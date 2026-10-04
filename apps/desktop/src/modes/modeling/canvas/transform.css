@@ -1,0 +1,78 @@
+/* Transform パネル（カード18） */
+
+.transform-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transform-empty,
+.transform-readonly {
+  margin: 0;
+  color: var(--text-dim);
+}
+.transform-readonly {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+}
+
+.transform-target {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+.transform-name {
+  font-weight: 600;
+}
+.transform-more {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.transform-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 8px;
+}
+.transform-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.transform-field input {
+  width: 100%;
+  min-width: 0;
+}
+.transform-field input[readonly] {
+  color: var(--text-dim);
+}
+.transform-label {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.transform-depth {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.transform-depth-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.transform-depth-end {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+/* 手前（+1）を左、奥（−1）を右に置く */
+.transform-depth-slider {
+  flex: 1;
+  min-width: 0;
+  direction: rtl;
+  accent-color: var(--accent);
+}

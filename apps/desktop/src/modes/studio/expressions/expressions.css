@@ -1,0 +1,80 @@
+/* スタジオの bottom の「表情」パネル（カード38・52）。色は shell.css の変数を使う */
+
+.sexpr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sexpr-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sexpr-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 6px 26px 6px 12px;
+  text-align: left;
+}
+.sexpr-card-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+/* 適用した順番の印（カードの右上） */
+.sexpr-card-order {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  box-sizing: border-box;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  background: var(--accent-text);
+  color: var(--accent);
+}
+.sexpr-mode .studio-check {
+  margin-bottom: 0;
+}
+.sexpr-mode .studio-note {
+  margin-top: 2px;
+}
+.sexpr-card-empty {
+  font-size: 11px;
+  opacity: 0.75;
+}
+.sexpr-fades {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sexpr-fade {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+.sexpr-fade-name {
+  min-width: 72px;
+}
+.sexpr-seconds {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sexpr-seconds span {
+  color: var(--text-dim);
+}
+.sexpr-seconds input {
+  width: 64px;
+}

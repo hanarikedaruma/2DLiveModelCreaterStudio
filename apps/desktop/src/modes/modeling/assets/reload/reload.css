@@ -1,0 +1,39 @@
+/* PSD の再読み込み（カード43）。色は shell.css の変数を使う */
+
+.psd-reload-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.psd-reload-toolbar select {
+  min-width: 0;
+  flex: 1;
+}
+.psd-reload-result {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: rgb(91 141 239 / 0.1);
+}
+.psd-reload-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.psd-reload-head strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.psd-reload-groups {
+  margin: 4px 0 0;
+  padding-left: 16px;
+}
+.psd-reload-groups p {
+  margin: 2px 0;
+}
+.psd-reload-result > p {
+  margin: 4px 0 0;
+}

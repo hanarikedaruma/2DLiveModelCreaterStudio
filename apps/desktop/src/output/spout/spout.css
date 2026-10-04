@@ -1,0 +1,28 @@
+/* ---- スタジオの設定の「出力の方式」（カード41） ---- */
+
+.spout-section .studio-status[data-spout='running'] {
+  background: #2f7d4f;
+  color: #fff;
+}
+.spout-section .studio-status[data-spout='error'] {
+  background: var(--danger);
+  color: #fff;
+}
+.spout-section .studio-status {
+  white-space: nowrap;
+}
+.spout-obs {
+  margin-top: 8px;
+}
+.spout-obs summary {
+  cursor: pointer;
+  color: var(--text-dim);
+}
+.spout-obs ol {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+}
+.spout-obs li + li {
+  margin-top: 2px;
+}

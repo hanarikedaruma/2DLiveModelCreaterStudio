@@ -1,0 +1,28 @@
+.vowel-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vowel-panel > label:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vowel-value {
+  display: grid;
+  grid-template-columns: 64px minmax(30px, 1fr) 36px;
+  gap: 6px;
+  align-items: center;
+}
+.vowel-value input {
+  width: 100%;
+  min-width: 0;
+}
+.vowel-value output {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.vowel-panel button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

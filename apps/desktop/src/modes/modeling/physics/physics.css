@@ -1,0 +1,95 @@
+/* 「パーツの設定」の物理のセクション（カード50） */
+
+.physics-section,
+.physics-settings,
+.physics-numbers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.physics-heading {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.physics-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.physics-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.physics-label {
+  min-width: 56px;
+  font-size: 12px;
+}
+.physics-choices,
+.physics-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.physics-choices button[aria-pressed='true'],
+.physics-buttons button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.physics-strength {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 160px;
+}
+.physics-strength input[type='range'] {
+  flex: 1;
+  min-width: 80px;
+}
+.physics-end,
+.physics-value {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.physics-value {
+  min-width: 56px;
+}
+.physics-hint,
+.physics-info {
+  margin: 0;
+  font-size: 12px;
+}
+.physics-hint,
+.physics-dim {
+  color: var(--text-dim);
+}
+.physics-dim {
+  font-size: 11px;
+}
+.physics-number {
+  width: 72px;
+}
+.physics-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.physics-inputs legend {
+  font-size: 12px;
+}
+.physics-input-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

@@ -1,0 +1,383 @@
+:root {
+  --bg: #1e1f22;
+  --bg-panel: #26282c;
+  --bg-raised: #30333a;
+  --bg-hover: #3a3e46;
+  --border: #3d4048;
+  --text: #e6e7ea;
+  --text-dim: #9a9ea8;
+  --accent: #5b8def;
+  --accent-text: #ffffff;
+  --danger: #e5484d;
+  font-family: system-ui, 'Segoe UI', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button.active,
+button[aria-pressed='true'],
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+input {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* ---- 枠 ---- */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+.app-title {
+  font-weight: 600;
+  margin-right: 8px;
+}
+.mode-tabs {
+  display: flex;
+  gap: 2px;
+}
+.project-name {
+  color: var(--text-dim);
+}
+.ui-level {
+  display: flex;
+  gap: 2px;
+}
+.ui-level[hidden] {
+  display: none;
+}
+
+.menu {
+  position: relative;
+}
+.menu-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.4);
+}
+.menu-list button {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+.menu-list button:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+kbd {
+  color: var(--text-dim);
+  font-family: inherit;
+}
+
+.shell-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.shell-center-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.shell-center {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.center-placeholder {
+  margin: auto;
+  color: var(--text-dim);
+}
+
+.shell-area {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  background: var(--bg-panel);
+}
+.shell-area-left,
+.shell-area-right {
+  width: 280px;
+  flex: none;
+}
+.shell-area-left {
+  border-right: 1px solid var(--border);
+}
+.shell-area-right {
+  border-left: 1px solid var(--border);
+}
+.shell-area-bottom {
+  flex-direction: row;
+  height: 220px;
+  flex: none;
+  border-top: 1px solid var(--border);
+}
+.shell-area-bottom .panel {
+  flex: 1;
+  border-bottom: none;
+}
+.shell-area-bottom .panel + .panel {
+  border-left: 1px solid var(--border);
+}
+
+.panel {
+  background: var(--bg-panel);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-align: left;
+}
+.panel-title button:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.panel-caret {
+  width: 10px;
+  font-size: 10px;
+}
+.panel.collapsed {
+  flex: none;
+}
+.panel-body[hidden] {
+  display: none;
+}
+.panel-body {
+  padding: 8px 10px;
+  overflow: auto;
+}
+.panel-section + .panel-section {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.dev-info {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+}
+.dev-info dt {
+  color: var(--text-dim);
+}
+.dev-info dd {
+  margin: 0;
+}
+
+/* ---- キャンバス ---- */
+
+.canvas-host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.canvas-toolbar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  overflow-x: auto;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+.canvas-toolbar > button,
+.canvas-toolbar > .canvas-zoom {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.canvas-zoom {
+  color: var(--text-dim);
+  min-width: 48px;
+  text-align: right;
+  margin-right: 4px;
+}
+.canvas-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  outline: none;
+  overflow: hidden;
+  /* 透明なところが分かるように市松模様を敷く */
+  background-color: #2a2c31;
+  background-image:
+    linear-gradient(45deg, #33363c 25%, transparent 25%), linear-gradient(-45deg, #33363c 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #33363c 75%), linear-gradient(-45deg, transparent 75%, #33363c 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+}
+.canvas-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.canvas-overlay {
+  touch-action: none;
+}
+.canvas-stage.space-pan .canvas-overlay {
+  cursor: grab !important;
+}
+
+/* ---- ダイアログ ---- */
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.5);
+}
+.dialog {
+  min-width: 320px;
+  max-width: 480px;
+  padding: 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+}
+.dialog-message {
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+}
+.dialog-input {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.toasts {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toast {
+  padding: 8px 12px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.4);
+  cursor: pointer;
+}
+
+/* かんたんモードで、その項目だけ詳細を開く（DetailDisclosure） */
+.detail-disclosure {
+  margin-top: 6px;
+}
+.detail-disclosure-toggle {
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 2px 0;
+}
+.detail-disclosure-toggle:hover:not(:disabled) {
+  background: transparent;
+  color: var(--text);
+}
+.detail-disclosure-content {
+  margin-top: 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}

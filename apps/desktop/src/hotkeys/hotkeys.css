@@ -1,0 +1,55 @@
+/* ---- ホットキー（カード40） ---- */
+
+.hotkey-list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+}
+.hotkey-item {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.hotkey-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hotkey-keys {
+  flex: none;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+}
+.hotkey-what {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hotkey-mode {
+  flex: none;
+  color: var(--text-dim);
+}
+.hotkey-remove {
+  flex: none;
+}
+.hotkey-warn {
+  margin: 2px 0 0;
+}
+.hotkey-form {
+  margin-top: 6px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.hotkey-recorder {
+  min-width: 0;
+  cursor: pointer;
+}
+.hotkey-recorder:focus {
+  outline: 1px solid var(--accent);
+}

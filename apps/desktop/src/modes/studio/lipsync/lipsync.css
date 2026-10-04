@@ -1,0 +1,57 @@
+/* ---- スタジオの設定の「リップシンク」（カード37） ---- */
+
+.lipsync-section .studio-status[data-mic='running'] {
+  background: #2f7d4f;
+  color: #fff;
+}
+.lipsync-threshold {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 8px;
+  margin-top: 10px;
+}
+.lipsync-threshold span {
+  grid-column: 1 / -1;
+  color: var(--text-dim);
+}
+.lipsync-threshold input {
+  width: 100%;
+  min-width: 0;
+}
+.lipsync-threshold output {
+  min-width: 48px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.lipsync-meter {
+  position: relative;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.lipsync-meter-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--text-dim);
+}
+.lipsync-meter-fill[data-speaking='true'] {
+  background: #2f7d4f;
+}
+.lipsync-meter-threshold {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--accent);
+}
+.lipsync-label {
+  margin: 10px 0 4px;
+  color: var(--text-dim);
+}

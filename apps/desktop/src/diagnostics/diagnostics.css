@@ -1,0 +1,26 @@
+.diagnostics {
+  position: fixed;
+  top: 48px;
+  right: 12px;
+  z-index: 90;
+  min-width: 260px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.6;
+  color: var(--text);
+  background: rgb(20 21 24 / 0.88);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
+  pointer-events: auto;
+}
+.diagnostics-title {
+  margin-bottom: 4px;
+  color: var(--text-dim);
+}
+.diagnostics-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}

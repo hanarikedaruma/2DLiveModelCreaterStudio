@@ -1,0 +1,83 @@
+/* ---- スタジオの設定の「キャリブレーション・動き」（カード35） ---- */
+
+.calibration-label {
+  margin: 10px 0 4px;
+  color: var(--text-dim);
+}
+.calibration-eyes {
+  margin-top: 10px;
+}
+.calibration-tuning {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.calibration-tuning-field {
+  display: grid;
+  grid-template-columns: 1fr 72px;
+  align-items: center;
+  gap: 6px;
+}
+.calibration-tuning-field span {
+  color: var(--text-dim);
+}
+.calibration-tuning-field input {
+  width: 72px;
+  min-width: 0;
+}
+
+/* キャリブレーションの手順の画面（枠のダイアログの見た目を使う） */
+.calibration-dialog {
+  min-width: 360px;
+}
+.calibration-steps {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  counter-reset: calibration-step;
+}
+.calibration-steps li {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  text-align: center;
+  counter-increment: calibration-step;
+}
+.calibration-steps li::before {
+  content: counter(calibration-step) '. ';
+}
+.calibration-steps li[data-state='current'] {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.calibration-steps li[data-state='done'] {
+  color: var(--text);
+}
+.calibration-instruction {
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+}
+.calibration-count {
+  margin: 8px 0;
+  font-size: 40px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.calibration-result {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0 0 12px;
+}
+.calibration-result dt {
+  color: var(--text-dim);
+}
+.calibration-result dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}

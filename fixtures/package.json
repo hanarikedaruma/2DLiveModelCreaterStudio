@@ -1,0 +1,29 @@
+{
+  "name": "@app/fixtures",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./sample-model/project.json": "./sample-model/project.json",
+    "./sample-model/assets/*": "./sample-model/assets/*",
+    "./reference-model/project.json": "./reference-model/project.json"
+  },
+  "scripts": {
+    "generate": "tsx scripts/generate-sample-model.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "generate:psd": "tsx scripts/make-sample-psd.ts",
+    "generate:reference": "tsx scripts/generate-reference-model.ts",
+    "generate:stress": "tsx scripts/make-stress-psd.ts"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:^",
+    "@app/core": "workspace:^",
+    "@app/schema": "workspace:^"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^0.1.65",
+    "ag-psd": "31.0.2",
+    "tsx": "^4.19.2"
+  }
+}

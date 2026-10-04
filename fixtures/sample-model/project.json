@@ -1,0 +1,1595 @@
+{
+  "schemaVersion": 1,
+  "id": "sample-model",
+  "name": "サンプルモデル",
+  "assets": [
+    {
+      "id": "asset-backHair",
+      "path": "assets/asset-backHair.png",
+      "hash": "f3260853fc021700e035fd6a2e4d9fac58a6e7245af19528b48e145c692de9e7",
+      "width": 580,
+      "height": 750,
+      "offset": {
+        "x": 210,
+        "y": 130
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "backHair.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-torso",
+      "path": "assets/asset-torso.png",
+      "hash": "0259709574b811fc4dc7037af269f3fe358ae032242c912237922098baf9004c",
+      "width": 600,
+      "height": 660,
+      "offset": {
+        "x": 200,
+        "y": 840
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "torso.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-armL",
+      "path": "assets/asset-armL.png",
+      "hash": "a03c863e8dfefcb765e4fd9a5d52e4a7a391a5506f90da185456d473ee5b74a0",
+      "width": 125,
+      "height": 480,
+      "offset": {
+        "x": 720,
+        "y": 890
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "armL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-armR",
+      "path": "assets/asset-armR.png",
+      "hash": "016f403f8daada3e78eabdd7bc5e04b8de98711518cdabc0da2a7873a7d0465a",
+      "width": 125,
+      "height": 480,
+      "offset": {
+        "x": 155,
+        "y": 890
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "armR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-neck",
+      "path": "assets/asset-neck.png",
+      "hash": "ffc9de2a53d590a40e70760854551e1a3b023902419ec10d3b8d80c2f340ad37",
+      "width": 100,
+      "height": 230,
+      "offset": {
+        "x": 450,
+        "y": 640
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "neck.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-earL",
+      "path": "assets/asset-earL.png",
+      "hash": "9f6b0f57397373f775dc2f2c347164a93c6bd75ac0422fbdae06d75abc81678d",
+      "width": 60,
+      "height": 104,
+      "offset": {
+        "x": 705,
+        "y": 428
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "earL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-earR",
+      "path": "assets/asset-earR.png",
+      "hash": "841f6fb98a163e4d568d77ad7eebbffb9d88e70dd039bbb6a656d3b5a763c5b7",
+      "width": 60,
+      "height": 104,
+      "offset": {
+        "x": 235,
+        "y": 428
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "earR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-face",
+      "path": "assets/asset-face.png",
+      "hash": "900c1a7be7912992965e3badf911a2cf420892b62f4d086ba910276b7949b523",
+      "width": 460,
+      "height": 520,
+      "offset": {
+        "x": 270,
+        "y": 190
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "face.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-mouthInside",
+      "path": "assets/asset-mouthInside.png",
+      "hash": "f65d05fafdd879d345f60c4038f8b0bec3377e220db139a897895a8ae839d0d4",
+      "width": 68,
+      "height": 24,
+      "offset": {
+        "x": 466,
+        "y": 600
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "mouthInside.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-teeth",
+      "path": "assets/asset-teeth.png",
+      "hash": "d1a83779615d3391f3618ecd83a4386e1d5c1594bd531cdbaa6fac430137b069",
+      "width": 56,
+      "height": 9,
+      "offset": {
+        "x": 472,
+        "y": 600
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "teeth.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-tongue",
+      "path": "assets/asset-tongue.png",
+      "hash": "5a64c0a2efe0943e65334e225fc1ef48f00deee3f37903930b4b0a3fa584e425",
+      "width": 44,
+      "height": 14,
+      "offset": {
+        "x": 478,
+        "y": 613
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "tongue.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-upperLip",
+      "path": "assets/asset-upperLip.png",
+      "hash": "2c6e907271b691007f9052a90f20fbd37ac976465682826bb87de727ca34125e",
+      "width": 88,
+      "height": 17,
+      "offset": {
+        "x": 456,
+        "y": 596
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "upperLip.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-lowerLip",
+      "path": "assets/asset-lowerLip.png",
+      "hash": "7887907e060b514f04fd7698cd7463b7afb6054fe9565353429efce85f70ede7",
+      "width": 80,
+      "height": 16,
+      "offset": {
+        "x": 460,
+        "y": 611
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "lowerLip.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-eyeWhiteL",
+      "path": "assets/asset-eyeWhiteL.png",
+      "hash": "a048366511935bbead573833c3ef2848e5405340f3ddd0c504751eb10360e976",
+      "width": 116,
+      "height": 80,
+      "offset": {
+        "x": 537,
+        "y": 430
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "eyeWhiteL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-eyeWhiteR",
+      "path": "assets/asset-eyeWhiteR.png",
+      "hash": "d811455829bc9ca7b0a43058744997007403888c99ea45d8607fd4650774ff34",
+      "width": 116,
+      "height": 80,
+      "offset": {
+        "x": 347,
+        "y": 430
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "eyeWhiteR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-irisL",
+      "path": "assets/asset-irisL.png",
+      "hash": "3ac2485233c70cd8d388901a5ef9b5ac98f6b79255bd630c3f0c1a7d87094cd2",
+      "width": 60,
+      "height": 68,
+      "offset": {
+        "x": 565,
+        "y": 438
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "irisL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-irisR",
+      "path": "assets/asset-irisR.png",
+      "hash": "3ac2485233c70cd8d388901a5ef9b5ac98f6b79255bd630c3f0c1a7d87094cd2",
+      "width": 60,
+      "height": 68,
+      "offset": {
+        "x": 375,
+        "y": 438
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "irisR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-highlightL",
+      "path": "assets/asset-highlightL.png",
+      "hash": "6bba8888c1275d34a6543f657cc2046dc045d9456cda5ec73658c9ae5485ec23",
+      "width": 18,
+      "height": 18,
+      "offset": {
+        "x": 596,
+        "y": 449
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "highlightL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-highlightR",
+      "path": "assets/asset-highlightR.png",
+      "hash": "f71cb053518d483c2b383c24f5789911fc42b7ea5b270eb7c86bb32998e5d926",
+      "width": 18,
+      "height": 18,
+      "offset": {
+        "x": 406,
+        "y": 449
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "highlightR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-lowerLidL",
+      "path": "assets/asset-lowerLidL.png",
+      "hash": "f8cfb48305985bc07de1845680b7d5faed9ceeae749106efc19906365a2c29fb",
+      "width": 96,
+      "height": 13,
+      "offset": {
+        "x": 547,
+        "y": 511
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "lowerLidL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-lowerLidR",
+      "path": "assets/asset-lowerLidR.png",
+      "hash": "f8cfb48305985bc07de1845680b7d5faed9ceeae749106efc19906365a2c29fb",
+      "width": 96,
+      "height": 13,
+      "offset": {
+        "x": 357,
+        "y": 511
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "lowerLidR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-upperLidL",
+      "path": "assets/asset-upperLidL.png",
+      "hash": "91ffd62a235c42fa716278caa017288626ecdf673f03c7e06196ac9f1b1d261c",
+      "width": 140,
+      "height": 36,
+      "offset": {
+        "x": 525,
+        "y": 422
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "upperLidL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-upperLidR",
+      "path": "assets/asset-upperLidR.png",
+      "hash": "91ffd62a235c42fa716278caa017288626ecdf673f03c7e06196ac9f1b1d261c",
+      "width": 140,
+      "height": 36,
+      "offset": {
+        "x": 335,
+        "y": 422
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "upperLidR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-browL",
+      "path": "assets/asset-browL.png",
+      "hash": "af24911dd13ee3c6ce8d7820cbeb8a994a9e2938689f2d03a786b9a45598390b",
+      "width": 122,
+      "height": 23,
+      "offset": {
+        "x": 534,
+        "y": 371
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "browL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-browR",
+      "path": "assets/asset-browR.png",
+      "hash": "af24911dd13ee3c6ce8d7820cbeb8a994a9e2938689f2d03a786b9a45598390b",
+      "width": 122,
+      "height": 23,
+      "offset": {
+        "x": 344,
+        "y": 371
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "browR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-sideHairL",
+      "path": "assets/asset-sideHairL.png",
+      "hash": "4d01d58cd5ab323f7bb0ec41822291802cf14f556898c5a871e4b8bc6149306b",
+      "width": 95,
+      "height": 480,
+      "offset": {
+        "x": 705,
+        "y": 300
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "sideHairL.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-sideHairR",
+      "path": "assets/asset-sideHairR.png",
+      "hash": "164f51b0d078972f977414a9f6f9eae4a694458c02e3d06a62dda60677856e9b",
+      "width": 95,
+      "height": 480,
+      "offset": {
+        "x": 200,
+        "y": 300
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "sideHairR.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    },
+    {
+      "id": "asset-frontHair",
+      "path": "assets/asset-frontHair.png",
+      "hash": "dd9d6e997b29d8ba4b248f2d0e150801db2d9f4a789fdc4a3a1070220b8e5d55",
+      "width": 490,
+      "height": 230,
+      "offset": {
+        "x": 255,
+        "y": 150
+      },
+      "canvasSize": {
+        "width": 1000,
+        "height": 1500
+      },
+      "source": {
+        "kind": "png",
+        "file": "frontHair.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    }
+  ],
+  "model": {
+    "parts": [
+      {
+        "id": "part-backHair",
+        "name": "後ろ髪",
+        "kind": "image",
+        "standardType": "backHair",
+        "assetId": "asset-backHair",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 505
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": -1,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-torso",
+        "name": "胴体",
+        "kind": "image",
+        "standardType": "torso",
+        "assetId": "asset-torso",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 1170
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-armL",
+        "name": "腕 L",
+        "kind": "image",
+        "standardType": "armL",
+        "assetId": "asset-armL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 782.5,
+          "y": 1130
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-armR",
+        "name": "腕 R",
+        "kind": "image",
+        "standardType": "armR",
+        "assetId": "asset-armR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 217.5,
+          "y": 1130
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-neck",
+        "name": "首",
+        "kind": "image",
+        "standardType": "neck",
+        "assetId": "asset-neck",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 755
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-earL",
+        "name": "耳 L",
+        "kind": "image",
+        "standardType": "earL",
+        "assetId": "asset-earL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 735,
+          "y": 480
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": -0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-earR",
+        "name": "耳 R",
+        "kind": "image",
+        "standardType": "earR",
+        "assetId": "asset-earR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 265,
+          "y": 480
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": -0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-face",
+        "name": "顔",
+        "kind": "image",
+        "standardType": "face",
+        "assetId": "asset-face",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 450
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.2,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-mouthInside",
+        "name": "口の中",
+        "kind": "image",
+        "standardType": "mouthInside",
+        "assetId": "asset-mouthInside",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 612
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-teeth",
+        "name": "歯",
+        "kind": "image",
+        "standardType": "teeth",
+        "assetId": "asset-teeth",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 604.5
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-tongue",
+        "name": "舌",
+        "kind": "image",
+        "standardType": "tongue",
+        "assetId": "asset-tongue",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 620
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-upperLip",
+        "name": "上唇",
+        "kind": "image",
+        "standardType": "upperLip",
+        "assetId": "asset-upperLip",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 604.5
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-lowerLip",
+        "name": "下唇",
+        "kind": "image",
+        "standardType": "lowerLip",
+        "assetId": "asset-lowerLip",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 619
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-eyeWhiteL",
+        "name": "白目 L",
+        "kind": "image",
+        "standardType": "eyeWhiteL",
+        "assetId": "asset-eyeWhiteL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 595,
+          "y": 470
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-eyeWhiteR",
+        "name": "白目 R",
+        "kind": "image",
+        "standardType": "eyeWhiteR",
+        "assetId": "asset-eyeWhiteR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 405,
+          "y": 470
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-irisL",
+        "name": "瞳 L",
+        "kind": "image",
+        "standardType": "irisL",
+        "assetId": "asset-irisL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 595,
+          "y": 472
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-irisR",
+        "name": "瞳 R",
+        "kind": "image",
+        "standardType": "irisR",
+        "assetId": "asset-irisR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 405,
+          "y": 472
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-highlightL",
+        "name": "ハイライト L",
+        "kind": "image",
+        "standardType": "highlightL",
+        "assetId": "asset-highlightL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 605,
+          "y": 458
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-highlightR",
+        "name": "ハイライト R",
+        "kind": "image",
+        "standardType": "highlightR",
+        "assetId": "asset-highlightR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 415,
+          "y": 458
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-lowerLidL",
+        "name": "下まぶた L",
+        "kind": "image",
+        "standardType": "lowerLidL",
+        "assetId": "asset-lowerLidL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 595,
+          "y": 517.5
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-lowerLidR",
+        "name": "下まぶた R",
+        "kind": "image",
+        "standardType": "lowerLidR",
+        "assetId": "asset-lowerLidR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 405,
+          "y": 517.5
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-upperLidL",
+        "name": "上まぶた L",
+        "kind": "image",
+        "standardType": "upperLidL",
+        "assetId": "asset-upperLidL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 595,
+          "y": 440
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-upperLidR",
+        "name": "上まぶた R",
+        "kind": "image",
+        "standardType": "upperLidR",
+        "assetId": "asset-upperLidR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 405,
+          "y": 440
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.5,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-browL",
+        "name": "眉 L",
+        "kind": "image",
+        "standardType": "browL",
+        "assetId": "asset-browL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 595,
+          "y": 382.5
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.6,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-browR",
+        "name": "眉 R",
+        "kind": "image",
+        "standardType": "browR",
+        "assetId": "asset-browR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 405,
+          "y": 382.5
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.6,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-sideHairL",
+        "name": "横髪 L",
+        "kind": "image",
+        "standardType": "sideHairL",
+        "assetId": "asset-sideHairL",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 752.5,
+          "y": 540
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.4,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-sideHairR",
+        "name": "横髪 R",
+        "kind": "image",
+        "standardType": "sideHairR",
+        "assetId": "asset-sideHairR",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 247.5,
+          "y": 540
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0.4,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "part-frontHair",
+        "name": "前髪",
+        "kind": "image",
+        "standardType": "frontHair",
+        "assetId": "asset-frontHair",
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 500,
+          "y": 265
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 1,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      }
+    ],
+    "meshes": [],
+    "warps": [],
+    "drawOrder": [
+      "part-backHair",
+      "part-torso",
+      "part-armL",
+      "part-armR",
+      "part-neck",
+      "part-earL",
+      "part-earR",
+      "part-face",
+      "part-mouthInside",
+      "part-teeth",
+      "part-tongue",
+      "part-upperLip",
+      "part-lowerLip",
+      "part-eyeWhiteL",
+      "part-eyeWhiteR",
+      "part-irisL",
+      "part-irisR",
+      "part-highlightL",
+      "part-highlightR",
+      "part-lowerLidL",
+      "part-lowerLidR",
+      "part-upperLidL",
+      "part-upperLidR",
+      "part-browL",
+      "part-browR",
+      "part-sideHairL",
+      "part-sideHairR",
+      "part-frontHair"
+    ],
+    "parameters": [
+      {
+        "id": "FaceAngleX",
+        "name": "顔 左右",
+        "groupId": "face",
+        "min": -30,
+        "max": 30,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "FaceAngleY",
+        "name": "顔 上下",
+        "groupId": "face",
+        "min": -30,
+        "max": 30,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "FaceAngleZ",
+        "name": "顔 傾き",
+        "groupId": "face",
+        "min": -30,
+        "max": 30,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "EyeOpenL",
+        "name": "目 開閉 L",
+        "groupId": "eye",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "standard": true
+      },
+      {
+        "id": "EyeOpenR",
+        "name": "目 開閉 R",
+        "groupId": "eye",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "standard": true
+      },
+      {
+        "id": "EyeBallX",
+        "name": "瞳 左右",
+        "groupId": "eye",
+        "min": -1,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "EyeBallY",
+        "name": "瞳 上下",
+        "groupId": "eye",
+        "min": -1,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "MouthOpen",
+        "name": "口 開閉",
+        "groupId": "mouth",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      }
+    ],
+    "parameterGroups": [
+      {
+        "id": "face",
+        "name": "顔"
+      },
+      {
+        "id": "eye",
+        "name": "目"
+      },
+      {
+        "id": "brow",
+        "name": "眉"
+      },
+      {
+        "id": "mouth",
+        "name": "口"
+      },
+      {
+        "id": "cheek",
+        "name": "頬"
+      },
+      {
+        "id": "body",
+        "name": "体"
+      },
+      {
+        "id": "armL",
+        "name": "左腕"
+      },
+      {
+        "id": "armR",
+        "name": "右腕"
+      },
+      {
+        "id": "sway",
+        "name": "揺れもの"
+      },
+      {
+        "id": "other",
+        "name": "その他"
+      }
+    ],
+    "bindings": [],
+    "lipSync": {
+      "mouthSource": "max",
+      "strength": "standard",
+      "vowels": []
+    },
+    "setupHints": {
+      "closedLineL": null,
+      "closedLineR": null
+    }
+  },
+  "expressions": [],
+  "animations": [],
+  "physics": [],
+  "trackingMappings": [],
+  "studio": {
+    "scenes": [
+      {
+        "id": "scene-1",
+        "name": "シーン 1",
+        "background": {
+          "type": "transparent"
+        },
+        "modelTransform": {
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "scale": 1
+        },
+        "expressionIds": [],
+        "periodicAnimationIds": []
+      }
+    ],
+    "activeSceneId": "scene-1",
+    "hotkeys": []
+  }
+}

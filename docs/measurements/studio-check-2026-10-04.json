@@ -1,0 +1,156 @@
+{
+  "date": "2026-10-04",
+  "applicationBuild": "2026-10-03 20:59:39 local; STEP1 controls present",
+  "video": "C:/Users/hanar/Videos/2026-10-04 00-43-22.mp4",
+  "videoSize": [
+    1920,
+    1080
+  ],
+  "videoDurationSeconds": 317.85,
+  "previousRecordingIssue": "2026-10-03 recording at 400s captures editor UI; OBS title matching changed to exact output title",
+  "placement": {
+    "before": {
+      "preview": {
+        "size": [
+          1160,
+          653
+        ],
+        "bounds": [
+          0.3612068965517241,
+          0.11638591117917305,
+          0.6379310344827587,
+          0.9479326186830015
+        ]
+      },
+      "output": {
+        "size": [
+          1920,
+          1080
+        ],
+        "bounds": [
+          0.3609375,
+          0.11574074074074074,
+          0.6385416666666667,
+          0.9490740740740741
+        ]
+      }
+    },
+    "drag": {
+      "preview": {
+        "size": [
+          1160,
+          653
+        ],
+        "bounds": [
+          0.4043103448275862,
+          0.15160796324655437,
+          0.6810344827586207,
+          0.9862174578866769
+        ]
+      },
+      "output": {
+        "size": [
+          1920,
+          1080
+        ],
+        "bounds": [
+          0.4041666666666667,
+          0.1527777777777778,
+          0.6817708333333333,
+          0.9879629629629629
+        ]
+      }
+    },
+    "zoom": {
+      "preview": {
+        "size": [
+          1160,
+          653
+        ],
+        "bounds": [
+          0.4370689655172414,
+          0.24655436447166923,
+          0.6482758620689655,
+          0.8790199081163859
+        ]
+      },
+      "output": {
+        "size": [
+          1920,
+          1080
+        ],
+        "bounds": [
+          0.43697916666666664,
+          0.24351851851851852,
+          0.6484375,
+          0.8805555555555555
+        ]
+      }
+    }
+  },
+  "loss": [
+    {
+      "afterLostMs": 0,
+      "at": 402651.6,
+      "weight": 1
+    },
+    {
+      "afterLostMs": 250,
+      "at": 402906.2,
+      "weight": 1
+    },
+    {
+      "afterLostMs": 500,
+      "at": 403154.6,
+      "weight": 0.9861029477460181
+    },
+    {
+      "afterLostMs": 750,
+      "at": 403403.2,
+      "weight": 0.7605523889740151
+    },
+    {
+      "afterLostMs": 1000,
+      "at": 403657.6,
+      "weight": 0.39171848116606833
+    },
+    {
+      "afterLostMs": 1500,
+      "at": 404154.6,
+      "weight": 0
+    },
+    {
+      "afterLostMs": 1800,
+      "at": 404463.7,
+      "weight": 0
+    }
+  ],
+  "recovery": [
+    {
+      "afterRedetectedMs": 0,
+      "at": 450251.7,
+      "weight": 0
+    },
+    {
+      "afterRedetectedMs": 100,
+      "at": 450354.8,
+      "weight": 0.2731416080739691
+    },
+    {
+      "afterRedetectedMs": 200,
+      "at": 450451.8,
+      "weight": 0.7411850739998966
+    },
+    {
+      "afterRedetectedMs": 300,
+      "at": 450554.8,
+      "weight": 1
+    },
+    {
+      "afterRedetectedMs": 400,
+      "at": 450663.9,
+      "weight": 1
+    }
+  ],
+  "manualVisualConfirmation": "Pending user response for yaw, mouth, unilateral wink, mirror and physical camera-cover trial"
+}

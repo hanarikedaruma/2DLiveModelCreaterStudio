@@ -1,0 +1,29 @@
+/* スタジオの bottom の「アニメーション」パネル（カード47）。色は shell.css の変数を使う */
+
+.sanim-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sanim-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.sanim-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 6px 12px;
+  text-align: left;
+}
+.sanim-button-name {
+  font-weight: 600;
+}
+.sanim-button-tag {
+  font-size: 11px;
+  opacity: 0.75;
+}

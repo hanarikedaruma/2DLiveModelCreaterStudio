@@ -1,0 +1,18 @@
+{
+  "name": "@app/tracking",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@app/schema": "workspace:*",
+    "@mediapipe/tasks-vision": "1.0.1"
+  }
+}

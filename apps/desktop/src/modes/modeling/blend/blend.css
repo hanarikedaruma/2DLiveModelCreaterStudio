@@ -1,0 +1,26 @@
+/* 合成モードのセクション（カード32）。色は shell.css の変数を使う */
+
+.blend-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.blend-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.blend-field select {
+  width: 100%;
+  min-width: 0;
+}
+.blend-label {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.blend-note {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}

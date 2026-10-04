@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    // 生成スクリプトが @app/core・@app/contracts（ImageData などの型を使う）を読み込むので DOM の型も入れる
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"]
+  },
+  "include": ["scripts", "*.test.ts"]
+}

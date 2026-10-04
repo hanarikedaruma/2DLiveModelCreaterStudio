@@ -1,0 +1,40 @@
+/* 「不透明度（このキー）」のセクション（カード34）。色は shell.css の変数を使う */
+
+.opacity-key {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.opacity-key-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.opacity-key-label {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.opacity-key-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.opacity-key-slider {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+.opacity-key-value {
+  min-width: 3em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.opacity-key-note {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.opacity-key-warn {
+  color: var(--danger);
+}

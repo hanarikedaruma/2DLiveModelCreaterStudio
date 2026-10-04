@@ -1,0 +1,45 @@
+[package]
+name = "live2d-studio"
+version = "0.0.0"
+description = "2D Live Model Creator Studio"
+edition = "2021"
+
+[lib]
+name = "live2d_studio_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-window-state = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Spout2 出力（カード41）で素材の PNG を読む（tauri も使っている版。MIT OR Apache-2.0）
+png = "0.18"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
+
+# WebView2 のカメラ・マイクの権限を許可するために使う。
+# tauri（wry）が使っている版と揃えること（cargo tree -i webview2-com で確かめる）
+# windows の Direct3D・Dxgi・Memory・Threading・Registry・LibraryLoader は Spout2 出力（カード41）の
+# D3D11 の描画・共有テクスチャ・送り手の共有メモリに使う
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.39"
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_System_LibraryLoader",
+  "Win32_System_Memory",
+  "Win32_System_Registry",
+  "Win32_System_Threading",
+  "Win32_Graphics_Direct3D",
+  "Win32_Graphics_Direct3D_Fxc",
+  "Win32_Graphics_Direct3D11",
+  "Win32_Graphics_Dxgi",
+  "Win32_Graphics_Dxgi_Common",
+] }

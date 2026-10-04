@@ -1,0 +1,139 @@
+/* ---- スタジオの中央（ライブプレビュー） ---- */
+
+.studio-center {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.studio-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+}
+.studio-hint,
+.studio-size {
+  color: var(--text-dim);
+}
+.studio-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+.studio-preview {
+  position: absolute;
+  display: block;
+  cursor: move;
+  touch-action: none;
+  /* 透明の背景が分かるように市松模様を敷く */
+  background-color: #2a2c31;
+  background-image:
+    linear-gradient(45deg, #33363c 25%, transparent 25%), linear-gradient(-45deg, #33363c 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #33363c 75%), linear-gradient(-45deg, transparent 75%, #33363c 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+  box-shadow: 0 0 0 1px var(--border);
+}
+.studio-lost {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* ---- 右のパネルのセクション ---- */
+
+.studio-section h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.studio-section select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 4px;
+  min-width: 0;
+}
+.studio-field {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.studio-field span {
+  color: var(--text-dim);
+}
+.studio-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.studio-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.studio-status {
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg-raised);
+  color: var(--text-dim);
+}
+.studio-status[data-status='tracking'] {
+  background: #2f7d4f;
+  color: #fff;
+}
+.studio-status[data-status='lost'] {
+  background: var(--danger);
+  color: #fff;
+}
+.studio-choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.studio-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.studio-color {
+  width: 32px;
+  height: 26px;
+  padding: 1px 2px;
+}
+.studio-size-inputs input {
+  width: 72px;
+}
+.studio-note {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+}
+.studio-warn {
+  color: var(--danger);
+}

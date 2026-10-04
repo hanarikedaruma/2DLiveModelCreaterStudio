@@ -1,0 +1,44 @@
+{
+  "name": "@app/desktop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p e2e/tsconfig.json",
+    "e2e": "node e2e/run.mjs",
+    "measure": "node e2e/measure.mjs"
+  },
+  "dependencies": {
+    "@app/audio": "workspace:*",
+    "@app/contracts": "workspace:*",
+    "@app/core": "workspace:*",
+    "@app/io": "workspace:*",
+    "@app/render": "workspace:*",
+    "@app/schema": "workspace:*",
+    "@app/tracking": "workspace:*",
+    "@tauri-apps/api": "^2.2.0",
+    "@tauri-apps/plugin-dialog": "^2.2.0",
+    "@tauri-apps/plugin-fs": "^2.2.0",
+    "@tauri-apps/plugin-global-shortcut": "^2.2.0",
+    "@tauri-apps/plugin-window-state": "^2.2.0",
+    "cdt2d": "1.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.2.0",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/react": "16.1.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "25.0.1",
+    "playwright": "1.63.0",
+    "vite": "^6.0.7"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "live2d-model-creator-studio",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "pnpm -r --workspace-concurrency=1 test",
+    "lint": "eslint .",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "tauri": "pnpm --filter @app/desktop tauri",
+    "e2e": "pnpm --filter @app/desktop e2e",
+    "measure": "pnpm --filter @app/desktop measure",
+    "app:install": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/app/install.ps1",
+    "app:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/app/install.ps1 -Uninstall"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.5",
+    "eslint": "^9.17.0",
+    "eslint-plugin-import-x": "^4.6.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.19.0",
+    "vitest": "^3.0.0"
+  }
+}

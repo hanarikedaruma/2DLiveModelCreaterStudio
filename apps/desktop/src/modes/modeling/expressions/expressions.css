@@ -1,0 +1,134 @@
+/* モデリングの「表情」パネル（カード38）。色は shell.css の変数を使う */
+
+.expr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.expr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.expr-note {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.expr-heading {
+  margin: 0;
+  font-weight: 600;
+}
+
+.expr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.expr-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+.expr-item button {
+  padding: 2px 8px;
+}
+.expr-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.expr-count {
+  color: var(--text-dim);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.expr-field {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+.expr-field span {
+  color: var(--text-dim);
+}
+.expr-field input {
+  min-width: 0;
+}
+
+.expr-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.expr-group-title {
+  margin: 4px 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.expr-param {
+  display: grid;
+  grid-template-columns: 76px 1fr 36px auto;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.expr-param.changed {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+}
+.expr-param-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.expr-param input[type='range'] {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+.expr-param-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}
+.expr-reset {
+  padding: 0 6px;
+}
+
+.expr-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.expr-mode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.expr-mode-name {
+  min-width: 48px;
+}
+.expr-choices {
+  display: flex;
+  gap: 4px;
+}
+.expr-choices button {
+  padding: 2px 8px;
+}
+.expr-mode-result {
+  flex-basis: 100%;
+  color: var(--text-dim);
+  font-size: 12px;
+}

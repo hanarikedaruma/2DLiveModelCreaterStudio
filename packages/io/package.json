@@ -1,0 +1,19 @@
+{
+  "name": "@app/io",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@app/schema": "workspace:*",
+    "ag-psd": "31.0.2",
+    "fast-png": "8.0.0"
+  }
+}

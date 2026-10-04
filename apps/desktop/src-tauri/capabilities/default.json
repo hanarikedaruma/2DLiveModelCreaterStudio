@@ -1,0 +1,26 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "メインウィンドウと出力ウィンドウ（カード22）の権限。グローバルホットキー（カード40）は登録と全部の解除だけを許す",
+  "windows": ["main", "output"],
+  "permissions": [
+    "core:default",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-set-size",
+    "core:window:allow-set-focus",
+    "core:window:allow-close",
+    "fs:default",
+    "fs:allow-appconfig-write-recursive",
+    "fs:read-all",
+    "fs:write-all",
+    {
+      "identifier": "fs:scope",
+      "allow": ["$HOME/**", "$APPDATA/**", "$APPLOCALDATA/**", "$DOCUMENT/**", "$DESKTOP/**", "$PICTURE/**"]
+    },
+    "dialog:default",
+    "global-shortcut:default",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister-all",
+    "window-state:default"
+  ]
+}

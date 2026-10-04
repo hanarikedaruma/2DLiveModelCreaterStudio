@@ -1,0 +1,157 @@
+/* パラメータパネル（カード19、キーの印の操作と生成方式はカード31）。色は shell.css の変数を使う */
+
+.parameter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.parameter-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.parameter-status-text {
+  margin: 0;
+}
+.parameter-hint {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.parameter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.parameter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.parameter-group-title {
+  margin: 4px 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.parameter-row {
+  padding: 2px 4px 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.parameter-row.active {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+}
+.parameter-row-head {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+  border-color: transparent;
+  background: transparent;
+  text-align: left;
+}
+.parameter-result {
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.parameter-row-head[aria-pressed='true'] .parameter-result {
+  color: var(--accent-text);
+}
+
+/* スライダーとキーの印。印はつまみ（幅 約14px）の中心に合わせて左右を 7px ずつ狭める */
+.key-slider-track {
+  position: relative;
+  padding: 2px 0 12px;
+}
+.key-slider-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  accent-color: var(--accent);
+}
+.key-slider-marks {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 0;
+  height: 12px;
+  pointer-events: none;
+}
+/* 印は押せる（押すとその値へ移動、右クリックでロック / ロック解除。カード31） */
+.key-mark {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  min-width: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 9px;
+  line-height: 12px;
+  color: var(--text);
+  pointer-events: auto;
+}
+.key-slider .key-mark:hover:not(:disabled) {
+  background: transparent;
+  color: var(--accent-text);
+}
+.key-mark-generated {
+  color: var(--text-dim);
+}
+.key-mark-locked {
+  color: var(--accent);
+}
+.key-mark.in-selection {
+  text-shadow: 0 0 3px var(--accent);
+}
+
+/* Shift＋ドラッグで選んだ範囲 */
+.key-selection {
+  position: absolute;
+  top: 0;
+  height: 12px;
+  background: rgba(91, 141, 239, 0.25);
+  border-left: 1px solid var(--accent);
+  border-right: 1px solid var(--accent);
+}
+.key-range-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+.key-range-text {
+  flex-basis: 100%;
+  color: var(--text-dim);
+}
+.key-range-actions button {
+  padding: 2px 6px;
+}
+
+/* 生成方式（詳細モード） */
+.parameter-generation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.parameter-generation select {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 4px;
+}

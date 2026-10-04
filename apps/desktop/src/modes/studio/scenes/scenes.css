@@ -1,0 +1,65 @@
+/* ---- シーンの一覧と編集（カード39） ---- */
+
+.scene-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.scene-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.scene-item {
+  width: 100%;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scene-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.scene-swatch {
+  box-shadow: 0 0 0 1px var(--border);
+}
+.scene-images {
+  margin-top: 6px;
+}
+.scene-image {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 32px;
+  padding: 1px;
+}
+.scene-image img {
+  display: block;
+  max-width: 64px;
+  max-height: 28px;
+  object-fit: contain;
+}
+.scene-placement {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.scene-number {
+  display: grid;
+  grid-template-columns: 56px 1fr 20px;
+  align-items: center;
+  gap: 6px;
+}
+.scene-number span {
+  color: var(--text-dim);
+}
+.scene-number input {
+  min-width: 0;
+}

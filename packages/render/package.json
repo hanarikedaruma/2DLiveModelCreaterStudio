@@ -1,0 +1,21 @@
+{
+  "name": "@app/render",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@app/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitest/browser": "3.2.7",
+    "playwright": "1.63.0"
+  }
+}

@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri
+
+      - name: install
+        run: pnpm install --frozen-lockfile
+
+      - name: lint
+        run: pnpm lint
+
+      - name: format
+        run: pnpm format:check
+
+      - name: typecheck
+        run: pnpm typecheck
+
+      - name: test
+        run: pnpm test
+
+      - name: tauri build
+        run: pnpm tauri build
+
+      # 通しのテスト（VITE_E2E=1 のデバッグビルドを WebView2 の CDP 経由で Playwright から操作する）
+      - name: e2e
+        run: pnpm e2e

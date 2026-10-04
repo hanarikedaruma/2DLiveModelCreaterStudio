@@ -1,0 +1,21 @@
+{
+  "name": "@app/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@app/contracts": "workspace:*",
+    "@app/schema": "workspace:*",
+    "cdt2d": "1.0.0"
+  },
+  "devDependencies": {
+    "@app/fixtures": "workspace:^"
+  }
+}

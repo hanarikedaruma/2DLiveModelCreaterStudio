@@ -1,0 +1,14 @@
+node_modules/
+dist/
+target/
+.cache/
+.pnpm-store/
+*.log
+.vite/
+coverage/
+test-results/
+playwright-report/
+fixtures/sample-model/*.psd
+apps/desktop/e2e/results/
+fixtures/stress/
+apps/desktop/src-tauri/gen/schemas/

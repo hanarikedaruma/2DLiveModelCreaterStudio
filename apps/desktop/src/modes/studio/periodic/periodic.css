@@ -1,0 +1,14 @@
+/* ---- 周期アニメーション（カード48） ---- */
+
+.periodic-list {
+  display: flex;
+  flex-direction: column;
+}
+.periodic-list .studio-check {
+  margin-bottom: 2px;
+}
+.periodic-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

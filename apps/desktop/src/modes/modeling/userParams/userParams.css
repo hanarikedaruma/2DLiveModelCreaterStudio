@@ -1,0 +1,92 @@
+/* ユーザー定義パラメータのセクション（カード34）。色は shell.css の変数を使う */
+
+.user-params {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.user-params-title {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.user-params-note {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.user-params-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.user-params-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.user-params-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 6px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.user-params-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-params-meta {
+  grid-column: 1;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.user-params-buttons {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  gap: 4px;
+}
+
+.user-params-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-raised);
+}
+.user-params-wide {
+  grid-column: 1 / -1;
+}
+.user-params-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.user-params-field input,
+.user-params-field select {
+  width: 100%;
+  min-width: 0;
+}
+.user-params-field input[readonly] {
+  color: var(--text-dim);
+}
+.user-params-label {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.user-params-actions {
+  display: flex;
+  gap: 6px;
+}
