@@ -78,9 +78,13 @@ export class FakeMixer implements ParameterMixer {
     const out: ParamValues = {};
     for (const p of parameters) out[p.id] = p.default;
     for (const layer of layers) {
-      const w = Math.min(1, Math.max(0, layer.weight));
       for (const [id, v] of Object.entries(layer.values)) {
         if (!(id in out)) continue;
+        const weight =
+          layer.parameterWeights && Object.hasOwn(layer.parameterWeights, id)
+            ? layer.parameterWeights[id]!
+            : layer.weight;
+        const w = Number.isNaN(weight) ? 0 : Math.min(1, Math.max(0, weight));
         out[id] = out[id]! * (1 - w) + v * w;
       }
     }

@@ -294,6 +294,7 @@ export interface Hotkey {
 
 export interface Environment {
   cameraDeviceId: string | null;
+  cameraCapture: { mode: 'auto' | 'manual'; width: number; height: number; fps: number };
   mirror: boolean;
   calibration: {
     neutral: { yaw: number; pitch: number; roll: number };
@@ -303,6 +304,10 @@ export interface Environment {
   microphoneDeviceId: string | null;
   silenceThreshold: number; // dBFS
   trackingPreset: 'stable' | 'standard' | 'large' | 'custom';
+  eyeTracking: boolean;
+  trackingCustom: { minCutoff: number; beta: number; gain: number; deadZone: number };
+  bodyFollowStrength: 'low' | 'standard' | 'high';
+  expressionMode: 'stack' | 'single';
   output: { method: 'window' | 'spout2'; width: number; height: number; fps: number };
   uiLevel: Record<ModeId, UiLevel>;
   lastProjectDir: string | null;

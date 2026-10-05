@@ -4,6 +4,7 @@ import { PanelSections, useDialogs, useEnvironment, useServices } from '../../sh
 import { useOutputWindow } from '../../output/controller';
 import { useStudioBinding } from './binding';
 import { studioRuntime, useStudioRuntime } from './runtime';
+import { CameraCaptureSettings } from './CameraCaptureSettings';
 
 export const STUDIO_SETTINGS_PANEL = 'studioSettings';
 
@@ -75,6 +76,7 @@ export function TrackingSection() {
           ))}
         </select>
       </label>
+      <CameraCaptureSettings />
       <label className="studio-check">
         <input type="checkbox" checked={env.mirror} onChange={(e) => setEnv({ mirror: e.target.checked })} />
         ミラー
@@ -87,6 +89,11 @@ export function TrackingSection() {
         >
           {started ? '停止' : '開始'}
         </button>
+        {started && env.cameraCapture.mode === 'auto' && (
+          <button type="button" title="カメラ設定の実測選択をやり直す" onClick={() => void start(deviceId)}>
+            再選択
+          </button>
+        )}
         <span className="studio-status" data-status={status} aria-label="トラッキングの状態">
           {STATUS_LABEL[status]}
         </span>

@@ -304,11 +304,16 @@ describe('setEyeTracking', () => {
     expect(Object.keys(q.tick(0).values)).not.toContain('EyeOpenL');
   });
 
-  it('まだ一度も検出していなければ、オフでも値なし（weight 0）', () => {
+  it('まだ一度も検出していなくても、自動まばたきを独立した重みで出す', () => {
     const blink = fakeBlink();
     const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: blink });
     p.setEyeTracking(false);
-    expect(p.tick(0)).toEqual({ id: 'tracking', weight: 0, values: {} });
-    expect(blink.calls).toEqual([]);
+    expect(p.tick(0)).toEqual({
+      id: 'tracking',
+      weight: 0,
+      values: { EyeOpenL: 0.25, EyeOpenR: 0.75 },
+      parameterWeights: { EyeOpenL: 1, EyeOpenR: 1 },
+    });
+    expect(blink.calls).toEqual([0]);
   });
 });

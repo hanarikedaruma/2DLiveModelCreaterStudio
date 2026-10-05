@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createEmptyProject, type Binding, type Project } from '@app/schema';
 import { FakeKeyGenerator, type KeyGenerator } from '@app/contracts';
-import { createProjectStore } from '@app/core';
+import { createKeyGenerator, createProjectStore } from '@app/core';
 import {
   applyGeneration,
   bindingsUsing,
@@ -115,7 +115,28 @@ const k = (coords: number[], locked = false, source: Key['source'] = 'generated'
 });
 
 describe('間を生成（方式ごと）', () => {
-  it('linear・depth のバインディングは linear、ほかは regenerate（それぞれの方式）で作る', () => {
+  it('奥行き方式を保持しながら中間キーを生成する。明示的な方式変更だけ linear に変える', () => {
+    const b = keyed('d', ['FaceAngleX'], [k([-30], true, 'manual'), k([30], false, 'auto')], 'depth');
+    b.keyValues = [[-30, 30]];
+    b.divisions = 3;
+    const store = createProjectStore(projectWith([b]));
+    const original = store.get();
+    const generator = createKeyGenerator();
+    generateBetween(store, generator, ['FaceAngleX']);
+    const next = store.get().model.bindings[0]!;
+    expect(next.generation).toBe('depth');
+    expect(next.keys.map((key) => key.coords)).toEqual([[-30], [-10], [10], [30]]);
+    expect(next.keys[0]).toBe(b.keys[0]);
+    store.undo();
+    expect(store.get()).toBe(original);
+    store.redo();
+    const interpolated = store.get();
+    generateBetween(store, generator, ['FaceAngleX']);
+    expect(store.get()).toBe(interpolated);
+    applyGeneration(store, generator, ['FaceAngleX'], 'linear');
+    expect(store.get().model.bindings[0]!.generation).toBe('linear');
+  });
+  it('linear は linear、depth を含むほかの方式は方式を保持する regenerate で作る', () => {
     const store = createProjectStore(
       projectWith([
         keyed('l', ['FaceAngleX'], [], 'linear'),
@@ -127,8 +148,8 @@ describe('間を生成（方式ごと）', () => {
     const linear = vi.fn((b: Binding) => b);
     const regenerate = vi.fn((b: Binding) => b);
     generateBetween(store, Object.assign(new FakeKeyGenerator(), { linear, regenerate }), ['FaceAngleX']);
-    expect(linear.mock.calls.map(([b]) => b.id)).toEqual(['l', 'd']);
-    expect(regenerate.mock.calls.map(([b]) => b.id)).toEqual(['r', 'e']);
+    expect(linear.mock.calls.map(([b]) => b.id)).toEqual(['l']);
+    expect(regenerate.mock.calls.map(([b]) => b.id)).toEqual(['d', 'r', 'e']);
   });
 });
 
@@ -205,6 +226,19 @@ describe('生成方式', () => {
 });
 
 describe('キーのロック', () => {
+  it('複合キーだけがロックされていても1軸の印はロック扱いにしない', () => {
+    const store = createProjectStore(
+      projectWith([
+        keyed('x', ['FaceAngleX'], [k([10])], 'linear'),
+        keyed('xy', ['FaceAngleX', 'FaceAngleY'], [k([10, 30], true)], 'linear'),
+      ]),
+    );
+    expect(isLockedAt(store.get().model, 'FaceAngleX', 10)).toBe(false);
+    toggleLockAt(store, 'FaceAngleX', 10);
+    expect(store.get().model.bindings.map((b) => b.keys[0]!.locked)).toEqual([true, true]);
+    toggleLockAt(store, 'FaceAngleX', 10);
+    expect(store.get().model.bindings.map((b) => b.keys[0]!.locked)).toEqual([false, true]);
+  });
   const lockModel = () =>
     projectWith([
       keyed('x', ['FaceAngleX'], [k([-30], false, 'manual'), k([10]), k([20], true), k([30])], 'linear'),
@@ -213,12 +247,12 @@ describe('キーのロック', () => {
     ]);
   const lockedOf = (p: Project) => p.model.bindings.map((b) => b.keys.map((key) => key.locked));
 
-  it('範囲（両端を含む）の中のキーだけ locked を変える。2パラメータは軸の値で見る', () => {
+  it('範囲（両端を含む）の1軸キーだけ locked を変え、複合キーは触らない', () => {
     const model = lockModel().model;
     const locked = setKeysLocked(model, 'FaceAngleX', [25, 10], true);
     expect(locked.bindings.map((b) => b.keys.map((key) => key.locked))).toEqual([
       [false, true, true, false],
-      [true, true],
+      [false, false],
       [false],
     ]);
     // 変わらないバインディング・キーは同じオブジェクト
@@ -235,15 +269,15 @@ describe('キーのロック', () => {
     toggleLockAt(store, 'FaceAngleX', 20);
     expect(lockedOf(store.get())[0]).toEqual([false, false, false, false]);
     toggleLockAt(store, 'FaceAngleX', 10);
-    // xy の [0, 10] も FaceAngleX = 10 のキー
+    // 同じ値を含む xy のキーは変更しない
     expect(lockedOf(store.get()).slice(0, 2)).toEqual([
       [false, true, false, false],
-      [true, false],
+      [false, false],
     ]);
     lockRange(store, 'FaceAngleX', [-30, 30], true);
     expect(lockedOf(store.get()).slice(0, 2)).toEqual([
       [true, true, true, true],
-      [true, true],
+      [false, false],
     ]);
     lockRange(store, 'FaceAngleX', [0, 15], false);
     expect(lockedOf(store.get())[0]).toEqual([true, false, true, true]);

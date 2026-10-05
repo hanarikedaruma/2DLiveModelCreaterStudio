@@ -39,9 +39,9 @@ export function linearCommand(generator: KeyGenerator, bindingId: string): Comma
   return bindingCommand('間を生成', bindingId, (binding) => generator.linear(binding));
 }
 
-// [間を生成] で掛けるもの。linear・depth は linear（MVP のまま）、ほかはバインディングの方式で作り直す
+// 中間生成は方式を変更しない。方式の変更は applyGeneration で明示的に行う。
 function between(generator: KeyGenerator, binding: Binding, model: Model): Binding {
-  if (binding.generation === 'linear' || binding.generation === 'depth') return generator.linear(binding);
+  if (binding.generation === 'linear') return generator.linear(binding);
   return generator.regenerate(binding, model);
 }
 
@@ -164,7 +164,7 @@ export function setKeysLocked(model: Model, parameterId: string, range: [number,
   let changed = false;
   const bindings = model.bindings.map((b) => {
     const axis = b.parameterIds.indexOf(parameterId);
-    if (axis < 0) return b;
+    if (axis < 0 || b.parameterIds.length !== 1) return b;
     let touched = false;
     const keys = b.keys.map((k) => {
       const v = k.coords[axis];
@@ -183,7 +183,11 @@ export function setKeysLocked(model: Model, parameterId: string, range: [number,
 export function isLockedAt(model: Model, parameterId: string, value: number): boolean {
   return model.bindings.some((b) => {
     const axis = b.parameterIds.indexOf(parameterId);
-    return axis >= 0 && b.keys.some((k) => k.locked && Math.abs((k.coords[axis] ?? Infinity) - value) <= NEAR);
+    return (
+      b.parameterIds.length === 1 &&
+      axis >= 0 &&
+      b.keys.some((k) => k.locked && Math.abs((k.coords[axis] ?? Infinity) - value) <= NEAR)
+    );
   });
 }
 

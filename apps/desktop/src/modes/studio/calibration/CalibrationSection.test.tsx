@@ -19,7 +19,6 @@ import { RECALIBRATE_EVENT } from '../../../hotkeys/actions';
 import { register as registerStudio } from '../index';
 import { animationFrameScheduler, studioRuntime } from '../runtime';
 import { COLLECT_MS, COUNT_INTERVAL_MS } from './flow';
-import { defaultTrackingOptions, trackingOptions } from './options';
 import { register } from './index';
 
 // jsdom には 2D/WebGL のコンテキストが無いので、何も描かないレンダラーにする
@@ -27,6 +26,13 @@ const renderer: Renderer = { init() {}, setTextures() {}, render() {}, dispose()
 
 // フレームを手で流すカメラ
 class ManualTrackingSource implements TrackingSource {
+  configureCapture() {}
+  captureStats() {
+    return null;
+  }
+  onCaptureStats() {
+    return () => {};
+  }
   started = false;
   failStart: Error | null = null;
   private readonly listeners = new Set<(f: TrackingFrame) => void>();
@@ -125,7 +131,6 @@ beforeEach(() => {
   registry.reset();
   registerStudio();
   register();
-  trackingOptions.set(defaultTrackingOptions());
   studioRuntime.setScheduler({
     request(cb) {
       const id = setTimeout(() => cb(Date.now()), 16);
@@ -137,7 +142,6 @@ afterEach(() => {
   studioRuntime.stopTracking();
   vi.useRealTimers();
   studioRuntime.setScheduler(animationFrameScheduler());
-  trackingOptions.set(defaultTrackingOptions());
 });
 
 describe('スタジオの設定の「キャリブレーション・動き」', () => {
@@ -281,8 +285,7 @@ describe('スタジオの設定の「キャリブレーション・動き」', (
 
   it('カスタムの値のときは「カスタム」を出し、プリセットを選び直すときに上書きを確かめる', async () => {
     const custom = { minCutoff: 0.8, beta: 0.02, gain: 1.3, deadZone: 0 };
-    trackingOptions.set({ custom });
-    const { environment, spies } = await setup({ environment: { trackingPreset: 'custom' } });
+    const { environment, spies } = await setup({ environment: { trackingPreset: 'custom', trackingCustom: custom } });
     expect(motion().getByRole('button', { name: 'カスタム' }).getAttribute('aria-pressed')).toBe('true');
     expect(spies.setPreset).toHaveBeenLastCalledWith('custom', custom);
 
@@ -311,7 +314,7 @@ describe('スタジオの設定の「キャリブレーション・動き」', (
     fireEvent.blur(gain);
     const custom = { ...TRACKING_PRESETS.standard, gain: 1.5 };
     expect(environment.get().trackingPreset).toBe('custom');
-    expect(trackingOptions.get().custom).toEqual(custom);
+    expect(environment.get().trackingCustom).toEqual(custom);
     expect(spies.setPreset).toHaveBeenLastCalledWith('custom', custom);
     expect(motion().getByRole('button', { name: 'カスタム' })).toBeTruthy();
 
@@ -330,10 +333,10 @@ describe('スタジオの設定の「キャリブレーション・動き」', (
   });
 
   it('目のトラッキングをオフにするとレイヤーに渡し、自動のまばたきにすると添える', async () => {
-    const { spies } = await setup();
+    const { spies, environment } = await setup();
     fireEvent.click(section().getByRole('checkbox', { name: '目のトラッキング' }));
     expect(spies.setEyeTracking).toHaveBeenLastCalledWith(false);
-    expect(trackingOptions.get().eyeTracking).toBe(false);
+    expect(environment.get().eyeTracking).toBe(false);
     expect(section().getByText('目の開け閉めは自動のまばたきにする')).toBeTruthy();
     fireEvent.click(section().getByRole('checkbox', { name: '目のトラッキング' }));
     expect(spies.setEyeTracking).toHaveBeenLastCalledWith(true);

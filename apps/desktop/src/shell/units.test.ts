@@ -125,9 +125,10 @@ describe('環境設定（environment.json）', () => {
     warn.mockRestore();
   });
 
-  it('同じ値の set は書き込まない・通知しない', async () => {
+  it('読み込み後、同じ値の set は書き込まない・通知しない', async () => {
     const storage = memoryEnvironmentStorage();
     const store = createEnvironmentStore(storage);
+    await store.load();
     const listener = vi.fn();
     store.subscribe(listener);
     store.set({ mirror: true });

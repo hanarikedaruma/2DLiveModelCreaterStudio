@@ -132,10 +132,15 @@ export function createStudioRuntime(
     for (const l of [...listeners]) l();
   }
 
-  // トラッキングは services.trackingLayer を包んだ producer として最初から入れておく。開始していなければ何も出さない
+  // カメラを停止しても自動まばたきは動かす。表情・アニメーションより前に合成する。
   const trackingProducer: LayerProducer = {
     id: 'tracking',
-    produce: (ctx) => (tracking ? tracking.services.trackingLayer.tick(ctx.now) : null),
+    produce: (ctx) =>
+      tracking
+        ? tracking.services.trackingLayer.tick(ctx.now)
+        : services
+          ? { id: 'tracking', weight: 1, values: services.autoBlink.tick(ctx.now) }
+          : null,
   };
   producers.push(trackingProducer);
   producers.push({ id: 'physics', produce: (ctx) => services?.physics.produce(ctx) ?? null });

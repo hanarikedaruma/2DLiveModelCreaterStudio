@@ -1,5 +1,15 @@
-import type { TrackingFrame, TrackingSource } from '@app/contracts';
-import { type CameraVideo, type MediaDevicesLike, cameraConstraints, createDomCameraVideo, stopStream } from './camera';
+import type { CameraCaptureStats, TrackingFrame, TrackingSource } from '@app/contracts';
+import type { Environment } from '@app/schema';
+import {
+  AUTO_CAPTURE,
+  type CameraVideo,
+  type MediaDevicesLike,
+  type MediaStreamLike,
+  cameraConstraints,
+  createDomCameraVideo,
+  stopStream,
+} from './camera';
+import { CaptureSession } from './capture';
 import { NEUTRAL_TRACKING_FRAME, landmarkerResultToFrame } from './convert';
 import {
   type FaceLandmarkerLike,
@@ -15,11 +25,13 @@ export interface MediaPipeTrackingSourceOptions {
   mediaDevices?: MediaDevicesLike;
   createVideo?: () => CameraVideo;
   createLandmarker?: () => Promise<FaceLandmarkerLike>;
+  now?: () => number;
 }
 
 interface Run {
   video: CameraVideo;
-  stream: { getTracks(): { stop(): void }[] };
+  stream: MediaStreamLike;
+  capture: CaptureSession | null;
   landmarker: FaceLandmarkerLike;
   cancelFrame: (() => void) | null;
   lastPresentedFrames: number; // 最後に推定したフレームの通し番号
@@ -39,6 +51,8 @@ class MediaPipeTrackingSource implements TrackingSource {
   private generation = 0; // start・stop のたびに増やす。待っている間に古くなった start を捨てる
   private lastTimestamp = -Infinity; // detectForVideo の時刻は同じ landmarker で増え続ける必要がある
   private last: TrackingFrame = { ...NEUTRAL_TRACKING_FRAME };
+  private captureSettings: Environment['cameraCapture'] = { ...AUTO_CAPTURE };
+  private readonly captureListeners = new Set<() => void>();
 
   constructor(private readonly options: MediaPipeTrackingSourceOptions) {}
 
@@ -56,12 +70,39 @@ class MediaPipeTrackingSource implements TrackingSource {
       .map((d, i) => ({ id: d.deviceId, label: d.label || `カメラ ${i + 1}` }));
   }
 
+  configureCapture(settings: Environment['cameraCapture']): void {
+    this.captureSettings = { ...settings };
+    this.run?.capture?.configure(settings);
+  }
+
+  captureStats(): CameraCaptureStats | null {
+    return this.run?.capture?.stats() ?? null;
+  }
+
+  onCaptureStats(listener: () => void): () => void {
+    this.captureListeners.add(listener);
+    return () => {
+      this.captureListeners.delete(listener);
+    };
+  }
+
+  private captureChanged(): void {
+    for (const listener of [...this.captureListeners]) {
+      try {
+        listener();
+      } catch (error) {
+        console.error('カメラ計測の通知で失敗した', error);
+      }
+    }
+  }
+
   async start(deviceId?: string): Promise<void> {
     this.stop();
     const generation = this.generation;
+    const settings = { ...this.captureSettings };
     const isStale = (): boolean => generation !== this.generation;
     const [streamResult, landmarkerResult] = await Promise.allSettled([
-      this.mediaDevices().getUserMedia(cameraConstraints(deviceId)),
+      this.openCamera(deviceId, settings, isStale),
       this.loadLandmarker(),
     ]);
     // 待っている間に stop・start されたら、取れたカメラを閉じて終わる（失敗も知らせない）
@@ -92,6 +133,7 @@ class MediaPipeTrackingSource implements TrackingSource {
     const run: Run = {
       video,
       stream,
+      capture: null,
       landmarker: landmarkerResult.value,
       cancelFrame: null,
       lastPresentedFrames: -Infinity,
@@ -99,7 +141,38 @@ class MediaPipeTrackingSource implements TrackingSource {
       warned: false,
     };
     this.run = run;
+    const track = stream.getVideoTracks()[0];
+    if (!track) {
+      this.stop();
+      throw new Error('カメラの映像トラックがない');
+    }
+    run.capture = new CaptureSession(
+      track,
+      video,
+      settings,
+      () => {
+        if (this.run === run) this.captureChanged();
+      },
+      this.options.now,
+    );
+    run.capture.start();
+    if (this.run !== run) return;
+    run.capture.configure(this.captureSettings);
     this.scheduleFrame(run);
+  }
+
+  private async openCamera(
+    deviceId: string | undefined,
+    settings: Environment['cameraCapture'],
+    isStale: () => boolean,
+  ): Promise<MediaStreamLike> {
+    try {
+      return await this.mediaDevices().getUserMedia(cameraConstraints(deviceId, settings));
+    } catch (error) {
+      if (isStale() || settings.mode !== 'auto' || !(error instanceof Error) || error.name !== 'OverconstrainedError')
+        throw error;
+      return this.mediaDevices().getUserMedia(cameraConstraints(deviceId, settings, true));
+    }
   }
 
   stop(): void {
@@ -107,10 +180,12 @@ class MediaPipeTrackingSource implements TrackingSource {
     const run = this.run;
     if (!run) return;
     this.run = null;
+    run.capture?.stop();
     run.cancelFrame?.();
     run.cancelFrame = null;
     run.video.release();
     stopStream(run.stream);
+    this.captureChanged();
   }
 
   onFrame(listener: (frame: TrackingFrame) => void): () => void {
@@ -143,6 +218,7 @@ class MediaPipeTrackingSource implements TrackingSource {
       if (run.busy || info.presentedFrames <= run.lastPresentedFrames) return;
       run.lastPresentedFrames = info.presentedFrames;
       run.busy = true;
+      run.capture?.estimated();
       try {
         this.processFrame(run, now);
       } finally {

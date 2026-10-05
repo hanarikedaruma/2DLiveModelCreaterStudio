@@ -187,9 +187,14 @@ describe('createTrackingLayerProducer', () => {
       expect(p.tick(5000).weight).toBe(0);
     });
 
-    it('まだ一度も検出していなければ weight 0・値なし・lost', () => {
+    it('まだ一度も検出していなければ顔の weight は0、目はフォールバック・lost', () => {
       const p = createTrackingLayerProducer(MVP);
-      expect(p.tick(0)).toEqual({ id: 'tracking', weight: 0, values: {} });
+      expect(p.tick(0)).toEqual({
+        id: 'tracking',
+        weight: 0,
+        values: { EyeOpenL: 1, EyeOpenR: 1 },
+        parameterWeights: { EyeOpenL: 1, EyeOpenR: 1 },
+      });
       expect(p.status()).toBe('lost');
     });
 

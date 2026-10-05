@@ -15,6 +15,7 @@ function fakeDocument(withFrameCallback = true) {
     style: { cssText: '' },
     attributes: {} as Record<string, string>,
     paused: true,
+    getVideoPlaybackQuality: () => ({ totalVideoFrames: 123 }),
     setAttribute(name: string, value: string) {
       this.attributes[name] = value;
     },
@@ -49,7 +50,7 @@ function fakeDocument(withFrameCallback = true) {
   return { doc: doc as unknown as Document, video, callbacks, appended };
 }
 
-const stream = { getTracks: () => [] };
+const stream = { getTracks: () => [], getVideoTracks: () => [] };
 
 describe('createDomCameraVideo', () => {
   it('音を出さず、見えない形で文書に入れてから流す', async () => {
@@ -63,6 +64,7 @@ describe('createDomCameraVideo', () => {
     expect(appended).toEqual([video]);
     expect(video.srcObject).toBe(stream);
     expect(video.play).toHaveBeenCalledTimes(1);
+    expect(camera.frameCount()).toBe(123);
   });
 
   it('onNextFrame は requestVideoFrameCallback で予約し、戻り値で取り消す', async () => {
@@ -98,6 +100,18 @@ describe('cameraConstraints・stopStream', () => {
   it('機器の指定は exact にする', () => {
     expect(cameraConstraints('x').video).toMatchObject({ deviceId: { exact: 'x' } });
     expect(cameraConstraints('').video).not.toHaveProperty('deviceId');
+  });
+  it('自動は小さい映像と60fpsを優先し、手動は指定した解像度を要求する', () => {
+    expect(cameraConstraints().video).toMatchObject({
+      width: { ideal: 640, max: 640 },
+      height: { ideal: 480, max: 480 },
+      frameRate: { ideal: 60 },
+    });
+    expect(cameraConstraints('x', { mode: 'manual', width: 1920, height: 1080, fps: 30 }).video).toMatchObject({
+      width: { exact: 1920 },
+      height: { exact: 1080 },
+      frameRate: { ideal: 30 },
+    });
   });
 
   it('stopStream はすべてのトラックを止める', () => {

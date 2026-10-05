@@ -119,11 +119,16 @@ describe('createDefaultEnvironment', () => {
   it('カード05の既定値', () => {
     expect(createDefaultEnvironment()).toEqual({
       cameraDeviceId: null,
+      cameraCapture: { mode: 'auto', width: 640, height: 480, fps: 60 },
       mirror: true,
       calibration: null,
       microphoneDeviceId: null,
       silenceThreshold: -50,
       trackingPreset: 'standard',
+      eyeTracking: true,
+      trackingCustom: { minCutoff: 1, beta: 0.02, gain: 1, deadZone: 0.5 },
+      bodyFollowStrength: 'standard',
+      expressionMode: 'stack',
       output: { method: 'window', width: 1920, height: 1080, fps: 60 },
       uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
       lastProjectDir: null,

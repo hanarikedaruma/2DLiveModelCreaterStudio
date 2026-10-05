@@ -414,6 +414,12 @@ const uiLevel = z.enum(['easy', 'detail']);
 
 export const environmentSchema: z.ZodType<Environment> = z.object({
   cameraDeviceId: z.string().nullable(),
+  cameraCapture: z.object({
+    mode: z.enum(['auto', 'manual']),
+    width: z.number().int().min(16).max(7680),
+    height: z.number().int().min(16).max(4320),
+    fps: z.number().int().min(1).max(120),
+  }),
   mirror: z.boolean(),
   calibration: z
     .object({
@@ -425,6 +431,15 @@ export const environmentSchema: z.ZodType<Environment> = z.object({
   microphoneDeviceId: z.string().nullable(),
   silenceThreshold: num,
   trackingPreset: z.enum(['stable', 'standard', 'large', 'custom']),
+  eyeTracking: z.boolean(),
+  trackingCustom: z.object({
+    minCutoff: num.positive(),
+    beta: num.nonnegative(),
+    gain: num.nonnegative(),
+    deadZone: num.nonnegative(),
+  }),
+  bodyFollowStrength: z.enum(['low', 'standard', 'high']),
+  expressionMode: z.enum(['stack', 'single']),
   output: z.object({
     method: z.enum(['window', 'spout2']),
     width: num.int().min(1),

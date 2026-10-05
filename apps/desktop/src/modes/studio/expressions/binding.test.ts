@@ -5,12 +5,7 @@ import { createExpressionController, createParameterMixer } from '@app/core';
 import { createFakeServices } from '../../../services';
 import { createHotkeyActions } from '../../../hotkeys/actions';
 import { createStudioRuntime } from '../runtime';
-import {
-  createExpressionBinding,
-  EXPRESSION_CARD_MODE_KEY,
-  localCardModeStorage,
-  memoryCardModeStorage,
-} from './binding';
+import { createExpressionBinding, memoryCardModeStorage } from './binding';
 
 const smile: Expression = {
   id: 'smile',
@@ -132,30 +127,11 @@ describe('createExpressionBinding', () => {
     expect(memory('other').mode()).toBe('stack');
   });
 
-  it('localStorage に覚える（保存できない環境でも動く）', () => {
-    localStorage.removeItem(EXPRESSION_CARD_MODE_KEY);
-    const storage = localCardModeStorage();
-    expect(createExpressionBinding(storage).mode()).toBe('stack');
-    createExpressionBinding(storage).setMode('single');
-    expect(localStorage.getItem(EXPRESSION_CARD_MODE_KEY)).toBe('single');
-    expect(createExpressionBinding(storage).mode()).toBe('single');
-    localStorage.removeItem(EXPRESSION_CARD_MODE_KEY);
-
-    const getItem = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new Error('使えない');
-    });
-    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new Error('使えない');
-    });
-    try {
-      const binding = createExpressionBinding(localCardModeStorage());
-      expect(binding.mode()).toBe('stack');
-      binding.setMode('single');
-      expect(binding.mode()).toBe('single');
-    } finally {
-      getItem.mockRestore();
-      setItem.mockRestore();
-    }
+  it('実行中のモードは個別 localStorage へ保存しない', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem');
+    createExpressionBinding().setMode('single');
+    expect(setItem).not.toHaveBeenCalled();
+    setItem.mockRestore();
   });
 
   it('ほかから services.expressions を直接切り替えたら（ホットキー・シーン）、次のフレームで知らせる', () => {
@@ -273,6 +249,7 @@ describe('スタジオの実行部での表情（本物の ExpressionController 
       emit: () => {},
       trackingSessionActive: () => false,
       cameraDeviceId: () => null,
+      expressionMode: () => 'stack',
       notify: () => {},
     });
     binding.toggle('smile', 0);

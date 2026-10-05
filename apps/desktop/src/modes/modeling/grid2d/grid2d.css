@@ -106,6 +106,15 @@
 .grid2d-current button {
   padding: 2px 8px;
 }
+.grid2d-current .grid2d-lock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  padding: 0;
+}
 
 /* 組み合わせの補正のパラメータの選択 */
 .grid2d-selects {

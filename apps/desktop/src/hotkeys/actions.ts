@@ -28,6 +28,7 @@ export interface HotkeyActionContext {
   emit(name: string, payload?: unknown): void;
   trackingSessionActive(): boolean; // スタジオでトラッキングを開始しているか
   cameraDeviceId(): string | null; // 再開するときのカメラ
+  expressionMode(): 'stack' | 'single';
   notify(message: string): void;
 }
 
@@ -65,6 +66,7 @@ export function createHotkeyActions(): HotkeyActions {
   const parameters = new Map<string, string>(); // ホットキーの id → max にしているパラメータの id
   let paused = false; // ホットキーでトラッキングを止めている
   const pausedByHold = new Set<string>();
+  const expressionHolds = new Set<string>();
   const listeners = new Set<() => void>();
   const changed = () => {
     for (const l of [...listeners]) l();
@@ -100,15 +102,23 @@ export function createHotkeyActions(): HotkeyActions {
 
   function expression(c: HotkeyActionContext, hotkey: Hotkey, phase: HotkeyPhase) {
     const { expressions } = c.services;
-    const s: Switcher<string | null> = {
-      current: () => expressions.active(),
-      set: (id) => expressions.apply(id, c.now()),
-      same: (a, b) => a === b,
-    };
-    if (hotkey.mode === 'hold') return holdSwitch(hotkey.id, hotkey.targetId, phase, s);
+    if (hotkey.mode === 'hold') {
+      const owner = `hotkey:${hotkey.id}`;
+      if (phase === 'down') {
+        expressionHolds.add(hotkey.id);
+        expressions.hold(owner, hotkey.targetId, c.expressionMode(), c.now());
+      } else {
+        expressionHolds.delete(hotkey.id);
+        expressions.release(owner, c.now());
+      }
+      return;
+    }
     if (phase !== 'down') return;
-    // toggle は適用 / 解除
-    s.set(s.current() === hotkey.targetId ? null : hotkey.targetId);
+    const target = hotkey.targetId;
+    if (target === null) return expressions.apply(target, c.now());
+    if (c.expressionMode() === 'stack') return expressions.toggle(target, c.now());
+    const ids = expressions.actives();
+    expressions.apply(ids.length === 1 && ids[0] === target ? null : target, c.now());
   }
 
   function scene(c: HotkeyActionContext, hotkey: Hotkey, phase: HotkeyPhase) {
@@ -209,6 +219,10 @@ export function createHotkeyActions(): HotkeyActions {
 
   return {
     setContext(next) {
+      if (ctx && ctx.services.expressions !== next?.services.expressions) {
+        for (const id of expressionHolds) ctx.services.expressions.release(`hotkey:${id}`, ctx.now());
+        expressionHolds.clear();
+      }
       ctx = next;
     },
     handle(hotkey, phase) {
@@ -248,6 +262,7 @@ export function createHotkeyActions(): HotkeyActions {
         const now = byId.get(id);
         if (now && sameAssignment(old, now)) continue;
         known.delete(id);
+        if (expressionHolds.delete(id)) ctx?.services.expressions.release(`hotkey:${id}`, ctx.now());
         memory.delete(id);
         pausedByHold.delete(id);
         if (parameters.delete(id)) dirty = true;

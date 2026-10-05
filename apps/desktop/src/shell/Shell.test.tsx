@@ -311,6 +311,50 @@ describe('キャンバス', () => {
 });
 
 describe('Undo / Redo のキー', () => {
+  it.each(['select', 'range', 'checkbox', 'radio', 'button'])('%s からもプロジェクトの Undo/Redo を使える', (type) => {
+    const { services } = setup();
+    act(() => services.store.dispatch({ label: '名前', apply: (p) => ({ ...p, name: '変更後' }) }));
+    const control = document.createElement(type === 'select' ? 'select' : 'input');
+    if (control instanceof HTMLInputElement) control.type = type;
+    document.body.appendChild(control);
+    fireEvent.keyDown(control, { key: 'z', ctrlKey: true });
+    expect(services.store.get().name).toBe('新しいプロジェクト');
+    fireEvent.keyDown(control, { key: 'y', ctrlKey: true });
+    expect(services.store.get().name).toBe('変更後');
+    control.remove();
+  });
+
+  it.each(['text', 'number', 'search', 'email', 'url', 'tel', 'password'])(
+    '%s の入力中は Undo/Redo を横取りしない',
+    (type) => {
+      const { services } = setup();
+      const undo = vi.spyOn(services.store, 'undo');
+      const redo = vi.spyOn(services.store, 'redo');
+      const input = document.createElement('input');
+      input.type = type;
+      document.body.appendChild(input);
+      fireEvent.keyDown(input, { key: 'z', ctrlKey: true });
+      fireEvent.keyDown(input, { key: 'y', ctrlKey: true });
+      expect(undo).not.toHaveBeenCalled();
+      expect(redo).not.toHaveBeenCalled();
+      input.remove();
+    },
+  );
+
+  it('IME の変換中と contenteditable の子からの Undo は横取りしない', () => {
+    const { services } = setup();
+    const undo = vi.spyOn(services.store, 'undo');
+    fireEvent.keyDown(window, { key: 'z', ctrlKey: true, isComposing: true });
+    fireEvent.keyDown(window, { key: 'z', ctrlKey: true, keyCode: 229 });
+    const editable = document.createElement('div');
+    editable.setAttribute('contenteditable', 'true');
+    const child = document.createElement('span');
+    editable.appendChild(child);
+    document.body.appendChild(editable);
+    fireEvent.keyDown(child, { key: 'z', ctrlKey: true });
+    expect(undo).not.toHaveBeenCalled();
+    editable.remove();
+  });
   it('Ctrl+Z で store.undo、Ctrl+Shift+Z と Ctrl+Y で store.redo が呼ばれる', () => {
     const { services } = setup();
     const undo = vi.spyOn(services.store, 'undo');

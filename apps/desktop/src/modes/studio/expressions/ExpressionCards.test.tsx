@@ -63,13 +63,14 @@ async function setup(options: { services?: Partial<Services>; project?: Project 
     mixer: createParameterMixer(),
     ...options.services,
   };
-  const environment = createEnvironmentStore(memoryEnvironmentStorage(null));
+  const storage = memoryEnvironmentStorage(null);
+  const environment = createEnvironmentStore(storage);
   render(<Shell services={services} environment={environment} />);
   await act(async () => {
     services.store.load(options.project ?? step1Project());
     services.editor.set({ mode: 'studio' });
   });
-  return { services, store: services.store };
+  return { services, store: services.store, environment, storage };
 }
 
 const panel = () => within(document.querySelector<HTMLElement>('[data-panel-id="studioExpressions"]')!);
@@ -158,7 +159,7 @@ describe('スタジオの「表情」パネル', () => {
   });
 
   it('詳細モードの「1つずつ切り替え」で、押した表情だけにする（STEP1 の動き）。設定はこの PC に覚える', async () => {
-    const { services } = await setup({ services: { expressions: new FakeExpressions() } });
+    const { services, environment, storage } = await setup({ services: { expressions: new FakeExpressions() } });
     // かんたんでは「カードの押し方」を開いたときだけ出す
     expect(panel().queryByRole('checkbox', { name: '1つずつ切り替え' })).toBeNull();
     expect(panel().getByRole('button', { name: /カードの押し方/ })).toBeTruthy();
@@ -174,7 +175,9 @@ describe('スタジオの「表情」パネル', () => {
     });
     expect(single.checked).toBe(true);
     expect(expressionBinding.mode()).toBe('single');
-    expect(localStorage.getItem('live2d-studio.expressionCardMode')).toBe('single');
+    expect(environment.get().expressionMode).toBe('single');
+    await environment.flush();
+    expect(JSON.parse(storage.text!).expressionMode).toBe('single');
     // 切り替えただけでは、適用中の表情は変えない
     expect(services.expressions.actives()).toEqual(['smile', 'angry']);
     expect(card('笑顔').title).toBe('押すとこの表情だけにする');

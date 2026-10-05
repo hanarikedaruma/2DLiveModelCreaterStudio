@@ -31,7 +31,7 @@ describe('キーの印', () => {
       bindings: [
         binding('a', ['FaceAngleX'], [key([0], 'auto'), key([15], 'generated'), key([30], 'manual')]),
         binding('b', ['FaceAngleX'], [key([0], 'auto'), key([15], 'manual'), key([-30], 'generated', true)]),
-        // 2パラメータのバインディングはその軸の値
+        // 複合キーはグリッド側で扱い、1軸スライダーには表示しない
         binding('c', ['FaceAngleY', 'FaceAngleX'], [key([10, 7.5], 'generated'), key([0, 0], 'auto')]),
         binding('d', ['MouthOpen'], [key([1], 'manual', true)]),
       ],
@@ -40,14 +40,10 @@ describe('キーの印', () => {
     expect(keyMarksFor(model, 'FaceAngleX')).toEqual([
       { value: -30, kind: 'locked' },
       { value: 0, kind: 'key' },
-      { value: 7.5, kind: 'generated' },
       { value: 15, kind: 'key' },
       { value: 30, kind: 'key' },
     ]);
-    expect(keyMarksFor(model, 'FaceAngleY')).toEqual([
-      { value: 0, kind: 'key' },
-      { value: 10, kind: 'generated' },
-    ]);
+    expect(keyMarksFor(model, 'FaceAngleY')).toEqual([]);
     expect(keyMarksFor(model, 'EyeOpenL')).toEqual([]);
   });
 });

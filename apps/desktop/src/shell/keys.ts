@@ -41,3 +41,13 @@ export function isTypingTarget(target: EventTarget | null): boolean {
   const tag = el.tagName.toLowerCase();
   return tag === 'input' || tag === 'textarea' || tag === 'select' || el.isContentEditable === true;
 }
+
+export function isTextEditingTarget(target: EventTarget | null): boolean {
+  if (!target || typeof (target as HTMLElement).tagName !== 'string') return false;
+  const el = target as HTMLElement;
+  const editable = el.closest('[contenteditable]');
+  if (editable && editable.getAttribute('contenteditable') !== 'false') return true;
+  if (el.tagName.toLowerCase() === 'textarea') return true;
+  if (el.tagName.toLowerCase() !== 'input') return false;
+  return ['text', 'search', 'email', 'url', 'tel', 'password', 'number'].includes((el as HTMLInputElement).type);
+}

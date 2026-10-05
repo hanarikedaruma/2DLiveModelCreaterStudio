@@ -54,18 +54,50 @@ export function memoryEnvironmentStorage(initial: string | null = null): Environ
   return storage;
 }
 
-// 足りない項目は既定値で埋める（古い版や手で書き換えたファイルでも開けるように）
+// 未設定・不正な項目だけを既定値にし、正常な設定は保持する。
 export function parseEnvironment(text: string | null): Environment {
   const defaults = createDefaultEnvironment();
   if (!text) return defaults;
   try {
     const json = JSON.parse(text) as Partial<Environment>;
-    return validateEnvironment({
+    const candidate = {
       ...defaults,
       ...json,
       output: { ...defaults.output, ...json.output },
       uiLevel: { ...defaults.uiLevel, ...json.uiLevel },
-    });
+      trackingCustom: { ...defaults.trackingCustom, ...json.trackingCustom },
+      cameraCapture: { ...defaults.cameraCapture, ...json.cameraCapture },
+    };
+    for (const key of Object.keys(defaults.trackingCustom) as (keyof Environment['trackingCustom'])[]) {
+      try {
+        validateEnvironment({
+          ...defaults,
+          trackingCustom: { ...defaults.trackingCustom, [key]: candidate.trackingCustom[key] },
+        });
+      } catch {
+        candidate.trackingCustom[key] = defaults.trackingCustom[key];
+      }
+    }
+    const result = { ...defaults };
+    for (const key of Object.keys(defaults.cameraCapture) as (keyof Environment['cameraCapture'])[]) {
+      try {
+        validateEnvironment({
+          ...defaults,
+          cameraCapture: { ...defaults.cameraCapture, [key]: candidate.cameraCapture[key] },
+        });
+      } catch {
+        Object.assign(candidate.cameraCapture, { [key]: defaults.cameraCapture[key] });
+      }
+    }
+    for (const key of Object.keys(defaults) as (keyof Environment)[]) {
+      try {
+        const validated = validateEnvironment({ ...defaults, [key]: candidate[key] });
+        Object.assign(result, { [key]: validated[key] });
+      } catch (e) {
+        console.warn(`environment.json の ${key} が不正なので既定値を使う`, e);
+      }
+    }
+    return result;
   } catch (e) {
     console.warn('environment.json を読めなかったので既定値を使う', e);
     return defaults;
@@ -85,23 +117,47 @@ export function createEnvironmentStore(storage: EnvironmentStorage): Environment
   const listeners = new Set<(env: Environment) => void>();
   let writing: Promise<void> = Promise.resolve();
   let loading: Promise<void> | null = null;
+  let loaded = false;
+  let pending: Partial<Environment> = {};
 
   function replace(next: Environment) {
     env = next;
     for (const l of [...listeners]) l(env);
   }
 
+  function save() {
+    const text = JSON.stringify(env, null, 2);
+    writing = writing.then(() => storage.write(text)).catch((e) => console.error('environment.json を保存できない', e));
+  }
+
+  function load() {
+    loading ??= storage
+      .read()
+      .catch((e) => {
+        console.warn('environment.json を読み込めない', e);
+        return null;
+      })
+      .then((text) => {
+        const changed = Object.keys(pending).length > 0;
+        const next = validateEnvironment({ ...parseEnvironment(text), ...pending });
+        pending = {};
+        loaded = true;
+        replace(next);
+        if (changed) save();
+      });
+    return loading;
+  }
+
   return {
     get: () => env,
     set(patch) {
       const keys = Object.keys(patch) as (keyof Environment)[];
-      if (keys.every((k) => Object.is(env[k], patch[k]))) return;
-      replace({ ...env, ...patch });
-      const text = JSON.stringify(env, null, 2);
-      // 順番どおりに書く。失敗してもアプリは止めない
-      writing = writing
-        .then(() => storage.write(text))
-        .catch((e) => console.error('environment.json を保存できない', e));
+      if (keys.length === 0 || (loaded && keys.every((k) => Object.is(env[k], patch[k])))) return;
+      const next = validateEnvironment({ ...env, ...patch });
+      if (!loaded) Object.assign(pending, patch);
+      replace(next);
+      if (loaded) save();
+      else void load();
     },
     subscribe(listener) {
       listeners.add(listener);
@@ -110,10 +166,10 @@ export function createEnvironmentStore(storage: EnvironmentStorage): Environment
       };
     },
     // 読み込みは1回だけ（何度呼んでも同じ結果を待つ。読み込みの後の set を古い内容で上書きしないため）
-    load() {
-      loading ??= storage.read().then((text) => replace(parseEnvironment(text)));
-      return loading;
+    load,
+    async flush() {
+      if (loading && Object.keys(pending).length > 0) await loading;
+      await writing;
     },
-    flush: () => writing,
   };
 }

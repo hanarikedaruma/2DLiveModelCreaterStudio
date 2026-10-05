@@ -7,7 +7,7 @@ import { ShellContext, type ShellContextValue } from './context';
 import { DialogHost, createDialogController, type DialogController } from './dialogs';
 import type { EnvironmentStore } from './environment';
 import { onAppEvent } from './events';
-import { isTypingTarget, matchesShortcut } from './keys';
+import { isTextEditingTarget, isTypingTarget, matchesShortcut } from './keys';
 import { Layout } from './Layout';
 import { registry } from './registry';
 import './shell.css';
@@ -72,18 +72,21 @@ export function Shell({ services, environment, dialogs, canvas }: ShellProps) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || isTypingTarget(e.target)) return;
+      if (e.defaultPrevented || e.isComposing || e.keyCode === 229) return;
       const { store } = services;
       if (matchesShortcut(e, 'Ctrl+Z')) {
+        if (isTextEditingTarget(e.target)) return;
         e.preventDefault();
         store.undo();
         return;
       }
       if (matchesShortcut(e, 'Ctrl+Shift+Z') || matchesShortcut(e, 'Ctrl+Y')) {
+        if (isTextEditingTarget(e.target)) return;
         e.preventDefault();
         store.redo();
         return;
       }
+      if (isTypingTarget(e.target)) return;
       const item = registry.get().menuItems.find((m) => m.shortcut && matchesShortcut(e, m.shortcut));
       if (item) {
         e.preventDefault();

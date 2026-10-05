@@ -14,6 +14,20 @@ function layer(id: LayerId, weight: number, values: Record<string, number>, blen
 const mixer = createParameterMixer();
 
 describe('createParameterMixer: 合成方法', () => {
+  it('パラメータ別の重みは共通の重みと独立し、後段の表情を妨げない', () => {
+    const ps = [param('FaceAngleX', -30, 30, 0), param('EyeOpenL', 0, 1, 1)];
+    const tracking: Layer = {
+      id: 'tracking',
+      weight: 0,
+      values: { FaceAngleX: 20, EyeOpenL: 0.25 },
+      parameterWeights: { EyeOpenL: 1 },
+    };
+    expect(mixer.mix(ps, [tracking])).toEqual({ FaceAngleX: 0, EyeOpenL: 0.25 });
+    expect(mixer.mix(ps, [tracking, layer('expression', 1, { EyeOpenL: 0 })]).EyeOpenL).toBe(0);
+    expect(mixer.mix(ps, [{ ...tracking, parameterWeights: { EyeOpenL: Number.NaN } }]).EyeOpenL).toBe(1);
+    expect(mixer.mix(ps, [{ ...tracking, parameterWeights: { EyeOpenL: 2 } }]).EyeOpenL).toBe(0.25);
+    expect(mixer.mix(ps, [{ ...tracking, parameterWeights: { EyeOpenL: -1 } }]).EyeOpenL).toBe(1);
+  });
   // v はデフォルト値から始まる。範囲は広くとって丸めの影響を外す
   const cases: { op: BlendOp; v: number; t: number; expected: [number, number, number] }[] = [
     // override: v + (t − v)·w

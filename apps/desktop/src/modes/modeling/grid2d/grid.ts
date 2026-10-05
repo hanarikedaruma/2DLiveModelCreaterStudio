@@ -4,7 +4,7 @@
 import type { Binding, Model, Parameter, ParameterKey, TransformDelta, Vec2 } from '@app/schema';
 import type { Command, EditorState } from '@app/contracts';
 import { modelCommand } from '@app/core';
-import { keyMarksFor, valueOf } from '../parameters/marks';
+import { valueOf } from '../parameters/marks';
 
 // パラメータの値・キー位置を同じとみなす幅（KeyEditor と同じ）
 const EPS = 1e-6;
@@ -48,7 +48,10 @@ function uniqueSorted(values: number[]): number[] {
 
 // そのパラメータのキー位置（どのバインディングのものも）とデフォルト値。範囲の中だけ、昇順
 export function keyPositions(model: Model, parameter: Parameter): number[] {
-  const values = keyMarksFor(model, parameter.id).map((m) => m.value);
+  const values = model.bindings.flatMap((binding) => {
+    const axis = binding.parameterIds.indexOf(parameter.id);
+    return axis < 0 ? [] : binding.keys.flatMap((key) => (key.coords[axis] === undefined ? [] : [key.coords[axis]!]));
+  });
   return uniqueSorted([parameter.default, ...values]).filter(
     (v) => v >= parameter.min - EPS && v <= parameter.max + EPS,
   );
@@ -134,6 +137,32 @@ export function correctionKeyCount(model: Model, pair: ParameterPair, cell: Grid
 
 export function cellStatus(model: Model, pair: ParameterPair, cell: GridCell): CellStatus {
   return correctionKeyCount(model, pair, cell) > 0 ? 'corrected' : 'auto';
+}
+
+export function cellLockState(model: Model, pair: ParameterPair, cell: GridCell): { count: number; locked: boolean } {
+  const keys = pairBindings(model, pair).flatMap((binding) =>
+    binding.keys.filter((key) => isAt(key, coordsOf(binding, pair, cell))),
+  );
+  return { count: keys.length, locked: keys.some((key) => key.locked) };
+}
+
+export function lockCellCommand(pair: ParameterPair, cell: GridCell, locked: boolean): Command {
+  return modelCommand(locked ? '補正キーをロック' : '補正キーのロックを解除', (model) => {
+    const targets = new Set(pairBindings(model, pair));
+    let changed = false;
+    const bindings = model.bindings.map((binding) => {
+      if (!targets.has(binding)) return binding;
+      const coords = coordsOf(binding, pair, cell);
+      let touched = false;
+      const keys = binding.keys.map((key) => {
+        if (!isAt(key, coords) || key.locked === locked) return key;
+        changed = touched = true;
+        return { ...key, locked };
+      });
+      return touched ? { ...binding, keys } : binding;
+    });
+    return changed ? { ...model, bindings } : model;
+  });
 }
 
 const ZERO = 1e-9;

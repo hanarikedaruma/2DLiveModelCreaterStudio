@@ -9,7 +9,6 @@ import { useConfirmOverwriteCustom } from '../../../shell/level';
 import { RECALIBRATE_EVENT } from '../../../hotkeys/actions';
 import { studioRuntime } from '../runtime';
 import { CALIBRATION_STEPS, COUNTDOWN_FROM, createCalibrationFlow, type CalibrationFlow } from './flow';
-import { trackingOptions } from './options';
 import './calibration.css';
 
 export const MOTION_CHOICES: readonly { id: TrackingPresetName; label: string }[] = [
@@ -54,19 +53,18 @@ export function CalibrationSection() {
   const [env, setEnv] = useEnvironment();
   const dialogs = useDialogs();
   const confirmOverwrite = useConfirmOverwriteCustom();
-  const options = useSyncExternalStore(trackingOptions.subscribe, trackingOptions.get);
   const [flow] = useState<CalibrationFlow>(() => createCalibrationFlow());
   const phase = useSyncExternalStore(flow.subscribe, flow.state);
 
   // 設定を services.trackingLayer に渡す（作り直しても引き継ぐのは services/trackingLayer.ts の包み）
   useEffect(() => services.trackingLayer.setCalibration(env.calibration), [services, env.calibration]);
   const preset = env.trackingPreset;
-  const custom = options.custom;
+  const custom = env.trackingCustom;
   useEffect(() => {
     if (preset === 'custom') services.trackingLayer.setPreset('custom', custom);
     else services.trackingLayer.setPreset(preset);
   }, [services, preset, custom]);
-  useEffect(() => services.trackingLayer.setEyeTracking(options.eyeTracking), [services, options.eyeTracking]);
+  useEffect(() => services.trackingLayer.setEyeTracking(env.eyeTracking), [services, env.eyeTracking]);
 
   // 画面を離れたら（パネルが消えたら）途中のキャリブレーションはやめる
   useEffect(() => () => flow.cancel(), [flow]);
@@ -110,8 +108,7 @@ export function CalibrationSection() {
   const setTuning = (key: keyof TrackingTuning, value: number) => {
     const next: TrackingTuning = { ...values, [key]: value };
     const name = presetOf(next, TRACKING_PRESETS) as TrackingPreset;
-    if (name === 'custom') trackingOptions.set({ custom: next });
-    setEnv({ trackingPreset: name });
+    setEnv({ trackingPreset: name, trackingCustom: next });
   };
 
   return (
@@ -171,14 +168,10 @@ export function CalibrationSection() {
       </DetailDisclosure>
 
       <label className="studio-check calibration-eyes">
-        <input
-          type="checkbox"
-          checked={options.eyeTracking}
-          onChange={(e) => trackingOptions.set({ eyeTracking: e.target.checked })}
-        />
+        <input type="checkbox" checked={env.eyeTracking} onChange={(e) => setEnv({ eyeTracking: e.target.checked })} />
         目のトラッキング
       </label>
-      {!options.eyeTracking && <p className="studio-note">目の開け閉めは自動のまばたきにする</p>}
+      {!env.eyeTracking && <p className="studio-note">目の開け閉めは自動のまばたきにする</p>}
 
       {phase.kind !== 'idle' && <CalibrationDialog flow={flow} />}
     </div>

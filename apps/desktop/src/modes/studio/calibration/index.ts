@@ -4,7 +4,6 @@ import { STUDIO_SETTINGS_PANEL } from '../sections';
 import { CalibrationSection } from './CalibrationSection';
 
 export { CALIBRATION_STEPS, createCalibrationFlow, type CalibrationFlow, type CalibrationPhase } from './flow';
-export { trackingOptions, type TrackingOptions } from './options';
 
 export function register(): void {
   // トラッキング（order 10）のすぐ後

@@ -95,12 +95,18 @@ class TrackingLayer implements TrackingLayerProducer {
   }
 
   // 目のトラッキングがオフのときと外れたときは、EyeOpenL / R を自動まばたきの値にする
-  // （まだ一度も検出していなければ、これまでどおり値なし）
+  // 顔の正面復帰の重みと分け、未検出でも目の動きは継続する。
   tick(now: number): Layer {
     this.lastTick = now;
     const values = { ...this.values };
-    if (this.lastDetectedFrame && (!this.eyeTracking || this.status() === 'lost')) this.applyBlink(values, now);
-    return { id: 'tracking', weight: clamp(this.weight.weightAt(now), 0, 1), values };
+    const fallback = !this.eyeTracking || this.status() === 'lost';
+    if (fallback) this.applyBlink(values, now);
+    const layer: Layer = { id: 'tracking', weight: clamp(this.weight.weightAt(now), 0, 1), values };
+    if (fallback)
+      layer.parameterWeights = Object.fromEntries(
+        EYE_PARAMETERS.filter((id) => this.parametersById.has(id)).map((id) => [id, 1]),
+      );
+    return layer;
   }
 
   // 最後のフレームが detected でないか、detected のフレームが 0.5秒より長く来ていなければ 'lost'

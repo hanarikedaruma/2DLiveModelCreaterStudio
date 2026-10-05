@@ -92,6 +92,9 @@ function manualTracking(): TrackingSource & { emit(frame: Partial<TrackingFrame>
   const listeners = new Set<(frame: TrackingFrame) => void>();
   return {
     listDevices: async () => [{ id: 'cam', label: 'カメラ' }],
+    configureCapture() {},
+    captureStats: () => null,
+    onCaptureStats: () => () => {},
     start: async () => {},
     stop: () => {},
     onFrame(listener) {

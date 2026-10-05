@@ -104,6 +104,7 @@ describe('計測', () => {
         gpuRequest: GPU ?? null,
         outputWindow: OBS ? { width: 1920, height: 1080, background: 'green' } : null,
         tracking: cameras.length > 0 ? cameras.map((c) => c.label) : null,
+        cameraCapture: record!.environment.cameraCapture ?? null,
         memory,
         summary: record!.summary,
         environment: record!.environment,

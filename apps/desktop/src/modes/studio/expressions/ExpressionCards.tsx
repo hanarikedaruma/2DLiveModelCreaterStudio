@@ -4,7 +4,7 @@
 // シーンを切り替えたときの表情はシーンの見張り（scenes/watcher.ts）が適用する
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { Expression } from '@app/schema';
-import { DetailDisclosure, useDispatch, useProject, useServices } from '../../../shell/api';
+import { DetailDisclosure, useDispatch, useEnvironment, useProject, useServices } from '../../../shell/api';
 import { updateExpressionCommand } from '../../modeling/expressions/commands';
 import { expressionBinding, type ExpressionCardMode } from './binding';
 import './expressions.css';
@@ -71,13 +71,14 @@ function cardTitle(mode: ExpressionCardMode, order: number, count: number): stri
 
 // カードの押し方の設定。チェックすると STEP1 と同じ1つずつの切り替えにする（この PC に覚える）
 function CardModeSetting({ mode }: { mode: ExpressionCardMode }) {
+  const [, setEnv] = useEnvironment();
   return (
     <div className="sexpr-mode">
       <label className="studio-check">
         <input
           type="checkbox"
           checked={mode === 'single'}
-          onChange={(e) => expressionBinding.setMode(e.target.checked ? 'single' : 'stack')}
+          onChange={(e) => setEnv({ expressionMode: e.target.checked ? 'single' : 'stack' })}
         />
         1つずつ切り替え
       </label>
@@ -93,13 +94,15 @@ function CardModeSetting({ mode }: { mode: ExpressionCardMode }) {
 export function ExpressionCards() {
   const services = useServices();
   const project = useProject();
+  const [env] = useEnvironment();
   // services.expressions を実行部の producer につなぐ。出力ウィンドウはスタジオの画面を離れても動き続けるので、
   // 外したとき（画面を離れたとき）もつないだままにする。services が替わったらつなぎ直す
   useEffect(() => {
     expressionBinding.bind(services.expressions);
-  }, [services]);
+    expressionBinding.setMode(env.expressionMode);
+  }, [services, env.expressionMode]);
   const actives = useSyncExternalStore(expressionBinding.subscribe, expressionBinding.actives);
-  const mode = useSyncExternalStore(expressionBinding.subscribe, expressionBinding.mode);
+  const mode = env.expressionMode;
   const { expressions } = project;
   // 適用した順の名前（プロジェクトに無い表情は出さない）
   const names = actives.flatMap((id) => expressions.find((e) => e.id === id)?.name ?? []);

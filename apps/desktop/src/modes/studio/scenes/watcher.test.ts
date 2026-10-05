@@ -121,6 +121,7 @@ describe('sceneChanged', () => {
       emit: (name, payload) => events.push({ name, payload }),
       trackingSessionActive: () => false,
       cameraDeviceId: () => null,
+      expressionMode: () => 'stack',
       notify: () => {},
     });
     const hotkey: Hotkey = { id: 'h', keys: 'F1', action: 'scene', targetId: 'song', mode: 'toggle' };

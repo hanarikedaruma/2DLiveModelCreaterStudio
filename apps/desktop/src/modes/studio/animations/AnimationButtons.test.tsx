@@ -184,6 +184,7 @@ describe('スタジオの「アニメーション」パネル', () => {
       emit: emitAppEvent,
       trackingSessionActive: () => false,
       cameraDeviceId: () => null,
+      expressionMode: () => 'stack',
       notify: () => {},
     });
     const hotkey: Hotkey = { id: 'h1', keys: 'Ctrl+Shift+1', action: 'animation', targetId: 'wave', mode: 'hold' };

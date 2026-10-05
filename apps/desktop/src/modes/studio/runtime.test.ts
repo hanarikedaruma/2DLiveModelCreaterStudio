@@ -9,6 +9,7 @@ import {
   type TargetDeltas,
 } from '@app/contracts';
 import { createParameterMixer } from '@app/core';
+import { createTrackingLayerProducer } from '@app/tracking';
 import { createFakeServices } from '../../services';
 import { createStudioRuntime, type FrameScheduler, type StudioFrame } from './runtime';
 import { setBackgroundCommand, setModelTransformCommand } from './scene';
@@ -63,6 +64,41 @@ function setup(project: Project = createEmptyProject('テスト')) {
 }
 
 describe('1フレームの処理', () => {
+  it('顔を見失って3秒後もまばたきが残り、表情の閉じ目が優先される（I-030）', async () => {
+    const { runtime, services } = setup();
+    services.mixer = createParameterMixer();
+    services.autoBlink = { tick: () => ({ EyeOpenL: 0.25, EyeOpenR: 0.75 }) };
+    services.trackingLayer = createTrackingLayerProducer(services.store.get().model.parameters, undefined, {
+      autoBlink: services.autoBlink,
+    });
+    const detach = runtime.attach(services);
+    expect(runtime.tick(0)!.params).toMatchObject({ FaceAngleX: 0, EyeOpenL: 0.25, EyeOpenR: 0.75 });
+    vi.spyOn(services.tracking, 'start').mockResolvedValue();
+    await runtime.startTracking();
+    services.trackingLayer.update({
+      time: 0,
+      detected: true,
+      faceYaw: 20,
+      facePitch: 0,
+      faceRoll: 0,
+      eyeOpenL: 1,
+      eyeOpenR: 1,
+      eyeBallX: 0,
+      eyeBallY: 0,
+      mouthOpen: 0,
+    });
+    expect(runtime.tick(300)!.params.FaceAngleX).toBeCloseTo(20);
+    expect(runtime.tick(3000)!.params).toMatchObject({ FaceAngleX: 0, EyeOpenL: 0.25, EyeOpenR: 0.75 });
+    const off = runtime.registerLayerProducer({
+      id: 'expression',
+      produce: () => ({ id: 'expression', weight: 1, values: { EyeOpenL: 0 } }),
+    });
+    expect(runtime.tick(3100)!.params.EyeOpenL).toBe(0);
+    off();
+    runtime.stopTracking();
+    expect(runtime.tick(3200)!.params).toMatchObject({ FaceAngleX: 0, EyeOpenL: 0.25, EyeOpenR: 0.75 });
+    detach();
+  });
   it('producer を LAYER_ORDER の順に呼び、呼ぶたびに mixedSoFar を更新する', () => {
     const { runtime, services } = setup();
     const calls: { id: string; mixedSoFar: Record<string, number>; flags: FrameContext['flags'] }[] = [];

@@ -42,7 +42,10 @@ export function createParameterMixer(): ParameterMixer {
             // 知らない id と、数でない値は使わない
             if (i === undefined || typeof t !== 'number' || !Number.isFinite(t)) continue;
             const op = layer.blend && Object.hasOwn(layer.blend, id) ? layer.blend[id]! : 'override';
-            values[i] = blendValue(op, values[i]!, t, w);
+            const rawWeight =
+              layer.parameterWeights && Object.hasOwn(layer.parameterWeights, id) ? layer.parameterWeights[id]! : w;
+            const parameterWeight = Number.isNaN(rawWeight) ? 0 : clamp(rawWeight, 0, 1);
+            values[i] = blendValue(op, values[i]!, t, parameterWeight);
           }
         }
       }

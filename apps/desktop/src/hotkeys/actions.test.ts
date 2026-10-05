@@ -50,6 +50,7 @@ let actions: HotkeyActions;
 let events: { name: string; payload: unknown }[];
 let sessionActive: boolean;
 let notices: string[];
+let expressionMode: 'stack' | 'single';
 
 function context(): HotkeyActionContext {
   return {
@@ -58,6 +59,7 @@ function context(): HotkeyActionContext {
     emit: (name, payload) => events.push({ name, payload }),
     trackingSessionActive: () => sessionActive,
     cameraDeviceId: () => 'cam-2',
+    expressionMode: () => expressionMode,
     notify: (m) => notices.push(m),
   };
 }
@@ -83,6 +85,7 @@ beforeEach(() => {
   events = [];
   sessionActive = true;
   notices = [];
+  expressionMode = 'stack';
 });
 
 describe('表情', () => {
@@ -94,10 +97,13 @@ describe('表情', () => {
     expect(services.expressions.active()).toBeNull();
   });
 
-  it('toggle でほかの表情のときに押すと、その表情に替える', () => {
+  it('stack の toggle はカードと同じく重ね、対象だけ解除する', () => {
     services.expressions.apply('angry', 0);
     press(hk('expression', 'smile'));
     expect(services.expressions.active()).toBe('smile');
+    expect(services.expressions.actives()).toEqual(['angry', 'smile']);
+    press(hk('expression', 'smile'));
+    expect(services.expressions.actives()).toEqual(['angry']);
   });
 
   it('hold は押している間だけ適用し、離すと前の表情に戻す', () => {
@@ -118,10 +124,59 @@ describe('表情', () => {
     expect(services.expressions.active()).toBe('smile');
   });
 
-  it('apply には now の時刻を渡す', () => {
-    const apply = vi.spyOn(services.expressions, 'apply');
+  it('toggle には now の時刻を渡す', () => {
+    const apply = vi.spyOn(services.expressions, 'toggle');
     press(hk('expression', 'smile'));
     expect(apply).toHaveBeenCalledWith('smile', 1000);
+  });
+
+  it('single は対象だけに切り替え、同じ表情なら解除する', () => {
+    expressionMode = 'single';
+    services.expressions.toggle('angry', 0);
+    press(hk('expression', 'smile'));
+    expect(services.expressions.actives()).toEqual(['smile']);
+    press(hk('expression', 'smile'));
+    expect(services.expressions.actives()).toEqual([]);
+  });
+
+  it('同じ表情を2つのholdで持つ。どちらから離しても残る持ち主を保つ', () => {
+    services.expressions.toggle('angry', 0);
+    const a = hk('expression', 'smile', 'hold', 'a');
+    const b = hk('expression', 'smile', 'hold', 'b');
+    actions.handle(a, 'down');
+    actions.handle(b, 'down');
+    actions.handle(a, 'up');
+    expect(services.expressions.actives()).toEqual(['angry', 'smile']);
+    actions.handle(b, 'up');
+    expect(services.expressions.actives()).toEqual(['angry']);
+  });
+
+  it('hold中のカードの変更を残す。全解除・シーンのapplyから古い表情を復元しない', () => {
+    services.expressions.toggle('angry', 0);
+    const held = hk('expression', 'smile', 'hold');
+    actions.handle(held, 'down');
+    services.expressions.toggle('custom', 0);
+    actions.handle(held, 'up');
+    expect(services.expressions.actives()).toEqual(['angry', 'custom']);
+    actions.handle(held, 'down');
+    press(hk('expression', null));
+    actions.handle(held, 'up');
+    expect(services.expressions.actives()).toEqual([]);
+    actions.handle(held, 'down');
+    services.expressions.apply('angry', 0);
+    actions.handle(held, 'up');
+    expect(services.expressions.actives()).toEqual(['angry']);
+  });
+
+  it('割り当て削除とコンテキスト解除は、自分のholdだけを解除する', () => {
+    const held = hk('expression', 'smile', 'hold');
+    services.expressions.toggle('angry', 0);
+    actions.handle(held, 'down');
+    actions.retain([]);
+    expect(services.expressions.actives()).toEqual(['angry']);
+    actions.handle(held, 'down');
+    actions.setContext(null);
+    expect(services.expressions.actives()).toEqual(['angry']);
   });
 });
 

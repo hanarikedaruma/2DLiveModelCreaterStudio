@@ -3,12 +3,15 @@
 import type { Parameter } from '@app/schema';
 import { useDispatch, useEditor, useProject } from '../../../shell/api';
 import { formatValue } from '../parameters/labels';
+import { LockIcon } from '../structure/ui';
 import {
   cellKind,
+  cellLockState,
   cellPatch,
   cellStatus,
   correctionKeyCount,
   isCurrentCell,
+  lockCellCommand,
   resetCellCommand,
   type CellKind,
   type CellStatus,
@@ -47,6 +50,7 @@ export function PairGrid({ pair, pa, pb, xs, ys, variant, label }: PairGridProps
     const status = cellStatus(model, pair, cell);
     const name = nameOf(cell);
     const text = `${name}（${cellStatusText(pa, pb, cell, status)}）`;
+    const locked = kind === 'combined' && cellLockState(model, pair, cell).locked;
     const classes = ['grid2d-cell', `grid2d-${kind}`];
     if (kind === 'combined' && status === 'corrected') classes.push('corrected');
     return (
@@ -56,7 +60,8 @@ export function PairGrid({ pair, pa, pb, xs, ys, variant, label }: PairGridProps
         className={classes.join(' ')}
         aria-pressed={current !== null && current.a === cell.a && current.b === cell.b}
         aria-label={text}
-        title={text}
+        title={locked ? `${text}・ロックあり` : text}
+        data-locked={locked}
         data-cell={`${cell.a},${cell.b}`}
         data-status={kind === 'combined' ? status : kind}
         onClick={() => setEditor(cellPatch(pa, pb, cell))}
@@ -125,6 +130,7 @@ function CurrentCell({ pair, pa, pb, cell, name }: CurrentCellProps) {
     );
   }
   const count = correctionKeyCount(model, pair, cell);
+  const locks = cellLockState(model, pair, cell);
   return (
     <div className="grid2d-current">
       <p className="grid2d-current-text">
@@ -137,6 +143,17 @@ function CurrentCell({ pair, pa, pb, cell, name }: CurrentCellProps) {
           </>
         )}
       </p>
+      <button
+        type="button"
+        className="grid2d-lock"
+        disabled={locks.count === 0}
+        aria-label={locks.locked ? '補正キーのロックを解除' : '補正キーをロック'}
+        aria-pressed={locks.locked}
+        title={`${locks.locked ? '補正キーのロックを解除' : '補正キーをロック'}（このマスの2パラメータのキーだけ）`}
+        onClick={() => dispatch(lockCellCommand(pair, cell, !locks.locked))}
+      >
+        <LockIcon locked={locks.locked} />
+      </button>
       <button
         type="button"
         disabled={count === 0}

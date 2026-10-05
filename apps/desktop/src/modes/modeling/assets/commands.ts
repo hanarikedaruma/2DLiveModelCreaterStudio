@@ -161,6 +161,7 @@ export function assign(
           meshId,
           pivot: assetCenter(asset),
           blendMode: asset.sourceBlendMode, // PSD の合成モードを引き継ぐ（カード32）
+          opacity: asset.sourceOpacity,
           ...fields,
         });
       };

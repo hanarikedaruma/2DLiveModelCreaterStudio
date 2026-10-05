@@ -1,4 +1,4 @@
-import type { TrackingFrame } from '@app/contracts';
+import type { TrackingFrame, TrackingSource } from '@app/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CameraVideo, MediaDevicesLike, MediaStreamLike, VideoFrameInfo } from './camera';
 import type { LandmarkerResultLike } from './convert';
@@ -10,6 +10,20 @@ import { createMediaPipeTrackingSource } from './source';
 class FakeStream implements MediaStreamLike {
   stopped = 0;
   constructor(readonly deviceId: string | undefined) {}
+  settings = { width: 640, height: 480, frameRate: 30 };
+  track = {
+    getSettings: () => ({ ...this.settings }),
+    getCapabilities: () => ({ frameRate: { min: 1, max: 30 } }),
+    applyConstraints: vi.fn(async (constraints: MediaTrackConstraints) => {
+      this.settings.width =
+        (constraints.width as ConstrainULongRange).exact ?? (constraints.width as ConstrainULongRange).ideal ?? 640;
+      this.settings.height =
+        (constraints.height as ConstrainULongRange).exact ?? (constraints.height as ConstrainULongRange).ideal ?? 480;
+    }),
+  };
+  getVideoTracks() {
+    return [this.track];
+  }
   getTracks(): { stop(): void }[] {
     return [{ stop: () => void this.stopped++ }];
   }
@@ -50,6 +64,10 @@ class FakeVideo implements CameraVideo {
   released = false;
   callbacks = new Map<number, (now: number, info: VideoFrameInfo) => void>();
   private nextHandle = 1;
+  private frames = 0;
+  frameCount() {
+    return this.frames;
+  }
 
   async play(stream: MediaStreamLike): Promise<void> {
     this.stream = stream;
@@ -67,6 +85,7 @@ class FakeVideo implements CameraVideo {
 
   // 予約されている callback をすべて呼ぶ（ブラウザーが新しいフレームを出したとき）
   present(now: number, presentedFrames: number): void {
+    this.frames = presentedFrames;
     const pending = [...this.callbacks.values()];
     this.callbacks.clear();
     for (const cb of pending) cb(now, { presentedFrames });
@@ -98,6 +117,7 @@ class FakeLandmarker implements FaceLandmarkerLike {
   close(): void {}
 }
 
+const sources: TrackingSource[] = [];
 function setup() {
   const devices = new FakeMediaDevices();
   const videos: FakeVideo[] = [];
@@ -111,7 +131,9 @@ function setup() {
       return v;
     },
     createLandmarker,
+    now: () => Date.now(),
   });
+  sources.push(source);
   const frames: TrackingFrame[] = [];
   source.onFrame((f) => frames.push(f));
   const video = (): FakeVideo => videos[videos.length - 1]!;
@@ -119,6 +141,8 @@ function setup() {
 }
 
 afterEach(() => {
+  for (const source of sources.splice(0)) source.stop();
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
@@ -131,12 +155,17 @@ describe('createMediaPipeTrackingSource', () => {
     ]);
   });
 
-  it('start は指定した機器を 1280×720・30fps 優先で開く。音は取らない', async () => {
+  it('start は指定した機器を 640×480・60fps 優先で開く。音は取らない', async () => {
     const { source, devices } = setup();
     await source.start('cam-b');
     expect(devices.requests[0]).toEqual({
       audio: false,
-      video: { deviceId: { exact: 'cam-b' }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30 } },
+      video: {
+        deviceId: { exact: 'cam-b' },
+        width: { ideal: 640, max: 640 },
+        height: { ideal: 480, max: 480 },
+        frameRate: { ideal: 60 },
+      },
     });
   });
 
@@ -144,9 +173,9 @@ describe('createMediaPipeTrackingSource', () => {
     const { source, devices } = setup();
     await source.start();
     expect(devices.requests[0]!.video).toEqual({
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      frameRate: { ideal: 30 },
+      width: { ideal: 640, max: 640 },
+      height: { ideal: 480, max: 480 },
+      frameRate: { ideal: 60 },
     });
   });
 
@@ -298,5 +327,74 @@ describe('createMediaPipeTrackingSource', () => {
     video().present(43, 2);
     expect(a).toEqual([10]);
     expect(b).toEqual([10, 43]);
+  });
+
+  it('受信映像の計測を独立して通知し、停止するとnullへ戻す', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+    const { source, video } = setup();
+    source.configureCapture({ mode: 'manual', width: 640, height: 480, fps: 30 });
+    const changed = vi.fn();
+    const off = source.onCaptureStats(changed);
+    await source.start();
+    video().present(1000, 30);
+    await vi.advanceTimersByTimeAsync(1000);
+    video().present(2000, 60);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(source.captureStats()).toMatchObject({ cameraFps: 30, trackingFps: 1, width: 640, height: 480 });
+    source.stop();
+    expect(source.captureStats()).toBeNull();
+    const count = changed.mock.calls.length;
+    off();
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(changed).toHaveBeenCalledTimes(count);
+  });
+
+  it('開始待ちの間に変えた設定も、開いたカメラへ適用する', async () => {
+    const { source, devices } = setup();
+    devices.pendingNext = true;
+    const start = source.start();
+    await vi.waitFor(() => expect(devices.pending).not.toBeNull());
+    source.configureCapture({ mode: 'manual', width: 1920, height: 1080, fps: 30 });
+    devices.pending!.resolve();
+    await start;
+    await vi.waitFor(() =>
+      expect(source.captureStats()).toMatchObject({ width: 1920, height: 1080, mode: 'manual', state: 'ready' }),
+    );
+  });
+
+  it('開始の計測通知から停止してもタイマーと映像を残さない', async () => {
+    vi.useFakeTimers();
+    const { source, devices, video } = setup();
+    source.onCaptureStats(() => {
+      if (source.captureStats()) source.stop();
+    });
+    await source.start();
+    expect(source.captureStats()).toBeNull();
+    expect(devices.streams[0]!.stopped).toBe(1);
+    expect(video().callbacks.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('自動の寸法制約だけが不適合なら緩める。手動・権限拒否は緩めない', async () => {
+    const { source, devices } = setup();
+    const original = devices.getUserMedia.bind(devices);
+    const get = vi
+      .spyOn(devices, 'getUserMedia')
+      .mockRejectedValueOnce(Object.assign(new Error('寸法'), { name: 'OverconstrainedError' }))
+      .mockImplementation(original);
+    await source.start('cam-b');
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(get.mock.calls[1]![0].video).toMatchObject({ deviceId: { exact: 'cam-b' }, width: { ideal: 640 } });
+    expect(get.mock.calls[1]![0].video).not.toHaveProperty('width.max');
+    get.mockClear();
+    get.mockRejectedValueOnce(Object.assign(new Error('拒否'), { name: 'NotAllowedError' }));
+    await expect(source.start()).rejects.toThrow('拒否');
+    expect(get).toHaveBeenCalledTimes(1);
+    source.configureCapture({ mode: 'manual', width: 1920, height: 1080, fps: 30 });
+    get.mockClear();
+    get.mockRejectedValueOnce(Object.assign(new Error('寸法'), { name: 'OverconstrainedError' }));
+    await expect(source.start()).rejects.toThrow('寸法');
+    expect(get).toHaveBeenCalledTimes(1);
   });
 });

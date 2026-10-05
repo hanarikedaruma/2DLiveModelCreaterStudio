@@ -1,6 +1,6 @@
 // スタジオの設定（studioSettings）の「体の動き」（カード36）。控えめ / 標準 / 大きめ を選ぶ
-import { useEffect, useSyncExternalStore } from 'react';
-import { useProject, useServices } from '../../../shell/api';
+import { useEffect } from 'react';
+import { useEnvironment, useProject, useServices } from '../../../shell/api';
 import { BODY_FOLLOW_CHOICES, bodyFollowBinding } from './bodyFollow';
 
 // 体の追従が出すパラメータ（顔の左右の向き・傾きに合わせる）
@@ -9,12 +9,14 @@ export const BODY_FOLLOW_PARAMETERS = ['BodyAngleX', 'BodyAngleZ'];
 export function BodyFollowSection() {
   const services = useServices();
   const project = useProject();
+  const [env, setEnv] = useEnvironment();
   // services.bodyFollow を実行部の producer につなぐ。出力ウィンドウはスタジオの画面を離れても動き続けるので、
   // 外したとき（画面を離れたとき）もつないだままにする。services が替わったらつなぎ直す
   useEffect(() => {
     bodyFollowBinding.bind(services.bodyFollow);
-  }, [services]);
-  const strength = useSyncExternalStore(bodyFollowBinding.subscribe, bodyFollowBinding.strength);
+    bodyFollowBinding.setStrength(env.bodyFollowStrength);
+  }, [services, env.bodyFollowStrength]);
+  const strength = env.bodyFollowStrength;
   const hasBody = project.model.parameters.some((p) => BODY_FOLLOW_PARAMETERS.includes(p.id));
 
   return (
@@ -26,7 +28,7 @@ export function BodyFollowSection() {
             key={c.id}
             type="button"
             aria-pressed={strength === c.id}
-            onClick={() => bodyFollowBinding.setStrength(c.id)}
+            onClick={() => setEnv({ bodyFollowStrength: c.id })}
           >
             {c.label}
           </button>

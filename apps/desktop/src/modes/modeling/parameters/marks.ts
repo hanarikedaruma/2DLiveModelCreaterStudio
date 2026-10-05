@@ -24,6 +24,7 @@ export function markKind(key: ParameterKey): MarkKind {
 export function keyMarksFor(model: Model, parameterId: string): KeyMark[] {
   let marks: KeyMark[] = [];
   for (const binding of model.bindings) {
+    if (binding.parameterIds.length !== 1) continue;
     const axis = binding.parameterIds.indexOf(parameterId);
     if (axis < 0) continue;
     for (const key of binding.keys) {

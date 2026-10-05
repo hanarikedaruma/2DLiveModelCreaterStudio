@@ -1,7 +1,15 @@
 // カメラまわりの差し込み口。本物は navigator.mediaDevices と <video>。テストでは仮のものに替える
+import type { Environment } from '@app/schema';
+
+export interface CameraTrack {
+  getSettings(): MediaTrackSettings;
+  getCapabilities(): MediaTrackCapabilities;
+  applyConstraints(constraints: MediaTrackConstraints): Promise<void>;
+}
 
 export interface MediaStreamLike {
   getTracks(): { stop(): void }[];
+  getVideoTracks(): CameraTrack[];
 }
 
 // navigator.mediaDevices のうち使うところ
@@ -18,6 +26,7 @@ export interface VideoFrameInfo {
 // カメラの映像を流す先。推定には image を渡す
 export interface CameraVideo {
   readonly image: HTMLVideoElement;
+  frameCount(): number;
   play(stream: MediaStreamLike): Promise<void>;
   // 次のフレームが出たら1回だけ呼ぶ。戻り値で取り消す
   onNextFrame(callback: (now: number, info: VideoFrameInfo) => void): () => void;
@@ -25,20 +34,37 @@ export interface CameraVideo {
   release(): void;
 }
 
-// 1280×720・30fps を優先する。deviceId を渡したときはその機器だけ
-export function cameraConstraints(deviceId?: string): MediaStreamConstraints {
+export const AUTO_CAPTURE = { mode: 'auto', width: 640, height: 480, fps: 60 } as const;
+
+export function captureConstraints(settings: Environment['cameraCapture'], relaxed = false): MediaTrackConstraints {
+  return {
+    width:
+      settings.mode === 'manual'
+        ? { exact: settings.width }
+        : { ideal: settings.width, ...(relaxed ? {} : { max: settings.width }) },
+    height:
+      settings.mode === 'manual'
+        ? { exact: settings.height }
+        : { ideal: settings.height, ...(relaxed ? {} : { max: settings.height }) },
+    frameRate: { ideal: settings.mode === 'auto' ? AUTO_CAPTURE.fps : settings.fps },
+  };
+}
+
+export function cameraConstraints(
+  deviceId?: string,
+  settings: Environment['cameraCapture'] = AUTO_CAPTURE,
+  relaxed = false,
+): MediaStreamConstraints {
   return {
     audio: false,
     video: {
       ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-      frameRate: { ideal: 30 },
+      ...captureConstraints(settings.mode === 'auto' ? AUTO_CAPTURE : settings, relaxed),
     },
   };
 }
 
-export function stopStream(stream: MediaStreamLike): void {
+export function stopStream(stream: Pick<MediaStreamLike, 'getTracks'>): void {
   for (const track of stream.getTracks()) track.stop();
 }
 
@@ -53,6 +79,7 @@ export function createDomCameraVideo(doc: Document = document): CameraVideo {
   video.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;';
   return {
     image: video,
+    frameCount: () => video.getVideoPlaybackQuality().totalVideoFrames,
     async play(stream) {
       if (typeof video.requestVideoFrameCallback !== 'function') {
         throw new Error('この環境では requestVideoFrameCallback が使えない');

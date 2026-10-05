@@ -33,6 +33,7 @@ function binding(services: Services): HotkeyBinding {
     emit: () => {},
     trackingSessionActive: () => false,
     cameraDeviceId: () => null,
+    expressionMode: () => 'stack',
     notify: () => {},
   };
 }
@@ -156,6 +157,23 @@ describe('ホットキーの登録の実行部', () => {
     expect(services.expressions.active()).toBe('smile');
     detach();
     expect(services.expressions.active()).toBeNull();
+  });
+
+  it('同時holdとカード変更を保ったまま、keyup取りこぼし分をresyncで解除する', async () => {
+    setHotkeys(services, [hk('a', 'F5', { mode: 'hold' }), hk('b', 'F6', { mode: 'hold' })]);
+    services.expressions.toggle('base', 0);
+    const detach = runtime.attach(binding(services));
+    await runtime.whenIdle();
+    hotkeys.press('F5', 'down');
+    hotkeys.press('F6', 'down');
+    services.expressions.toggle('card', 0);
+    runtime.resync();
+    await runtime.whenIdle();
+    expect(services.expressions.actives()).toEqual(['base', 'card']);
+    hotkeys.press('F5', 'up');
+    expect(services.expressions.actives()).toEqual(['base', 'card']);
+    detach();
+    await runtime.whenIdle();
   });
 
   it('つなぐ・外す・つなぐが続いても（StrictMode）、登録と解除は順に行い、最後の状態になる', async () => {

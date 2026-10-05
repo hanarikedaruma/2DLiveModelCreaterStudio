@@ -21,6 +21,47 @@
 
 ## 記録
 
+### CC-004 カメラの設定と実動作の計測を公開する
+
+- 決めた日 / ステップ: 2026-10-05 / あるべき姿をユーザーが承認。実装・自動確認は2026-10-06。
+- 対象の契約: `@app/schema` の `Environment`、`@app/contracts` の `TrackingSource`（カード05・15・25・26）。
+- 変更後: Environmentへ `cameraCapture: { mode: 'auto' | 'manual'; width: number; height: number; fps: number }` を追加。既定はauto/640/480/60。幅16..7680、高さ16..4320、fps1..120の整数。未設定・不正な値は項目単位で補完し、手動の値はautoへ切り替えても保持する。
+- TrackingSourceへ必須の `configureCapture(settings: Environment['cameraCapture']): void`、`captureStats(): CameraCaptureStats | null`、`onCaptureStats(listener: () => void): () => void` を追加。CameraCaptureStatsはmode、state（selecting/ready/error）、width/height、requestedFps、nominalFps/maxFps/cameraFps/trackingFps（numberまたはnull）、warning（stringまたはnull）を持つ。停止中はnull、測定前のfpsはnull、停止した映像は0fps。
+- 計測: cameraFpsはvideo.getVideoPlaybackQuality().totalVideoFramesの差分を実時間で割った動画フレーム数。推定コールバック数とは独立させ、推定で省いたフレームも数える。trackingFpsは実際の推定呼び出し数。nominalFpsはtrack.getSettings、maxFpsはgetCapabilitiesの機器全体の報告で、照明・解像度別の達成保証ではない。
+- 自動選択: 640×480・要求60fpsを初期値とし、320×240、1280×720を各1秒安定待ち+1秒計測。初期設定で受信/推定とも54fps以上なら終了。その他は両fpsの小さい方が高い候補を優先し、差10%以内なら受信fps、同程度なら初期設定を保持する。不適合候補は飛ばす。手動の解像度はexact、fpsはidealで、達成しない場合は実測と注意を表示する。
+- 理由: I-001/I-002。カメラと推定の遅さを区別し、PCと機器の負荷に応じた設定・画質優先の手動指定を可能にする。適用は直列化し、最後の指定と停止を優先する。
+- 移行: schema、trackingのcamera/sourceとCaptureSession、FakeTrackingSource、desktopのEnvironment/UI/計測、テストの差し替え実装を変更。旧TrackingSource向けの互換分岐は追加しない。Project形式は変更しない。実カメラ+OBSでの性能受け入れは未確認。
+
+### CC-005 表情の一時適用を所有者ごとに管理する
+
+- 決めた日 / ステップ: 同上。実装・自動確認は2026-10-06。
+- 対象の契約: `@app/contracts` の `ExpressionController`（カード38・40・45・52）。
+- 変更後: 必須の `hold(ownerId: string, expressionId: string | null, mode: 'stack' | 'single', now: number): void`、`release(ownerId: string, now: number): void` を追加。通常のapply/toggleと一時所有を分離し、共通の純粋な選択処理 `createExpressionSelection` をcontractsから公開する。
+- 規則: stackのholdは元の表情・順序を変更せず、所有者が全て解除された追加分だけを外す。singleのholdは押した時点のモードで一時的に置き換え、残る所有者と現在の通常選択から復元する。nullのholdは所有者が残る間だけ全解除する。途中のtoggleは保持し、hold中の表情をカードで外したらそのholdを再表示しない。明示的なapplyは全holdを無効化し、古いキー解放がその選択を戻さない。
+- ホットキー: 所有者IDは `hotkey:${hotkey.id}`。Environment.expressionModeをキー押下時に読み、カードと同じstack/singleのtoggleを行う。割り当て削除・再登録・コンテキスト解除は自身のholdを解放する。ブラウザのblurによる解放は既存のbackendを使用する。
+- 理由: I-043。同時hold・全解除・シーン変更・途中のカード操作で、最後の1件や古いスナップショットへ戻る不具合を解消する。フェード後の出力レイヤーも選択一覧の順序を保つ。
+- 移行: 本物のcoreとFakeExpressions、desktopのhotkeys/actions・binding、各テストのコンテキストを変更。任意メソッドへの互換分岐は追加しない。表情・Projectの保存形式は変更しない。
+
+### CC-002 顔の復帰とまばたきの重みを分離する
+
+- 決めた日 / ステップ: 2026-10-05 / 判断待ち課題のあるべき姿をユーザーが承認。実装確認は2026-10-06。
+- 対象の契約: `@app/contracts` の `Layer`（カード09・26・45）。
+- 変更前: `interface Layer { id: LayerId; weight: number; values: ParamValues; blend?: Record<string, BlendOp> }`
+- 変更後: 上に `parameterWeights?: Record<string, number>` を追加。指定パラメータには共通のweightの代わりに0..1の重みを適用する。NaNは0、範囲外は丸める。未指定のパラメータはweightを使う。
+- 理由: I-030。顔の正面復帰がweightを0にしても、目のフォールバックは重み1で継続する。後段の表情・アニメーションによる上書きは維持する。
+- 影響するカード: 合成09、追跡15・26・35、実行部24・45。
+- 移行: contracts型とFakeMixer、coreのMixer、trackingのproducer、desktopのStudioRuntimeを変更。Project保存型は変更しない。
+
+### CC-003 PC設定をEnvironmentへ集約する
+
+- 決めた日 / ステップ: 2026-10-05 / 同上。実装確認は2026-10-06。
+- 対象の契約: `@app/schema` の `Environment`（カード05・26）。
+- 変更前: `cameraDeviceId; mirror; calibration; microphoneDeviceId; silenceThreshold; trackingPreset; output; uiLevel; lastProjectDir`。
+- 変更後: `eyeTracking: boolean`、`trackingCustom: { minCutoff: number; beta: number; gain: number; deadZone: number }`、`bodyFollowStrength: 'low' | 'standard' | 'high'`、`expressionMode: 'stack' | 'single'` を追加。既定はtrue、標準調整値、standard、stack。minCutoffは正、他の調整値は0以上の有限数。
+- 理由: I-033。PC設定の保存・復元・初期化を一元管理し、旧個別localStorageは保存元にしない。
+- 影響するカード: 枠05、保存16、契約26、動き35・36、表情38・52、ホットキー40。
+- 移行: schemaの型・既定値・検証、desktopのEnvironmentStore・Appの設定反映・各設定UIを変更。旧個別localStorageの互換移行は行わない。未設定項目は既定値、不正な項目は項目単位で補完する。Project形式は変更しない。カメラ設定はI-001で別途追加する。
+
 ### CC-001 キャンバスのツールに、かんたん/詳細の出し分け（level）を足す
 
 - 決めた日 / ステップ: 2026-10-05 / STEP2 の後の課題の修正（docs/issues.md の I-008）

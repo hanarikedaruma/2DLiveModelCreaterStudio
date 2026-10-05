@@ -1,6 +1,6 @@
 // 体の追従（カード36）のスタジオ側。実行部に入れる producer は、つないだ services.bodyFollow に任せる
 // （カード44までは仮実装で何も出さない。本物は @app/core の createBodyFollowProducer）。
-// 強さ（控えめ / 標準 / 大きめ）は Environment に項目が無いので、この PC の localStorage に覚える
+// 設定の保存は Environment が担当し、このバインディングは実行中の値を持つ。
 import type { BodyFollowProducer, LayerProducer } from '@app/contracts';
 
 export type BodyFollowStrength = Parameters<BodyFollowProducer['setStrength']>[0];
@@ -15,26 +15,6 @@ export const DEFAULT_BODY_FOLLOW_STRENGTH: BodyFollowStrength = 'standard';
 export interface StrengthStorage {
   read(): string | null;
   write(value: string): void;
-}
-
-// 保存できない環境では覚えない（動作は続ける）
-export function localStrengthStorage(key = 'live2d-studio.bodyFollowStrength'): StrengthStorage {
-  return {
-    read() {
-      try {
-        return localStorage.getItem(key);
-      } catch {
-        return null;
-      }
-    },
-    write(value) {
-      try {
-        localStorage.setItem(key, value);
-      } catch {
-        // 覚えられなくても動作は続ける
-      }
-    },
-  };
 }
 
 export function memoryStrengthStorage(initial: string | null = null): StrengthStorage & { value: string | null } {
@@ -61,7 +41,7 @@ export interface BodyFollowBinding {
   subscribe(listener: () => void): () => void;
 }
 
-export function createBodyFollowBinding(storage: StrengthStorage = localStrengthStorage()): BodyFollowBinding {
+export function createBodyFollowBinding(storage: StrengthStorage = memoryStrengthStorage()): BodyFollowBinding {
   let target: BodyFollowProducer | null = null;
   let current: BodyFollowStrength | null = null; // 最初に使うときに保存先から読む
   const listeners = new Set<() => void>();

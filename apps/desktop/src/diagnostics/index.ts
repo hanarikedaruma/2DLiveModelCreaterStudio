@@ -105,6 +105,7 @@ export function registerDiagnostics(services: Services): Diagnostics {
       screen: { width: screen.width, height: screen.height },
       window: { width: window.innerWidth, height: window.innerHeight },
       output: studioRuntime.getOutputSize(),
+      cameraCapture: services.tracking.captureStats(),
       model: {
         name: project.name,
         parts: project.model.parts.length,
@@ -117,8 +118,16 @@ export function registerDiagnostics(services: Services): Diagnostics {
 
   const update = () => {
     if (!lines || !recordButton || !exportButton) return;
+    const text = formatSnapshot(collector.snapshot(performance.now()));
+    const camera = services.tracking.captureStats();
+    if (camera)
+      text.splice(
+        1,
+        0,
+        `カメラ映像 ${camera.width}×${camera.height} / ${camera.cameraFps === null ? '--' : fmt(camera.cameraFps)} fps`,
+      );
     lines.replaceChildren(
-      ...formatSnapshot(collector.snapshot(performance.now())).map((text) => {
+      ...text.map((text) => {
         const div = document.createElement('div');
         div.textContent = text;
         return div;

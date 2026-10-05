@@ -1,5 +1,6 @@
 import type { BlendOp } from '@app/schema';
 import type { AutoBlink, BodyFollowProducer, ExpressionController, FrameContext, Layer, ParamValues } from '../index';
+import { createExpressionSelection } from '../expressionSelection';
 
 const BLINK_INTERVAL = 4000; // 4秒ごとに
 const BLINK_DURATION = 150; // 目を閉じている時間（ミリ秒）
@@ -31,30 +32,35 @@ export class FakeBodyFollow implements BodyFollowProducer {
 // 適用した順に重ね、同じパラメータはあとの表情の値にする
 export class FakeExpressions implements ExpressionController {
   readonly id = 'expression' as const;
-  private activeIds: string[] = [];
+  private selection = createExpressionSelection();
 
   apply(expressionId: string | null, _now: number): void {
-    this.activeIds = expressionId === null ? [] : [expressionId];
+    this.selection.apply(expressionId);
   }
 
   active(): string | null {
-    return this.activeIds.at(-1) ?? null;
+    return this.selection.ids().at(-1) ?? null;
   }
 
   toggle(expressionId: string, _now: number): void {
-    this.activeIds = this.activeIds.includes(expressionId)
-      ? this.activeIds.filter((id) => id !== expressionId)
-      : [...this.activeIds, expressionId];
+    this.selection.toggle(expressionId);
   }
 
   actives(): string[] {
-    return [...this.activeIds];
+    return this.selection.ids();
+  }
+
+  hold(owner: string, id: string | null, mode: 'stack' | 'single', _now: number): void {
+    this.selection.hold(owner, id, mode);
+  }
+  release(owner: string, _now: number): void {
+    this.selection.release(owner);
   }
 
   produce(ctx: FrameContext): Layer | null {
     const values: ParamValues = {};
     const blend: Record<string, BlendOp> = {};
-    for (const id of this.activeIds) {
+    for (const id of this.selection.ids()) {
       const expression = ctx.project.expressions.find((e) => e.id === id);
       for (const entry of expression?.entries ?? []) {
         values[entry.parameterId] = entry.value;

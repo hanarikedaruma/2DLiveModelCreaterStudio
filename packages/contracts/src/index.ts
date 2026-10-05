@@ -63,6 +63,7 @@ export const LAYER_ORDER: LayerId[] = [
 export interface Layer {
   id: LayerId;
   weight: number; // 0..1
+  parameterWeights?: Record<string, number>; // 指定したパラメータは weight の代わりにこの重みを使う（0..1）
   values: ParamValues; // このレイヤーが担当するパラメータの値だけ
   blend?: Record<string, BlendOp>; // パラメータごとの合成方法。無ければ override
 }
@@ -250,8 +251,23 @@ export interface TrackingFrame {
   mouthWidth?: number; // -1..1（すぼめ〜横に開く）
   browY?: number; // -1..1（下げる〜上げる）
 }
+export interface CameraCaptureStats {
+  mode: Environment['cameraCapture']['mode'];
+  state: 'selecting' | 'ready' | 'error';
+  width: number;
+  height: number;
+  requestedFps: number;
+  nominalFps: number | null;
+  maxFps: number | null;
+  cameraFps: number | null;
+  trackingFps: number | null;
+  warning: string | null;
+}
 export interface TrackingSource {
   listDevices(): Promise<{ id: string; label: string }[]>;
+  configureCapture(settings: Environment['cameraCapture']): void;
+  captureStats(): CameraCaptureStats | null;
+  onCaptureStats(listener: () => void): () => void;
   start(deviceId?: string): Promise<void>;
   stop(): void;
   onFrame(listener: (frame: TrackingFrame) => void): () => void;
@@ -310,6 +326,8 @@ export interface ExpressionController extends LayerProducer {
   // ここから STEP2（カード45）。複数の同時適用
   toggle(expressionId: string, now: number): void;
   actives(): string[]; // 適用した順
+  hold(ownerId: string, expressionId: string | null, mode: 'stack' | 'single', now: number): void;
+  release(ownerId: string, now: number): void;
 }
 
 // ---- キャリブレーション・ホットキー・出力の契約（STEP1） ----
@@ -394,3 +412,4 @@ export interface Services {
 // ---- 仮実装 ----
 
 export * from './fakes';
+export { createExpressionSelection } from './expressionSelection';

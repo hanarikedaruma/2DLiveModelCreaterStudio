@@ -213,6 +213,57 @@ describe('スタジオの画面', () => {
     expect(JSON.parse(storage.text!)).toMatchObject({ mirror: false, cameraDeviceId: 'cam-b' });
   });
 
+  it('カメラの手動指定を保存・復元し、動作中も新しい設定を反映する（I-001）', async () => {
+    const tracking = new FakeTrackingSource(() => Date.now());
+    const configure = vi.spyOn(tracking, 'configureCapture');
+    const { environment, storage } = await setup({ tracking });
+    fireEvent.click(screen.getByRole('button', { name: '手動' }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'カメラの解像度' }), { target: { value: '1920x1080' } });
+    const fps = screen.getByRole('spinbutton', { name: 'カメラの要求fps' });
+    fireEvent.change(fps, { target: { value: '30' } });
+    fireEvent.blur(fps);
+    const settings = { mode: 'manual', width: 1920, height: 1080, fps: 30 };
+    expect(environment.get().cameraCapture).toEqual(settings);
+    expect(configure).toHaveBeenLastCalledWith(settings);
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: '開始' }));
+    });
+    expect(screen.getByLabelText('カメラの実測').textContent).toContain('1920×1080');
+    fireEvent.change(fps, { target: { value: '60' } });
+    fireEvent.blur(fps);
+    expect(configure).toHaveBeenLastCalledWith({ ...settings, fps: 60 });
+    await environment.flush();
+    const restored = createEnvironmentStore(storage);
+    await restored.load();
+    expect(restored.get().cameraCapture).toEqual({ ...settings, fps: 60 });
+    fireEvent.click(screen.getByRole('button', { name: '自動' }));
+    expect(screen.queryByRole('spinbutton', { name: 'カメラの要求fps' })).toBeNull();
+    expect(environment.get().cameraCapture).toEqual({ ...settings, fps: 60, mode: 'auto' });
+  });
+
+  it('受信fpsと推定fps・機器上限を区別して表示する（I-002）', async () => {
+    const tracking = new FakeTrackingSource(() => Date.now());
+    vi.spyOn(tracking, 'captureStats').mockReturnValue({
+      mode: 'auto',
+      state: 'ready',
+      width: 640,
+      height: 480,
+      requestedFps: 60,
+      nominalFps: 30,
+      maxFps: 60,
+      cameraFps: 29.5,
+      trackingFps: 14.2,
+      warning: '要求fps未達',
+    });
+    await setup({ tracking });
+    const stats = screen.getByLabelText('カメラの実測');
+    expect(stats.textContent).toContain('受信fps29.5');
+    expect(stats.textContent).toContain('推定fps14.2');
+    expect(stats.textContent).toContain('動作設定30 fps');
+    expect(stats.textContent).toContain('機器上限60 fps');
+    expect(screen.getByText('要求fps未達')).toBeTruthy();
+  });
+
   it('背景の切り替えがシーンに保存され、プレビューにも出る', async () => {
     const { services, renderer } = await setup();
     fireEvent.click(screen.getByRole('button', { name: '緑' }));

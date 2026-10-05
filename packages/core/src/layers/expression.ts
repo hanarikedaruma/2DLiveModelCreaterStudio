@@ -4,6 +4,7 @@
 // 作った状態と項目の値の変換を置く
 import type { BlendOp, Expression, Parameter, ParameterGroupId } from '@app/schema';
 import type { ExpressionController, FrameContext, Layer, ParamValues } from '@app/contracts';
+import { createExpressionSelection } from '@app/contracts';
 
 export const EXPRESSION_FADE_DEFAULT = 0.2; // fadeIn・fadeOut の初期値（秒）
 
@@ -178,6 +179,7 @@ function expressionLayer(expression: Expression, weight: number, parameterIds: R
 // produce は表情ごとに1つのレイヤーを適用した順に返すので、override で取り合うパラメータは後から適用した表情が勝つ。
 // 時刻が戻ったとき（apply の時刻より前の produce）は、その時刻から数え直す
 export function createExpressionController(): ExpressionController {
+  const selection = createExpressionSelection();
   let applied: string[] = []; // 適用中の表情（適用した順）
   // レイヤーの順（適用した順）に並べた重みの動き。外れた表情は消え終わるまで元の位置に残る。同じ表情は1つだけ
   let tracks: Track[] = [];
@@ -214,10 +216,16 @@ export function createExpressionController(): ExpressionController {
       if (next.some((track) => track.id === id)) continue;
       next.push({ id, from: returning.get(id) ?? 0, to: 1, start: t });
     }
-    tracks = next;
+    const activeOrder = new Map(ids.map((id, index) => [id, index]));
+    const activeTracks = next
+      .filter((track) => track.to === 1)
+      .sort((a, b) => activeOrder.get(a.id)! - activeOrder.get(b.id)!);
+    let activeIndex = 0;
+    tracks = next.map((track) => (track.to === 0 ? track : activeTracks[activeIndex++]!));
   }
 
   function request(ids: string[], now: number) {
+    if (sameIds(ids, applied)) return;
     applied = ids;
     pending.push({ ids, now });
   }
@@ -226,16 +234,22 @@ export function createExpressionController(): ExpressionController {
     id: 'expression',
     // ほかを全部外して expressionId だけにする（null で全部外す）。STEP1 の1つずつの切り替えと同じ
     apply(expressionId, now) {
-      const ids = expressionId === null ? [] : [expressionId];
-      if (!sameIds(ids, applied)) request(ids, now);
+      selection.apply(expressionId);
+      request(selection.ids(), now);
     },
     active: () => applied.at(-1) ?? null, // 最後に適用した表情
     // 適用していなければ後ろに足し（fadeIn）、適用していれば外す（fadeOut）
     toggle(expressionId, now) {
-      request(
-        applied.includes(expressionId) ? applied.filter((id) => id !== expressionId) : [...applied, expressionId],
-        now,
-      );
+      selection.toggle(expressionId);
+      request(selection.ids(), now);
+    },
+    hold(owner, id, mode, now) {
+      selection.hold(owner, id, mode);
+      request(selection.ids(), now);
+    },
+    release(owner, now) {
+      selection.release(owner);
+      request(selection.ids(), now);
     },
     actives: () => [...applied],
     produce(ctx): Layer[] | null {

@@ -1,5 +1,12 @@
 import type { Environment } from '@app/schema';
-import type { Layer, ParamValues, TrackingFrame, TrackingLayerProducer, TrackingSource } from '../index';
+import type {
+  CameraCaptureStats,
+  Layer,
+  ParamValues,
+  TrackingFrame,
+  TrackingLayerProducer,
+  TrackingSource,
+} from '../index';
 
 const FRAME_INTERVAL = 1000 / 30;
 const SWING_PERIOD = 4000; // 左右に振る周期（ミリ秒）
@@ -29,11 +36,47 @@ export class FakeTrackingSource implements TrackingSource {
   private timer: ReturnType<typeof setInterval> | null = null;
   private startedAt = 0;
   private readonly listeners = new Set<(frame: TrackingFrame) => void>();
+  private readonly captureListeners = new Set<() => void>();
+  private settings: Environment['cameraCapture'] = { mode: 'auto', width: 640, height: 480, fps: 60 };
+  private stats: CameraCaptureStats | null = null;
 
   constructor(private readonly clock: () => number = () => performance.now()) {}
 
   async listDevices(): Promise<{ id: string; label: string }[]> {
     return [{ id: 'fake-camera', label: '仮のカメラ' }];
+  }
+
+  configureCapture(settings: Environment['cameraCapture']): void {
+    this.settings = { ...settings };
+    if (this.timer !== null) this.updateStats();
+  }
+
+  captureStats(): CameraCaptureStats | null {
+    return this.stats;
+  }
+  onCaptureStats(listener: () => void): () => void {
+    this.captureListeners.add(listener);
+    return () => {
+      this.captureListeners.delete(listener);
+    };
+  }
+  private updateStats(): void {
+    this.stats =
+      this.timer === null
+        ? null
+        : {
+            mode: this.settings.mode,
+            width: this.settings.mode === 'auto' ? 640 : this.settings.width,
+            height: this.settings.mode === 'auto' ? 480 : this.settings.height,
+            state: 'ready',
+            requestedFps: this.settings.mode === 'auto' ? 60 : this.settings.fps,
+            nominalFps: 30,
+            maxFps: 30,
+            cameraFps: 30,
+            trackingFps: 30,
+            warning: '仮のカメラ（実機の計測ではない）',
+          };
+    for (const l of [...this.captureListeners]) l();
   }
 
   async start(_deviceId?: string): Promise<void> {
@@ -44,11 +87,13 @@ export class FakeTrackingSource implements TrackingSource {
       const frame = fakeTrackingFrame(now - this.startedAt, now);
       for (const l of [...this.listeners]) l(frame);
     }, FRAME_INTERVAL);
+    this.updateStats();
   }
 
   stop(): void {
     if (this.timer !== null) clearInterval(this.timer);
     this.timer = null;
+    this.updateStats();
   }
 
   onFrame(listener: (frame: TrackingFrame) => void): () => void {

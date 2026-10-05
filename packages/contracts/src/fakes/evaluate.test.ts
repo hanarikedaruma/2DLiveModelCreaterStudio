@@ -80,6 +80,14 @@ describe('FakePipeline', () => {
 });
 
 describe('FakeMixer', () => {
+  it('パラメータ別の重みで目だけを継続できる', () => {
+    const { parameters } = createEmptyProject('t').model;
+    const out = new FakeMixer().mix(parameters, [
+      { id: 'tracking', weight: 0, parameterWeights: { EyeOpenL: 1 }, values: { FaceAngleX: 20, EyeOpenL: 0.25 } },
+    ]);
+    expect(out.FaceAngleX).toBe(0);
+    expect(out.EyeOpenL).toBe(0.25);
+  });
   it('デフォルト値に、各レイヤーの値を重みで上書きする', () => {
     const { parameters } = createEmptyProject('t').model;
     const out = new FakeMixer().mix(parameters, [

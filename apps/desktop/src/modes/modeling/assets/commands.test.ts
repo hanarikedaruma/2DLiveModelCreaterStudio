@@ -64,6 +64,37 @@ describe('layerNameOf', () => {
 });
 
 describe('assign', () => {
+  it.each([0, 0.25, 0.5, 1])('素材の不透明度 %s を単一・自由・グループの画像に一度だけ引き継ぐ', (opacity) => {
+    const p = project();
+    p.assets[0] = { ...p.assets[0]!, sourceOpacity: opacity };
+    const single = assign({ kind: 'standard', type: 'face' }, [item('A1')]).apply(p);
+    expect(single.model.parts.at(-1)!.opacity).toBe(opacity);
+    const free = assign({ kind: 'free', partId: null, name: '自由' }, [item('A1')]).apply(p);
+    expect(free.model.parts.at(-1)!.opacity).toBe(opacity);
+    const grouped = assign({ kind: 'standard', type: 'face' }, [item('A1'), item('A2')]).apply(p);
+    const group = grouped.model.parts.find((part) => part.standardType === 'face')!;
+    expect(group.opacity).toBe(1);
+    expect(slotMembers(grouped.model, group).map((part) => part.opacity)).toEqual([opacity, 1]);
+    const edited = {
+      ...single,
+      model: {
+        ...single.model,
+        parts: single.model.parts.map((part) => (part.assetId === 'A1' ? { ...part, opacity: 0.7 } : part)),
+      },
+    };
+    const expanded = assign({ kind: 'standard', type: 'face' }, [item('A2')]).apply(edited);
+    const expandedGroup = expanded.model.parts.find((part) => part.standardType === 'face')!;
+    expect(expandedGroup.opacity).toBe(1);
+    expect(slotMembers(expanded.model, expandedGroup).map((part) => part.opacity)).toEqual([0.7, 1]);
+    expect(() => validateProject(JSON.parse(JSON.stringify(grouped)))).not.toThrow();
+    const store = createProjectStore(p);
+    store.dispatch(assign({ kind: 'standard', type: 'face' }, [item('A1')]));
+    expect(store.get().model.parts.at(-1)!.opacity).toBe(opacity);
+    store.undo();
+    expect(store.get()).toBe(p);
+    store.redo();
+    expect(store.get().model.parts.at(-1)!.opacity).toBe(opacity);
+  });
   it('画像パーツとメッシュを作り、drawOrder の最前面に足す', () => {
     const p = project();
     const next = assign({ kind: 'standard', type: 'eyeWhiteL' }, [item('A1', quad(10, 20))], {

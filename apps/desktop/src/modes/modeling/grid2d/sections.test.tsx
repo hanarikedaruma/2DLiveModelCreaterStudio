@@ -54,6 +54,29 @@ function moveFace(s: Services, dx: number, dy: number) {
 const detail = (s: Services) => act(() => s.editor.set({ uiLevel: { ...s.editor.get().uiLevel, modeling: 'detail' } }));
 
 describe('方向グリッド（かんたん）', () => {
+  it('補正キーのロックは選んだマスだけに作用し、1軸キーと他のマスを保つ（I-019）', () => {
+    const s = setup();
+    fireEvent.click(cell('右上'));
+    expect(screen.getByRole('button', { name: '補正キーをロック' }).hasAttribute('disabled')).toBe(true);
+    moveFace(s, 4, -2);
+    fireEvent.click(cell('左上'));
+    moveFace(s, -3, 1);
+    fireEvent.click(cell('右上'));
+    const original = s.store.get();
+    fireEvent.click(screen.getByRole('button', { name: '補正キーのロックを解除' }));
+    const b = pairBindings(s.store.get().model, DIRECTION_PAIR)[0]!;
+    expect(b.keys.find((k) => k.coords.join() === '30,30')!.locked).toBe(false);
+    expect(b.keys.find((k) => k.coords.join() === '-30,30')!.locked).toBe(true);
+    expect(s.store.get().model.bindings.filter((binding) => binding.parameterIds.length === 1)).toEqual(
+      original.model.bindings.filter((binding) => binding.parameterIds.length === 1),
+    );
+    expect(cell('右上').getAttribute('data-locked')).toBe('false');
+    fireEvent.click(screen.getByRole('button', { name: '補正キーをロック' }));
+    expect(cell('右上').getAttribute('data-locked')).toBe('true');
+    act(() => s.store.undo());
+    act(() => s.store.undo());
+    expect(s.store.get()).toBe(original);
+  });
   it('同じパーツの2つ目の斜めも確認なしで編集でき、それぞれ1回で Undo/Redo（I-017）', () => {
     const s = setup();
     fireEvent.click(cell('右上'));

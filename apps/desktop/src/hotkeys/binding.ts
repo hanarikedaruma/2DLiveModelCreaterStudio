@@ -10,9 +10,9 @@ export function useHotkeyBinding(runtime: HotkeyRuntime = hotkeyRuntime): void {
   const dialogs = useDialogs();
   const { status } = useStudioRuntime();
   // ホットキーは画面の外から呼ばれるので、いまの値は ref から読む
-  const latest = useRef({ cameraDeviceId: env.cameraDeviceId, status });
+  const latest = useRef({ cameraDeviceId: env.cameraDeviceId, expressionMode: env.expressionMode, status });
   useEffect(() => {
-    latest.current = { cameraDeviceId: env.cameraDeviceId, status };
+    latest.current = { cameraDeviceId: env.cameraDeviceId, expressionMode: env.expressionMode, status };
   });
 
   useEffect(
@@ -23,6 +23,7 @@ export function useHotkeyBinding(runtime: HotkeyRuntime = hotkeyRuntime): void {
         emit: emitAppEvent,
         trackingSessionActive: () => latest.current.status !== 'stopped',
         cameraDeviceId: () => latest.current.cameraDeviceId,
+        expressionMode: () => latest.current.expressionMode,
         notify: dialogs.notify,
       }),
     [runtime, services, dialogs],

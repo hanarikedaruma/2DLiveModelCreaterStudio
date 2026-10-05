@@ -137,3 +137,35 @@
 .studio-warn {
   color: var(--danger);
 }
+.camera-capture {
+  margin: 8px 0;
+}
+.camera-capture .studio-choices {
+  margin-bottom: 8px;
+}
+.camera-capture input {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.camera-dimensions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.camera-stats {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 4px 6px;
+  margin: 8px 0;
+}
+.camera-stats dt {
+  color: var(--text-dim);
+}
+.camera-stats dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
