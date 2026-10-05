@@ -1,7 +1,7 @@
 // 「Transform」パネルの「不透明度（このキー）」（カード34）。本物の KeyEditor で確かめる
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Part, Project, TransformDelta } from '@app/schema';
+import type { Binding, Part, Project, TransformDelta } from '@app/schema';
 import type { ProjectStoreWithHistory } from '@app/core';
 import { withStep1Parameters } from '../../../project/step1Params';
 import { createKeyEditor } from '../../../services/keyEditor';
@@ -30,9 +30,9 @@ function cheekProject(): Project {
   return { ...p, model: { ...p.model, parts: [...p.model.parts, cheek] } };
 }
 
-function open() {
+function open(project = cheekProject()) {
   const shell = renderShell(() => ({ keyEditor: createKeyEditor() }));
-  act(() => shell.services.store.load(cheekProject()));
+  act(() => shell.services.store.load(project));
   const store = shell.services.store as ProjectStoreWithHistory;
   const part = (id: string): Part => store.get().model.parts.find((p) => p.id === id)!;
   const panel = () => within(document.querySelector<HTMLElement>('[data-panel-id="transform"]')!);
@@ -132,5 +132,53 @@ describe('不透明度（このキー）のセクション', () => {
     slide(0.3);
     expect(keyOpacity('part-upperLip', 1)).toBeCloseTo(0.3);
     expect(keyOpacity('part-lowerLip', 1)).toBeCloseTo(0.3);
+  });
+
+  it('かんたんセットアップの頬染め（値 0 に倍率 0.001 のキー）は、デフォルト値でそのキーを表示して変える（I-038）', () => {
+    // かんたんセットアップ（カード42）が作るのと同じ形
+    const setup: Binding = {
+      id: 'b-cheek',
+      target: { type: 'part', id: 'part-cheek' },
+      channel: 'transform',
+      parameterIds: ['Cheek'],
+      keyValues: [[0, 1]],
+      keys: [
+        {
+          coords: [0],
+          delta: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 }, opacity: OPACITY_FLOOR },
+          source: 'auto',
+          locked: false,
+        },
+        {
+          coords: [1],
+          delta: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 }, opacity: 1 },
+          source: 'auto',
+          locked: false,
+        },
+      ],
+      generation: 'linear',
+      divisions: null,
+    };
+    const p = cheekProject();
+    const { editing, slide, slider, part, store, keyOpacity, panel } = open({
+      ...p,
+      model: { ...p.model, bindings: [...p.model.bindings, setup] },
+    });
+    editing({ Cheek: 0 });
+    // 見た目どおり 0（基準状態の 1 ではない）。デフォルト値のキーに記録すると出す
+    expect(Number(slider()!.value)).toBeCloseTo(OPACITY_FLOOR);
+    expect(panel().getByText('0', { selector: 'output' })).toBeTruthy();
+    expect(panel().getByText(/デフォルト値のこのキーに記録する/)).toBeTruthy();
+    expect(panel().queryByText(/デフォルト値では基準状態の不透明度を変える/)).toBeNull();
+
+    slide(0.3, 0.7);
+    expect(keyOpacity('part-cheek', 0)).toBeCloseTo(0.7);
+    expect(keyOpacity('part-cheek', 1)).toBe(1);
+    expect(part('part-cheek').opacity).toBe(1);
+    expect(Number(slider()!.value)).toBeCloseTo(0.7);
+    expect(store.undoLabel()).toBe('不透明度の変更');
+    act(() => store.undo());
+    expect(keyOpacity('part-cheek', 0)).toBe(OPACITY_FLOOR);
+    expect(store.canUndo()).toBe(false);
   });
 });

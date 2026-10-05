@@ -5,7 +5,7 @@ import type { ProjectStoreWithHistory } from '@app/core';
 import { registerPanelSection } from '../../../shell/api';
 import { registry } from '../../../shell/registry';
 import { register } from './index';
-import { formatNumber } from './TransformPanel';
+import { formatNumber, PREVIEW_OFF_BASE_NOTE } from './TransformPanel';
 import { openSample, pointer, renderShell, stubSize } from './testUtils';
 
 let restoreSize: () => void = () => {};
@@ -144,6 +144,24 @@ describe('Transform パネル', () => {
     type('X', '50');
     expect(part('part-torso').position.x).toBe(0);
     expect((panel().getByLabelText('前後の位置（手前〜奥）') as HTMLInputElement).disabled).toBe(true);
+  });
+
+  it('編集中のパラメータが無く、値だけがデフォルト値でないとき（表情を作っている途中など）も読み取り専用にする（I-029）', async () => {
+    const { panel, select, input, type, part, services } = await open();
+    select(['part-torso']);
+    act(() => services.editor.set({ activeParameterIds: [], editorParamValues: { FaceAngleX: 30 } }));
+    expect(panel().getByText(PREVIEW_OFF_BASE_NOTE)).toBeTruthy();
+    expect(panel().queryByText('パラメータ編集中は画面上で操作')).toBeNull();
+    expect(input('X').readOnly).toBe(true);
+    type('X', '50');
+    expect(part('part-torso').position.x).toBe(0);
+    expect((panel().getByLabelText('前後の位置（手前〜奥）') as HTMLInputElement).disabled).toBe(true);
+
+    // 値をデフォルト値に戻すと編集できる
+    act(() => services.editor.set({ editorParamValues: {} }));
+    expect(panel().queryByText(PREVIEW_OFF_BASE_NOTE)).toBeNull();
+    type('X', '50');
+    expect(part('part-torso').position.x).toBe(50);
   });
 
   it('パネルの下にほかのカードのセクションが入る', async () => {

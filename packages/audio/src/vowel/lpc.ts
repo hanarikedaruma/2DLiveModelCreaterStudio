@@ -158,6 +158,21 @@ export function polynomialRoots(coeffs: ArrayLike<number>, maxIterations = 500):
   return Array.from({ length: p }, (_, k) => ({ re: re[k]!, im: im[k]! }));
 }
 
+// LPC の包絡 1/|A(e^jω)|² の、周波数 frequency（Hz）での強さ（dB。大きさの基準は任意なので、比べるのに使う）。
+// preEmphasis（prepareFrame に渡した α）を渡すと、高域強調 1 - α z^-1 で持ち上げた分を戻した強さにする
+export function lpcEnvelopeDb(a: ArrayLike<number>, frequency: number, sampleRate: number, preEmphasis = 0): number {
+  const w = (2 * Math.PI * frequency) / sampleRate;
+  let re = 0;
+  let im = 0;
+  for (let k = 0; k < a.length; k++) {
+    re += a[k]! * Math.cos(w * k);
+    im -= a[k]! * Math.sin(w * k);
+  }
+  const emphasis = 1 + preEmphasis * preEmphasis - 2 * preEmphasis * Math.cos(w); // |1 - α e^-jω|²
+  const power = (re * re + im * im) * emphasis;
+  return power > 0 ? -10 * Math.log10(power) : Infinity;
+}
+
 // LPC の係数の根から、上半面の根の周波数と帯域幅を求める（周波数の小さい順）
 export function lpcResonances(a: ArrayLike<number>, sampleRate: number): Formant[] {
   const out: Formant[] = [];

@@ -47,6 +47,11 @@ export function beginLiveEdit(store: ProjectStore, label: string): LiveEdit {
 
 export const NEEDS_KEY_MESSAGE = 'この値にキーを追加して編集しますか？';
 
+// 編集中のパラメータが無いのに値だけがデフォルト値でない（表情を作っている途中など）ときに、
+// 基準状態を変える操作をやめて出す（I-029。見えている形と基準状態が違うため）
+export const PREVIEW_OFF_BASE_MESSAGE =
+  'パラメータの値がデフォルト値でない間は、パーツを動かせない（基準状態と見た目が違うため）。表情などを作り終えるか、パラメータパネルで行を押してキーを編集する';
+
 export interface ConfirmDialogs {
   confirm(message: string): Promise<boolean>;
   notify(message: string): void;

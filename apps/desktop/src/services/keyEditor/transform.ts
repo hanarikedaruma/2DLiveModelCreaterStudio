@@ -5,9 +5,12 @@ import { modelCommand } from '@app/core';
 import {
   activeParams,
   addKey,
+  coordsOf,
   editKey,
+  findBinding,
   isBaseState,
   isEasy,
+  keyIndexAt,
   type ActiveParam,
   type DeltaOps,
   type KeySpec,
@@ -136,6 +139,34 @@ export function transformEdit(
   if (run(model) === 'needsKey') return 'needsKey';
   return modelCommand('パーツの変形（キー）', (m) => {
     const next = run(m);
+    return next === 'needsKey' ? m : next;
+  });
+}
+
+// デフォルト値のキーの差分を変える（I-038）。transformEdit はデフォルト値では基準状態を変えるが、かんたんセットアップ
+// （カード42）の頬染めは値 0（デフォルト値）に不透明度の倍率 0.001 のキーを置くので、そのキーを変える口を別に用意する
+// （契約の KeyEditor には足さない）。編集中のパラメータがすべてデフォルト値で、そのパーツのこの組のバインディングに
+// デフォルト値のキーがあるときだけコマンドを返し、無ければ null（呼ぶ側が基準状態を変える）。dPivot は受け付けない
+export function defaultKeyTransformEdit(
+  project: Project,
+  editor: EditorState,
+  partId: string,
+  change: TransformChange,
+): Command | null {
+  const model = project.model;
+  const params = activeParams(model, editor);
+  if (params.length === 0 || !isBaseState(params) || !model.parts.some((p) => p.id === partId)) return null;
+  const spec = partSpec(partId, params, editor);
+  const hasKey = (m: Model) => {
+    const binding = findBinding(m, spec.target, params);
+    return binding !== undefined && keyIndexAt(binding, coordsOf(binding, params, 'value')) >= 0;
+  };
+  if (!hasKey(model)) return null;
+  const { dPivot: _pivot, ...keyChange } = change;
+  if (!hasKeyChange(keyChange)) return noop('パーツの変形');
+  return modelCommand('パーツの変形（キー）', (m) => {
+    if (!hasKey(m)) return m; // キーがあるときだけ変える（editKey はキーが無いとバインディングを作るため）
+    const next = editKey(m, spec, (d) => applyChangeToDelta(d, keyChange));
     return next === 'needsKey' ? m : next;
   });
 }

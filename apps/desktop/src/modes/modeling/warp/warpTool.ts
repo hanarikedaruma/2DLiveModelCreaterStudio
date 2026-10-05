@@ -215,6 +215,7 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
   const tool: CanvasTool = {
     id: WARP_TOOL_ID,
     label: 'ワープ編集',
+    level: 'detail', // ワープのセクションと同じく詳細でだけ出す（I-008）
     cursor: 'crosshair',
 
     onPointerDown(e) {

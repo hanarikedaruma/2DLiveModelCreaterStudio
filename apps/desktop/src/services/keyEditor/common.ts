@@ -43,6 +43,18 @@ export function isBaseState(params: ActiveParam[]): boolean {
   return params.every((p) => near(p.value, p.default));
 }
 
+// 基準状態を編集する状態（isBaseState）なのに、プレビュー（editorParamValues）が基準状態と違う。
+// 表情づくりのように編集中のパラメータを空にして値だけを動かすとこうなる。このまま基準状態を変えると、
+// 見えている形と違うものを編集してしまう（I-029）。値は min..max に丸め、モデルに無いものと数でないものは数えない
+export function isPreviewOffBase(model: Model, editor: EditorState): boolean {
+  if (!isBaseState(activeParams(model, editor))) return false;
+  return model.parameters.some((p) => {
+    const raw = editor.editorParamValues[p.id];
+    if (raw === undefined || !Number.isFinite(raw)) return false;
+    return !near(Math.min(p.max, Math.max(p.min, raw)), p.default);
+  });
+}
+
 // 各軸の既存のキー位置を組み合わせたマス。1軸の編集や格子の間では自動でキーを追加しない
 export function isCombinationGridPoint(model: Model, params: ActiveParam[]): boolean {
   return (

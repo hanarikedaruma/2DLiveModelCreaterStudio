@@ -37,8 +37,13 @@ button {
   padding: 4px 10px;
   cursor: pointer;
 }
-button:hover:not(:disabled) {
+/* 押してあるボタンには掛けない（押してある色が、マウスが乗っている間に消えないように。I-044）。
+   :not() の詳細度は中のいちばん強いものなので、各機能の :hover の規則より強くならない */
+button:hover:not(:disabled, [aria-pressed='true'], .active, .primary) {
   background: var(--bg-hover);
+}
+button:is(.active, [aria-pressed='true'], .primary):hover:not(:disabled) {
+  filter: brightness(1.12);
 }
 button:disabled {
   opacity: 0.4;

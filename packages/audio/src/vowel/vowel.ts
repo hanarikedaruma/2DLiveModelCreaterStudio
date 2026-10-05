@@ -1,10 +1,18 @@
-// 母音の推定（カード51）。20ms の窓ごとに LPC（次数 12）で第1・第2フォルマントを求め、
+// 母音の推定（カード51）。20ms の窓ごとに 8kHz くらいへ間引き、LPC（次数 10）で第1・第2フォルマントを求め、
 // 母音ごとの代表値（成人の平均）との距離から確率に直す（合計 1）。無音（しきい値以下）とフォルマントが取れない窓は closed。
 // 話者ごとのキャリブレーションはしない。音声はこの PC の中だけで扱う
 import type { VowelEstimator } from '@app/contracts';
 import type { LipSync } from '@app/schema';
 import { levelDbOf } from '../source/level';
-import { autocorrelation, decimate, levinsonDurbin, lpcResonances, prepareFrame, type Formant } from './lpc';
+import {
+  autocorrelation,
+  decimate,
+  levinsonDurbin,
+  lpcEnvelopeDb,
+  lpcResonances,
+  prepareFrame,
+  type Formant,
+} from './lpc';
 
 export type VowelId = LipSync['vowels'][number]['vowel'];
 export type SpokenVowelId = Exclude<VowelId, 'closed'>;
@@ -14,7 +22,7 @@ export const VOWEL_IDS: readonly VowelId[] = ['closed', 'a', 'i', 'u', 'e', 'o']
 export const SPOKEN_VOWEL_IDS: readonly SpokenVowelId[] = ['a', 'i', 'u', 'e', 'o'];
 
 export const VOWEL_WINDOW_MS = 20; // 1回の推定に使う長さ
-export const VOWEL_LPC_ORDER = 12; // 間引いたあと 12kHz のときの次数
+export const VOWEL_LPC_ORDER = 10; // 間引いたあと 8kHz のときの次数
 // 無音とみなす音量（dBFS）。リップシンクの「無音とみなす音量」のスライダーの下限と同じにして、
 // それより上はリップシンクの側のしきい値で決める（ここを高くすると、小さい声で口が開かなくなる）
 export const DEFAULT_VOWEL_SILENCE_DB = -80;
@@ -30,12 +38,17 @@ export const ADULT_VOWEL_FORMANTS: Readonly<Record<SpokenVowelId, { f1: number; 
 // 距離の目盛り（対数の周波数で、この幅を 1 とする）。話者による違い（2割くらい）を吸収する
 export const VOWEL_FORMANT_SPREAD = { f1: 0.25, f2: 0.2 };
 
-const TARGET_RATE = 10000; // 間引いたあとのサンプリング周波数（これ以上で、いちばん近いもの）
+// 間引いたあとのサンプリング周波数（これ以上で、いちばん近いもの）。第1・第2フォルマントは 4kHz より下にある。
+// それより上を残すと、声の弱い高い周波数で雑音（高域強調で持ち上がる）に LPC の極を取られる（I-045）
+const TARGET_RATE = 8000;
 const PRE_EMPHASIS_HZ = 50; // 高域強調（声の -6dB/oct の傾きを打ち消す）
-// これより帯域幅の広い共振はフォルマントとみなさない。第2フォルマントは、狭いものが範囲に無いときだけ
-// 広いもの（WIDE_BANDWIDTH まで）も使う（「お」の第2フォルマントは弱く、雑音があると帯域幅が広く出る）
+// これより帯域幅の広い共振は第1フォルマントとみなさない。第2フォルマントは WIDE_BANDWIDTH までの広いものも
+// 候補にする（「お」の第2フォルマントは弱く、雑音があると帯域幅が広く出る）が、強さを WIDE_PENALTY_DB だけ割り引く
 const MAX_BANDWIDTH = 500;
 const WIDE_BANDWIDTH = 900;
+const WIDE_PENALTY_DB = 5;
+// 第2フォルマントは候補のうち強いもの。いちばん強いものとの差がこれ以内の狭い共振が下にあれば、低い方を選ぶ（第3と取り違えない）
+const LOWER_PEAK_DB = 2;
 const F1_RANGE = [200, 1200] as const;
 const F2_RANGE = [600, 3500] as const;
 
@@ -60,12 +73,13 @@ export function analyzeVowelFrame(
   if (!(sampleRate > 0) || !Number.isFinite(sampleRate)) return none;
   const factor = Math.max(1, Math.floor(sampleRate / TARGET_RATE));
   const rate = sampleRate / factor;
-  // 間引いたあとが 12kHz より高いとき（16kHz の入力など）は、周波数の細かさが同じになるよう次数を増やす
-  const lpcOrder = Math.max(order, Math.round((order * rate) / 12000));
+  // 間引いたあとが 8kHz より高いとき（11.025kHz など）は、周波数の細かさが同じになるよう次数を増やす
+  const lpcOrder = Math.max(order, Math.round((order * rate) / TARGET_RATE));
   const x = decimate(samples, factor);
   if (x.length < lpcOrder * 2 + 2) return none;
   for (let i = 0; i < x.length; i++) if (!Number.isFinite(x[i]!)) x[i] = 0;
-  prepareFrame(x, Math.exp((-2 * Math.PI * PRE_EMPHASIS_HZ) / rate));
+  const preEmphasis = Math.exp((-2 * Math.PI * PRE_EMPHASIS_HZ) / rate);
+  prepareFrame(x, preEmphasis);
   const r = autocorrelation(x, lpcOrder);
   r[0]! *= 1 + 1e-9; // 計算を安定させるためのわずかな白色雑音
   const a = levinsonDurbin(r, lpcOrder);
@@ -75,12 +89,36 @@ export function analyzeVowelFrame(
     (f) => f.bandwidth < MAX_BANDWIDTH && f.frequency >= F1_RANGE[0] && f.frequency <= F1_RANGE[1],
   );
   if (!first) return { ...none, resonances };
-  const inF2Range = (f: Formant) =>
-    f.frequency > first.frequency && f.frequency >= F2_RANGE[0] && f.frequency <= Math.min(F2_RANGE[1], rate / 2 - 50);
-  const second =
-    resonances.find((f) => inF2Range(f) && f.bandwidth < MAX_BANDWIDTH) ??
-    resonances.find((f) => inF2Range(f) && f.bandwidth < WIDE_BANDWIDTH);
+  const second = secondFormantOf(resonances, first, (f) => lpcEnvelopeDb(a, f, rate, preEmphasis), rate);
   return { levelDb, resonances, f1: first.frequency, f2: second ? second.frequency : null };
+}
+
+// 第2フォルマントを選ぶ。第1より上で範囲の中の共振を、高域強調を戻した LPC の包絡の強さ（envelopeDb）で比べる
+// （帯域幅の広いものは割り引く）。低い順に選ぶと、雑音でできた弱い極（「い」の 1.5kHz くらいなど）や、
+// 「お」で第2フォルマントが広がったときに上の雑音の極を拾うため（I-045）
+function secondFormantOf(
+  resonances: readonly Formant[],
+  first: Formant,
+  envelopeDb: (frequency: number) => number,
+  rate: number,
+): Formant | undefined {
+  const top = Math.min(F2_RANGE[1], rate / 2 - 50);
+  const candidates = resonances.filter(
+    (f) =>
+      f.frequency > first.frequency && f.frequency >= F2_RANGE[0] && f.frequency <= top && f.bandwidth < WIDE_BANDWIDTH,
+  );
+  const strengths = candidates.map(
+    (f) => envelopeDb(f.frequency) - (f.bandwidth < MAX_BANDWIDTH ? 0 : WIDE_PENALTY_DB),
+  );
+  let best = -1;
+  for (let k = 0; k < candidates.length; k++) if (best < 0 || strengths[k]! > strengths[best]!) best = k;
+  if (best < 0) return undefined;
+  // candidates は周波数の小さい順
+  for (let k = 0; k < best; k++) {
+    if (candidates[k]!.bandwidth < MAX_BANDWIDTH && strengths[k]! >= strengths[best]! - LOWER_PEAK_DB)
+      return candidates[k];
+  }
+  return candidates[best];
 }
 
 // 第1・第2フォルマントから5母音の確率（合計 1）。代表値との対数の距離 d から exp(-d²/2) に比例させる

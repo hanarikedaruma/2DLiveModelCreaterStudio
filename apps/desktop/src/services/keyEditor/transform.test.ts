@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Binding, Project } from '@app/schema';
 import type { Command } from '@app/contracts';
-import { createKeyEditor } from './index';
+import { createKeyEditor, defaultKeyTransformEdit } from './index';
 import {
   DETAIL,
   deepFreeze,
@@ -489,5 +489,55 @@ describe('2つのパラメータでの編集', () => {
       expect(partLook(out, values)).toEqual(partLook(project, values));
     }
     expect(command(keyEditor.transformEdit(project, state, ['face'], { dRotation: 1 })).apply(project)).toEqual(out);
+  });
+});
+
+describe('デフォルト値のキーの編集（defaultKeyTransformEdit、I-038）', () => {
+  // かんたんセットアップの頬染めと同じ形: デフォルト値に不透明度の倍率 0.001、値 30 に差分なし
+  const hidden = () =>
+    faceXBinding([
+      { coords: [0], delta: delta({ opacity: 0.001 }), source: 'auto', locked: false },
+      { coords: [30], delta: delta(), source: 'auto', locked: false },
+    ]);
+
+  it('デフォルト値のキーの差分を変え、基準状態は変えない（transformEdit と同じく手で直したキーにし、かんたんではロック）', () => {
+    const project = baseProject([hidden()]);
+    const cmd = defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }), 'face', {
+      opacityFactor: 600,
+      dPosition: { x: 4, y: 0 },
+      dPivot: { x: 9, y: 9 },
+    });
+    const out = command(cmd!).apply(project);
+    expect(out.model.parts).toBe(project.model.parts);
+    const b = out.model.bindings[0]!;
+    expect(b.keyValues).toEqual([[0, 30]]);
+    expect(b.keys[0]).toMatchObject({ coords: [0], source: 'manual', locked: true });
+    expect(b.keys[0]!.delta).toMatchObject({ position: { x: 4, y: 0 }, opacity: expect.closeTo(0.6, 9) });
+    expect(b.keys[1]).toEqual(hidden().keys[1]);
+    // 詳細モードではロックしない
+    const detail = defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }, DETAIL), 'face', { opacityFactor: 2 });
+    expect(command(detail!).apply(project).model.bindings[0]!.keys[0]!.locked).toBe(false);
+  });
+
+  it('デフォルト値でない・編集中のパラメータが無い・デフォルト値のキーが無い・無いパーツなら null', () => {
+    const project = baseProject([hidden()]);
+    const change = { opacityFactor: 2 };
+    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 30 }), 'face', change)).toBeNull();
+    expect(defaultKeyTransformEdit(project, editorAt({}), 'face', change)).toBeNull();
+    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleY: 0 }), 'face', change)).toBeNull(); // 組が違う
+    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }), 'hair', change)).toBeNull();
+    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }), 'nothing', change)).toBeNull();
+    const onlyThirty = faceXBinding([{ coords: [30], delta: delta(), source: 'auto', locked: false }]);
+    expect(defaultKeyTransformEdit(baseProject([onlyThirty]), editorAt({ FaceAngleX: 0 }), 'face', change)).toBeNull();
+  });
+
+  it('コマンドは純粋（入力を書き換えず、キーが無くなったプロジェクトには何もしない）', () => {
+    const project = baseProject([hidden()]);
+    const cmd = defaultKeyTransformEdit(project, deepFreeze(editorAt({ FaceAngleX: 0 })), 'face', {
+      opacityFactor: 3,
+    })!;
+    expect(cmd.apply(project)).toEqual(cmd.apply(project));
+    const removed = baseProject();
+    expect(cmd.apply(removed)).toBe(removed);
   });
 });

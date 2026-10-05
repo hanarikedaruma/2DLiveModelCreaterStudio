@@ -162,3 +162,105 @@ describe('不透明度のキー', () => {
     expect(() => run(p, opacityCommand(keyEditor, p, editorAt({ Cheek: 0 }), ['cheek'], 0.5))).not.toThrow();
   });
 });
+
+// かんたんセットアップ（カード42）の頬染めと同じ形: 値 0（デフォルト値）に倍率 0.001、値 1 に差分なし
+function setupCheek(partId: string): Binding {
+  return {
+    id: `b-${partId}`,
+    target: { type: 'part', id: partId },
+    channel: 'transform',
+    parameterIds: ['Cheek'],
+    keyValues: [[0, 1]],
+    keys: [
+      { coords: [0], delta: delta({ opacity: OPACITY_FLOOR }), source: 'auto', locked: false },
+      { coords: [1], delta: delta(), source: 'auto', locked: false },
+    ],
+    generation: 'linear',
+    divisions: null,
+  };
+}
+
+const withBindings = (p: Project, bindings: Binding[]): Project => ({ ...p, model: { ...p.model, bindings } });
+const keyAt = (p: Project, partId: string, value: number) =>
+  p.model.bindings.find((b) => b.target.id === partId)!.keys.find((k) => Math.abs(k.coords[0]! - value) < 1e-6)!;
+const opacityOf = (p: Project, partId: string) => p.model.parts.find((x) => x.id === partId)!.opacity;
+
+describe('デフォルト値のキー（I-038）', () => {
+  it('頬染めの値 0 のキー（倍率 0.001）を、デフォルト値で表示して変えられる（基準状態は変えない）', () => {
+    const before = withBindings(project(), [setupCheek('cheek')]);
+    const atZero = editorAt({ Cheek: 0 });
+    const state = opacityAt(keyEditor, before, atZero, 'cheek');
+    expect(state).toMatchObject({ base: false, needsKey: false, blocked: null });
+    expect(state.value).toBeCloseTo(OPACITY_FLOOR); // 見た目どおり（Part.opacity の 1 ではない）
+
+    let p = set(before, atZero, ['cheek'], 0.6);
+    expect(opacityOf(p, 'cheek')).toBe(1);
+    expect(keyAt(p, 'cheek', 0)).toMatchObject({ delta: { opacity: expect.closeTo(0.6, 6) }, source: 'manual' });
+    expect(keyAt(p, 'cheek', 1)).toEqual(keyAt(before, 'cheek', 1));
+    expect(shown(p, 'cheek', { Cheek: 0 })).toBeCloseTo(0.6);
+    expect(shown(p, 'cheek', { Cheek: 0.5 })).toBeCloseTo(0.8);
+    expect(shown(p, 'cheek', { Cheek: 1 })).toBeCloseTo(1);
+    expect(opacityAt(keyEditor, p, atZero, 'cheek').value).toBeCloseTo(0.6);
+    expect(opacityCommand(keyEditor, p, atZero, ['cheek'], 0.6)).toBeNull();
+
+    // 0 にすると OPACITY_FLOOR を記録し、また上げられる
+    p = set(p, atZero, ['cheek'], 0);
+    expect(shown(p, 'cheek', { Cheek: 0 })).toBeCloseTo(OPACITY_FLOOR);
+    p = set(p, atZero, ['cheek'], 1);
+    expect(shown(p, 'cheek', { Cheek: 0 })).toBeCloseTo(1);
+    expect(opacityOf(p, 'cheek')).toBe(1);
+  });
+
+  it('基準状態の不透明度が 1 でなくても、見た目の不透明度で指定する。かんたんモードではロックする', () => {
+    const before = withBindings(project(), [setupCheek('ribbon')]); // ribbon の基準状態は 0.5
+    const atZero = editorAt({ Cheek: 0 });
+    expect(opacityAt(keyEditor, before, atZero, 'ribbon').value).toBeCloseTo(0.5 * OPACITY_FLOOR);
+    const p = set(before, atZero, ['ribbon'], 0.4);
+    expect(keyAt(p, 'ribbon', 0).delta).toMatchObject({ opacity: expect.closeTo(0.8, 6) });
+    expect(keyAt(p, 'ribbon', 0).locked).toBe(true);
+    expect(shown(p, 'ribbon', { Cheek: 0 })).toBeCloseTo(0.4);
+    expect(opacityOf(p, 'ribbon')).toBe(0.5);
+    // 詳細モードではロックしない
+    const detail = set(before, editorAt({ Cheek: 0 }, DETAIL), ['ribbon'], 0.4);
+    expect(keyAt(detail, 'ribbon', 0).locked).toBe(false);
+  });
+
+  it('デフォルト値にキーが無いパーツは、いまどおり基準状態を変える（選んだパーツごとに決める）', () => {
+    // ribbon のバインディングは値 1 にだけキーがある
+    const onlyOne: Binding = { ...setupCheek('ribbon'), keyValues: [[1]], keys: [setupCheek('ribbon').keys[1]!] };
+    const before = withBindings(project(), [setupCheek('cheek'), onlyOne]);
+    const atZero = editorAt({ Cheek: 0 });
+    expect(opacityAt(keyEditor, before, atZero, 'face')).toEqual({
+      base: true,
+      value: 1,
+      needsKey: false,
+      blocked: null,
+    });
+    expect(opacityAt(keyEditor, before, atZero, 'ribbon')).toMatchObject({ base: true, value: 0.5 });
+
+    const p = set(before, atZero, ['cheek', 'face', 'ribbon'], 0.3);
+    expect(keyAt(p, 'cheek', 0).delta).toMatchObject({ opacity: expect.closeTo(0.3, 6) });
+    expect(opacityOf(p, 'cheek')).toBe(1);
+    expect(opacityOf(p, 'face')).toBe(0.3);
+    expect(opacityOf(p, 'ribbon')).toBe(0.3);
+    expect(p.model.bindings[1]).toEqual(onlyOne);
+  });
+
+  it('基準状態の不透明度が 0 なら、デフォルト値のキーでも倍率では上げられない', () => {
+    const p = withBindings(project(), [setupCheek('cheek')]);
+    const hidden = {
+      ...p,
+      model: { ...p.model, parts: p.model.parts.map((x) => (x.id === 'cheek' ? { ...x, opacity: 0 } : x)) },
+    };
+    const atZero = editorAt({ Cheek: 0 });
+    expect(opacityAt(keyEditor, hidden, atZero, 'cheek')).toMatchObject({ base: false, value: 0, blocked: 'baseZero' });
+    expect(opacityCommand(keyEditor, hidden, atZero, ['cheek'], 1)).toBeNull();
+  });
+
+  it('デフォルト値のキーを変えるコマンドも入力を書き換えない', () => {
+    const p = deepFreeze(withBindings(project(), [setupCheek('cheek')]));
+    expect(() =>
+      run(p, opacityCommand(keyEditor, p, deepFreeze(editorAt({ Cheek: 0 })), ['cheek'], 0.5)),
+    ).not.toThrow();
+  });
+});

@@ -1,11 +1,12 @@
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Part, TransformDelta, Vec2 } from '@app/schema';
 import type { ProjectStoreWithHistory } from '@app/core';
 import { patchPart } from '@app/core';
 import { registry } from '../../../shell/registry';
+import { register as registerExpressions } from '../expressions';
 import { register, selectTool, SELECT_TOOL_ID } from './index';
-import { NEEDS_KEY_MESSAGE } from './liveEdit';
+import { NEEDS_KEY_MESSAGE, PREVIEW_OFF_BASE_MESSAGE } from './liveEdit';
 import { ROTATE_HANDLE_DISTANCE } from './selectTool';
 import { KeyedStubEditor, RecordingContext, openSample, pointer, redrawn, renderShell, stubSize } from './testUtils';
 
@@ -255,6 +256,100 @@ describe('変形のドラッグ', () => {
     ptr.up({ x: TORSO.x + 50, y: TORSO.y });
     expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
     expect(store.canUndo()).toBe(false);
+  });
+});
+
+describe('値だけがデフォルト値でないとき（I-029）', () => {
+  // 表情を作っている途中と同じ状態: 編集中のパラメータは無く、プレビューの値だけがデフォルト値でない
+  const offBase = { activeParameterIds: [] as string[], editorParamValues: { FaceAngleX: 30 } };
+  const notices = () => screen.queryAllByText(PREVIEW_OFF_BASE_MESSAGE);
+
+  it('基準状態を動かさずに知らせる。クリックで選ぶことはできる', async () => {
+    const { ptr, part, store, services, selected } = await open();
+    act(() => services.editor.set(offBase));
+    ptr.drag(TORSO, { x: TORSO.x + 100, y: TORSO.y + 50 });
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    expect(store.canUndo()).toBe(false);
+    expect(selected()).toEqual(['part-torso']);
+    expect(notices()).toHaveLength(1); // 1回のドラッグで1回だけ
+    // 動かさないクリックでは知らせない
+    ptr.click(FACE);
+    expect(selected()).toEqual(['part-face']);
+    ptr.click(EMPTY);
+    expect(selected()).toEqual([]);
+    expect(notices()).toHaveLength(1);
+    expect(services.editor.get().editorParamValues).toEqual({ FaceAngleX: 30 });
+  });
+
+  it('回転・拡縮・ピボットのハンドルでも動かさない（ピボットは動かせない表示にする）', async () => {
+    const { ptr, part, store, services, canvas } = await open();
+    ptr.click(TORSO);
+    act(() => services.editor.set(offBase));
+    const handle = { x: 500, y: 840 - ROTATE_HANDLE_DISTANCE / canvas.getState().view.scale };
+    ptr.drag(handle, { x: TORSO_PIVOT.x + 400, y: TORSO_PIVOT.y });
+    ptr.drag({ x: 800, y: 1500 }, { x: 950, y: 1665 });
+    ptr.drag(TORSO_PIVOT, { x: 530, y: 1200 });
+    expect(part('part-torso')).toMatchObject({
+      position: { x: 0, y: 0 },
+      rotation: 0,
+      scale: { x: 1, y: 1 },
+      pivot: TORSO_PIVOT,
+    });
+    expect(store.canUndo()).toBe(false);
+    expect(notices()).toHaveLength(3);
+
+    // ピボットは薄く描く（動かせないとき）
+    const ctx = new RecordingContext();
+    const alphas: number[] = [];
+    const arc = ctx.arc.bind(ctx);
+    ctx.arc = (...a: number[]) => {
+      alphas.push(ctx.globalAlpha);
+      arc(...a);
+    };
+    selectTool.tool.drawOverlay!(ctx.asContext(), canvas.getState().view);
+    expect(alphas.at(-1)).toBeLessThan(1);
+  });
+
+  it('値をデフォルト値に戻すと、また基準状態を動かせる', async () => {
+    const { ptr, part, services } = await open();
+    act(() => services.editor.set(offBase));
+    ptr.drag(TORSO, { x: TORSO.x + 30, y: TORSO.y });
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    act(() => services.editor.set({ editorParamValues: { FaceAngleX: 0 } }));
+    ptr.drag(TORSO, { x: TORSO.x + 30, y: TORSO.y });
+    near(part('part-torso').position, { x: 30, y: 0 });
+  });
+
+  it('編集中のパラメータがデフォルト値で、ほかの値だけがデフォルト値でないときも動かさない', async () => {
+    const { ptr, part, services } = await open();
+    act(() =>
+      services.editor.set({ activeParameterIds: ['FaceAngleX'], editorParamValues: { FaceAngleX: 0, MouthOpen: 1 } }),
+    );
+    ptr.drag(TORSO, { x: TORSO.x + 30, y: TORSO.y });
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    expect(notices()).toHaveLength(1);
+  });
+
+  it('表情を作っている途中: 表情の値はそのままで動かさず、登録して基準状態に戻ると動かせる', async () => {
+    registerExpressions();
+    const { ptr, part, store, services, selected } = await open();
+    const panel = () => within(document.querySelector<HTMLElement>('[data-panel-id="expressions"]')!);
+    fireEvent.click(panel().getByRole('button', { name: '新しい表情' }));
+    fireEvent.change(panel().getByRole('slider', { name: '顔 左右' }), { target: { value: '12' } });
+    const values = services.editor.get().editorParamValues;
+    expect(values.FaceAngleX).toBeCloseTo(12, 6);
+
+    ptr.drag(TORSO, { x: TORSO.x + 40, y: TORSO.y });
+    expect(selected()).toEqual(['part-torso']);
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    expect(notices()).toHaveLength(1);
+    expect(services.editor.get().editorParamValues).toEqual(values);
+
+    fireEvent.click(panel().getByRole('button', { name: '登録' }));
+    expect(store.get().expressions).toHaveLength(1);
+    expect(store.get().expressions[0]!.entries.map((e) => e.parameterId)).toEqual(['FaceAngleX']);
+    ptr.drag(TORSO, { x: TORSO.x + 40, y: TORSO.y });
+    near(part('part-torso').position, { x: 40, y: 0 });
   });
 });
 

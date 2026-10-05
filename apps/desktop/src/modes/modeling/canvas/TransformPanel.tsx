@@ -1,12 +1,17 @@
 // Transform パネル。選択中のパーツの基準状態の値を数値で表示・編集する
+// （パラメータの編集中と、値だけがデフォルト値でない間は読み取り専用）
 import { useRef, useState, type FC } from 'react';
 import type { Part, Project } from '@app/schema';
 import type { Command, ProjectStore } from '@app/contracts';
 import { patchPart } from '@app/core';
 import { PanelSections, useEditor, useProject, useServices } from '../../../shell/api';
+import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { useBindEnv, type EnvSlot } from './env';
 import { beginLiveEdit, type LiveEdit } from './liveEdit';
 import './transform.css';
+
+// 編集中のパラメータが無いのに値だけがデフォルト値でない（表情を作っている途中など）ときの案内（I-029）
+export const PREVIEW_OFF_BASE_NOTE = 'パラメータの値がデフォルト値でない間は編集できない（基準状態と見た目が違うため）';
 
 export type FieldKey = 'x' | 'y' | 'rotation' | 'scaleX' | 'scaleY' | 'pivotX' | 'pivotY' | 'opacity';
 
@@ -158,7 +163,9 @@ export function makeTransformPanel(slot: EnvSlot): FC {
       .filter((p): p is Part => p !== undefined);
     const primary = parts[0];
     const ids = parts.map((p) => p.id);
-    const readOnly = editor.activeParameterIds.length > 0;
+    // 値だけがデフォルト値でない間に基準状態を変えると、見えている形と違うものを編集してしまう（キャンバスでも動かせない）
+    const offBase = isPreviewOffBase(project.model, editor);
+    const readOnly = editor.activeParameterIds.length > 0 || offBase;
 
     const onDepth = (value: number) => {
       if (readOnly) return;
@@ -181,7 +188,7 @@ export function makeTransformPanel(slot: EnvSlot): FC {
             </div>
             {readOnly && (
               <p className="transform-readonly" role="note">
-                パラメータ編集中は画面上で操作
+                {offBase ? PREVIEW_OFF_BASE_NOTE : 'パラメータ編集中は画面上で操作'}
               </p>
             )}
             <div className="transform-grid">

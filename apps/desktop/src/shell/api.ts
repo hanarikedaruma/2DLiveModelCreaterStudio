@@ -90,6 +90,8 @@ export interface CanvasTool {
   id: string;
   label: string;
   cursor?: string;
+  // かんたん/詳細のどちらでツールのボタンを出すか（パネル・セクションの level と同じ。省略は both）
+  level?: 'easy' | 'detail' | 'both';
   onPointerDown?(e: CanvasPointerEvent): void;
   onPointerMove?(e: CanvasPointerEvent): void;
   onPointerUp?(e: CanvasPointerEvent): void;

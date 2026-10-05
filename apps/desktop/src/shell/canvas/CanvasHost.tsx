@@ -6,7 +6,7 @@ import type { DeformedModel, ParamValues, Renderer } from '@app/contracts';
 import { useCanvas, useEditor, useProject, type CanvasPointerEvent, type CanvasTool } from '../api';
 import { useShell } from '../context';
 import { isTypingTarget } from '../keys';
-import { registry } from '../registry';
+import { registry, visibleAt } from '../registry';
 import { boundsOf, fitRect, pan, zoomAt, type Rect } from './view';
 
 // 無いパラメータはデフォルト値
@@ -50,6 +50,9 @@ export function CanvasHost() {
   const fittedRef = useRef<string | null>(null);
 
   const activeTool: CanvasTool | undefined = snapshot.tools.find((t) => t.id === activeToolId);
+  // 今のかんたん/詳細で出すツール（I-008）
+  const uiLevel = editor.uiLevel[editor.mode];
+  const tools = snapshot.tools.filter((t) => visibleAt(t.level, uiLevel));
 
   // 描くときは最新の値を使う
   const latest = useRef({ project, editor, snapshot, activeTool });
@@ -102,6 +105,12 @@ export function CanvasHost() {
 
   // 描画の元になるものが変わったら描き直す
   useEffect(requestDraw, [requestDraw, project, editor, view, snapshot, activeTool]);
+  // 使っているツールが今のかんたん/詳細で出ないものになったら、既定のツール（最初に出すもの）に戻す
+  const fallbackToolId = tools[0]?.id;
+  const activeHidden = activeTool !== undefined && !visibleAt(activeTool.level, uiLevel);
+  useEffect(() => {
+    if (activeHidden && fallbackToolId !== undefined) setActiveTool(fallbackToolId);
+  }, [activeHidden, fallbackToolId, setActiveTool]);
   useEffect(() => controller.onRedrawRequest(requestDraw), [controller, requestDraw]);
 
   // レンダラー
@@ -274,7 +283,7 @@ export function CanvasHost() {
   return (
     <div className="canvas-host">
       <div className="canvas-toolbar" role="toolbar" aria-label="キャンバスのツール">
-        {snapshot.tools.map((tool) => (
+        {tools.map((tool) => (
           <button
             key={tool.id}
             type="button"

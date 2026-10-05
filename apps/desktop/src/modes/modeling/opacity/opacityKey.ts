@@ -1,9 +1,11 @@
 // 不透明度のキー（カード34）。パラメータの編集中に、選んだパーツの「この値での不透明度」を読み書きする。
 // 見せる値は 基準状態の不透明度（Part.opacity）× このキーの倍率（TransformDelta.opacity）。
-// キーは keyEditor.transformEdit の opacityFactor で記録する。デフォルト値（基準状態）では Part.opacity を変える
+// キーは keyEditor.transformEdit の opacityFactor で記録する。デフォルト値では、その値のキーがあればそのキー
+// （かんたんセットアップの頬染めの倍率 0.001 など。I-038）を、無ければ基準状態（Part.opacity）を変える
 import type { Binding, Model, ParameterKey, Part, Project } from '@app/schema';
-import type { Command, EditorState, KeyEditor } from '@app/contracts';
+import type { Command, EditorState, KeyEditor, TransformChange } from '@app/contracts';
 import { patchPart } from '@app/core';
+import { defaultKeyTransformEdit } from '../../../services/keyEditor';
 import { activeParameters, valueOf } from '../parameters/marks';
 
 export const OPACITY_LABEL = '不透明度の変更';
@@ -55,8 +57,15 @@ function findKey(model: Model, editor: EditorState, partId: string): { binding?:
 const multiplierOf = (key: ParameterKey): number => (Array.isArray(key.delta) ? 1 : key.delta.opacity);
 const partOf = (model: Model, partId: string): Part | undefined => model.parts.find((p) => p.id === partId);
 
+// そのパーツの、編集中のパラメータの組のバインディングに、デフォルト値のキーがある（いまの値によらない）。
+// あると、デフォルト値ではそのキーを編集する（I-038）
+export function hasDefaultKey(model: Model, editor: EditorState, partId: string): boolean {
+  if (activeParameters(model, editor).length === 0) return false;
+  return findKey(model, { ...editor, editorParamValues: {} }, partId).key !== undefined;
+}
+
 export interface OpacityAtValue {
-  base: boolean; // デフォルト値（基準状態）
+  base: boolean; // 基準状態（Part.opacity）を変える（デフォルト値で、その値のキーが無い）
   value: number; // 見せる値（0..1）
   needsKey: boolean; // バインディングはあるが、この値にキーが無い（変えるとキーを足すか確かめる）
   blocked: 'baseZero' | 'keyZero' | null; // 0 からは倍率で上げられない
@@ -67,9 +76,12 @@ export function opacityAt(keyEditor: KeyEditor, project: Project, editor: Editor
   const model = project.model;
   const part = partOf(model, partId);
   const baseOpacity = part?.opacity ?? 1;
-  if (isBaseState(model, editor)) return { base: true, value: clamp01(baseOpacity), needsKey: false, blocked: null };
-
   const found = findKey(model, editor, partId);
+  // デフォルト値でも、その値のキーがあればキーの倍率を掛けた見た目の値を見せる（I-038）
+  if (isBaseState(model, editor) && !found.key) {
+    return { base: true, value: clamp01(baseOpacity), needsKey: false, blocked: null };
+  }
+
   let multiplier = 1;
   if (found.key) multiplier = multiplierOf(found.key);
   else if (found.binding) {
@@ -95,7 +107,8 @@ function sequence(label: string, commands: Command[]): Command | null {
 }
 
 // 選んだパーツすべてを、いまの値で不透明度 target にするコマンド（1回の Undo）。
-// キーはパーツごとに今の倍率からの opacityFactor で記録する。キーの無い値なら 'needsKey'。変わらなければ null
+// キーはパーツごとに今の倍率からの opacityFactor で記録する。キーの無い値なら 'needsKey'。変わらなければ null。
+// デフォルト値では、その値のキーがあるパーツはそのキーを、無いパーツは Part.opacity を変える
 export function opacityCommand(
   keyEditor: KeyEditor,
   project: Project,
@@ -105,27 +118,31 @@ export function opacityCommand(
 ): Command | 'needsKey' | null {
   const goal = Math.max(OPACITY_FLOOR, Math.min(1, target));
   const ids = [...new Set(partIds)].filter((id) => partOf(project.model, id));
-
-  if (isBaseState(project.model, editor)) {
-    // 基準状態は Part.opacity を直接変える（Transform の Opacity と同じ。0 からでも上げられる）
-    const commands = ids
-      .filter((id) => !near(partOf(project.model, id)!.opacity, goal))
-      .map((id) => patchPart(OPACITY_LABEL, id, { opacity: goal }));
-    return sequence(OPACITY_LABEL, commands);
-  }
+  const base = isBaseState(project.model, editor);
 
   let p = project;
   const commands: Command[] = [];
   for (const id of ids) {
     const { binding, key } = findKey(p.model, editor, id);
-    if (binding && !key) return 'needsKey';
     const baseOpacity = partOf(p.model, id)!.opacity;
-    const multiplier = key ? multiplierOf(key) : 1;
-    if (baseOpacity <= 0 || multiplier <= 0) continue; // 0 からは倍率で上げられない
-    const factor = goal / baseOpacity / multiplier;
-    if (near(factor, 1)) continue;
-    const command = keyEditor.transformEdit(p, editor, [id], { opacityFactor: factor });
+    let command: Command | 'needsKey' | null = null;
+    if (base && !key) {
+      // 基準状態は Part.opacity を直接変える（Transform の Opacity と同じ。0 からでも上げられる）
+      if (!near(baseOpacity, goal)) command = patchPart(OPACITY_LABEL, id, { opacity: goal });
+    } else {
+      if (binding && !key) return 'needsKey';
+      const multiplier = key ? multiplierOf(key) : 1;
+      if (baseOpacity <= 0 || multiplier <= 0) continue; // 0 からは倍率で上げられない
+      const factor = goal / baseOpacity / multiplier;
+      if (near(factor, 1)) continue;
+      const change: TransformChange = { opacityFactor: factor };
+      // デフォルト値のキーは transformEdit では変えられない（基準状態を変える）ので、専用の口で変える
+      command = base
+        ? defaultKeyTransformEdit(p, editor, id, change)
+        : keyEditor.transformEdit(p, editor, [id], change);
+    }
     if (command === 'needsKey') return 'needsKey';
+    if (!command) continue;
     commands.push(command);
     p = command.apply(p);
   }

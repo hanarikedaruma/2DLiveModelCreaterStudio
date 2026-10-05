@@ -21,4 +21,12 @@
 
 ## 記録
 
-（まだなし）
+### CC-001 キャンバスのツールに、かんたん/詳細の出し分け（level）を足す
+
+- 決めた日 / ステップ: 2026-10-05 / STEP2 の後の課題の修正（docs/issues.md の I-008）
+- 対象の契約: アプリの枠の差し込み口（apps/desktop/src/shell/api.ts）の CanvasTool（カード05）
+- 変更前: `interface CanvasTool { id; label; cursor?; onPointerDown?; onPointerMove?; onPointerUp?; onKeyDown?; drawOverlay? }`
+- 変更後: 上に `level?: 'easy' | 'detail' | 'both'` を足す（省略は both。PanelDef・SectionDef の level と同じ意味）
+- 理由: 詳細モードにだけ出すワープのセクションに対して、ツールのボタン「ワープ編集」がかんたんモードでも出て、押しても何もしなかった（I-008）
+- 影響するカード: CanvasTool を前提に載せるカード（18・21・29・42 など）。省略できる項目を足しただけなので、既存のツールはそのまま動く
+- 移行: shell/canvas/CanvasHost.tsx がツールのボタンを今のかんたん/詳細で出し分け、使っているツールが出ないほうになったら既定のツールに戻す。ワープのツール（modes/modeling/warp/warpTool.ts）を `level: 'detail'` にした。テスト: shell/canvas/toolLevel.test.tsx

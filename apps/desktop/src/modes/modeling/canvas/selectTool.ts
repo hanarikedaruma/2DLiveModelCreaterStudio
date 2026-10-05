@@ -1,8 +1,9 @@
 // 選択・変形ツール（既定のツール）。クリックで選び、ドラッグで移動・回転・拡縮・ピボット移動をする
-import type { Project, Vec2 } from '@app/schema';
+import type { Model, Project, Vec2 } from '@app/schema';
 import type { Command, EditorState, KeyEditor, TransformChange, ViewTransform } from '@app/contracts';
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { canvasToScreen } from '../../../shell/canvas/view';
+import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import type { EnvSlot, ToolEnv } from './env';
 import {
   angleBetween,
@@ -25,7 +26,7 @@ import {
   type ScaleHandle,
   type SelectionBox,
 } from './geometry';
-import { startKeyedDrag, type KeyedDrag } from './liveEdit';
+import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from './liveEdit';
 import {
   ancestorsOf,
   isLockedDeep,
@@ -233,7 +234,7 @@ export function drawHandles(ctx: CanvasRenderingContext2D, h: Handles): void {
     ctx.strokeRect(at.x - s, at.y - s, s * 2, s * 2);
   }
   for (const p of h.otherPivots) drawPivot(ctx, p, 5, accent, 0.6);
-  // 動かせないとき（パラメータ編集中）は薄く出す
+  // 動かせないとき（パラメータ編集中・値だけがデフォルト値でない間）は薄く出す
   if (h.pivot) drawPivot(ctx, h.pivot, 7, '#ff9f1c', h.pivotMovable ? 1 : 0.45);
 }
 
@@ -251,6 +252,7 @@ interface Drag {
   box: SelectionBox | null;
   keyed: KeyedDrag<PartChange[]>;
   clickSelect: string[] | null; // 動かさずに離したら、この選択にする
+  blocked: boolean; // 基準状態と見た目が違うので動かさない（I-029）。クリックでの選択はする
 }
 
 export interface SelectTool {
@@ -277,9 +279,9 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
     return { project, editor, info };
   };
 
-  // ピボットの移動は、編集中のパラメータが無く、1つだけ選んでいるときだけ
-  const pivotMovable = (editor: EditorState, info: SelectionInfo) =>
-    editor.activeParameterIds.length === 0 && info.targets.length === 1;
+  // ピボットの移動は、編集中のパラメータが無く、1つだけ選んでいるときだけ（値だけがデフォルト値でない間も動かせない）
+  const pivotMovable = (model: Model, editor: EditorState, info: SelectionInfo) =>
+    editor.activeParameterIds.length === 0 && info.targets.length === 1 && !isPreviewOffBase(model, editor);
 
   const startDrag = (
     env: ToolEnv,
@@ -311,6 +313,7 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
         onChange: () => env.requestRedraw(),
       }),
       clickSelect: null,
+      blocked: isPreviewOffBase(store.get().model, editor),
     };
     drag = next;
     return next;
@@ -327,7 +330,7 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       if (!env || drag?.keyed.active()) return; // 確認の途中は受け付けない
       drag = null;
       const { project, editor, info } = snapshot(env);
-      const handles = computeHandles(info, env.view(), pivotMovable(editor, info));
+      const handles = computeHandles(info, env.view(), pivotMovable(project.model, editor, info));
       const hit = handles ? hitHandle(handles, e.screenPoint) : null;
       if (hit) {
         startDrag(env, hit.kind, hit.kind === 'scale' ? hit.handle : null, e, info, editor);
@@ -365,7 +368,10 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       if (!drag.started) {
         if (distance(e.screenPoint, drag.screenStart) < DRAG_THRESHOLD) return;
         drag.started = true;
+        // 表情を作っている途中などは、見えている形と違う基準状態を変えてしまうので動かさずに知らせる
+        if (drag.blocked) slot.get()?.dialogs.notify(PREVIEW_OFF_BASE_MESSAGE);
       }
+      if (drag.blocked) return;
       if (drag.kind === 'rotate') {
         const center = drag.targets[0]?.pivot;
         if (center) drag.angle += angleBetween(center, drag.last, e.canvasPoint);
@@ -407,8 +413,8 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
     drawOverlay(ctx, view) {
       const env = slot.get();
       if (!env) return;
-      const { editor, info } = snapshot(env);
-      const handles = computeHandles(info, view, pivotMovable(editor, info));
+      const { project, editor, info } = snapshot(env);
+      const handles = computeHandles(info, view, pivotMovable(project.model, editor, info));
       if (handles) drawHandles(ctx, handles);
     },
   };
