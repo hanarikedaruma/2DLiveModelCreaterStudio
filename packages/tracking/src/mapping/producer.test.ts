@@ -1,5 +1,5 @@
 import type { TrackingFrame } from '@app/contracts';
-import { STANDARD_PARAMETERS, type TrackingMapping, standardParametersFor } from '@app/schema';
+import { STANDARD_PARAMETERS, type TrackingMapping, type TrackingSetup, standardParametersFor } from '@app/schema';
 import { describe, expect, it } from 'vitest';
 import { createDefaultTrackingMappings } from './defaults';
 import { createTrackingLayerProducer } from './producer';
@@ -44,8 +44,14 @@ describe('createTrackingLayerProducer', () => {
     expect(layer.blend).toBeUndefined();
   });
 
-  it('mappings が無いか空なら既定のマッピング（ミラーのオン: yaw・roll・eyeBallX はそのまま、目は入れ替え）', () => {
-    for (const mappings of [undefined, []]) {
+  it('空の一覧なら何も動かさない（I-042。「無効」と、何も割り当てていないカスタム）', () => {
+    const p = createTrackingLayerProducer(MVP, []);
+    p.update(POSE);
+    expect(p.tick(0).values).toEqual({});
+  });
+
+  it('mappings が無ければ既定のマッピング（ミラーのオン: yaw・roll・eyeBallX はそのまま、目は入れ替え）', () => {
+    for (const mappings of [undefined]) {
       const p = createTrackingLayerProducer(MVP, mappings);
       p.update(POSE);
       const v = p.tick(0).values;
@@ -211,5 +217,63 @@ describe('createTrackingLayerProducer', () => {
       p.tick(1600);
       expect(p.status()).toBe('lost');
     });
+  });
+});
+
+describe('同じパラメータへの複数の割り当て（I-042）', () => {
+  // 顔の左右（faceYaw）と視線の左右（eyeBallX）の両方で、ユーザー定義の「しっぽ」（−10..10）を動かす
+  const TAIL = {
+    id: 'Tail',
+    name: 'しっぽ',
+    groupId: 'other' as const,
+    min: -10,
+    max: 10,
+    default: 0,
+    standard: false,
+  };
+  const yaw = {
+    ...createDefaultTrackingMappings()[0]!,
+    parameterId: 'Tail',
+    outputRange: [-10, 10] as [number, number],
+  };
+  const eyes = {
+    ...createDefaultTrackingMappings()[5]!,
+    parameterId: 'Tail',
+    outputRange: [-10, 10] as [number, number],
+    weight: 3,
+  };
+  // faceYaw 15（−30..30 の 3/4 → 5）、eyeBallX 0.5（−1..1 の 3/4 → 5）。ならしが落ち着くまで同じフレームを送る
+  const settled = (mappings: TrackingMapping[], combine: TrackingSetup['combine'], patch = {}) => {
+    const p = createTrackingLayerProducer([...MVP, TAIL], mappings, { combine });
+    for (let t = 0; t < 3000; t += FRAME) p.update(frame(t, { faceYaw: 15, eyeBallX: 0.5, ...patch }));
+    return p.tick(3000).values.Tail;
+  };
+
+  it('加算は 重み × 値 の和（指定が無いときも加算）。パラメータの範囲で丸める', () => {
+    expect(settled([yaw, { ...eyes, weight: 0.2 }], [])).toBeCloseTo(5 + 0.2 * 5, 6);
+    expect(settled([yaw, eyes], [{ parameterId: 'Tail', method: 'add' }])).toBe(10);
+  });
+
+  it('重み付き平均', () => {
+    const v = settled([yaw, { ...eyes, outputRange: [-2, 2] }], [{ parameterId: 'Tail', method: 'average' }]);
+    expect(v).toBeCloseTo((1 * 5 + 3 * 1) / 4, 6);
+    // 重みがどれも 0 ならふつうの平均
+    const zero = settled(
+      [
+        { ...yaw, weight: 0 },
+        { ...eyes, weight: 0, outputRange: [-2, 2] },
+      ],
+      [{ parameterId: 'Tail', method: 'average' }],
+    );
+    expect(zero).toBeCloseTo((5 + 1) / 2, 6);
+  });
+
+  it('優先は一覧で上の割り当て。そのフレームに入力が無ければ次の割り当て', () => {
+    const combine: TrackingSetup['combine'] = [{ parameterId: 'Tail', method: 'priority' }];
+    expect(settled([{ ...eyes, outputRange: [-2, 2] }, yaw], combine)).toBeCloseTo(1, 6);
+    expect(settled([yaw, { ...eyes, outputRange: [-2, 2] }], combine)).toBeCloseTo(5, 6);
+    // 口の形（mouthForm）は MVP の推定に無い入力なので、下の割り当てを使う
+    const form = { ...yaw, input: 'mouthForm' as const, inputRange: [-1, 1] as [number, number] };
+    expect(settled([form, yaw], combine, { mouthForm: undefined })).toBeCloseTo(5, 6);
   });
 });

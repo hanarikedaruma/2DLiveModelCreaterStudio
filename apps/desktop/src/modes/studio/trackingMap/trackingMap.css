@@ -1,0 +1,42 @@
+/* 「トラッキングの割り当て」（I-042）。色は shell.css の変数を使う */
+
+.tracking-map-list {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tracking-map-row {
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.tracking-map-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin-bottom: 4px;
+}
+.tracking-map-line > span {
+  color: var(--text-dim);
+}
+.tracking-map-line select {
+  min-width: 0;
+  max-width: 100%;
+}
+.tracking-map-line .studio-check {
+  margin-bottom: 0;
+}
+.tracking-map-number {
+  width: 64px;
+}
+.tracking-map-actions {
+  justify-content: flex-end;
+  margin-bottom: 0;
+}
+.tracking-map-combine .studio-field {
+  grid-template-columns: minmax(56px, auto) 1fr;
+}

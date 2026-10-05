@@ -18,6 +18,7 @@ import type {
   Project,
   Scene,
   TrackingMapping,
+  TrackingSetup,
   TransformDelta,
   Vec2,
   Warp,
@@ -382,7 +383,23 @@ const trackingMapping: z.ZodType<TrackingMapping> = z.object({
   curve: z.enum(['linear', 'smooth']),
   smoothing: unit,
   deadZone: nonNegative,
+  weight: nonNegative,
 });
+
+const trackingSetup: z.ZodType<TrackingSetup> = z
+  .object({
+    mode: z.enum(['standard', 'custom', 'off']),
+    combine: z.array(z.object({ parameterId: id, method: z.enum(['add', 'average', 'priority']) })),
+  })
+  .superRefine((t, ctx) => {
+    const seen = new Set<string>();
+    t.combine.forEach((c, i) => {
+      if (seen.has(c.parameterId)) {
+        ctx.addIssue({ code: 'custom', path: ['combine', i, 'parameterId'], message: '同じパラメータが2回ある' });
+      }
+      seen.add(c.parameterId);
+    });
+  });
 
 const scene: z.ZodType<Scene> = z.object({
   id,
@@ -416,6 +433,7 @@ export const projectSchema: z.ZodType<Project> = z
     animations: z.array(animation),
     physics: z.array(physics),
     trackingMappings: z.array(trackingMapping),
+    trackingSetup,
     studio: z.object({ scenes: z.array(scene), activeSceneId: id.nullable(), hotkeys: z.array(hotkey) }),
   })
   .superRefine((p, ctx) => {

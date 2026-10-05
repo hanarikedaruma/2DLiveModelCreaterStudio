@@ -1,11 +1,11 @@
 import { validateProject } from './validate';
 import type { Project } from './types';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 // { [版]: その版の json を次の版に変換する関数 }
 export type Migrations = Record<number, (json: Record<string, unknown>) => Record<string, unknown>>;
-export const MIGRATIONS: Migrations = { 1: opacityKeysToAbsolute };
+export const MIGRATIONS: Migrations = { 1: opacityKeysToAbsolute, 2: trackingSetupFromMappings };
 
 export class ProjectVersionError extends Error {
   constructor(message: string) {
@@ -113,6 +113,34 @@ function opacityKeysToAbsolute(json: Record<string, unknown>): Record<string, un
     parts[at] = { ...part, opacity: clamp01(base * atDefault.reduce((acc, f) => acc * f, 1)) };
   }
   return { ...json, model: { ...model, parts, bindings } };
+}
+
+// ---- 2 → 3: トラッキングの割り当ての設定（I-042） ----
+
+// 2 では、trackingMappings が空なら既定のマッピング、あればその一覧だけを使い、同じパラメータへの割り当ては
+// 後の行の値で上書きしていた。trackingSetup の mode をそれに合わせ（空なら standard、あれば custom）、各割り当てに
+// weight 1 を足す。同じパラメータへの割り当てが複数あるものは priority にし、それまで効いていた後の行が上に来るよう
+// その割り当ての並びを逆にする（ほかの行の位置は変えない）
+function trackingSetupFromMappings(json: Record<string, unknown>): Record<string, unknown> {
+  const mappings = Array.isArray(json.trackingMappings) ? json.trackingMappings : [];
+  const withWeight = mappings.map((m) => (isRecord(m) && m.weight === undefined ? { ...m, weight: 1 } : m));
+  const slots = new Map<unknown, number[]>(); // parameterId → 一覧の位置
+  withWeight.forEach((m, i) => {
+    if (!isRecord(m)) return;
+    slots.set(m.parameterId, [...(slots.get(m.parameterId) ?? []), i]);
+  });
+  const ordered = withWeight.slice();
+  const combine: { parameterId: unknown; method: 'priority' }[] = [];
+  for (const [parameterId, at] of slots) {
+    if (at.length < 2) continue;
+    combine.push({ parameterId, method: 'priority' });
+    at.forEach((pos, k) => (ordered[pos] = withWeight[at[at.length - 1 - k]!]));
+  }
+  return {
+    ...json,
+    trackingMappings: ordered,
+    trackingSetup: { mode: mappings.length > 0 ? 'custom' : 'standard', combine },
+  };
 }
 
 // 変換表を指定できる版（テスト用）。現在の版なら受け取ったものをそのまま返す

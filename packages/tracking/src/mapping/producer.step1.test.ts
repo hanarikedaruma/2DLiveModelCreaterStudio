@@ -175,6 +175,7 @@ describe('setPreset', () => {
         curve: 'linear',
         smoothing,
         deadZone: 0,
+        weight: 1,
       },
     ]);
     p.setPreset('custom', { minCutoff: 1.5, beta: 0.05, gain: 1, deadZone: 0 });

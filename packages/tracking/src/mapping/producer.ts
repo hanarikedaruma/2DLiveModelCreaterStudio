@@ -1,5 +1,5 @@
 import type { AutoBlink, Layer, ParamValues, TrackingFrame, TrackingLayerProducer } from '@app/contracts';
-import type { Environment, Parameter, TrackingMapping } from '@app/schema';
+import type { Environment, Parameter, TrackingCombineMethod, TrackingMapping, TrackingSetup } from '@app/schema';
 import { applyCalibration, normalizeCalibration, sameCalibration, type TrackingCalibration } from './calibrate';
 import { createDefaultTrackingMappings } from './defaults';
 import { LOST_DELAY, type LostBehavior, LostWeight } from './lostWeight';
@@ -27,6 +27,8 @@ export interface TrackingLayerOptions {
   // 目のトラッキングをオフにしたときと外れたときの EyeOpenL / R（@app/core の createAutoBlink など）。
   // 無ければ目を開けたまま（アプリではカード44で services.autoBlink を渡す）
   autoBlink?: AutoBlink;
+  // 同じパラメータへの割り当てが複数あるときの合わせ方（I-042）。無いパラメータは add
+  combine?: TrackingSetup['combine'];
 }
 
 interface ResolvedMapping {
@@ -37,8 +39,16 @@ interface ResolvedMapping {
   centered: boolean; // gain と preset の deadZone を当てる入力か
 }
 
+// 同じパラメータへの割り当ての組（一覧の順）
+interface MappingGroup {
+  parameter: Parameter;
+  method: TrackingCombineMethod;
+  members: ResolvedMapping[];
+}
+
 // トラッキングの値をパラメータへ写し、ならし、顔が外れたら正面へ戻すレイヤー（id 'tracking'）。
-// mappings が無いか空なら既定のマッピング。parameters に無いパラメータへのマッピングは使わない
+// mappings が無ければ既定のマッピング。空の一覧なら何も動かさない（I-042。以前は空でも既定だった）。
+// parameters に無いパラメータへのマッピングは使わない
 export function createTrackingLayerProducer(
   parameters: Parameter[],
   mappings?: TrackingMapping[],
@@ -46,13 +56,15 @@ export function createTrackingLayerProducer(
 ): TrackingLayerProducer {
   return new TrackingLayer(
     parameters,
-    mappings && mappings.length > 0 ? mappings : createDefaultTrackingMappings(),
+    mappings ?? createDefaultTrackingMappings(),
     options.autoBlink ?? null,
+    options.combine ?? [],
   );
 }
 
 class TrackingLayer implements TrackingLayerProducer {
   private readonly resolved: ResolvedMapping[];
+  private readonly groups: MappingGroup[];
   private readonly parametersById: Map<string, Parameter>;
   private readonly weight = new LostWeight();
   private values: ParamValues = {};
@@ -68,21 +80,31 @@ class TrackingLayer implements TrackingLayerProducer {
     parameters: Parameter[],
     mappings: TrackingMapping[],
     private readonly autoBlink: AutoBlink | null,
+    combine: TrackingSetup['combine'],
   ) {
     this.parametersById = new Map(parameters.map((p) => [p.id, p]));
     this.resolved = [];
+    const groups = new Map<string, MappingGroup>();
     for (const mapping of mappings) {
       const parameter = this.parametersById.get(mapping.parameterId);
       if (!parameter) continue;
       const span = Math.abs(mapping.inputRange[1] - mapping.inputRange[0]);
-      this.resolved.push({
+      const resolved: ResolvedMapping = {
         mapping,
         parameter,
         filter: this.createFilter(mapping),
         scale: span > 0 ? FILTER_SPAN / span : 1,
         centered: CENTERED_TRACKING_INPUTS.has(mapping.input),
-      });
+      };
+      this.resolved.push(resolved);
+      let group = groups.get(parameter.id);
+      if (!group) {
+        const method = combine.find((c) => c.parameterId === parameter.id)?.method ?? 'add';
+        groups.set(parameter.id, (group = { parameter, method, members: [] }));
+      }
+      group.members.push(resolved);
     }
+    this.groups = [...groups.values()];
   }
 
   update(frame: TrackingFrame): void {
@@ -178,26 +200,44 @@ class TrackingLayer implements TrackingLayerProducer {
   }
 
   // キャリブレーション → ミラー → 入力範囲で丸めてならす → 写像（deadZone はマッピングの値 + プリセットの値）
-  // → 中央からの差に gain → パラメータの範囲で丸める
+  // → 中央からの差に gain → 同じパラメータの割り当てを合わせる（I-042） → パラメータの範囲で丸める
   private compute(frame: TrackingFrame): ParamValues {
     const inputs = trackingInputs(applyCalibration(frame, this.calibration), this.mirror);
     const values: ParamValues = { ...this.values };
-    const { gain, deadZone } = this.tuning;
-    for (const r of this.resolved) {
-      const x = inputs[r.mapping.input];
-      if (x === undefined || !Number.isFinite(x)) continue; // 推定に無い入力・壊れた値は前のまま
-      const smoothed = r.filter.filter(clampToInputRange(x, r.mapping.inputRange) * r.scale, frame.time) / r.scale;
-      let v: number;
-      if (r.centered && (deadZone !== 0 || gain !== 1)) {
-        v = mapTrackingValue(smoothed, { ...r.mapping, deadZone: r.mapping.deadZone + deadZone / r.scale });
-        const [c, d] = r.mapping.outputRange;
-        const mid = (c + d) / 2;
-        v = mid + (v - mid) * gain;
-      } else {
-        v = mapTrackingValue(smoothed, r.mapping);
+    for (const group of this.groups) {
+      // 推定に無い入力・壊れた値の割り当ては、このフレームでは使わない（どれも無ければ前の値のまま）
+      const got: { v: number; weight: number }[] = [];
+      for (const r of group.members) {
+        const v = this.mapOne(r, inputs[r.mapping.input], frame.time);
+        if (v !== null) got.push({ v, weight: Math.max(0, r.mapping.weight) });
       }
-      values[r.parameter.id] = clamp(v, r.parameter.min, r.parameter.max);
+      if (got.length === 0) continue;
+      values[group.parameter.id] = clamp(combineValues(group.method, got), group.parameter.min, group.parameter.max);
     }
     return values;
   }
+
+  // 1つの割り当ての値。入力が無いか壊れていれば null
+  private mapOne(r: ResolvedMapping, x: number | undefined, time: number): number | null {
+    if (x === undefined || !Number.isFinite(x)) return null;
+    const { gain, deadZone } = this.tuning;
+    const smoothed = r.filter.filter(clampToInputRange(x, r.mapping.inputRange) * r.scale, time) / r.scale;
+    if (r.centered && (deadZone !== 0 || gain !== 1)) {
+      const v = mapTrackingValue(smoothed, { ...r.mapping, deadZone: r.mapping.deadZone + deadZone / r.scale });
+      const [c, d] = r.mapping.outputRange;
+      const mid = (c + d) / 2;
+      return mid + (v - mid) * gain;
+    }
+    return mapTrackingValue(smoothed, r.mapping);
+  }
+}
+
+// 同じパラメータの割り当ての値を合わせる（I-042）。add = 重み × 値の和、average = 重みで平均（重みの和が 0 なら
+// ふつうの平均）、priority = 一覧で上にある割り当て（値の無いものは除いてある）
+export function combineValues(method: TrackingCombineMethod, got: readonly { v: number; weight: number }[]): number {
+  if (method === 'priority') return got[0]!.v;
+  const total = got.reduce((s, g) => s + g.weight, 0);
+  const sum = got.reduce((s, g) => s + g.weight * g.v, 0);
+  if (method === 'add') return sum;
+  return total > 0 ? sum / total : got.reduce((s, g) => s + g.v, 0) / got.length;
 }

@@ -1,9 +1,21 @@
-// トラッキングのレイヤー（カード24）。プロジェクトの parameters・trackingMappings が変わったら作り直す。
+// トラッキングのレイヤー（カード24）。プロジェクトの parameters・trackingMappings・trackingSetup が変わったら作り直す。
 // 作り直しても、ミラー・外れたときの動き・キャリブレーション・プリセット・目の追従の設定（STEP1）は引き継ぐ
-import type { Environment, Parameter, Project, TrackingMapping } from '@app/schema';
+import type { Environment, Parameter, Project, TrackingMapping, TrackingSetup } from '@app/schema';
 import type { Layer, TrackingFrame, TrackingLayerProducer } from '@app/contracts';
 
-export type TrackingLayerFactory = (parameters: Parameter[], mappings?: TrackingMapping[]) => TrackingLayerProducer;
+// mappings が無ければ既定のマッピング、空なら何も動かさない。combine は同じパラメータへの割り当ての合わせ方（I-042）
+export type TrackingLayerFactory = (
+  parameters: Parameter[],
+  mappings?: TrackingMapping[],
+  combine?: TrackingSetup['combine'],
+) => TrackingLayerProducer;
+
+// trackingSetup.mode に合わせた割り当て（standard = 既定（undefined）、custom = 一覧、off = 空）
+export function mappingsOf(project: Project): TrackingMapping[] | undefined {
+  const { mode } = project.trackingSetup;
+  if (mode === 'standard') return undefined;
+  return mode === 'custom' ? project.trackingMappings : [];
+}
 
 export function createProjectTrackingLayer(
   store: { get(): Project; subscribe(listener: (project: Project) => void): () => void },
@@ -16,9 +28,10 @@ export function createProjectTrackingLayer(
   let eyeTracking = true;
   let parameters = store.get().model.parameters;
   let mappings = store.get().trackingMappings;
+  let setup = store.get().trackingSetup;
 
-  const build = () => {
-    const layer = create(parameters, mappings);
+  const build = (project: Project) => {
+    const layer = create(project.model.parameters, mappingsOf(project), project.trackingSetup.combine);
     layer.setMirror(mirror);
     layer.setLostBehavior(lostBehavior);
     layer.setCalibration(calibration);
@@ -26,13 +39,19 @@ export function createProjectTrackingLayer(
     layer.setEyeTracking(eyeTracking);
     return layer;
   };
-  let inner = build();
+  let inner = build(store.get());
 
   store.subscribe((project) => {
-    if (project.model.parameters === parameters && project.trackingMappings === mappings) return;
+    if (
+      project.model.parameters === parameters &&
+      project.trackingMappings === mappings &&
+      project.trackingSetup === setup
+    )
+      return;
     parameters = project.model.parameters;
     mappings = project.trackingMappings;
-    inner = build();
+    setup = project.trackingSetup;
+    inner = build(project);
   });
 
   return {

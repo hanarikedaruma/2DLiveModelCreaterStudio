@@ -205,8 +205,10 @@ function fullProject(): Project {
         curve: 'linear',
         smoothing: 0.5,
         deadZone: 0.5,
+        weight: 1,
       },
     ],
+    trackingSetup: { mode: 'custom', combine: [{ parameterId: 'FaceAngleX', method: 'average' }] },
     studio: {
       scenes: [
         ...p.studio.scenes,
@@ -330,6 +332,23 @@ describe('validateProject', () => {
       'model.parameters[1].max',
       'model.parameters[1].default',
     ]);
+  });
+
+  it('トラッキングの割り当ての重みは 0 以上、合わせ方の同じパラメータは1つだけ（I-042）', () => {
+    const p = fullProject();
+    const negative = { ...p, trackingMappings: [{ ...p.trackingMappings[0]!, weight: -1 }] };
+    expect(() => validateProject(negative)).toThrow(/trackingMappings\[0\]\.weight/);
+    const twice = {
+      ...p,
+      trackingSetup: {
+        mode: 'custom' as const,
+        combine: [
+          { parameterId: 'FaceAngleX', method: 'add' as const },
+          { parameterId: 'FaceAngleX', method: 'priority' as const },
+        ],
+      },
+    };
+    expect(() => validateProject(twice)).toThrow(/同じパラメータが2回ある/);
   });
 
   it('id の重複を見つける', () => {

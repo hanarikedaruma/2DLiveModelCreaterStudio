@@ -25,6 +25,7 @@ import { register as registerAnimation } from './animation'; // カード46
 import { register as registerPhysics } from './modeling/physics'; // カード50
 import { register as registerPeriodic } from './studio/periodic'; // カード48
 import { register as registerVowels } from './modeling/vowels'; // カード51
+import { register as registerTrackingMap } from './studio/trackingMap'; // I-042
 
 export function registerModes(): void {
   registerCanvasEdit(); // カード18
@@ -53,4 +54,5 @@ export function registerModes(): void {
   registerPhysics(); // カード50
   registerPeriodic(); // カード48
   registerVowels(); // カード51
+  registerTrackingMap(); // I-042
 }

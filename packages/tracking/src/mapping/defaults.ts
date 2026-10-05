@@ -11,10 +11,11 @@ function mapping(input: TrackingInput, parameterId: string, range: [number, numb
     curve: 'linear',
     smoothing: DEFAULT_SMOOTHING, // minCutoff 1.0
     deadZone: 0,
+    weight: 1,
   };
 }
 
-// 既定のマッピング（Project の trackingMappings が空のとき）。毎回新しい配列を返す。
+// 既定のマッピング（Project の trackingSetup.mode が standard のとき）。毎回新しい配列を返す。
 // 口の形・口の横幅・眉（STEP1、カード35）は、モデルにそのパラメータがあるときだけ使われる
 export function createDefaultTrackingMappings(): TrackingMapping[] {
   return [

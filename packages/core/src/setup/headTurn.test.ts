@@ -1,5 +1,5 @@
 import reference from '@app/fixtures/reference-model/project.json';
-import { validateProject, type Project, type Vec2 } from '@app/schema';
+import { loadProjectJson, validateProject, type Project, type Vec2 } from '@app/schema';
 import { describe, expect, it } from 'vitest';
 import { createBindingEvaluator } from '../eval';
 import { createDeformPipeline } from '../deform';
@@ -8,7 +8,7 @@ import { createAutoSetup } from './autoSetup';
 import { headWarpOf as modelHeadWarp } from './faceTurn';
 import { faceTurnBindings as modelFaceTurns, HEAD_TURN_ANGLE } from './headTurn';
 
-const base = () => validateProject(structuredClone(reference));
+const base = () => loadProjectJson(JSON.stringify(reference));
 const setup = createAutoSetup({ faceTurn: 'head-surface' });
 const run = (p: Project) => setup.plan(p).command.apply(p);
 const headWarpOf = (p: Project) => modelHeadWarp(p.model);

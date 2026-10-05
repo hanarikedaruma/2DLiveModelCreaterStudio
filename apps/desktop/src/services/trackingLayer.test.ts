@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createEmptyProject, type Parameter, type TrackingMapping } from '@app/schema';
+import { createEmptyProject, type Parameter, type TrackingMapping, type TrackingSetup } from '@app/schema';
 import { createProjectStore } from '@app/core';
 import type { TrackingFrame, TrackingLayerProducer } from '@app/contracts';
 import { createTrackingLayerProducer } from '@app/tracking';
@@ -20,11 +20,20 @@ const frame = (time: number, faceYaw: number): TrackingFrame => ({
 
 // 作った回数と、渡された設定を記録する
 function recordingFactory() {
-  const made: { parameters: Parameter[]; mappings?: TrackingMapping[]; calls: string[] }[] = [];
-  const create = (parameters: Parameter[], mappings?: TrackingMapping[]): TrackingLayerProducer => {
-    const entry = { parameters, mappings, calls: [] as string[] };
+  const made: {
+    parameters: Parameter[];
+    mappings?: TrackingMapping[];
+    combine?: TrackingSetup['combine'];
+    calls: string[];
+  }[] = [];
+  const create = (
+    parameters: Parameter[],
+    mappings?: TrackingMapping[],
+    combine?: TrackingSetup['combine'],
+  ): TrackingLayerProducer => {
+    const entry = { parameters, mappings, combine, calls: [] as string[] };
     made.push(entry);
-    const real = createTrackingLayerProducer(parameters, mappings);
+    const real = createTrackingLayerProducer(parameters, mappings, { combine });
     return {
       update: (f) => real.update(f),
       tick: (now) => real.tick(now),
@@ -57,7 +66,9 @@ function recordingFactory() {
 describe('createProjectTrackingLayer', () => {
   it('本物のレイヤーでフレームが FaceAngleX に写る', () => {
     const store = createProjectStore(createEmptyProject('t'));
-    const layer = createProjectTrackingLayer(store, createTrackingLayerProducer);
+    const layer = createProjectTrackingLayer(store, (parameters, mappings) =>
+      createTrackingLayerProducer(parameters, mappings),
+    );
     for (let t = 0; t <= 1000; t += 33) layer.update(frame(t, 20));
     const out = layer.tick(1000);
     expect(out.id).toBe('tracking');
@@ -96,8 +107,13 @@ describe('createProjectTrackingLayer', () => {
       curve: 'linear',
       smoothing: 0.5,
       deadZone: 0,
+      weight: 1,
     };
-    store.dispatch({ label: 'マッピング', apply: (p) => ({ ...p, trackingMappings: [mapping] }) });
+    // カスタムの一覧を使う設定にすると、その一覧で作り直す
+    store.dispatch({
+      label: 'マッピング',
+      apply: (p) => ({ ...p, trackingMappings: [mapping], trackingSetup: { mode: 'custom', combine: [] } }),
+    });
     expect(made).toHaveLength(2);
     expect(made[1]!.mappings).toEqual([mapping]);
     expect(made[1]!.calls).toEqual(['mirror:false', 'lost:hold', 'calibration:5', 'preset:custom:1.5', 'eyes:false']);
@@ -108,5 +124,24 @@ describe('createProjectTrackingLayer', () => {
     });
     expect(made).toHaveLength(3);
     expect(made[2]!.parameters).toHaveLength(3);
+  });
+
+  it('標準は既定のマッピング（undefined）、カスタムは一覧（空なら何も動かさない）、無効は空。合わせ方も渡す（I-042）', () => {
+    const store = createProjectStore(createEmptyProject('t'));
+    const { made, create } = recordingFactory();
+    const layer = createProjectTrackingLayer(store, create);
+    expect(made[0]!.mappings).toBeUndefined();
+    const setup = (trackingSetup: TrackingSetup) =>
+      store.dispatch({ label: '設定', apply: (p) => ({ ...p, trackingSetup }) });
+
+    setup({ mode: 'custom', combine: [{ parameterId: 'FaceAngleX', method: 'average' }] });
+    expect(made.at(-1)!.mappings).toEqual([]);
+    expect(made.at(-1)!.combine).toEqual([{ parameterId: 'FaceAngleX', method: 'average' }]);
+    setup({ mode: 'off', combine: [] });
+    expect(made.at(-1)!.mappings).toEqual([]);
+    for (let t = 0; t <= 1000; t += 33) layer.update(frame(t, 20));
+    expect(layer.tick(1000).values.FaceAngleX).toBeUndefined();
+    setup({ mode: 'standard', combine: [] });
+    expect(made.at(-1)!.mappings).toBeUndefined();
   });
 });

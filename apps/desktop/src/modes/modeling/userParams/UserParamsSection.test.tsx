@@ -58,6 +58,7 @@ function projectWithTail(): Project {
         curve: 'linear',
         smoothing: 0.5,
         deadZone: 0,
+        weight: 1,
       },
     ],
   };

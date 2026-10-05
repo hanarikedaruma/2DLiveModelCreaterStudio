@@ -1,6 +1,7 @@
 import reference from '@app/fixtures/reference-model/project.json';
 import sample from '@app/fixtures/sample-model/project.json';
 import {
+  loadProjectJson,
   validateProject,
   type Binding,
   type Mesh,
@@ -22,7 +23,7 @@ import { faceTurnCrossTerm, sphereTurn } from './faceTurn';
 
 // fixtures の sample-model に、3×3 の格子のメッシュと頬（顔と同じ素材）を足したもの（値を手で確かめやすい）
 function sampleWithMeshes(): Project {
-  const p = validateProject(structuredClone(sample));
+  const p = loadProjectJson(JSON.stringify(sample));
   const face = p.model.parts.find((q) => q.standardType === 'face')!;
   p.model.parts.push({ ...face, id: 'cheek', name: '頬染め', standardType: 'cheek' });
   p.model.drawOrder.push('cheek');
@@ -51,7 +52,7 @@ function sampleWithMeshes(): Project {
   return p;
 }
 // fixtures の reference-model（本物のメッシュ・頬・上まぶたの子のまつげがあり、MVP のかんたんセットアップ済み）
-const referenceModel = (): Project => validateProject(structuredClone(reference));
+const referenceModel = (): Project => loadProjectJson(JSON.stringify(reference));
 
 const run = (p: Project) => createAutoSetup().plan(p).command.apply(p);
 const part = (p: Project, type: StandardPartType) => p.model.parts.find((q) => q.standardType === type)!;

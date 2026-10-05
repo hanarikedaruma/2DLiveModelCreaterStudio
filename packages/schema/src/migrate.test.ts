@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { createEmptyProject } from './defaults';
 import { ProjectVersionError, SCHEMA_VERSION, loadProjectJson, migrate, migrateWith } from './migrate';
 import { ProjectValidationError } from './validate';
-import type { Binding, Parameter, Part, TransformDelta } from './types';
+import type { Binding, Parameter, Part, TrackingMapping, TransformDelta } from './types';
 
 describe('migrate', () => {
   it('現在の版は 2', () => {
-    expect(SCHEMA_VERSION).toBe(2);
+    expect(SCHEMA_VERSION).toBe(3);
   });
 
   it('現在の版は何も変えない', () => {
@@ -17,9 +17,9 @@ describe('migrate', () => {
   });
 
   it('このアプリより新しい版のファイルはエラーになる', () => {
-    const p = { ...createEmptyProject('テスト'), schemaVersion: 3 };
+    const p = { ...createEmptyProject('テスト'), schemaVersion: 4 };
     expect(() => migrate(p)).toThrow(ProjectVersionError);
-    expect(() => migrate(p)).toThrow(/新しい版（3）/);
+    expect(() => migrate(p)).toThrow(/新しい版（4）/);
   });
 
   it('版が無い・数でないものはエラー', () => {
@@ -119,7 +119,7 @@ describe('1 → 2: 不透明度のキーを倍率から絶対値にする（I-02
         ],
       ),
     );
-    expect(p.schemaVersion).toBe(2);
+    expect(p.schemaVersion).toBe(3);
     expect(p.model.parts[0]!.opacity).toBe(0.5);
     const b = p.model.bindings[0];
     expect(b!.controlsOpacity).toBe(true);
@@ -198,6 +198,47 @@ describe('1 → 2: 不透明度のキーを倍率から絶対値にする（I-02
     );
     expect(p.model.parts[0]!.opacity).toBeCloseTo(0.4);
     expect(opacities(p.model.bindings[0])).toEqual([expect.closeTo(0.2), expect.closeTo(0.6)]);
+  });
+});
+
+describe('2 → 3: トラッキングの割り当ての設定（I-042）', () => {
+  const mapping = (input: TrackingMapping['input'], parameterId: string) => ({
+    input,
+    parameterId,
+    inputRange: [-30, 30],
+    outputRange: [-30, 30],
+    invert: false,
+    curve: 'linear',
+    smoothing: 0.5,
+    deadZone: 0,
+  });
+  const v2 = (trackingMappings: unknown[]) => {
+    const { trackingSetup: _setup, ...p } = createEmptyProject('版 2');
+    return { ...p, schemaVersion: 2, trackingMappings };
+  };
+  const migrated = (json: unknown) => loadProjectJson(JSON.stringify(json));
+
+  it('空の一覧は standard（既定のマッピング）のまま', () => {
+    const p = migrated(v2([]));
+    expect(p.trackingSetup).toEqual({ mode: 'standard', combine: [] });
+    expect(p.trackingMappings).toEqual([]);
+  });
+
+  it('一覧があれば custom にし、各割り当てに重み 1 を足す', () => {
+    const p = migrated(v2([mapping('faceYaw', 'FaceAngleX'), mapping('mouthOpen', 'MouthOpen')]));
+    expect(p.trackingSetup).toEqual({ mode: 'custom', combine: [] });
+    expect(p.trackingMappings.map((m) => [m.input, m.weight])).toEqual([
+      ['faceYaw', 1],
+      ['mouthOpen', 1],
+    ]);
+  });
+
+  it('同じパラメータへの割り当ては priority にし、後の行（それまで効いていた方）を上にする', () => {
+    const p = migrated(
+      v2([mapping('faceYaw', 'FaceAngleX'), mapping('mouthOpen', 'MouthOpen'), mapping('eyeBallX', 'FaceAngleX')]),
+    );
+    expect(p.trackingSetup.combine).toEqual([{ parameterId: 'FaceAngleX', method: 'priority' }]);
+    expect(p.trackingMappings.map((m) => m.input)).toEqual(['eyeBallX', 'mouthOpen', 'faceYaw']);
   });
 });
 

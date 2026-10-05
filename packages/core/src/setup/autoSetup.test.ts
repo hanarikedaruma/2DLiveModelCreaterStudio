@@ -2,6 +2,7 @@ import sample from '@app/fixtures/sample-model/project.json';
 import {
   STANDARD_DRAW_ORDER,
   ensureStandardParameters,
+  loadProjectJson,
   validateProject,
   type Asset,
   type Binding,
@@ -15,7 +16,7 @@ import { describe, expect, it } from 'vitest';
 import { createKeyGenerator } from '../generate';
 import { AUTO_SETUP_LABEL, createAutoSetup, runAutoSetup } from './autoSetup';
 
-const base = (): Project => validateProject(structuredClone(sample));
+const base = (): Project => loadProjectJson(JSON.stringify(sample));
 const autoSetup = createAutoSetup();
 
 function run(project: Project) {

@@ -21,6 +21,20 @@
 
 ## 記録
 
+### CC-007 トラッキングの割り当ての使い方と、同じパラメータへの割り当ての合わせ方
+
+- 決めた日 / ステップ: 2026-10-05 / 承認済み方針（I-042「スタジオ詳細設定にトラッキングの割り当て・合成設定を追加する」）。実装・自動確認は2026-10-06（別のセッション）。
+- 対象の契約: `@app/schema` の `Project`・`TrackingMapping`・schemaVersion（カード02・16）、`@app/tracking` の `createTrackingLayerProducer`（カード16・26）。
+- 変更前: `Project.trackingMappings` が空なら既定のマッピング、1件でもあればその一覧だけを使う。同じパラメータへの割り当ては後の行の値で上書き。空の一覧と「全部無効」を区別できない。割り当てを編集する画面は無い。
+- 変更後:
+  - `Project.trackingSetup: { mode: 'standard' | 'custom' | 'off'; combine: { parameterId; method: 'add' | 'average' | 'priority' }[] }` を追加。standard = 既定のマッピング、custom = `trackingMappings` の一覧（空なら何も動かさない）、off = トラッキングでパラメータを動かさない。一覧はどの使い方でも残す。
+  - `TrackingMapping.weight: number`（0 以上）を追加。合わせ方: add = 重み × 値の和（一覧に無いパラメータの既定）、average = 重み付き平均（重みの和が 0 ならふつうの平均）、priority = 一覧で上の割り当て（そのフレームに入力が無ければ次）。合わせたあとパラメータの範囲で丸める。
+  - `createTrackingLayerProducer(parameters, mappings?, { autoBlink?, combine? })`: mappings が無ければ既定、空の配列なら何も動かさない（以前は空でも既定）。
+  - schemaVersion を 3 にし、2 → 3 の変換を足した（`MIGRATIONS[2]`）。一覧が空なら standard、あれば custom。各割り当てに weight 1。同じパラメータへの割り当てが複数あれば priority にし、それまで効いていた後の行が上に来るよう並びを逆にする。
+- 理由: I-042。ユーザー定義パラメータへの割り当てを画面で作れるようにし（STEP1 完成条件14）、標準へ戻すことと全部無効にすることを区別し、複数の入力の合わせ方を明示する。
+- 影響するカード: 保存16、トラッキング16・26・35、スタジオの設定22、ユーザー定義パラメータ34（削除で合わせ方の設定も消す）。
+- 移行: schema（型・既定値・検証・migrate）、tracking（producer・既定のマッピングに weight）、desktop（services/trackingLayer の `mappingsOf`、スタジオの設定（詳細）の「トラッキングの割り当て」（modes/studio/trackingMap）、userParams の削除）。core のテストは fixtures のプロジェクトを `loadProjectJson`（変換してから検証）で読むようにした。
+
 ### CC-006 不透明度のキーを、その姿勢でのパーツ自身の不透明度（絶対値）にする
 
 - 決めた日 / ステップ: 2026-10-05 / 承認済み方針（I-026「姿勢ごとの絶対値キー」）。実装・自動確認は2026-10-06（別のセッション。CO と同時に着手しないよう実装記録に書いて進めた）。

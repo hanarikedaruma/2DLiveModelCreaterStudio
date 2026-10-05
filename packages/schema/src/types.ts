@@ -180,7 +180,7 @@ export interface Model {
   setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
 }
 export interface Project {
-  schemaVersion: number; // 現在は 2（1 → 2 で不透明度のキーを倍率から絶対値にした。I-026）
+  schemaVersion: number; // 現在は 3（1 → 2 で不透明度のキーを絶対値に（I-026）、2 → 3 でトラッキングの割り当ての設定（I-042））
   id: Id;
   name: string;
   assets: Asset[];
@@ -188,7 +188,8 @@ export interface Project {
   expressions: Expression[];
   animations: Animation[];
   physics: Physics[];
-  trackingMappings: TrackingMapping[]; // 空なら既定のマッピング
+  trackingMappings: TrackingMapping[]; // カスタムの割り当ての一覧（trackingSetup.mode が custom のときに使う）
+  trackingSetup: TrackingSetup; // トラッキングの割り当ての使い方と合わせ方（I-042）
   studio: { scenes: Scene[]; activeSceneId: Id | null; hotkeys: Hotkey[] };
 }
 
@@ -276,6 +277,16 @@ export interface TrackingMapping {
   curve: 'linear' | 'smooth';
   smoothing: number; // 0..1
   deadZone: number; // 入力の単位
+  weight: number; // 0 以上。同じパラメータへの割り当てを「加算」「重み付き平均」で合わせるときの重み（I-042）
+}
+// 同じパラメータに複数の割り当てがあるときの合わせ方（I-042）。add = 重み × 値の和、average = 重みで平均、
+// priority = 一覧で上にある割り当て（そのフレームに入力が無ければ次の割り当て）
+export type TrackingCombineMethod = 'add' | 'average' | 'priority';
+export interface TrackingSetup {
+  // standard = 既定のマッピング、custom = Project.trackingMappings の一覧（空なら何も動かさない）、
+  // off = トラッキングでパラメータを動かさない（自動まばたきは目のトラッキングの設定のまま）
+  mode: 'standard' | 'custom' | 'off';
+  combine: { parameterId: Id; method: TrackingCombineMethod }[]; // 一覧に無いパラメータは add
 }
 
 // ---- Scene と Hotkey ----

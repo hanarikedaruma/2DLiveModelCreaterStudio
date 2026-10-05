@@ -1,5 +1,5 @@
 import reference from '@app/fixtures/reference-model/project.json';
-import { validateProject, type Binding, type Project } from '@app/schema';
+import { loadProjectJson, type Binding, type Project } from '@app/schema';
 import { describe, expect, it } from 'vitest';
 import { createDeformPipeline } from '../deform';
 import { createBindingEvaluator } from '../eval';
@@ -7,7 +7,7 @@ import { depthKeyDelta } from '../generate/depth';
 import { createProjectStore } from '../store';
 import { createAutoSetup } from './autoSetup';
 
-const base = () => validateProject(structuredClone(reference));
+const base = () => loadProjectJson(JSON.stringify(reference));
 const setup = createAutoSetup({ faceTurn: 'depth' });
 const run = (p: Project) => setup.plan(p).command.apply(p);
 const surface = (p: Project) => createAutoSetup({ faceTurn: 'surface' }).plan(p).command.apply(p);

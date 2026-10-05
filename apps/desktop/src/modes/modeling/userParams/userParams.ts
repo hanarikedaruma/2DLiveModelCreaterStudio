@@ -186,6 +186,7 @@ export function removeParameterCommand(id: string): Command {
           },
         },
         trackingMappings: keep(project.trackingMappings),
+        trackingSetup: { ...project.trackingSetup, combine: keep(project.trackingSetup.combine) },
         expressions: project.expressions.map((e) =>
           e.entries.some((x) => x.parameterId === id) ? { ...e, entries: keep(e.entries) } : e,
         ),

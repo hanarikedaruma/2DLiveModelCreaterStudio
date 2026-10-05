@@ -37,6 +37,7 @@ export function createEmptyProject(name: string): Project {
     animations: [],
     physics: [],
     trackingMappings: [],
+    trackingSetup: { mode: 'standard', combine: [] },
     studio: { scenes: [scene], activeSceneId: scene.id, hotkeys: [] },
   };
 }

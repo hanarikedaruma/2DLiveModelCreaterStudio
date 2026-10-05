@@ -2,7 +2,7 @@ import reference from '@app/fixtures/reference-model/project.json';
 import sample from '@app/fixtures/sample-model/project.json';
 import {
   ensureStandardParameters,
-  validateProject,
+  loadProjectJson,
   type Binding,
   type Mesh,
   type ParameterKey,
@@ -20,9 +20,9 @@ import { STEP2_MOTION } from './step2';
 
 // プロジェクトを開いたときにアプリ（step2Params）が足すのと同じく、STEP2 の標準パラメータを足す
 const withStep2 = (p: Project): Project => ({ ...p, model: ensureStandardParameters(p.model, 'step2') });
-const sampleModel = (): Project => validateProject(structuredClone(sample));
+const sampleModel = (): Project => loadProjectJson(JSON.stringify(sample));
 // fixtures の reference-model（本物のメッシュがあり、胴体の子にボタンなど。MVP のかんたんセットアップ済み）
-const referenceModel = (): Project => validateProject(structuredClone(reference));
+const referenceModel = (): Project => loadProjectJson(JSON.stringify(reference));
 
 // 画像パーツに 3×3 の格子のメッシュを付ける（変形した位置を手で確かめやすい）
 function withGridMeshes(start: Project): Project {

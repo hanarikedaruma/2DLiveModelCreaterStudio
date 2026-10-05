@@ -88,6 +88,7 @@ function project(): Project {
         curve: 'linear',
         smoothing: 0.5,
         deadZone: 0,
+        weight: 1,
       },
       {
         input: 'faceYaw',
@@ -98,6 +99,7 @@ function project(): Project {
         curve: 'linear',
         smoothing: 0.5,
         deadZone: 0,
+        weight: 1,
       },
     ],
     expressions: [
@@ -265,8 +267,20 @@ describe('削除', () => {
   });
 
   it('パラメータと、それを使うバインディング・マッピング・表情の項目などを消す（ほかは残す）', () => {
-    const p = deepFreeze(project());
+    const base = project();
+    const p = deepFreeze({
+      ...base,
+      trackingSetup: {
+        mode: 'custom' as const,
+        combine: [
+          { parameterId: 'tail', method: 'average' as const },
+          { parameterId: 'FaceAngleX', method: 'priority' as const },
+        ],
+      },
+    });
     const next = removeParameterCommand('tail').apply(p);
+    // 合わせ方の設定からも消す（I-042）
+    expect(next.trackingSetup.combine).toEqual([{ parameterId: 'FaceAngleX', method: 'priority' }]);
     expect(next.model.parameters.map((x) => x.id)).not.toContain('tail');
     expect(next.model.parameters.map((x) => x.id)).toContain('tears');
     expect(next.model.bindings.map((b) => b.id)).toEqual(['b-face']); // 2つの組のバインディングも消す

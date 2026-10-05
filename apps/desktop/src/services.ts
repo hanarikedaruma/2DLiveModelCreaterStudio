@@ -131,8 +131,8 @@ export function createServices(): Services {
     io,
     autoSaver: createAutoSaver(fs, io, store, projectAssetPngs),
     tracking: createMediaPipeTrackingSource(),
-    trackingLayer: createProjectTrackingLayer(store, (parameters, mappings) =>
-      createTrackingLayerProducer(parameters, mappings, { autoBlink }),
+    trackingLayer: createProjectTrackingLayer(store, (parameters, mappings, combine) =>
+      createTrackingLayerProducer(parameters, mappings, { autoBlink, combine }),
     ),
     // STEP1（カード44で本物に差し替えた）
     audio,
