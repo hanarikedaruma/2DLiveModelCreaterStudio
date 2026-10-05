@@ -39,7 +39,8 @@ import {
 
 export const SELECT_TOOL_ID = 'modeling.select';
 
-export const HANDLE_RADIUS = 7; // 画面のピクセル
+export const HANDLE_RADIUS = 7; // 画面のピクセル。ピボットをつかめる範囲と、小さい枠の判定の基準
+export const HANDLE_GRAB_RADIUS = 11; // 回転・拡縮のハンドルをつかめる範囲（画面のピクセル）。描いた印より広くする（I-049）
 export const ROTATE_HANDLE_DISTANCE = 24; // 画面のピクセル
 const DRAG_THRESHOLD = 3; // これより小さい動きはクリックとみなす
 
@@ -92,17 +93,20 @@ export function computeHandles(info: SelectionInfo, view: ViewTransform, pivotMo
 
 export type HandleHit = { kind: 'pivot' } | { kind: 'rotate' } | { kind: 'scale'; handle: ScaleHandle };
 
-export function hitHandle(h: Handles, screen: Vec2, radius = HANDLE_RADIUS): HandleHit | null {
-  if (h.rotate && distance(h.rotate, screen) <= radius) return { kind: 'rotate' };
+export function hitHandle(h: Handles, screen: Vec2): HandleHit | null {
+  if (h.rotate && distance(h.rotate, screen) <= HANDLE_GRAB_RADIUS) return { kind: 'rotate' };
   if (h.compact) return null;
-  if (h.pivotMovable && h.pivot && distance(h.pivot, screen) <= radius) return { kind: 'pivot' };
+  if (h.pivotMovable && h.pivot && distance(h.pivot, screen) <= HANDLE_RADIUS) return { kind: 'pivot' };
   let best: { handle: ScaleHandle; d: number } | null = null;
   for (const s of h.scale) {
     const d = distance(s.at, screen);
-    if (d <= radius && (!best || d < best.d)) best = { handle: s.handle, d };
+    if (d <= HANDLE_GRAB_RADIUS && (!best || d < best.d)) best = { handle: s.handle, d };
   }
   return best ? { kind: 'scale', handle: best.handle } : null;
 }
+
+const sameHandle = (a: HandleHit | null, kind: HandleHit['kind'], handle?: ScaleHandle) =>
+  a?.kind === kind && (a.kind !== 'scale' || a.handle === handle);
 
 // ---- ドラッグの変更 ----
 
@@ -205,7 +209,8 @@ function drawPivot(ctx: CanvasRenderingContext2D, p: Vec2, r: number, color: str
   ctx.globalAlpha = 1;
 }
 
-export function drawHandles(ctx: CanvasRenderingContext2D, h: Handles): void {
+// hot は、いまつかめる（マウスが乗っている・ドラッグしている）ハンドル。少し大きく、塗りの色を変えて描く（I-049）
+export function drawHandles(ctx: CanvasRenderingContext2D, h: Handles, hot: HandleHit | null = null): void {
   const accent = cssVar('--accent', '#5b8def');
   const fill = '#ffffff';
   ctx.lineWidth = 1;
@@ -217,25 +222,27 @@ export function drawHandles(ctx: CanvasRenderingContext2D, h: Handles): void {
     ctx.stroke();
   }
   if (h.topCenter && h.rotate) {
+    const isHot = sameHandle(hot, 'rotate');
     ctx.beginPath();
     ctx.moveTo(h.topCenter.x, h.topCenter.y);
     ctx.lineTo(h.rotate.x, h.rotate.y);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(h.rotate.x, h.rotate.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = fill;
+    ctx.arc(h.rotate.x, h.rotate.y, isHot ? 7 : 5, 0, Math.PI * 2);
+    ctx.fillStyle = isHot ? accent : fill;
     ctx.fill();
     ctx.stroke();
   }
-  const s = 4;
-  for (const { at } of h.scale) {
-    ctx.fillStyle = fill;
+  for (const { handle, at } of h.scale) {
+    const isHot = sameHandle(hot, 'scale', handle);
+    const s = isHot ? 6 : 4;
+    ctx.fillStyle = isHot ? accent : fill;
     ctx.fillRect(at.x - s, at.y - s, s * 2, s * 2);
     ctx.strokeRect(at.x - s, at.y - s, s * 2, s * 2);
   }
   for (const p of h.otherPivots) drawPivot(ctx, p, 5, accent, 0.6);
   // 動かせないとき（パラメータ編集中・値だけがデフォルト値でない間）は薄く出す
-  if (h.pivot) drawPivot(ctx, h.pivot, 7, '#ff9f1c', h.pivotMovable ? 1 : 0.45);
+  if (h.pivot) drawPivot(ctx, h.pivot, sameHandle(hot, 'pivot') ? 9 : 7, '#ff9f1c', h.pivotMovable ? 1 : 0.45);
 }
 
 // ---- ツール ----
@@ -262,6 +269,7 @@ export interface SelectTool {
 
 export function createSelectTool(slot: EnvSlot): SelectTool {
   let drag: Drag | null = null;
+  let hover: Vec2 | null = null; // 最後のマウスの位置（画面座標）。つかめるハンドルを強調して描くため
   let cache: { model: unknown; values: unknown; transforms: Transforms } | null = null;
 
   const snapshot = (env: ToolEnv) => {
@@ -282,6 +290,15 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
   // ピボットの移動は、編集中のパラメータが無く、1つだけ選んでいるときだけ（値だけがデフォルト値でない間も動かせない）
   const pivotMovable = (model: Model, editor: EditorState, info: SelectionInfo) =>
     editor.activeParameterIds.length === 0 && info.targets.length === 1 && !isPreviewOffBase(model, editor);
+
+  // 強調するハンドル: ドラッグ中はつかんだもの、そうでなければマウスの下でつかめるもの
+  const hotHandle = (handles: Handles): HandleHit | null => {
+    if (drag?.keyed.active()) {
+      if (drag.kind === 'scale' && drag.handle) return { kind: 'scale', handle: drag.handle };
+      return drag.kind === 'rotate' || drag.kind === 'pivot' ? { kind: drag.kind } : null;
+    }
+    return hover ? hitHandle(handles, hover) : null;
+  };
 
   const startDrag = (
     env: ToolEnv,
@@ -325,6 +342,7 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
     cursor: 'default',
 
     onPointerDown(e) {
+      hover = e.screenPoint;
       if (e.button !== 0) return;
       const env = slot.get();
       if (!env || drag?.keyed.active()) return; // 確認の途中は受け付けない
@@ -349,7 +367,12 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
         }
         // 選んでいるグループの中を押したときは、そのグループを動かす
         const inSelection = selected.includes(hitId) || ancestorsOf(model, hitId).some((p) => selected.includes(p.id));
-        if (!inSelection) select(e.shiftKey ? [...selected, hitId] : [hitId]);
+        if (!inSelection) {
+          select(e.shiftKey ? [...selected, hitId] : [hitId]);
+          // 選んでいる状態から別のパーツを選んだ最初の操作は、選ぶだけにする。
+          // ハンドルをつかみ損ねて後ろのパーツを押したときなどに、そのまま動かさない（I-050）
+          if (selected.length > 0) return;
+        }
         const next = snapshot(env);
         const started = startDrag(env, 'move', null, e, next.info, next.editor);
         // 複数を選んでいるときに、そのうちの1つをクリックしただけなら、それだけを選ぶ
@@ -364,6 +387,7 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
     },
 
     onPointerMove(e) {
+      hover = e.screenPoint;
       if (!drag || !drag.keyed.active()) return;
       if (!drag.started) {
         if (distance(e.screenPoint, drag.screenStart) < DRAG_THRESHOLD) return;
@@ -415,7 +439,7 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       if (!env) return;
       const { project, editor, info } = snapshot(env);
       const handles = computeHandles(info, view, pivotMovable(project.model, editor, info));
-      if (handles) drawHandles(ctx, handles);
+      if (handles) drawHandles(ctx, handles, hotHandle(handles));
     },
   };
 

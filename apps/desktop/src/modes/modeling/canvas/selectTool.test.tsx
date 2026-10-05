@@ -247,6 +247,61 @@ describe('変形のドラッグ', () => {
     expect(part('part-irisL').scale).toEqual({ x: 1, y: 1 });
   });
 
+  it('選んでいる状態から別のパーツをドラッグすると、選ぶだけで動かさない。次のドラッグで動く（I-050）', async () => {
+    const { ptr, part, store, selected } = await open();
+    ptr.click(TORSO);
+    ptr.drag(FACE, { x: FACE.x - 30, y: FACE.y });
+    expect(selected()).toEqual(['part-face']);
+    expect(part('part-face').position).toEqual({ x: 0, y: 0 });
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    expect(store.canUndo()).toBe(false);
+    ptr.drag(FACE, { x: FACE.x - 30, y: FACE.y });
+    near(part('part-face').position, { x: -30, y: 0 });
+
+    // Shift で足したときも、足すだけで動かさない
+    act(() => store.undo());
+    ptr.drag(TORSO, { x: TORSO.x + 20, y: TORSO.y }, { shiftKey: true });
+    expect(selected()).toEqual(['part-face', 'part-torso']);
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    expect(part('part-face').position).toEqual({ x: 0, y: 0 });
+  });
+
+  it('拡縮のハンドルは、描いた四角の少し外からでもつかめる（I-049）', async () => {
+    const { ptr, part, selected, canvas } = await open();
+    ptr.click(TORSO);
+    // 右下の角から画面で 9 ピクセル右（前の 7 ピクセルでは外れて、後ろのパーツを押していた）
+    const off = 9 / canvas.getState().view.scale;
+    ptr.drag({ x: 800 + off, y: 1500 }, { x: 950 + off, y: 1665 });
+    expect(selected()).toEqual(['part-torso']);
+    expect(part('part-torso').scale.x).toBeGreaterThan(1.3);
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+  });
+
+  it('つかめるハンドルにマウスが乗ると、そのハンドルを大きく描く（I-049）', async () => {
+    const { ptr, canvas } = await open();
+    ptr.click(TORSO);
+    const draw = () => {
+      const ctx = new RecordingContext();
+      selectTool.tool.drawOverlay!(ctx.asContext(), canvas.getState().view);
+      return ctx.named('fillRect').filter(([, , w]) => w! > 8);
+    };
+    ptr.move({ x: TORSO.x, y: TORSO.y });
+    expect(draw()).toHaveLength(0);
+
+    const off = 5 / canvas.getState().view.scale;
+    ptr.move({ x: 800 + off, y: 1500 + off });
+    const big = draw();
+    expect(big).toHaveLength(1);
+    const se = ptr.toScreen({ x: 800, y: 1500 });
+    near({ x: big[0]![0]! + big[0]![2]! / 2, y: big[0]![1]! + big[0]![3]! / 2 }, se);
+
+    // ドラッグの間は、つかんだハンドルを大きく描いたまま
+    ptr.down({ x: 800 + off, y: 1500 + off });
+    ptr.move({ x: 900, y: 1600 });
+    expect(draw()).toHaveLength(1);
+    ptr.up({ x: 900, y: 1600 });
+  });
+
   it('Escape でドラッグをやめると元に戻る', async () => {
     const { ptr, part, store } = await open();
     ptr.down(TORSO);
