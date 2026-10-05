@@ -134,9 +134,10 @@ describe('パラメータパネル', () => {
     expect(marksOf('FaceAngleX')).toHaveLength(0);
 
     fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }));
-    // 選んだパラメータだけを編集中にし、ほかはデフォルト値に戻す
+    // 選んだパラメータを編集中にする。プレビューの値（目 開閉 L）は残す（I-028）
     expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX']);
-    expect(services.editor.get().editorParamValues).toEqual({ FaceAngleX: 0 });
+    expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2, FaceAngleX: 0 });
+    act(() => services.editor.set({ editorParamValues: { FaceAngleX: 0 } }));
     expect(row('FaceAngleX').querySelector('button')!.getAttribute('aria-pressed')).toBe('true');
     // ● = manual・auto、○ = generated、■ = locked
     expect(marksOf('FaceAngleX').map((m) => [m.dataset.value, m.dataset.kind, m.textContent])).toEqual([
@@ -170,14 +171,54 @@ describe('パラメータパネル', () => {
     expect(drawn.texts.length).toBe(count);
   });
 
-  it('編集中でない行のスライダーを動かすと、その行を編集中にする', () => {
+  it('編集中でない行のスライダーはプレビューだけ（編集中のパラメータもほかの値も変えない。I-028）', async () => {
+    const { services } = setup();
+    fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }));
+    fireEvent.change(slider('顔 左右'), { target: { value: '30' } });
+    fireEvent.change(slider('口 開閉'), { target: { value: '0.6' } });
+    expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX']);
+    expect(services.editor.get().editorParamValues).toEqual({ FaceAngleX: 30, MouthOpen: 0.6 });
+    expect(marksOf('MouthOpen')).toHaveLength(0);
+    expect(within(row('MouthOpen')).getByText('開く（0.6）')).toBeTruthy();
+    expect(screen.getByText(/プレビュー中: 口 開閉 開く（0.6）/)).toBeTruthy();
+    await waitFor(() => expect(lastLabel()).toMatch(/プレビュー: 口 開閉 ＝ 開く（0.6）（編集できない）$/));
+
+    // ［値をすべて戻す］で値だけを戻す（編集中のパラメータはそのまま。I-047）
+    fireEvent.click(screen.getByRole('button', { name: '値をすべて戻す' }));
+    expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX']);
+    expect(services.editor.get().editorParamValues).toEqual({});
+    expect(screen.queryByText(/プレビュー中:/)).toBeNull();
+    expect(screen.getByRole('button', { name: '値をすべて戻す' }).hasAttribute('disabled')).toBe(true);
+  });
+
+  it('ほかの行を押すと編集するパラメータを替え、それまで編集していた値は戻し、プレビューの値は残す', () => {
+    const { services } = setup();
+    act(() => services.editor.set({ editorParamValues: { EyeOpenL: 0.2 } }));
+    fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }));
+    fireEvent.change(slider('顔 左右'), { target: { value: '30' } });
+    fireEvent.click(screen.getByRole('button', { name: /^口 開閉/ }));
+    expect(services.editor.get().activeParameterIds).toEqual(['MouthOpen']);
+    expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2, MouthOpen: 0 });
+    // 編集中の行をもう一度押すと、その編集をやめてデフォルト値に戻す
+    fireEvent.change(slider('口 開閉'), { target: { value: '1' } });
+    fireEvent.click(screen.getByRole('button', { name: /^口 開閉/ }));
+    expect(services.editor.get().activeParameterIds).toEqual([]);
+    expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2 });
+  });
+
+  it('Ctrl+クリックで編集中のパラメータに加える（組み合わせのキー。2つまで）', () => {
     const { services } = setup();
     fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }));
     fireEvent.change(slider('口 開閉'), { target: { value: '0.6' } });
-    expect(services.editor.get().activeParameterIds).toEqual(['MouthOpen']);
-    expect(services.editor.get().editorParamValues).toEqual({ MouthOpen: 0.6 });
-    expect(marksOf('MouthOpen').map((m) => m.dataset.value)).toEqual(['0', '1']);
-    expect(within(row('MouthOpen')).getByText('開く（0.6）')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^口 開閉/ }), { ctrlKey: true });
+    expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX', 'MouthOpen']);
+    // プレビューだった値のまま編集に加わる
+    expect(services.editor.get().editorParamValues).toEqual({ MouthOpen: 0.6, FaceAngleX: 0 });
+    expect(screen.queryByText(/プレビュー中:/)).toBeNull();
+    expect(screen.getByText('キーを編集中: 顔 左右、口 開閉')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^顔 上下/ }), { ctrlKey: true });
+    expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX', 'MouthOpen']);
+    expect(screen.getByText('キーを一緒に編集できるパラメータは 2 つまで')).toBeTruthy();
   });
 });
 

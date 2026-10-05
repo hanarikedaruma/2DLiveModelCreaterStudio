@@ -16,12 +16,17 @@ import {
   type GenerationChoice,
 } from './generate';
 import type { KeyActions } from './KeySlider';
-import { activeParameters, keyMarksFor, valueOf } from './marks';
+import { previewParameters } from '../../../services/keyEditor/common';
+import { activeParameters, keyMarksFor, near, valueOf } from './marks';
 import { connectEditingOverlay } from './overlay';
+import { resultLabel } from './labels';
 import { ParameterRow } from './ParameterRow';
 import './parameters.css';
 
 export const PARAMETER_PANEL_ID = 'parameters';
+
+// キーを一緒に編集できるパラメータの数（組み合わせのキー）
+export const MAX_EDITING = 2;
 
 // 生成方式の説明（選ぶ欄のツールチップ）
 const GENERATION_TITLE = GENERATION_CHOICES.map((c) => `${c.label}: ${c.hint}`).join('\n');
@@ -60,17 +65,39 @@ export function ParameterPanel() {
   const activeIds = active.map((p) => p.id);
   const depthIds = activeIds.filter(isDepthParameter);
 
-  // 押すと編集中にする（ほかのパラメータはデフォルト値に戻す）。編集中の行をもう一度押すと基準状態に戻る
-  const toggle = (p: Parameter) => {
-    if (activeIds.includes(p.id)) setEditor({ activeParameterIds: [], editorParamValues: {} });
-    else setEditor({ activeParameterIds: [p.id], editorParamValues: { [p.id]: valueOf(p, editor) } });
+  // 押すと、そのパラメータだけのキーを編集する（それまで編集していたパラメータは編集をやめてデフォルト値に戻し、
+  // プレビューの値は残す）。Ctrl+クリックで編集中のパラメータに加える（組み合わせのキー。MAX_EDITING まで）。
+  // 編集中の行をもう一度押すと、そのパラメータの編集をやめてデフォルト値に戻す（I-028）
+  const toggle = (p: Parameter, additive: boolean) => {
+    const values = editor.editorParamValues;
+    const without = (ids: string[]) => Object.fromEntries(Object.entries(values).filter(([id]) => !ids.includes(id)));
+    if (activeIds.includes(p.id)) {
+      setEditor({ activeParameterIds: activeIds.filter((id) => id !== p.id), editorParamValues: without([p.id]) });
+    } else if (additive && activeIds.length > 0) {
+      if (activeIds.length >= MAX_EDITING) {
+        dialogs.notify(`キーを一緒に編集できるパラメータは ${MAX_EDITING} つまで`);
+        return;
+      }
+      setEditor({
+        activeParameterIds: [...activeIds, p.id],
+        editorParamValues: { ...values, [p.id]: valueOf(p, editor) },
+      });
+    } else {
+      setEditor({
+        activeParameterIds: [p.id],
+        editorParamValues: { ...without(activeIds), [p.id]: valueOf(p, editor) },
+      });
+    }
   };
 
-  // 編集中でない行のスライダーを動かしたら、その行を編集中にする（基準状態の編集と見た目がずれないように）
-  const change = (p: Parameter, value: number) => {
-    if (activeIds.includes(p.id)) setEditor({ editorParamValues: { ...editor.editorParamValues, [p.id]: value } });
-    else setEditor({ activeParameterIds: [p.id], editorParamValues: { [p.id]: value } });
-  };
+  // スライダーは値を変えるだけ（編集中でない行はプレビュー。編集中のパラメータもほかの値も変えない。I-028）
+  const change = (p: Parameter, value: number) =>
+    setEditor({ editorParamValues: { ...editor.editorParamValues, [p.id]: value } });
+
+  // すべての値をデフォルト値に戻す（編集中のパラメータはそのまま。I-047）
+  const resetValues = () => setEditor({ editorParamValues: {} });
+  const previews = previewParameters(model, editor);
+  const offDefault = model.parameters.some((p) => !near(valueOf(p, editor), p.default));
 
   const generate = () => {
     if (generateBetween(services.store, services.keyGenerator, activeIds) === 0) {
@@ -112,9 +139,25 @@ export function ParameterPanel() {
         {active.length > 0 ? (
           <p className="parameter-status-text">キーを編集中: {active.map((p) => p.name).join('、')}</p>
         ) : (
-          <p className="parameter-status-text parameter-hint">行を押すと、そのパラメータのキーを編集する</p>
+          <p className="parameter-status-text parameter-hint">
+            行を押すと、そのパラメータのキーを編集する（Ctrl+クリックで組み合わせ）。編集中でない行のスライダーは見え方を確かめるだけ
+          </p>
+        )}
+        {previews.length > 0 && (
+          <p className="parameter-preview" role="status">
+            プレビュー中: {previews.map((p) => `${p.name} ${resultLabel(p, valueOf(p, editor))}`).join('、')}
+            （この間はパーツや頂点を動かせない。キーを編集するには行を Ctrl+クリックして加える）
+          </p>
         )}
         <div className="parameter-actions">
+          <button
+            type="button"
+            disabled={!offDefault}
+            title="すべてのパラメータの値をデフォルト値に戻す（編集中のパラメータはそのまま）"
+            onClick={resetValues}
+          >
+            値をすべて戻す
+          </button>
           <button
             type="button"
             disabled={active.length === 0}
@@ -179,7 +222,7 @@ export function ParameterPanel() {
               value={valueOf(p, editor)}
               active={activeIds.includes(p.id)}
               marks={keyMarksFor(model, p.id)}
-              onToggle={() => toggle(p)}
+              onToggle={(additive) => toggle(p, additive)}
               onChange={(v) => change(p, v)}
               keyActions={keyActionsFor(p)}
             />

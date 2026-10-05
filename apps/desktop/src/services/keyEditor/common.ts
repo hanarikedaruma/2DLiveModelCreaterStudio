@@ -43,16 +43,23 @@ export function isBaseState(params: ActiveParam[]): boolean {
   return params.every((p) => near(p.value, p.default));
 }
 
-// 基準状態を編集する状態（isBaseState）なのに、プレビュー（editorParamValues）が基準状態と違う。
-// 表情づくりのように編集中のパラメータを空にして値だけを動かすとこうなる。このまま基準状態を変えると、
-// 見えている形と違うものを編集してしまう（I-029）。値は min..max に丸め、モデルに無いものと数でないものは数えない
-export function isPreviewOffBase(model: Model, editor: EditorState): boolean {
-  if (!isBaseState(activeParams(model, editor))) return false;
-  return model.parameters.some((p) => {
+// プレビュー中のパラメータ: キーを編集していない（編集中でない）のに、値がデフォルト値でないもの（I-028）。
+// 表情づくりや母音・揺れの確かめ、パラメータパネルのプレビューで残る。値は min..max に丸め、モデルに無いものと
+// 数でないものは数えない
+export function previewParameters(model: Model, editor: EditorState): Model['parameters'] {
+  const editing = new Set(activeParams(model, editor).map((p) => p.id));
+  return model.parameters.filter((p) => {
+    if (editing.has(p.id)) return false;
     const raw = editor.editorParamValues[p.id];
     if (raw === undefined || !Number.isFinite(raw)) return false;
     return !near(Math.min(p.max, Math.max(p.min, raw)), p.default);
   });
+}
+
+// プレビュー中のパラメータがある。このまま基準状態やキーを変えると、見えている形と違うものを編集してしまう
+// （I-029・I-046。I-028 で、編集中のパラメータがあるときも、ほかの値がデフォルト値でなければ同じにした）
+export function isPreviewOffBase(model: Model, editor: EditorState): boolean {
+  return previewParameters(model, editor).length > 0;
 }
 
 // 各軸の既存のキー位置を組み合わせたマス。1軸の編集や格子の間では自動でキーを追加しない

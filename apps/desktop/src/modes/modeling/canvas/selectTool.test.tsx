@@ -375,6 +375,21 @@ describe('値だけがデフォルト値でないとき（I-029）', () => {
     near(part('part-torso').position, { x: 30, y: 0 });
   });
 
+  it('編集中のパラメータがデフォルト値でなくても、ほかのパラメータのプレビューがあれば動かさない（I-028）', async () => {
+    const { ptr, part, store, services } = await open();
+    act(() =>
+      services.editor.set({ activeParameterIds: ['FaceAngleX'], editorParamValues: { FaceAngleX: 30, MouthOpen: 1 } }),
+    );
+    ptr.drag(TORSO, { x: TORSO.x + 30, y: TORSO.y });
+    expect(part('part-torso').position).toEqual({ x: 0, y: 0 });
+    expect(store.get().model.bindings).toHaveLength(0);
+    expect(notices()).toHaveLength(1);
+    // プレビューを戻すと、編集に戻る（この KeyEditor は仮実装なので基準状態が動く）
+    act(() => services.editor.set({ editorParamValues: { FaceAngleX: 30 } }));
+    ptr.drag(TORSO, { x: TORSO.x + 30, y: TORSO.y });
+    near(part('part-torso').position, { x: 30, y: 0 });
+  });
+
   it('編集中のパラメータがデフォルト値で、ほかの値だけがデフォルト値でないときも動かさない', async () => {
     const { ptr, part, services } = await open();
     act(() =>

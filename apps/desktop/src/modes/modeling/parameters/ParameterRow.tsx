@@ -1,4 +1,4 @@
-// パラメータの1行。名前と結果の言葉（押すと編集中にする / やめる）と、キーの印つきのスライダー
+// パラメータの1行。名前と結果の言葉（押すと編集中にする / やめる。Ctrl+クリックで加える）と、キーの印つきのスライダー
 import type { Parameter } from '@app/schema';
 import { KeySlider, type KeyActions } from './KeySlider';
 import { resultLabel } from './labels';
@@ -9,7 +9,7 @@ export interface ParameterRowProps {
   value: number;
   active: boolean;
   marks: KeyMark[];
-  onToggle(): void;
+  onToggle(additive: boolean): void; // additive = Ctrl（Mac は ⌘）を押しながら
   onChange(value: number): void;
   keyActions?: KeyActions;
 }
@@ -21,8 +21,12 @@ export function ParameterRow({ parameter, value, active, marks, onToggle, onChan
         type="button"
         className="parameter-row-head"
         aria-pressed={active}
-        title={active ? '押すと編集をやめる（基準状態に戻る）' : '押すとこのパラメータのキーを編集する'}
-        onClick={onToggle}
+        title={
+          active
+            ? '押すとこのパラメータの編集をやめる（値はデフォルト値に戻る）'
+            : '押すとこのパラメータのキーを編集する。Ctrl+クリックで、編集中のパラメータに加える（組み合わせのキー）'
+        }
+        onClick={(e) => onToggle(e.ctrlKey || e.metaKey)}
       >
         <span className="parameter-name">{parameter.name}</span>
         <span className="parameter-result">{resultLabel(parameter, value)}</span>

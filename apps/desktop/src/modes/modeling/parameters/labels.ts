@@ -1,4 +1,5 @@
 // パラメータの値を言葉にする（パネルの行と、キャンバスの「編集中」の表示で使う）
+import { previewParameters } from '../../../services/keyEditor/common';
 import type { Parameter, Project } from '@app/schema';
 import type { EditorState } from '@app/contracts';
 import { activeParameters, hasKeyAtCurrentValue, isAutomaticCombination, valueOf } from './marks';
@@ -69,13 +70,20 @@ export function resultLabel(parameter: Parameter, value: number): string {
 // キャンバスに出す「編集中: 顔 左右 ＝ 右（+30）」。キーの無い値なら「キーなし」を添える。編集中でなければ null
 export function editingLabel(project: Project, editor: EditorState): string | null {
   const params = activeParameters(project.model, editor);
-  if (params.length === 0) return null;
+  // プレビュー中のパラメータ（編集していないのに値がデフォルト値でない。I-028）
+  const previews = previewParameters(project.model, editor);
+  const preview =
+    previews.length > 0
+      ? `プレビュー: ${previews.map((p) => `${p.name} ＝ ${resultLabel(p, valueOf(p, editor))}`).join('、')}`
+      : '';
+  if (params.length === 0) return preview ? `${preview}（パーツは動かせない）` : null;
   const parts = params.map((p) => `${p.name} ＝ ${resultLabel(p, valueOf(p, editor))}`);
+  const tail = preview ? '　' + preview + '（編集できない）' : '';
   const noKey = !hasKeyAtCurrentValue(project.model, editor);
   if (noKey && isAutomaticCombination(project.model, editor)) {
     const face = params.some((p) => p.id === 'FaceAngleX') && params.some((p) => p.id === 'FaceAngleY');
     const status = face ? '　自動（左右と上下の和）' : '　自動（2つのパラメータの合成）';
-    return `編集中: ${parts.join('、')}${status}`;
+    return `編集中: ${parts.join('、')}${status}${tail}`;
   }
-  return `編集中: ${parts.join('、')}${noKey ? '　キーなし' : ''}`;
+  return `編集中: ${parts.join('、')}${noKey ? '　キーなし' : ''}${tail}`;
 }

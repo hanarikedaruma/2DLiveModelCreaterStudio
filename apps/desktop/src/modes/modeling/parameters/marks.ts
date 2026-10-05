@@ -4,7 +4,7 @@ import type { EditorState } from '@app/contracts';
 import { activeParams, isCombinationGridPoint } from '../../../services/keyEditor/common';
 
 const NEAR = 1e-6;
-const near = (a: number, b: number) => Math.abs(a - b) <= NEAR;
+export const near = (a: number, b: number) => Math.abs(a - b) <= NEAR;
 
 // ● = manual・auto（key）、○ = generated、■ = locked
 export type MarkKind = 'key' | 'generated' | 'locked';

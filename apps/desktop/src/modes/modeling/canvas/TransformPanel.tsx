@@ -11,7 +11,8 @@ import { beginLiveEdit, type LiveEdit } from './liveEdit';
 import './transform.css';
 
 // 編集中のパラメータが無いのに値だけがデフォルト値でない（表情を作っている途中など）ときの案内（I-029）
-export const PREVIEW_OFF_BASE_NOTE = 'パラメータの値がデフォルト値でない間は編集できない（基準状態と見た目が違うため）';
+export const PREVIEW_OFF_BASE_NOTE =
+  'キーを編集していないパラメータの値がデフォルト値でない間は編集できない（見えている形と違うため。パラメータパネルの［値をすべて戻す］で戻す）';
 
 export type FieldKey = 'x' | 'y' | 'rotation' | 'scaleX' | 'scaleY' | 'pivotX' | 'pivotY' | 'opacity';
 
@@ -163,7 +164,7 @@ export function makeTransformPanel(slot: EnvSlot): FC {
       .filter((p): p is Part => p !== undefined);
     const primary = parts[0];
     const ids = parts.map((p) => p.id);
-    // 値だけがデフォルト値でない間に基準状態を変えると、見えている形と違うものを編集してしまう（キャンバスでも動かせない）
+    // プレビュー中（編集していないパラメータの値がデフォルト値でない）に変えると、見えている形と違うものを編集してしまう（キャンバスでも動かせない）
     const offBase = isPreviewOffBase(project.model, editor);
     const readOnly = editor.activeParameterIds.length > 0 || offBase;
 
