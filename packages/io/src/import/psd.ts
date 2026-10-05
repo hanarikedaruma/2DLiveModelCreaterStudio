@@ -233,7 +233,8 @@ export function mergeReasons(layer: Layer, isGroup: boolean): string[] {
   if (layer.adjustment) reasons.push('調整レイヤー');
   if (hasActiveEffects(layer.effects)) reasons.push('レイヤー効果');
   if (layer.placedLayer) reasons.push('スマートオブジェクト');
-  if (!isGroup && layer.mask && !layer.mask.disabled && hasMaskArea(layer)) reasons.push('レイヤーマスク');
+  // グループのマスクも中のレイヤーに反映しないので、グループの中のレイヤーの統合の理由にする（I-048）
+  if (layer.mask && !layer.mask.disabled && hasMaskArea(layer)) reasons.push('レイヤーマスク');
   return reasons;
 }
 

@@ -6,7 +6,7 @@ import { createBindingEvaluator, createDeformPipeline } from '@app/core';
 import { createKeyEditor } from '../../../services/keyEditor';
 import { registry } from '../../../shell/registry';
 import { register as registerCanvasEdit } from '../canvas';
-import { NEEDS_KEY_MESSAGE } from '../canvas/liveEdit';
+import { NEEDS_KEY_MESSAGE, PREVIEW_OFF_BASE_MESSAGE } from '../canvas/liveEdit';
 import { RecordingContext, pointer, redrawn, renderShell, stubSize } from '../canvas/testUtils';
 import { register as registerStructure } from '../structure';
 import { WARP_TOOL_ID, register, warpEditor } from './index';
@@ -262,6 +262,20 @@ describe('ワープ編集ツール', () => {
     act(() => shell.store.undo());
     near(shell.warp()!.points[CENTER]!, { x: 500, y: 500 });
     expect(shell.store.canUndo()).toBe(false);
+  });
+
+  it('プレビューが基準状態と違う間は、制御点を動かさずに知らせる。値を戻すと動かせる（I-046）', async () => {
+    const shell = await openWithWarp();
+    // 表情を作っている途中と同じ状態: 編集中のパラメータは無く、プレビューの値だけがデフォルト値でない
+    act(() => shell.services.editor.set({ activeParameterIds: [], editorParamValues: { FaceAngleX: 30 } }));
+    shell.ptr.drag({ x: 500, y: 500 }, { x: 540, y: 520 });
+    near(shell.warp()!.points[CENTER]!, { x: 500, y: 500 });
+    expect(shell.store.canUndo()).toBe(false);
+    expect(screen.queryAllByText(PREVIEW_OFF_BASE_MESSAGE)).toHaveLength(1);
+
+    act(() => shell.services.editor.set({ editorParamValues: {} }));
+    shell.ptr.drag({ x: 500, y: 500 }, { x: 540, y: 520 });
+    near(shell.warp()!.points[CENTER]!, { x: 540, y: 520 });
   });
 
   it('グループが拡縮されていれば、見た目の移動量を制御点の空間に直す', async () => {

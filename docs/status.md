@@ -559,7 +559,7 @@
 | ユーザー定義パラメータの追加・編集・削除と Undo       | ✅   | userParams.test.ts（8件）・UserParamsSection.test.tsx（5件）                                                                                                                                                                                          |
 
 - project/step1Params.ts（`connectStep1Params(store)` を project/index.ts の registerProject の最初で呼ぶ）。project/actions.ts の loadIntoApp に、'projectLoaded' で足したものを変更に数えない1行を足した。
-- opacity/（Transform パネルの `transform.opacityKey`、order 5）: スライダーは「この値での見た目の不透明度」（基準 × キーの倍率）。キーは今の倍率からの opacityFactor で記録し、0 は 0.001 で記録する（掛け算では 0 から上げ直せないため）。デフォルト値では Part.opacity を直接変える。
+- opacity/（Transform パネルの `transform.opacityKey`、order 5）: スライダーは「この値での見た目の不透明度」（基準 × キーの倍率）。キーは今の倍率からの opacityFactor で記録し、0 は 0.001 で記録する（掛け算では 0 から上げ直せないため）。デフォルト値では Part.opacity を直接変える（2026-10-05 の I-038 の修正で、デフォルト値にキーがあればそのキーを変えるようにした）。
 - userParams/（パラメータパネルの `modeling.userParams`、order 20）: 削除ではバインディング・トラッキングのマッピング・表情の項目に加え、ホットキー（parameter）・アニメーションのトラック・物理の入力・母音の値からも外す。名前の重複は不可、キーのあるパラメータはデフォルト値を変えられない。
 - parameters/labels.ts の RESULT_WORDS に STEP1 の12行を足した。
 - 課題: I-026（不透明度のキーは倍率なので 0 から上げられない）、I-027（消したパラメータを指す物理の出力先が残る）。

@@ -16,7 +16,7 @@ import type { ProjectStoreWithHistory } from '@app/core';
 import { patchPart } from '@app/core';
 import { registry } from '../../../shell/registry';
 import { register as registerCanvasEdit } from '../canvas';
-import { NEEDS_KEY_MESSAGE } from '../canvas/liveEdit';
+import { NEEDS_KEY_MESSAGE, PREVIEW_OFF_BASE_MESSAGE } from '../canvas/liveEdit';
 import { effectivePose } from '../canvas/parts';
 import {
   KeyedStubEditor,
@@ -240,6 +240,21 @@ describe('頂点のドラッグ', () => {
     expect(store.get().model.bindings).toHaveLength(1);
     act(() => store.undo());
     expect((store.get().model.bindings[0]!.keys[0]!.delta as Vec2[])[2]).toEqual({ x: 0, y: 0 });
+  });
+
+  it('プレビューが基準状態と違う間は、頂点を動かさずに知らせる。値を戻すと動かせる（I-046）', async () => {
+    const { ptr, mesh, store, services } = await open(withTorsoMesh());
+    // 表情を作っている途中と同じ状態: 編集中のパラメータは無く、プレビューの値だけがデフォルト値でない
+    act(() => services.editor.set({ activeParameterIds: [], editorParamValues: { FaceAngleX: 30 } }));
+    ptr.drag({ x: 800, y: 1500 }, { x: 830, y: 1520 });
+    expect(mesh()!.vertices).toEqual(TORSO_CORNERS);
+    expect(store.canUndo()).toBe(false);
+    expect(screen.queryAllByText(PREVIEW_OFF_BASE_MESSAGE)).toHaveLength(1); // 1回のドラッグで1回だけ
+    expect(services.editor.get().editorParamValues).toEqual({ FaceAngleX: 30 });
+
+    act(() => services.editor.set({ editorParamValues: {} }));
+    ptr.drag({ x: 800, y: 1500 }, { x: 830, y: 1520 });
+    near(mesh()!.vertices[2]!, { x: 830, y: 1520 });
   });
 
   it("'needsKey' なら確認し、承認されたらキーを足してから編集する", async () => {

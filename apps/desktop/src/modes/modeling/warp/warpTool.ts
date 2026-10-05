@@ -7,7 +7,8 @@ import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
 import { applyLinear, distance, invert, type Affine } from '../canvas/geometry';
-import { startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
+import { isPreviewOffBase } from '../../../services/keyEditor/common';
+import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
 import { paramValuesOf, partById } from '../canvas/parts';
 import { nearestVertex, verticesInRect } from '../mesh/meshTool';
 import { warpOfPart } from './warpOps';
@@ -142,6 +143,7 @@ type Drag =
       indices: number[];
       inverses: (Affine | null)[];
       keyed: KeyedDrag<Move[]>;
+      blocked: boolean; // プレビューが基準状態と違う間は動かさない（I-046）
     }
   | { kind: 'rect'; start: Vec2; current: Vec2; screenStart: Vec2; moved: boolean; shift: boolean };
 
@@ -209,6 +211,7 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
         addKeys: (p) => keyEditor.addKeyAtCurrentValue(p, editor, pointsTarget),
         onChange: () => env.requestRedraw(),
       }),
+      blocked: isPreviewOffBase(project.model, editor),
     };
   };
 
@@ -261,7 +264,10 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       if (!drag.started) {
         if (distance(e.screenPoint, drag.screenStart) < DRAG_THRESHOLD) return;
         drag.started = true;
+        // 表情を作っている途中などは、見えている形と違う基準状態を変えてしまうので動かさずに知らせる
+        if (drag.blocked) slot.get()?.dialogs.notify(PREVIEW_OFF_BASE_MESSAGE);
       }
+      if (drag.blocked) return;
       const delta = { x: e.canvasPoint.x - drag.start.x, y: e.canvasPoint.y - drag.start.y };
       const inverses = drag.inverses;
       drag.keyed.move(

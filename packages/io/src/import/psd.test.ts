@@ -54,6 +54,11 @@ describe('mergeReasons', () => {
       'レイヤーマスク',
     ]);
     expect(mergeReasons({ mask: { left: 0, top: 0, right: 2, bottom: 2, disabled: true } }, false)).toEqual([]);
+    // グループのマスクも中のレイヤーに反映していないので挙げる（I-048）
+    expect(mergeReasons({ mask: { left: 0, top: 0, right: 2, bottom: 2, defaultColor: 0 } }, true)).toEqual([
+      'レイヤーマスク',
+    ]);
+    expect(mergeReasons({ mask: { left: 0, top: 0, right: 2, bottom: 2, disabled: true } }, true)).toEqual([]);
   });
 });
 
@@ -158,6 +163,33 @@ describe('readPsdDocument', () => {
     });
     const doc = readPsdDocument(data);
     expect(doc.mergeTargets).toEqual([{ name: '影グループ', reasons: ['合成モード: 乗算'], layerIndexes: [0, 1] }]);
+  });
+
+  it('レイヤーマスクだけを持つグループも、中のレイヤーをまとめて統合の対象にする（I-048）', () => {
+    const pixel = () => toPixelData(makeImage(1, 1, [0, 0, 0, 255]));
+    const data = writePsdUint8Array({
+      width: 10,
+      height: 10,
+      children: [
+        {
+          name: 'マスクのグループ',
+          mask: {
+            left: 0,
+            top: 0,
+            right: 2,
+            bottom: 2,
+            defaultColor: 0,
+            imageData: toPixelData(makeImage(2, 2, [255, 255, 255, 255])),
+          },
+          children: [
+            { name: 'a', left: 0, top: 0, right: 1, bottom: 1, imageData: pixel() },
+            { name: 'b', left: 1, top: 1, right: 2, bottom: 2, imageData: pixel() },
+          ],
+        },
+      ],
+    });
+    const doc = readPsdDocument(data);
+    expect(doc.mergeTargets).toEqual([{ name: 'マスクのグループ', reasons: ['レイヤーマスク'], layerIndexes: [0, 1] }]);
   });
 
   it('レイヤーの無い PSD は統合画像を1枚として読む', () => {
