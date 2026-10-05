@@ -428,9 +428,8 @@ describe('目 開閉（曲線）', () => {
     });
     expect(bottoms).toBeGreaterThan(3);
     expect(tops).toBeGreaterThan(3);
-    // 上まぶたの子（まつげ）は MVP と同じだけ下がる（白目の下端 1020 − 上まぶたの下端 916）
-    const lashBase = deformAt(p)('part-lashL');
-    closed('part-lashL').forEach((v, i) => expect(v.y - lashBase[i]!.y).toBeCloseTo(104, 3));
+    // 上まぶたの子（まつげ）は MVP の平行移動（白目の下端 1020 − 上まぶたの下端 916 = 104）だけではなく、
+    // 上まぶたの下端と一緒に線に沿う（次のテスト。I-040）
     // 白目: すべての頂点が、線に沿わせた上まぶたの帯の真ん中（線の厚みの半分上）に来る
     // （面積がほぼ 0 になって帯に隠れ、白目で切り抜く瞳・ハイライトも消える）
     const closedWhite = (x: number) => closedLineY(line, x) - thickness / 2;
@@ -458,6 +457,44 @@ describe('目 開閉（曲線）', () => {
     expect(run(p)).toBe(p);
   });
 
+  it('線があれば、上まぶたの子（まつげ）も上まぶたの下端と一緒に線に沿って閉じる（I-040）', () => {
+    const p = run(withLine(referenceModel(), 'L', LINE_L));
+    const lidId = part(p, 'upperLidL').id;
+    const lidMesh = meshOf(p, 'upperLidL');
+    const lashMesh = p.model.meshes.find((m) => m.id === 'mesh-lashL')!;
+    expect(p.model.parts.find((q) => q.id === 'part-lashL')!.parentId).toBe(lidId);
+    // 変形した上まぶたの下端の高さ（x は上まぶたの横の範囲 1050〜1330 に収める。まつげは右端の外にはみ出す）
+    const lowerEdge = (lid: Vec2[], x: number) =>
+      meshSpanAt({ vertices: lid, triangles: lidMesh.triangles }, Math.min(Math.max(x, 1050), 1330))!.bottom;
+    const open = deformAt(p);
+    for (const value of [0, 0.5]) {
+      const closed = deformAt(p, { EyeOpenL: value });
+      const lash = closed('part-lashL');
+      expect(lash).toHaveLength(lashMesh.vertices.length);
+      lash.forEach((v, i) => {
+        const base = open('part-lashL')[i]!;
+        expect(v.x).toBeCloseTo(base.x, 3);
+        // まつげの頂点と上まぶたの下端の縦の間隔は、開いたときと変わらない
+        const gap = v.y - lowerEdge(closed(lidId), v.x);
+        expect(Math.abs(gap - (base.y - lowerEdge(open(lidId), base.x)))).toBeLessThan(0.5);
+      });
+    }
+    // 右端（x 1330 より外）の頂点は、上まぶたの右端の下端と同じだけ下がる（916 → 線の 985 で 69。MVP の 104 ではない）
+    const closed = deformAt(p, { EyeOpenL: 0 })('part-lashL');
+    const outside = lashMesh.vertices.flatMap((v, i) => (v.x >= 1330 ? [i] : []));
+    expect(outside.length).toBeGreaterThan(1);
+    for (const i of outside) expect(closed[i]!.y - open('part-lashL')[i]!.y).toBeCloseTo(69, 3);
+    // まつげの頂点のバインディング: 値 0 で線に沿う残りの分、値 1 は差分 0（auto）
+    const b = p.model.bindings.find((q) => q.channel === 'vertices' && q.target.id === lashMesh.id)!;
+    expect(b.parameterIds).toEqual(['EyeOpenL']);
+    expect(b.keyValues).toEqual([[0, 1]]);
+    expect(pointsAt(b, 1).every((d) => d.x === 0 && d.y === 0)).toBe(true);
+    expect(b.keys.every((k) => k.source === 'auto' && !k.locked)).toBe(true);
+    // 線の無い R のまつげは MVP のまま
+    expect(p.model.bindings.some((q) => q.channel === 'vertices' && q.target.id === 'mesh-lashR')).toBe(false);
+    expect(run(p)).toBe(p);
+  });
+
   it('3×3 の格子のメッシュでも、上まぶたの下端が線に乗り、白目は線へ閉じる', () => {
     const p = run(withLine(sampleWithMeshes(), 'L', SAMPLE_LINE_L));
     const line = normalizeClosedLine(SAMPLE_LINE_L)!;
@@ -478,9 +515,13 @@ describe('目 開閉（曲線）', () => {
         binding(forward, type, ['EyeOpenL'], 'vertices')!.keys,
       );
     }
+    const lashKeys = (p: Project) =>
+      p.model.bindings.find((b) => b.channel === 'vertices' && b.target.id === 'mesh-lashL')?.keys;
+    expect(lashKeys(backward)).toEqual(lashKeys(forward));
     const cleared = run(withLine(forward, 'L', null));
     expect(binding(cleared, 'upperLidL', ['EyeOpenL'], 'vertices')).toBeUndefined();
     expect(binding(cleared, 'eyeWhiteL', ['EyeOpenL'], 'vertices')).toBeUndefined();
+    expect(lashKeys(cleared)).toBeUndefined();
     expect(transformAt(binding(cleared, 'eyeWhiteL', ['EyeOpenL']), 0).scale.y).toBe(0.08);
     expect(cleared.model.bindings).toHaveLength(run(referenceModel()).model.bindings.length);
   });
@@ -522,6 +563,8 @@ describe('目 開閉（曲線）', () => {
     const out = run(withLine(replaceBinding(first, { ...lid, keys: manual }), 'L', LINE_L));
     expect(binding(out, 'upperLidL', ['EyeOpenL'])!.keys).toEqual(manual);
     expect(binding(out, 'upperLidL', ['EyeOpenL'], 'vertices')).toBeUndefined();
+    // 上まぶたの子（まつげ）も、手で直した上まぶたの閉じ方についていくだけ
+    expect(out.model.bindings.some((b) => b.channel === 'vertices' && b.target.id === 'mesh-lashL')).toBe(false);
     // 白目は線そのものへ閉じる（線に沿わせた上まぶたが無いので）
     const line = normalizeClosedLine(LINE_L)!;
     const white = meshOf(out, 'eyeWhiteL').vertices;
@@ -595,6 +638,23 @@ describe('再実行', () => {
     for (const line of [LINE_L.map((v) => ({ ...v, y: v.y + 10 })), null]) {
       const out = run(withLine(project, 'L', line));
       expect(keyAt(binding(out, 'upperLidL', ['EyeOpenL'], 'vertices'), 0)).toEqual(lidKey);
+    }
+  });
+
+  it('上まぶたの子（まつげ）の頂点の manual・locked のキーも、線を引き直しても消しても残る', () => {
+    const lashOf = (p: Project) =>
+      p.model.bindings.find((b) => b.channel === 'vertices' && b.target.id === 'mesh-lashL')!;
+    const first = run(withLine(referenceModel(), 'L', LINE_L));
+    const lash = lashOf(first);
+    const keys = lash.keys.map((k): ParameterKey => {
+      const delta = (k.delta as Vec2[]).map((v) => ({ x: v.x + 3, y: v.y - 2 }));
+      return k.coords[0] === 0 ? { ...k, delta, locked: true } : { ...k, delta, source: 'manual' };
+    });
+    const project = replaceBinding(first, { ...lash, keys });
+    for (const line of [LINE_L.map((v) => ({ ...v, y: v.y + 10 })), null]) {
+      const out = lashOf(run(withLine(project, 'L', line)));
+      expect(out.id).toBe(lash.id);
+      expect(out.keys).toEqual(keys);
     }
   });
 

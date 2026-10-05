@@ -44,12 +44,23 @@ function isDescendant(parts: ReadonlyMap<string, Part>, part: Part, ancestorId: 
 // 範囲は子孫の画像パーツの外接矩形（グループのワープを掛ける直前の空間で測る）+ 5%（最低 1px）の余白。
 // すでにあるワープは形も範囲も変えない
 export function withFaceWarp(model: Model, boundsOf: BoundsOf, newId: () => string): Model {
-  const group = indexStandardParts(model.parts).group('faceGroup');
+  return withTurnWarp(model, boundsOf, newId, 'faceGroup');
+}
+
+export function withHeadWarp(model: Model, boundsOf: BoundsOf, newId: () => string): Model {
+  return withTurnWarp(model, boundsOf, newId, 'headRoot');
+}
+
+function withTurnWarp(model: Model, boundsOf: BoundsOf, newId: () => string, type: 'faceGroup' | 'headRoot'): Model {
+  const index = indexStandardParts(model.parts);
+  const group = index.group(type);
   if (!group || model.warps.some((w) => w.partId === group.id)) return model;
+  // 頭部も顔の寸法を基準にする。長い後ろ髪で回転量が増えないよう、髪の長さを半径に含めない。
+  const reference = type === 'headRoot' ? (index.group('faceGroup') ?? group) : group;
   const parts = new Map(model.parts.map((p) => [p.id, p]));
   const points: Vec2[] = [];
   for (const part of model.parts) {
-    if (part.kind !== 'image' || !isDescendant(parts, part, group.id)) continue;
+    if (part.kind !== 'image' || !isDescendant(parts, part, reference.id)) continue;
     const local = pointsToAncestorSpace(model, NO_DELTAS, part.id, group.id, basePoints(model, part, boundsOf));
     points.push(...local.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y)));
   }
@@ -73,6 +84,11 @@ export function withFaceWarp(model: Model, boundsOf: BoundsOf, newId: () => stri
 // faceGroup の曲面に使うワープ（最初のワープ。カード29のツールが編集するもの）
 export function faceWarpOf(model: Model): Warp | null {
   const group = indexStandardParts(model.parts).group('faceGroup');
+  return group ? (model.warps.find((w) => w.partId === group.id) ?? null) : null;
+}
+
+export function headWarpOf(model: Model): Warp | null {
+  const group = indexStandardParts(model.parts).group('headRoot');
   return group ? (model.warps.find((w) => w.partId === group.id) ?? null) : null;
 }
 

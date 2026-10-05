@@ -2,7 +2,7 @@ import { STANDARD_PART_NAMES, type Model } from '@app/schema';
 import { isUsableWarp } from '../deform/warp';
 import { normalizeClosedLine } from './closedLine';
 import { faceWarpOf } from './faceTurn';
-import { blinkMethod, mouthMethod } from './motions';
+import { blinkMethod, keepOnRerun, mouthMethod } from './motions';
 import { SIDES, eyeTypes, indexStandardParts, type ImageType } from './standardParts';
 
 // 表示名を「・」でつなぐ。「上まぶた L」のように英字で終わるときは、助詞の前に空白を入れる
@@ -12,7 +12,7 @@ const names = (types: ImageType[]) => {
 };
 
 // 推奨パーツ（白目・瞳・上まぶた・上唇・下唇・口の中）が足りないとき、動きがどう簡易になるかの文
-export function setupWarnings(model: Model): string[] {
+export function setupWarnings(model: Model, surfaceFaceTurn = true): string[] {
   const index = indexStandardParts(model.parts);
   const missing = (types: ImageType[]) => types.filter((t) => !index.has(t));
   const out: string[] = [];
@@ -49,8 +49,28 @@ export function setupWarnings(model: Model): string[] {
     }
   }
   const faceWarp = faceWarpOf(model);
-  if (faceWarp && !isUsableWarp(faceWarp)) {
+  if (surfaceFaceTurn && faceWarp && !isUsableWarp(faceWarp)) {
     out.push('顔の変形のワープが使えない形のため、曲面の顔の向きは作られません');
+  }
+  if (!surfaceFaceTurn) {
+    const faceGroup = index.group('faceGroup');
+    const warpIds = new Set(model.warps.filter((w) => w.partId === faceGroup?.id).map((w) => w.id));
+    if (
+      model.bindings.some(
+        (b) =>
+          b.target.type === 'warp' &&
+          warpIds.has(b.target.id) &&
+          b.channel === 'warpPoints' &&
+          b.parameterIds.length >= 1 &&
+          b.parameterIds.length <= 2 &&
+          b.parameterIds.every((id) => id === 'FaceAngleX' || id === 'FaceAngleY') &&
+          b.keys.some(keepOnRerun),
+      )
+    ) {
+      out.push(
+        '顔の向きに手動編集・ロック済みの変形があるため、そのバインディングは残ります。髪と同じ奥行き方式には完全にそろいません',
+      );
+    }
   }
 
   const method = mouthMethod(index);

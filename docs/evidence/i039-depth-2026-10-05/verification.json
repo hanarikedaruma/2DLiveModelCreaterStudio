@@ -1,0 +1,98 @@
+{
+  "url": "http://127.0.0.1:1430/",
+  "poses": [
+    [
+      "left",
+      "X -15 / Y 0",
+      -15,
+      0
+    ],
+    [
+      "front",
+      "X 0 / Y 0",
+      0,
+      0
+    ],
+    [
+      "right",
+      "X +15 / Y 0",
+      15,
+      0
+    ],
+    [
+      "diagonal",
+      "X +15 / Y +15",
+      15,
+      15
+    ],
+    [
+      "limit",
+      "X +30 / Y +30",
+      30,
+      30
+    ]
+  ],
+  "metrics": [
+    {
+      "mode": "before",
+      "name": "left",
+      "opaque": 28800,
+      "colorful": 12999
+    },
+    {
+      "mode": "before",
+      "name": "front",
+      "opaque": 28800,
+      "colorful": 12812
+    },
+    {
+      "mode": "before",
+      "name": "right",
+      "opaque": 28800,
+      "colorful": 12997
+    },
+    {
+      "mode": "before",
+      "name": "diagonal",
+      "opaque": 28800,
+      "colorful": 13029
+    },
+    {
+      "mode": "before",
+      "name": "limit",
+      "opaque": 28800,
+      "colorful": 13656
+    },
+    {
+      "mode": "after",
+      "name": "left",
+      "opaque": 28800,
+      "colorful": 12991
+    },
+    {
+      "mode": "after",
+      "name": "front",
+      "opaque": 28800,
+      "colorful": 12812
+    },
+    {
+      "mode": "after",
+      "name": "right",
+      "opaque": 28800,
+      "colorful": 12990
+    },
+    {
+      "mode": "after",
+      "name": "diagonal",
+      "opaque": 28800,
+      "colorful": 13014
+    },
+    {
+      "mode": "after",
+      "name": "limit",
+      "opaque": 28800,
+      "colorful": 13508
+    }
+  ],
+  "errors": []
+}

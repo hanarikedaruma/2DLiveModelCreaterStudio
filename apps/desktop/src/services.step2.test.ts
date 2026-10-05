@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ensureStandardParameters } from '@app/schema';
+import { ensureStandardParameters, loadProjectJson } from '@app/schema';
 import * as audio from '@app/audio';
 import type { AudioSource, FrameContext, Layer } from '@app/contracts';
 import { createServices, createFakeServices } from './services';
@@ -10,12 +10,35 @@ import { enablePhysicsCommand } from './modes/modeling/physics/commands';
 import { STANDARD_VOWELS } from './modes/modeling/vowels/commands';
 import { createStandardBreathAnimation } from '@app/core';
 
+const sampleJson = Object.values(
+  import.meta.glob<string>('../../../fixtures/sample-model/project.json', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }),
+)[0]!;
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
 describe('STEP2 の結合', () => {
+  it('I-039: 顔だけでなく頭部全体に曲面変形を作る', () => {
+    const s = createServices();
+    const before = loadProjectJson(sampleJson);
+    const p = s.autoSetup.plan(before).command.apply(before);
+    expect(p.model.warps).toHaveLength(1);
+    const head = p.model.parts.find((q) => q.standardType === 'headRoot')!;
+    expect(p.model.warps[0]!.partId).toBe(head.id);
+    expect(p.model.bindings.some((b) => b.channel === 'warpPoints' && b.target.id === p.model.warps[0]!.id)).toBe(true);
+    for (const type of ['face', 'frontHair']) {
+      const part = p.model.parts.find((q) => q.standardType === type)!;
+      const turn = p.model.bindings.find((b) => b.target.id === part.id && b.parameterIds[0] === 'FaceAngleX');
+      expect(turn).toBeUndefined();
+    }
+  });
+
   it('4つのサービスは本物で、構築時には機器を開かない', () => {
     const getUserMedia = vi.fn();
     vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });

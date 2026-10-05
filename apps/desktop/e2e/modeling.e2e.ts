@@ -36,6 +36,7 @@ function shiftsAt(v: number) {
     const base = deformAt(0);
     const turned = deformAt(value);
     return {
+      face: meanX(turned, 'face') - meanX(base, 'face'),
       frontHair: meanX(turned, 'frontHair') - meanX(base, 'frontHair'),
       backHair: meanX(turned, 'backHair') - meanX(base, 'backHair'),
     };
@@ -99,10 +100,15 @@ describe('モデリングの通し', () => {
     await page.waitForFunction(() => window.__studio.services.store.get().model.bindings.length > 0);
     const bindingCount = await page.evaluate(() => window.__studio.services.store.get().model.bindings.length);
 
-    // 4. FaceAngleX を 30 にすると前髪が右へ、後ろ髪が左へ動く
-    const shifts = await shiftsAt(30);
-    expect(shifts.frontHair).toBeGreaterThan(10);
-    expect(shifts.backHair).toBeLessThan(-10);
+    // 4. FaceAngleX を ±30 にすると、顔と前髪がその向きへはっきり動き、後ろ髪も頭について同じ向きへ動く
+    //    （I-039 で、頭の共通の曲面のワープに変えた。MVP の「後ろ髪は逆へ」の奥行きの動きではない）
+    for (const sign of [1, -1]) {
+      const shifts = await shiftsAt(30 * sign);
+      expect(shifts.face * sign).toBeGreaterThan(10);
+      expect(shifts.frontHair * sign).toBeGreaterThan(10);
+      expect(shifts.backHair * sign).toBeGreaterThan(0);
+    }
+    const shifts = await shiftsAt(30); // 7. で開き直したあとと比べる
     await page.evaluate(() => window.__studio.services.editor.set({ editorParamValues: { FaceAngleX: 30 } }));
     await sleep(300);
     await page.screenshot({ path: join(RESULTS, 'face-angle-x-30.png') });
@@ -128,6 +134,7 @@ describe('モデリングの通し', () => {
     const reopened = await page.evaluate(() => JSON.stringify(window.__studio.services.store.get()));
     expect(JSON.parse(reopened)).toEqual(JSON.parse(saved));
     const after = await shiftsAt(30);
+    expect(after.face).toBeCloseTo(shifts.face, 3);
     expect(after.frontHair).toBeCloseTo(shifts.frontHair, 3);
     expect(after.backHair).toBeCloseTo(shifts.backHair, 3);
   }, 180_000);

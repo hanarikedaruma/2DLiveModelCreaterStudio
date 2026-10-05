@@ -72,7 +72,12 @@ const sameSet = (a: readonly string[], b: readonly string[]) =>
 const channelOf = (target: PointPlan['target']): Binding['channel'] =>
   target.type === 'warp' ? 'warpPoints' : 'vertices';
 
-export function planStep1(model: Model, basePlans: readonly BindingPlan[], boundsOf: BoundsOf): Step1Plan {
+export function planStep1(
+  model: Model,
+  basePlans: readonly BindingPlan[],
+  boundsOf: BoundsOf,
+  surfaceFaceTurn = true,
+): Step1Plan {
   const index = indexStandardParts(model.parts);
   const meshes = new Map(model.meshes.map((m) => [m.id, m]));
   const meshOf = (part: Part): Mesh | null => {
@@ -82,6 +87,24 @@ export function planStep1(model: Model, basePlans: readonly BindingPlan[], bound
   const rectOf = (type: ImageType): Rect | null => {
     const part = index.first(type);
     return part ? boundsOf(part) : null;
+  };
+  const childrenOf = new Map<string, Part[]>();
+  for (const part of model.parts) {
+    if (part.parentId !== null) childrenOf.set(part.parentId, [...(childrenOf.get(part.parentId) ?? []), part]);
+  }
+  // 子孫の画像パーツのうちメッシュのあるもの（parts の順ではなく、親から順に）
+  const descendantMeshes = (root: Part): { part: Part; mesh: Mesh }[] => {
+    const out: { part: Part; mesh: Mesh }[] = [];
+    const seen = new Set([root.id]);
+    const queue = [...(childrenOf.get(root.id) ?? [])];
+    for (let part = queue.shift(); part; part = queue.shift()) {
+      if (seen.has(part.id)) continue;
+      seen.add(part.id);
+      const mesh = part.kind === 'image' ? meshOf(part) : null;
+      if (mesh) out.push({ part, mesh });
+      queue.push(...(childrenOf.get(part.id) ?? []));
+    }
+    return out;
   };
   const transforms: BindingPlan[] = [];
   const points: PointPlan[] = [];
@@ -126,7 +149,8 @@ export function planStep1(model: Model, basePlans: readonly BindingPlan[], bound
     own(w.id, [...FACE_ANGLES]);
   }
   const warp = faceWarpOf(model);
-  if (warp && isUsableWarp(warp)) {
+  // 奥行き方式では曲面の計画を出さない。既存の自動キーだけを除き、手動・ロックは applyPointPlans が保護する。
+  if (surfaceFaceTurn && warp && isUsableWarp(warp)) {
     const target = { type: 'warp' as const, id: warp.id };
     for (const parameterId of FACE_ANGLES) {
       const deltas = generateSurfaceKeys(warp, parameterId, SURFACE_ANCHOR_VALUES);
@@ -162,6 +186,9 @@ export function planStep1(model: Model, basePlans: readonly BindingPlan[], bound
       const mesh = meshOf(part);
       if (!mesh) continue;
       own(mesh.id, [open]);
+      // 子（まつげなど）は親の transform とワープは受け継ぐが、頂点の差分は受け継がない
+      const children = descendantMeshes(part);
+      for (const child of children) own(child.mesh.id, [open]);
       // MVP の閉じ方を手で直していれば重ねない
       if (!line || !lids || keptTransform(part, open)) continue;
       // まつげなどの子も一緒に下がるよう、MVP の平行移動は残し、線に沿わせる残りの分だけを頂点で足す
@@ -176,6 +203,22 @@ export function planStep1(model: Model, basePlans: readonly BindingPlan[], bound
           mesh.vertices.map((p, i) => ({ x: 0, y: clean(closed.ys[i]! - p.y - drop) })),
         ),
       );
+      // 子の頂点にも、その x での上まぶたの下端の動きのうち MVP の平行移動の残りの分を足す（I-040）。
+      // 子の閉じ方を手で直していれば重ねない
+      const shift = lowerEdgeShift(mesh, closed.ys);
+      for (const child of children) {
+        if (keptTransform(child.part, open)) continue;
+        points.push(
+          closePlan(
+            child.mesh,
+            open,
+            child.mesh.vertices.map((p) => {
+              const s = shift(p.x);
+              return { x: 0, y: s === null ? 0 : clean(s - drop) };
+            }),
+          ),
+        );
+      }
     }
     for (const part of index.images(t.eyeWhite)) {
       const mesh = meshOf(part);
@@ -302,6 +345,21 @@ export function lidAlongLine(mesh: Mesh, lineY: (x: number) => number): { ys: nu
     return to - thickness + ((p.y - span.top) / height) * thickness;
   });
   return { ys, thickness };
+}
+
+// 閉じたときの上まぶたの下端の動き（x の関数）。閉じた形（頂点の高さ ys）の下端 − もとの下端。
+// x は上まぶたの横の範囲に収める（範囲の外にはみ出す子は端の列と一緒に動く）。下端が分からなければ null
+export function lowerEdgeShift(mesh: Mesh, ys: readonly number[]): (x: number) => number | null {
+  const closed = { vertices: mesh.vertices.map((p, i) => ({ x: p.x, y: ys[i]! })), triangles: mesh.triangles };
+  const xs = mesh.vertices.map((p) => p.x);
+  const left = Math.min(...xs);
+  const right = Math.max(...xs);
+  return (x) => {
+    const at = Math.min(Math.max(x, left), right);
+    const from = meshSpanAt(mesh, at);
+    const to = meshSpanAt(closed, at);
+    return from && to ? to.bottom - from.bottom : null;
+  };
 }
 
 // まばたきの頂点の計画（値 0 で delta、値 1 で差分 0）

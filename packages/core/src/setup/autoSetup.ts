@@ -3,7 +3,8 @@ import type { AutoSetup } from '@app/contracts';
 import { rectOfAsset } from '../generate/bounds';
 import { deepEqual } from '../generate/equal';
 import { withDrawOrder } from './drawOrder';
-import { withFaceWarp } from './faceTurn';
+import { withFaceWarp, withHeadWarp } from './faceTurn';
+import { faceTurnBindings, headTurnBlockReason, planHeadTurn } from './headTurn';
 import { buildHierarchy } from './hierarchy';
 import { applyMasksAndDepth } from './masksDepth';
 import { applyMotionPlans, planMotions } from './motions';
@@ -14,14 +15,24 @@ import { setupWarnings } from './warnings';
 
 export const AUTO_SETUP_LABEL = 'かんたんセットアップ';
 
-export function createAutoSetup(): AutoSetup {
+export interface AutoSetupOptions {
+  faceTurn?: 'surface' | 'depth' | 'head-surface';
+}
+
+export function createAutoSetup(options: AutoSetupOptions = {}): AutoSetup {
   return {
     plan(project) {
       // 新しい id は plan ごとに覚えておき、同じ入力には同じ id を使う（apply を純粋にする）
       const pool: string[] = [];
       return {
-        command: { label: AUTO_SETUP_LABEL, apply: (p) => runAutoSetup(p, pooledIds(pool, p)) },
-        warnings: setupWarnings(project.model),
+        command: { label: AUTO_SETUP_LABEL, apply: (p) => runAutoSetup(p, pooledIds(pool, p), options) },
+        warnings:
+          options.faceTurn === 'head-surface'
+            ? [
+                ...setupWarnings(project.model, true),
+                ...[headTurnBlockReason(project.model)].filter((w): w is string => w !== null),
+              ]
+            : setupWarnings(project.model, options.faceTurn !== 'depth'),
       };
     },
   };
@@ -47,7 +58,7 @@ function pooledIds(pool: string[], project: Project): () => string {
 }
 
 // かんたんセットアップの本体。何も変わらなければ同じ参照を返す
-export function runAutoSetup(project: Project, nextId: () => string): Project {
+export function runAutoSetup(project: Project, nextId: () => string, options: AutoSetupOptions = {}): Project {
   const assets = new Map(project.assets.map((a) => [a.id, a]));
   // 画像パーツの外接矩形 = 素材の offset と幅・高さ
   const boundsOf: BoundsOf = (part: Part) => {
@@ -63,10 +74,27 @@ export function runAutoSetup(project: Project, nextId: () => string): Project {
   // 7 標準パラメータ。STEP1 の動きも作るので、MVP と STEP1 の標準パラメータで足りないものを足す
   // （STEP2 の標準パラメータはプロジェクトを開いたときにアプリが足す。無ければ STEP2 の動きは作らない）
   model = ensureStandardParameters(model, 'step1');
-  model = withFaceWarp(model, boundsOf, nextId); // 曲面の顔の向きに使う顔のワープ（カード42）
-  const plan = planStep1(model, planMotions(model, boundsOf), boundsOf);
+  const headTurn = options.faceTurn === 'head-surface';
+  const blocked = headTurn && headTurnBlockReason(model) !== null;
+  const surfaceFaceTurn = !headTurn && options.faceTurn !== 'depth';
+  if (surfaceFaceTurn) model = withFaceWarp(model, boundsOf, nextId);
+  if (headTurn && !blocked) model = withHeadWarp(model, boundsOf, nextId);
+  const plan = planStep1(model, planMotions(model, boundsOf), boundsOf, surfaceFaceTurn);
+  const headPoints = headTurn && !blocked ? planHeadTurn(model) : [];
+  // 手動の旧顔ワープがある場合は、他軸の自動キーも含め旧顔の向きを一式残す。
+  const preservedFace = new Set(blocked ? faceTurnBindings(model).map((b) => b.id) : []);
   const step2 = planStep2(model, boundsOf); // 呼吸・腕（カード53）
-  model = applyMotionPlans(model, [...plan.transforms, ...step2], nextId); // 8 バインディング（transform）
-  model = applyPointPlans(model, plan.points, plan.owns, nextId); // 頂点・制御点のバインディング（カード42）
+  // 頭部の曲面と従来の奥行き移動を二重に掛けない。手動・ロック済みの旧キーは applyMotionPlans が残す。
+  const transforms =
+    headPoints.length > 0
+      ? plan.transforms.filter((p) => p.parameterId !== 'FaceAngleX' && p.parameterId !== 'FaceAngleY')
+      : plan.transforms;
+  model = applyMotionPlans(model, [...transforms, ...step2], nextId); // 8 バインディング（transform）
+  model = applyPointPlans(
+    model,
+    [...plan.points, ...headPoints],
+    (b) => plan.owns(b) && !preservedFace.has(b.id),
+    nextId,
+  );
   return deepEqual(model, project.model) ? project : { ...project, model };
 }
