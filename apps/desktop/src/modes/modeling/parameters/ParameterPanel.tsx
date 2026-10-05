@@ -1,7 +1,7 @@
 // パラメータパネル（モデリングの右）。グループごとに行を並べ、行を押すとそのパラメータを編集中にする。
 // [間を生成]・[奥行きで作り直す]・[すべて再補間]・生成方式・キーのロックは、操作ごとに1回の Undo にする
 import { useEffect } from 'react';
-import { PARAMETER_GROUPS, type Model, type Parameter, type ParameterGroup } from '@app/schema';
+import { MAX_BINDING_PARAMETERS, PARAMETER_GROUPS, type Model, type Parameter, type ParameterGroup } from '@app/schema';
 import { PanelSections, useCanvas, useDialogs, useEditor, useProject, useServices } from '../../../shell/api';
 import {
   applyGeneration,
@@ -25,8 +25,8 @@ import './parameters.css';
 
 export const PARAMETER_PANEL_ID = 'parameters';
 
-// キーを一緒に編集できるパラメータの数（組み合わせのキー）
-export const MAX_EDITING = 2;
+// キーを一緒に編集できるパラメータの数（組み合わせのキー。3つ以上は I-028）
+export const MAX_EDITING = MAX_BINDING_PARAMETERS;
 
 // 生成方式の説明（選ぶ欄のツールチップ）
 const GENERATION_TITLE = GENERATION_CHOICES.map((c) => `${c.label}: ${c.hint}`).join('\n');

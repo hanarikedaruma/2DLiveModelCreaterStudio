@@ -319,6 +319,45 @@ describe('createBindingEvaluator: 2パラメータ', () => {
   });
 });
 
+describe('createBindingEvaluator: 3つ以上のパラメータ（I-028）', () => {
+  // 顔 左右 × 顔 上下 × 口 開閉。(30, 30, 1) にはキーが無い
+  const b = transformBinding(
+    'xyz',
+    'part',
+    ['FaceAngleX', 'FaceAngleY', 'MouthOpen'],
+    [
+      [0, 30],
+      [0, 30],
+      [0, 1],
+    ],
+    [
+      [[0, 0, 0], delta()],
+      [[30, 0, 0], delta({ px: 10 })],
+      [[0, 30, 0], delta({ py: 10 })],
+      [[0, 0, 1], delta({ px: 1 })],
+      [[30, 30, 0], delta({ px: 10, py: 10, rot: 5 })],
+      [[30, 0, 1], delta({ px: 20 })],
+    ],
+  );
+
+  it('キーの上ではその差分、軸の間は多重線形補間', () => {
+    expectDelta(evalOne(b, { FaceAngleX: 30, FaceAngleY: 30 }).transforms.part, delta({ px: 10, py: 10, rot: 5 }));
+    expectDelta(evalOne(b, { FaceAngleX: 15, MouthOpen: 1 }).transforms.part, delta({ px: 10.5 }));
+  });
+
+  it('キーの無い点は 面の和 − 辺の和 + 頂点 で代用する（2つの軸の欠けは各軸の和）', () => {
+    // (0, 30, 1) = (0, 30, 0) + (0, 0, 1) − (0, 0, 0)
+    expectDelta(evalOne(b, { FaceAngleY: 30, MouthOpen: 1 }).transforms.part, delta({ px: 1, py: 10 }));
+    // (30, 30, 1) = (30, 30, 0) + (30, 0, 1) + (0, 30, 1) − (30, 0, 0) − (0, 30, 0) − (0, 0, 1) + (0, 0, 0)
+    const corner = delta({ px: 10 + 20 + 1 - 10 - 1, py: 10 + 10 - 10, rot: 5 });
+    expectDelta(evalOne(b, { FaceAngleX: 30, FaceAngleY: 30, MouthOpen: 1 }).transforms.part, corner);
+    expectDelta(
+      evalOne(b, { FaceAngleX: 30, FaceAngleY: 30, MouthOpen: 0.5 }).transforms.part,
+      delta({ px: 15, py: 10, rot: 5 }),
+    );
+  });
+});
+
 describe('createBindingEvaluator: 不透明度（絶対値のキー。I-026）', () => {
   const part = (id: string, opacity: number): Part => ({
     id,
@@ -656,17 +695,18 @@ describe('createBindingEvaluator: 無視するバインディング', () => {
     expect(warn).toHaveBeenCalledTimes(2);
   });
 
-  it('パラメータが 0個・3個のバインディングは無視して console.warn', () => {
+  it('パラメータが 0個・5個（上限 4 を超える）のバインディングは無視して console.warn', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const none = transformBinding('none', 'p', [], [], [[[], delta({ px: 1 })]]);
-    const three = transformBinding(
-      'three',
+    const ids = ['FaceAngleX', 'FaceAngleY', 'FaceAngleZ', 'EyeOpenL', 'EyeOpenR'];
+    const five = transformBinding(
+      'five',
       'p',
-      ['FaceAngleX', 'FaceAngleY', 'FaceAngleZ'],
-      [[0], [0], [0]],
-      [[[0, 0, 0], delta({ px: 1 })]],
+      ids,
+      ids.map(() => [0]),
+      [[[0, 0, 0, 1, 1], delta({ px: 1 })]],
     );
-    const out = createBindingEvaluator().evaluate(testModel({ bindings: [none, three] }), {});
+    const out = createBindingEvaluator().evaluate(testModel({ bindings: [none, five] }), {});
     expect(out.transforms).toEqual({});
     expect(warn).toHaveBeenCalledTimes(2);
   });

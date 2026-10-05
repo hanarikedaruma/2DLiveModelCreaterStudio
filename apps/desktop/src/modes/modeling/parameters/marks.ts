@@ -1,5 +1,5 @@
 // スライダーのキーの印と吸い付き、編集中の値にキーがあるか
-import type { Model, Parameter, ParameterKey } from '@app/schema';
+import { MAX_BINDING_PARAMETERS, type Model, type Parameter, type ParameterKey } from '@app/schema';
 import type { EditorState } from '@app/contracts';
 import { activeParams, isCombinationGridPoint } from '../../../services/keyEditor/common';
 
@@ -68,7 +68,7 @@ export function activeParameters(model: Model, editor: EditorState): Parameter[]
     const p = model.parameters.find((x) => x.id === id);
     if (p && !out.includes(p)) out.push(p);
   }
-  return out.slice(0, 2);
+  return out.slice(0, MAX_BINDING_PARAMETERS);
 }
 
 // 編集中のパラメータの組と同じ組のバインディングに、現在値のキーがあるか。

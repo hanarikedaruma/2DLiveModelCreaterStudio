@@ -29,6 +29,11 @@ export function pointsOps(n: number): DeltaOps<Vec2[]> {
         const q = at(b, i);
         return { x: p.x + q.x, y: p.y + q.y };
       }),
+    inverse: (a) =>
+      Array.from({ length: n }, (_, i) => {
+        const p = at(a, i);
+        return { x: -p.x, y: -p.y };
+      }),
     same: (a, b) =>
       Array.from({ length: n }, (_, i) => i).every((i) => same(at(a, i).x, at(b, i).x) && same(at(a, i).y, at(b, i).y)),
   };

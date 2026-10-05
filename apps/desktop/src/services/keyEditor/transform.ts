@@ -21,6 +21,8 @@ import {
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const same = (a: number, b: number) => Math.abs(a - b) <= 1e-9;
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+// 掛け算の逆（0 は 1 にする。評価の格子の代用と同じ）
+const inv = (v: number) => (v !== 0 ? 1 / v : 1);
 
 // 位置・回転は加算、拡縮は倍率（1 = 変化なし）。opacity は不透明度のバインディングでだけ使う（使わないものは 1）
 export const transformOps: DeltaOps<TransformDelta> = {
@@ -37,6 +39,12 @@ export const transformOps: DeltaOps<TransformDelta> = {
     rotation: a.rotation + b.rotation,
     scale: { x: a.scale.x * b.scale.x, y: a.scale.y * b.scale.y },
     opacity: a.opacity * b.opacity,
+  }),
+  inverse: (a) => ({
+    position: { x: -a.position.x, y: -a.position.y },
+    rotation: -a.rotation,
+    scale: { x: inv(a.scale.x), y: inv(a.scale.y) },
+    opacity: inv(a.opacity),
   }),
   same: (a, b) =>
     same(a.position.x, b.position.x) &&
@@ -56,6 +64,7 @@ export function opacityOps(base: number): DeltaOps<TransformDelta> {
     identity,
     read: (delta) => (Array.isArray(delta) ? identity() : delta),
     combine: (a, b) => ({ ...transformOps.combine(a, b), opacity: a.opacity + b.opacity - base }),
+    inverse: (a) => ({ ...transformOps.inverse(a), opacity: 2 * base - a.opacity }),
   };
 }
 

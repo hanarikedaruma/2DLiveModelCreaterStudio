@@ -14,6 +14,9 @@ function keysOf<T extends string>(record: Record<T, true>): [T, ...T[]] {
   return Object.keys(record) as [T, ...T[]];
 }
 
+// 1つのバインディングのパラメータの数の上限（I-028 で 2 から増やした。3つ以上は組み合わせのキー）
+export const MAX_BINDING_PARAMETERS = 4;
+
 export const BLEND_MODES = keysOf<BlendMode>({ normal: true, multiply: true, screen: true, add: true });
 export const BLEND_OPS = keysOf<BlendOp>({ override: true, add: true, multiply: true, max: true });
 export const MODE_IDS = keysOf<ModeId>({ modeling: true, animation: true, studio: true });

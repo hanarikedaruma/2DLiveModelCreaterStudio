@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Binding, Project, TransformDelta } from '@app/schema';
 import type { Command } from '@app/contracts';
-import { partOpacity } from '@app/core';
+import { createBindingEvaluator, partOpacity } from '@app/core';
 import { createKeyEditor } from './index';
 import {
   DETAIL,
@@ -603,5 +603,56 @@ describe('不透明度のキー（絶対値。I-026）', () => {
     const editor = deepFreeze(editorAt({ FaceAngleX: 30 }));
     const cmd = command(keyEditor.transformEdit(project, editor, ['face'], { opacity: 1 }));
     expect(cmd.apply(project)).toEqual(cmd.apply(project));
+  });
+});
+
+describe('3つ以上のパラメータでの編集（I-028）', () => {
+  const evaluator = createBindingEvaluator();
+  const look = (p: Project, values: Record<string, number>) => evaluator.evaluate(p.model, values).transforms.face;
+  const three = { FaceAngleX: 30, FaceAngleY: 30, MouthOpen: 1 };
+
+  it('3つのパラメータを編集中にすると、その3つの組のバインディングにキーを作る', () => {
+    const project = baseProject();
+    const out = command(
+      keyEditor.transformEdit(project, editorAt(three), ['face'], { dPosition: { x: 5, y: 0 } }),
+    ).apply(project);
+    const b = out.model.bindings[0]!;
+    expect(b.parameterIds).toEqual(['FaceAngleX', 'FaceAngleY', 'MouthOpen']);
+    expect(b.keyValues).toEqual([
+      [0, 30],
+      [0, 30],
+      [0, 1],
+    ]);
+    expect(b.keys.map((k) => k.coords)).toEqual([
+      [0, 0, 0],
+      [30, 30, 1],
+    ]);
+    expect(look(out, three)!.position.x).toBeCloseTo(5);
+    // ほかの組み合わせは変わらない（欠けた点は包除で代用）
+    expect(look(out, { FaceAngleX: 30, FaceAngleY: 30 })!.position.x).toBeCloseTo(0);
+  });
+
+  it('格子の線が増えるキーを足しても、見た目が変わらない（必要な点に補助のキーを足す）', () => {
+    const project = baseProject();
+    let p = command(keyEditor.transformEdit(project, editorAt(three), ['face'], { dPosition: { x: 6, y: 0 } })).apply(
+      project,
+    );
+    // デフォルト値の軸がある点はキーを足してから編集する（2パラメータと同じ）
+    const axisPoint = editorAt({ FaceAngleX: 30, FaceAngleY: 0, MouthOpen: 1 });
+    expect(keyEditor.transformEdit(p, axisPoint, ['face'], { dPosition: { x: 0, y: 4 } })).toBe('needsKey');
+    p = keyEditor.addKeyAtCurrentValue(p, axisPoint, { partId: 'face' }).apply(p);
+    p = command(keyEditor.transformEdit(p, axisPoint, ['face'], { dPosition: { x: 0, y: 4 } })).apply(p);
+    const points = samples({ FaceAngleX: [0, 10, 15, 30], FaceAngleY: [0, 15, 30], MouthOpen: [0, 0.5, 1] });
+    const before = points.map((v) => look(p, v));
+    const added = keyEditor
+      .addKeyAtCurrentValue(p, editorAt({ FaceAngleX: 15, FaceAngleY: 30, MouthOpen: 1 }), { partId: 'face' })
+      .apply(p);
+    expect(added.model.bindings[0]!.keyValues[0]).toEqual([0, 15, 30]);
+    points.forEach((v, i) => {
+      const a = before[i]!;
+      const b = look(added, v)!;
+      expect(b.position.x).toBeCloseTo(a.position.x, 6);
+      expect(b.position.y).toBeCloseTo(a.position.y, 6);
+    });
   });
 });

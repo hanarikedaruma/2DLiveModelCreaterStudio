@@ -81,8 +81,9 @@ export function editingLabel(project: Project, editor: EditorState): string | nu
   const tail = preview ? '　' + preview + '（編集できない）' : '';
   const noKey = !hasKeyAtCurrentValue(project.model, editor);
   if (noKey && isAutomaticCombination(project.model, editor)) {
-    const face = params.some((p) => p.id === 'FaceAngleX') && params.some((p) => p.id === 'FaceAngleY');
-    const status = face ? '　自動（左右と上下の和）' : '　自動（2つのパラメータの合成）';
+    const face =
+      params.length === 2 && params.some((p) => p.id === 'FaceAngleX') && params.some((p) => p.id === 'FaceAngleY');
+    const status = face ? '　自動（左右と上下の和）' : '　自動（' + params.length + 'つのパラメータの合成）';
     return `編集中: ${parts.join('、')}${status}${tail}`;
   }
   return `編集中: ${parts.join('、')}${noKey ? '　キーなし' : ''}${tail}`;

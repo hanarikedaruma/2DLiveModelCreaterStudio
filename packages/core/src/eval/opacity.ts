@@ -1,7 +1,7 @@
 // 不透明度のキー（I-026）。パーツ自身の不透明度 = Part.opacity + Σ（不透明度のバインディング（controlsOpacity）の
 // いまの値 − デフォルト値での値）を 0..1 に収めたもの。評価（evaluator）と同じ規則を、1つのパーツについて求める。
 // 編集の画面と KeyEditor が「いま見えている不透明度」と、キーに記録する値を求めるのに使う
-import type { Binding, Model, Parameter } from '@app/schema';
+import { MAX_BINDING_PARAMETERS, type Binding, type Model, type Parameter } from '@app/schema';
 import type { ParamValues } from '@app/contracts';
 import { parameterValue } from './evaluator';
 import { prepareBinding, preparedOpacityAt, sameCoord } from './prepare';
@@ -26,15 +26,14 @@ export function bindingOpacity(
 ): { value: number; atDefault: number } | null {
   if (!binding.controlsOpacity || binding.channel !== 'transform') return null;
   const ps = parametersOf(model, binding);
-  if (!ps || ps.length === 0 || ps.length > 2) return null;
+  if (!ps || ps.length === 0 || ps.length > MAX_BINDING_PARAMETERS) return null;
   const prep = prepareBinding(
     binding,
     ps.map((p) => p.default),
   );
   if (!prep.ok || prep.kind !== 'transform' || prep.values.length === 0 || prep.opacityAtDefault === null) return null;
-  const x = parameterValue(ps[0]!, params);
-  const y = ps[1] ? parameterValue(ps[1], params) : 0;
-  return { value: preparedOpacityAt(prep, x, y), atDefault: prep.opacityAtDefault };
+  const coords = ps.map((p) => parameterValue(p, params));
+  return { value: preparedOpacityAt(prep, coords), atDefault: prep.opacityAtDefault };
 }
 
 // パーツ自身の不透明度（0..1 に収める前）。except のバインディングの分は足さない

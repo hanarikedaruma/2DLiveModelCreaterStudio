@@ -4,16 +4,18 @@
 import type { Binding, Model, Parameter, ParameterKey, TransformDelta, Vec2 } from '@app/schema';
 import type { Command, EditorState } from '@app/contracts';
 import { modelCommand } from '@app/core';
-import { valueOf } from '../parameters/marks';
+import { activeParameters, valueOf } from '../parameters/marks';
 
 // パラメータの値・キー位置を同じとみなす幅（KeyEditor と同じ）
 const EPS = 1e-6;
 export const near = (a: number, b: number): boolean => Math.abs(a - b) <= EPS;
 
-// a は横（列）、b は縦（行）のパラメータ
+// a は横（列）、b は縦（行）のパラメータ。fixed は2軸断面（I-028）: 一緒にキーを編集しているほかのパラメータと
+// その値（デフォルト値でないもの）。あると、格子は a・b・fixed の組のバインディングの、fixed の値での断面になる
 export interface ParameterPair {
   a: string;
   b: string;
+  fixed?: { id: string; value: number }[];
 }
 export interface GridCell {
   a: number;
@@ -71,6 +73,14 @@ export function activePair(model: Model, editor: EditorState): ParameterPair | n
   return a !== undefined && b !== undefined && pairParameters(model, { a, b }) ? { a, b } : null;
 }
 
+// 格子の組に、いま一緒にキーを編集しているほかのパラメータ（デフォルト値でないもの）を断面として足す（I-028）
+export function crossSection(model: Model, editor: EditorState, pair: ParameterPair): ParameterPair {
+  const fixed = activeParameters(model, editor)
+    .filter((p) => p.id !== pair.a && p.id !== pair.b && !near(valueOf(p, editor), p.default))
+    .map((p) => ({ id: p.id, value: valueOf(p, editor) }));
+  return fixed.length > 0 ? { a: pair.a, b: pair.b, fixed } : { a: pair.a, b: pair.b };
+}
+
 // 組を選んでいないときの組。顔の向き、それが無ければ先頭の2つ
 export function defaultPair(model: Model): ParameterPair | null {
   if (pairParameters(model, DIRECTION_PAIR)) return DIRECTION_PAIR;
@@ -87,12 +97,24 @@ export function cellKind(pa: Parameter, pb: Parameter, cell: GridCell): CellKind
   return aDefault || bDefault ? 'axis' : 'combined';
 }
 
-// マスを押したときの EditorState の変更。組み合わせと中央は2パラメータ、上下左右は値の動く方だけの1パラメータ
+// マスを押したときの EditorState の変更。組み合わせと中央は2パラメータ、上下左右は値の動く方だけの1パラメータ。
+// 断面（fixed）があれば、どのマスも組と fixed のすべてを編集中にし、fixed の値はそのまま（I-028）
 export function cellPatch(
   pa: Parameter,
   pb: Parameter,
   cell: GridCell,
+  fixed: ParameterPair['fixed'] = [],
 ): Pick<EditorState, 'activeParameterIds' | 'editorParamValues'> {
+  if (fixed.length > 0) {
+    return {
+      activeParameterIds: [pa.id, pb.id, ...fixed.map((f) => f.id)],
+      editorParamValues: {
+        [pa.id]: cell.a,
+        [pb.id]: cell.b,
+        ...Object.fromEntries(fixed.map((f) => [f.id, f.value])),
+      },
+    };
+  }
   if (cellKind(pa, pb, cell) === 'axis') {
     const [p, v] = near(cell.a, pa.default) ? [pb, cell.b] : [pa, cell.a];
     return { activeParameterIds: [p.id], editorParamValues: { [p.id]: v } };
@@ -104,22 +126,31 @@ const sameIds = (ids: string[], expected: string[]) =>
   ids.length === expected.length && expected.every((id) => ids.includes(id));
 
 // そのマスがいまの編集中の状態か（押したときの状態と同じか）
-export function isCurrentCell(pa: Parameter, pb: Parameter, cell: GridCell, editor: EditorState): boolean {
-  const patch = cellPatch(pa, pb, cell);
+export function isCurrentCell(
+  pa: Parameter,
+  pb: Parameter,
+  cell: GridCell,
+  editor: EditorState,
+  fixed: ParameterPair['fixed'] = [],
+): boolean {
+  const patch = cellPatch(pa, pb, cell, fixed);
   if (!sameIds(editor.activeParameterIds, patch.activeParameterIds)) return false;
   return near(valueOf(pa, editor), cell.a) && near(valueOf(pb, editor), cell.b);
 }
 
 // ---- 補正のキー ----
 
-// その組の2パラメータのバインディング（parameterIds の順は問わない）
+// その組（と断面の fixed）のパラメータのバインディング（parameterIds の順は問わない）
 export function pairBindings(model: Model, pair: ParameterPair): Binding[] {
-  return model.bindings.filter((b) => b.parameterIds.length === 2 && sameIds(b.parameterIds, [pair.a, pair.b]));
+  const ids = [pair.a, pair.b, ...(pair.fixed ?? []).map((f) => f.id)];
+  return model.bindings.filter((b) => b.parameterIds.length === ids.length && sameIds(b.parameterIds, ids));
 }
 
-// バインディングの parameterIds の順に並べたマスの値
+// バインディングの parameterIds の順に並べたマスの値（断面の fixed はその値）
 function coordsOf(binding: Binding, pair: ParameterPair, cell: GridCell): number[] {
-  return binding.parameterIds.map((id) => (id === pair.a ? cell.a : cell.b));
+  return binding.parameterIds.map((id) =>
+    id === pair.a ? cell.a : id === pair.b ? cell.b : (pair.fixed?.find((f) => f.id === id)?.value ?? 0),
+  );
 }
 
 const isAt = (key: ParameterKey, coords: number[]) =>
@@ -204,8 +235,9 @@ export function resetCell(model: Model, pair: ParameterPair, cell: GridCell): Mo
   if (!params || cellKind(params[0], params[1], cell) !== 'combined') return model;
   let changed = false;
   const bindings: Binding[] = [];
+  const targets = new Set(pairBindings(model, pair)); // 断面なら、組と断面のパラメータの組のバインディング（I-028）
   for (const binding of model.bindings) {
-    if (binding.parameterIds.length !== 2 || !sameIds(binding.parameterIds, [pair.a, pair.b])) {
+    if (!targets.has(binding)) {
       bindings.push(binding);
       continue;
     }

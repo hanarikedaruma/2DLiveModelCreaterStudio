@@ -6,6 +6,7 @@ import { createBindingEvaluator, defaultEditorState } from '@app/core';
 import { createKeyEditor } from '../../../services/keyEditor';
 import {
   activePair,
+  crossSection,
   cellKind,
   cellPatch,
   cellStatus,
@@ -284,5 +285,52 @@ describe('組み合わせの補正の格子', () => {
     const reset = resetCell(edited, { a: 'EyeOpenL', b: 'EyeSmileL' }, { a: 0, b: 1 });
     expect(pairBindings(reset, pair)).toEqual([]);
     expect(eye(reset)).toEqual(eye(model));
+  });
+});
+
+describe('2軸断面（I-028）', () => {
+  const three = ['FaceAngleX', 'FaceAngleY', 'EyeOpenL'];
+  const at = { FaceAngleX: 30, FaceAngleY: 30, EyeOpenL: 0 };
+
+  it('ほかに編集中のパラメータ（デフォルト値でない）があれば、その値での断面にする', () => {
+    const p = gridTestProject();
+    const editor = editorWith({ activeParameterIds: three, editorParamValues: at });
+    const pair = crossSection(p.model, editor, DIRECTION_PAIR);
+    expect(pair.fixed).toEqual([{ id: 'EyeOpenL', value: 0 }]);
+    // デフォルト値のものは断面にしない
+    const atDefault = editorWith({ activeParameterIds: three, editorParamValues: { FaceAngleX: 30, EyeOpenL: 1 } });
+    expect(crossSection(p.model, atDefault, DIRECTION_PAIR).fixed).toBeUndefined();
+
+    const [pa, pb] = pairParameters(p.model, pair)!;
+    expect(cellPatch(pa, pb, { a: 30, b: 0 }, pair.fixed)).toEqual({
+      activeParameterIds: three,
+      editorParamValues: { FaceAngleX: 30, FaceAngleY: 0, EyeOpenL: 0 },
+    });
+    expect(isCurrentCell(pa, pb, { a: 30, b: 30 }, editor, pair.fixed)).toBe(true);
+    expect(isCurrentCell(pa, pb, { a: 30, b: 30 }, editor)).toBe(false);
+  });
+
+  it('断面のマスで直すと3つの組のバインディングに補正のキーができ、その断面だけが修正済みになる', () => {
+    const p = gridTestProject();
+    const editor = editorWith({ activeParameterIds: three, editorParamValues: at });
+    const pair = crossSection(p.model, editor, DIRECTION_PAIR);
+    const cell = { a: 30, b: 30 };
+    expect(cellStatus(p.model, pair, cell)).toBe('auto');
+    const moved = moveFace(p, editor, 5, 0);
+    const bindings = pairBindings(moved.model, pair);
+    expect(bindings).toHaveLength(1);
+    expect([...bindings[0]!.parameterIds].sort()).toEqual([...three].sort());
+    expect(cellStatus(moved.model, pair, cell)).toBe('corrected');
+    expect(correctionKeyCount(moved.model, pair, cell)).toBe(1);
+    // 目を開けた（EyeOpenL がデフォルト値の）格子は変わらない
+    expect(cellStatus(moved.model, DIRECTION_PAIR, cell)).toBe('auto');
+    expect(faceAt(moved.model, at).position.x - faceAt(p.model, at).position.x).toBeCloseTo(5);
+    const open = { FaceAngleX: 30, FaceAngleY: 30 };
+    expect(faceAt(moved.model, open).position.x).toBeCloseTo(faceAt(p.model, open).position.x);
+    // [自動に戻す] で断面の補正のキーを消す
+    const reset = resetCell(moved.model, pair, cell);
+    expect(cellStatus(reset, pair, cell)).toBe('auto');
+    expect(faceAt(reset, at).position.x).toBeCloseTo(faceAt(p.model, at).position.x);
+    expect(() => validateProject({ ...moved, model: reset })).not.toThrow();
   });
 });

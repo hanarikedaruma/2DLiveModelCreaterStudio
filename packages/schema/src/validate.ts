@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { BLEND_MODES, BLEND_OPS, PARAMETER_GROUP_IDS, STANDARD_PART_TYPES, TRACKING_INPUTS } from './rules';
+import {
+  BLEND_MODES,
+  BLEND_OPS,
+  MAX_BINDING_PARAMETERS,
+  PARAMETER_GROUP_IDS,
+  STANDARD_PART_TYPES,
+  TRACKING_INPUTS,
+} from './rules';
 import type {
   Animation,
   Asset,
@@ -228,7 +235,7 @@ const binding: z.ZodType<Binding> = z
     id,
     target: z.object({ type: z.enum(['part', 'mesh', 'warp']), id }),
     channel: z.enum(['transform', 'vertices', 'warpPoints']),
-    parameterIds: z.array(id).min(1).max(2),
+    parameterIds: z.array(id).min(1).max(MAX_BINDING_PARAMETERS),
     keyValues: z.array(z.array(num)),
     keys: z.array(parameterKey),
     generation: z.enum(['linear', 'depth', 'rotate', 'surface', 'ease']),

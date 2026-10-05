@@ -1,5 +1,13 @@
 // KeyEditor の共通部分。編集中のパラメータの解決、バインディングとキーの検索・作成、1つのバインディングの補間
-import type { Binding, Channel, Model, ParameterKey, TransformDelta, Vec2 } from '@app/schema';
+import {
+  MAX_BINDING_PARAMETERS,
+  type Binding,
+  type Channel,
+  type Model,
+  type ParameterKey,
+  type TransformDelta,
+  type Vec2,
+} from '@app/schema';
 import type { EditorState } from '@app/contracts';
 
 // パラメータの値・キー位置を同じとみなす幅
@@ -14,6 +22,7 @@ export interface DeltaOps<D extends Delta> {
   read(delta: ParameterKey['delta']): D; // キーの差分をこの形にそろえる
   lerp(a: D, b: D, t: number): D;
   combine(a: D, b: D): D; // 2つの差分を重ねる（位置・回転・点は加算、拡縮・不透明度は乗算）
+  inverse(a: D): D; // combine(a, inverse(a)) が変化なしになる差分（格子の代用の包除で引く）
   same(a: D, b: D): boolean;
 }
 
@@ -25,7 +34,7 @@ export interface ActiveParam {
   default: number;
 }
 
-// 編集中のパラメータと現在値。モデルに無い id と重複は除き、最大2つ
+// 編集中のパラメータと現在値。モデルに無い id と重複は除き、最大 MAX_BINDING_PARAMETERS 個（I-028 で 2 から増やした）
 export function activeParams(model: Model, editor: EditorState): ActiveParam[] {
   const out: ActiveParam[] = [];
   for (const id of editor.activeParameterIds) {
@@ -33,7 +42,7 @@ export function activeParams(model: Model, editor: EditorState): ActiveParam[] {
     if (!p || out.some((a) => a.id === id)) continue;
     const raw = editor.editorParamValues[id] ?? p.default;
     out.push({ id, value: Math.min(p.max, Math.max(p.min, raw)), default: p.default });
-    if (out.length === 2) break;
+    if (out.length === MAX_BINDING_PARAMETERS) break;
   }
   return out;
 }
@@ -62,10 +71,10 @@ export function isPreviewOffBase(model: Model, editor: EditorState): boolean {
   return previewParameters(model, editor).length > 0;
 }
 
-// 各軸の既存のキー位置を組み合わせたマス。1軸の編集や格子の間では自動でキーを追加しない
+// 各軸の既存のキー位置を組み合わせたマス（2つ以上のパラメータ）。1軸の編集や格子の間では自動でキーを追加しない
 export function isCombinationGridPoint(model: Model, params: ActiveParam[]): boolean {
   return (
-    params.length === 2 &&
+    params.length >= 2 &&
     params.every(
       (p) =>
         !near(p.value, p.default) &&
@@ -230,14 +239,14 @@ export function addKey<D extends Delta>(model: Model, spec: KeySpec<D>): Model {
   const added: ParameterKey[] = [
     { coords, delta: sampleBinding(binding, coords, defaults, ops), source: 'manual', locked: easy },
   ];
-  if (binding.parameterIds.length === 2) {
+  if (binding.parameterIds.length >= 2) {
     added.push(...supportKeys(binding, keyValues, coords, defaults, added, ops));
   }
   const keys = [...binding.keys, ...added].sort(compareCoords);
   return replaceBinding(model, { ...binding, keyValues, keys });
 }
 
-// 2パラメータで格子の線が増えたとき、増えた格子の点のうち、代用（各軸の差分の和）では元の補間と
+// 2つ以上のパラメータで格子の線が増えたとき、増えた格子の点のうち、代用（包除）では元の補間と
 // 値が変わる点にもキーを足す（source 'auto'）。こうすると格子全体で見た目が変わらない
 function supportKeys<D extends Delta>(
   old: Binding,
@@ -247,25 +256,27 @@ function supportKeys<D extends Delta>(
   added: ParameterKey[],
   ops: DeltaOps<D>,
 ): ParameterKey[] {
-  const [oldXs = [], oldYs = []] = old.keyValues;
-  const [xs = [], ys = []] = keyValues;
-  const onOldGrid = (x: number, y: number) => oldXs.some((v) => near(v, x)) && oldYs.some((v) => near(v, y));
-  const points: number[][] = [];
-  for (const x of xs) for (const y of ys) if (!onOldGrid(x, y)) points.push([x, y]);
-  // 代用はデフォルト値の軸の上の点を使うので、軸の上の点を先に決める
-  const onAxis = (p: number[]) => near(p[0]!, defaults[0]!) || near(p[1]!, defaults[1]!);
-  points.sort((a, b) => Number(onAxis(b)) - Number(onAxis(a)));
+  const onOldGrid = (p: number[]) => p.every((v, k) => (old.keyValues[k] ?? []).some((x) => near(x, v)));
+  const points = cartesian(keyValues).filter((p) => !onOldGrid(p));
+  // 代用はデフォルト値から外れた軸の少ない点を使うので、外れた軸の少ない点から決める
+  const offCount = (p: number[]) => p.filter((v, k) => !near(v, defaults[k]!)).length;
+  points.sort((a, b) => offCount(a) - offCount(b));
 
   const out: ParameterKey[] = [];
   for (const p of points) {
-    if (near(p[0]!, current[0]!) && near(p[1]!, current[1]!)) continue;
+    if (p.every((v, k) => near(v, current[k]!))) continue;
     const working: Binding = { ...old, keyValues, keys: [...old.keys, ...added, ...out] };
     if (keyAt(working, p)) continue;
     const before = sampleBinding(old, p, defaults, ops);
-    const substitute = gridValue(working, p[0]!, p[1]!, defaults, ops);
+    const substitute = gridValue(working, p, defaults, ops);
     if (!ops.same(before, substitute)) out.push({ coords: p, delta: before, source: 'auto', locked: false });
   }
   return out;
+}
+
+// 軸ごとの値の組み合わせすべて
+function cartesian(axes: number[][]): number[][] {
+  return axes.reduce<number[][]>((acc, values) => acc.flatMap((p) => values.map((v) => [...p, v])), [[]]);
 }
 
 // ---- 1つのバインディングの補間（評価のカード06 と同じ規則） ----
@@ -289,16 +300,28 @@ function cellOf(values: number[], v: number): Cell {
   return { i0: last, i1: last, t: 0 };
 }
 
-// 格子の点の差分。キーが無ければ (x, y0) と (x0, y) の差分を重ねて代用する（どちらも無ければ 0）
-function gridValue<D extends Delta>(binding: Binding, x: number, y: number, defaults: number[], ops: DeltaOps<D>): D {
-  const key = keyAt(binding, [x, y]);
+// 格子の点の差分。キーがあればその差分。デフォルト値から外れた軸が1つ以下でキーが無ければ、デフォルト値の点の差分
+// （無ければ変化なし）。2つ以上なら、外れた軸の一部だけをデフォルト値に戻した点の差分の包除で代用する
+// （2パラメータなら (x, y0) + (x0, y) − (x0, y0)。評価の格子の代用と同じ。I-028）
+function gridValue<D extends Delta>(binding: Binding, point: number[], defaults: number[], ops: DeltaOps<D>): D {
+  const key = keyAt(binding, point);
   if (key) return ops.read(key.delta);
-  const ax = keyAt(binding, [x, defaults[1]!]);
-  const ay = keyAt(binding, [defaults[0]!, y]);
-  return ops.combine(ax ? ops.read(ax.delta) : ops.identity(), ay ? ops.read(ay.delta) : ops.identity());
+  const off = point.map((_, k) => k).filter((k) => !near(point[k]!, defaults[k]!));
+  if (off.length <= 1) {
+    const origin = keyAt(binding, defaults);
+    return origin ? ops.read(origin.delta) : ops.identity();
+  }
+  let acc = ops.identity();
+  for (let mask = 0; mask < (1 << off.length) - 1; mask++) {
+    const kept = off.filter((_, b) => (mask >> b) & 1);
+    const face = point.map((v, k) => (off.includes(k) && !kept.includes(k) ? defaults[k]! : v));
+    const value = gridValue(binding, face, defaults, ops);
+    acc = ops.combine(acc, (off.length - 1 - kept.length) % 2 === 0 ? value : ops.inverse(value));
+  }
+  return acc;
 }
 
-// バインディング1つの coords での差分。1パラメータはキーの間の線形補間、2パラメータは格子の双線形補間
+// バインディング1つの coords での差分。1パラメータはキーの間の線形補間、2つ以上は格子の多重線形補間
 export function sampleBinding<D extends Delta>(
   binding: Binding,
   coords: number[],
@@ -312,12 +335,16 @@ export function sampleBinding<D extends Delta>(
     const { i0, i1, t } = cellOf(values, coords[0] ?? 0);
     return ops.lerp(ops.read(keys[i0]!.delta), ops.read(keys[i1]!.delta), t);
   }
-  const [xs = [], ys = []] = binding.keyValues;
-  if (xs.length === 0 || ys.length === 0) return ops.identity();
-  const cx = cellOf(xs, coords[0] ?? 0);
-  const cy = cellOf(ys, coords[1] ?? 0);
-  const at = (i: number, j: number) => gridValue(binding, xs[i]!, ys[j]!, defaults, ops);
-  const low = ops.lerp(at(cx.i0, cy.i0), at(cx.i1, cy.i0), cx.t);
-  const high = ops.lerp(at(cx.i0, cy.i1), at(cx.i1, cy.i1), cx.t);
-  return ops.lerp(low, high, cy.t);
+  const axes = binding.keyValues;
+  if (axes.length === 0 || axes.some((a) => a.length === 0)) return ops.identity();
+  const cells = axes.map((a, k) => cellOf(a, coords[k] ?? 0));
+  // 最後の軸から順に、2つの値を線形補間して1つ減らす
+  const reduce = (fixed: number[], k: number): D => {
+    if (k === axes.length) return gridValue(binding, fixed, defaults, ops);
+    const c = cells[k]!;
+    const low = reduce([...fixed, axes[k]![c.i0]!], k + 1);
+    if (c.t === 0) return low;
+    return ops.lerp(low, reduce([...fixed, axes[k]![c.i1]!], k + 1), c.t);
+  };
+  return reduce([], 0);
 }

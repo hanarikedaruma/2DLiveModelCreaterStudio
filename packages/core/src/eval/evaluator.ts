@@ -1,4 +1,12 @@
-import type { Binding, Mesh, Model, Parameter, TransformDelta, Warp } from '@app/schema';
+import {
+  MAX_BINDING_PARAMETERS,
+  type Binding,
+  type Mesh,
+  type Model,
+  type Parameter,
+  type TransformDelta,
+  type Warp,
+} from '@app/schema';
 import type { BindingEvaluator, ParamValues, TargetDeltas } from '@app/contracts';
 import { prepareBinding, type PreparedBinding } from './prepare';
 import { identityDelta } from './transformDelta';
@@ -29,23 +37,50 @@ function fractionalIndex(xs: number[], v: number): number {
   return lo + (v - xs[lo]!) / (xs[hi]! - xs[lo]!);
 }
 
-// 格子の4つの角と重み（重み 0 の角は使わない）。毎回の確保を避けるため使い回す
-const cornerIndex = new Int32Array(4);
-const cornerWeight = new Float64Array(4);
+// 格子の角（2^次元）と重み（重み 0 の角は使わない）。毎回の確保を避けるため使い回す
+const MAX_CORNERS = 1 << MAX_BINDING_PARAMETERS;
+const cornerIndex = new Int32Array(MAX_CORNERS);
+const cornerWeight = new Float64Array(MAX_CORNERS);
+const fraction = new Float64Array(MAX_BINDING_PARAMETERS);
 
-function corners(prepared: { xs: number[]; ys: number[] }, fx: number, fy: number): number {
-  const ny = prepared.ys.length;
-  const i0 = Math.floor(fx);
-  const j0 = Math.floor(fy);
-  const tx = fx - i0;
-  const ty = fy - j0;
-  const i1 = tx > 0 ? i0 + 1 : i0;
-  const j1 = ty > 0 ? j0 + 1 : j0;
+// fraction[k] は軸 k の小数の添字。1・2パラメータはよく使うので展開して数える
+function corners(prepared: { axes: number[][]; strides: number[] }, dims: number): number {
+  const { strides } = prepared;
+  if (dims === 1) {
+    const i0 = Math.floor(fraction[0]!);
+    const t = fraction[0]! - i0;
+    let n = pushCorner(0, i0, 1 - t);
+    if (t > 0) n = pushCorner(n, i0 + 1, t);
+    return n;
+  }
+  if (dims === 2) {
+    const ny = strides[0]!;
+    const i0 = Math.floor(fraction[0]!);
+    const j0 = Math.floor(fraction[1]!);
+    const tx = fraction[0]! - i0;
+    const ty = fraction[1]! - j0;
+    const i1 = tx > 0 ? i0 + 1 : i0;
+    const j1 = ty > 0 ? j0 + 1 : j0;
+    let n = 0;
+    n = pushCorner(n, i0 * ny + j0, (1 - tx) * (1 - ty));
+    n = pushCorner(n, i1 * ny + j0, tx * (1 - ty));
+    n = pushCorner(n, i0 * ny + j1, (1 - tx) * ty);
+    n = pushCorner(n, i1 * ny + j1, tx * ty);
+    return n;
+  }
   let n = 0;
-  n = pushCorner(n, i0 * ny + j0, (1 - tx) * (1 - ty));
-  n = pushCorner(n, i1 * ny + j0, tx * (1 - ty));
-  n = pushCorner(n, i0 * ny + j1, (1 - tx) * ty);
-  n = pushCorner(n, i1 * ny + j1, tx * ty);
+  for (let corner = 0; corner < 1 << dims; corner++) {
+    let index = 0;
+    let weight = 1;
+    for (let k = 0; k < dims; k++) {
+      const i0 = Math.floor(fraction[k]!);
+      const t = fraction[k]! - i0;
+      const high = (corner >> k) & 1;
+      weight *= high ? t : 1 - t;
+      index += (high && t > 0 ? i0 + 1 : i0) * strides[k]!;
+    }
+    n = pushCorner(n, index, weight);
+  }
   return n;
 }
 
@@ -118,11 +153,11 @@ export function createBindingEvaluator(): BindingEvaluator {
     console.warn(`バインディング ${binding.id}: ${message}`);
   }
 
-  // d0・d1 は各パラメータのデフォルト値（2パラメータの代用に使うので、変わったら作り直す）
-  function prepared(binding: Binding, d0: number, d1: number): PreparedBinding {
+  // defaults は各パラメータのデフォルト値（2つ以上のパラメータの代用に使うので、変わったら作り直す）
+  function prepared(binding: Binding, defaults: number[]): PreparedBinding {
     const cached = preparedCache.get(binding);
-    if (cached && (!cached.ok || (cached.defaults[0] === d0 && cached.defaults[1] === d1))) return cached;
-    const next = prepareBinding(binding, [d0, d1]);
+    if (cached && (!cached.ok || cached.defaults.every((d, k) => d === defaults[k]))) return cached;
+    const next = prepareBinding(binding, defaults);
     preparedCache.set(binding, next);
     return next;
   }
@@ -141,13 +176,15 @@ export function createBindingEvaluator(): BindingEvaluator {
 
       for (const binding of model.bindings) {
         const ids = binding.parameterIds;
-        const p0 = ids.length > 0 ? parameters.get(ids[0]!) : undefined;
-        const p1 = ids.length > 1 ? parameters.get(ids[1]!) : undefined;
-        if (ids.length > 0 && ids.length <= 2 && (!p0 || (ids.length === 2 && !p1))) {
+        const ps = ids.map((id) => parameters.get(id));
+        if (ids.length > 0 && ids.length <= MAX_BINDING_PARAMETERS && ps.some((p) => !p)) {
           warn(binding, `無視する（モデルに無いパラメータを使っている: ${ids.join(', ')}）`);
           continue;
         }
-        const prep = prepared(binding, p0 ? p0.default : 0, p1 ? p1.default : 0);
+        const prep = prepared(
+          binding,
+          ps.map((p) => (p ? p.default : 0)),
+        );
         if (!prep.ok) {
           warn(binding, `無視する（${prep.reason}）`);
           continue;
@@ -155,10 +192,10 @@ export function createBindingEvaluator(): BindingEvaluator {
         if (prep.warning) warn(binding, prep.warning);
         if (prep.values.length === 0) continue;
 
-        // ここでは parameterIds が 1つか2つで、どれもモデルにある
-        const fx = fractionalIndex(prep.xs, parameterValue(p0!, params));
-        const fy = prep.dims === 2 ? fractionalIndex(prep.ys, parameterValue(p1!, params)) : 0;
-        const n = corners(prep, fx, fy);
+        // ここでは parameterIds が 1〜MAX_BINDING_PARAMETERS 個で、どれもモデルにある
+        for (let k = 0; k < prep.dims; k++)
+          fraction[k] = fractionalIndex(prep.axes[k]!, parameterValue(ps[k]!, params));
+        const n = corners(prep, prep.dims);
         const targetId = binding.target.id;
 
         if (prep.kind === 'transform') {

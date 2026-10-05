@@ -5,6 +5,7 @@ import { useDispatch, useEditor, useProject } from '../../../shell/api';
 import { formatValue } from '../parameters/labels';
 import { LockIcon } from '../structure/ui';
 import {
+  crossSection,
   cellKind,
   cellLockState,
   cellPatch,
@@ -37,13 +38,17 @@ function shortText(kind: CellKind, status: CellStatus): string {
   return status === 'corrected' ? '修正' : '自動';
 }
 
-export function PairGrid({ pair, pa, pb, xs, ys, variant, label }: PairGridProps) {
+export function PairGrid({ pair: chosen, pa, pb, xs, ys, variant, label }: PairGridProps) {
   const { model } = useProject();
   const [editor, setEditor] = useEditor();
+  // 一緒にキーを編集しているほかのパラメータがあれば、その値での2軸断面（I-028）
+  const pair = crossSection(model, editor, chosen);
+  const fixed = pair.fixed ?? [];
   const direction = variant === 'direction';
   const nameOf = (cell: GridCell) => (direction ? directionName(pa, pb, cell) : combinationName(pa, pb, cell));
   const rows = [...ys].reverse(); // 上が大きい値
-  const current = rows.flatMap((b) => xs.map((a) => ({ a, b }))).find((c) => isCurrentCell(pa, pb, c, editor)) ?? null;
+  const current =
+    rows.flatMap((b) => xs.map((a) => ({ a, b }))).find((c) => isCurrentCell(pa, pb, c, editor, fixed)) ?? null;
 
   const cellButton = (cell: GridCell) => {
     const kind = cellKind(pa, pb, cell);
@@ -64,7 +69,7 @@ export function PairGrid({ pair, pa, pb, xs, ys, variant, label }: PairGridProps
         data-locked={locked}
         data-cell={`${cell.a},${cell.b}`}
         data-status={kind === 'combined' ? status : kind}
-        onClick={() => setEditor(cellPatch(pa, pb, cell))}
+        onClick={() => setEditor(cellPatch(pa, pb, cell, fixed))}
       >
         {direction ? (
           <>
@@ -81,6 +86,18 @@ export function PairGrid({ pair, pa, pb, xs, ys, variant, label }: PairGridProps
   const columns = direction ? `repeat(${xs.length}, minmax(0, 1fr))` : `auto repeat(${xs.length}, minmax(32px, 1fr))`;
   return (
     <div className={`grid2d grid2d-${variant}`}>
+      {fixed.length > 0 && (
+        <p className="grid2d-hint grid2d-section-note">
+          断面:{' '}
+          {fixed
+            .map((f) => {
+              const p = model.parameters.find((x) => x.id === f.id);
+              return p ? `${p.name} ＝ ${formatValue(p, f.value)}` : f.id;
+            })
+            .join('、')}
+          （{[pa, pb].length + fixed.length} つのパラメータの組み合わせのキー）
+        </p>
+      )}
       <div className="grid2d-cells" role="group" aria-label={label} style={{ gridTemplateColumns: columns }}>
         {!direction && (
           <>
@@ -120,6 +137,10 @@ function CurrentCell({ pair, pa, pb, cell, name }: CurrentCellProps) {
   const dispatch = useDispatch();
   if (!cell) return <p className="grid2d-current grid2d-hint">マスを押すと、そのマスのキーを編集する</p>;
   const kind = cellKind(pa, pb, cell);
+  // 断面（I-028）では、どのマスも組と断面のパラメータの組み合わせのキー
+  if ((pair.fixed ?? []).length > 0 && kind !== 'combined') {
+    return <p className="grid2d-current">{name}: 断面のパラメータとの組み合わせのキーを編集する</p>;
+  }
   if (kind === 'center') return <p className="grid2d-current">{name}: 基準状態を編集する</p>;
   if (kind === 'axis') {
     const p = cellPatch(pa, pb, cell).activeParameterIds[0] === pa.id ? pa : pb;
