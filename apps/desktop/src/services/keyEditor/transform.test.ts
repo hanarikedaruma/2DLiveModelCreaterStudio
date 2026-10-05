@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { Binding, Project } from '@app/schema';
+import type { Binding, Project, TransformDelta } from '@app/schema';
 import type { Command } from '@app/contracts';
-import { createKeyEditor, defaultKeyTransformEdit } from './index';
+import { partOpacity } from '@app/core';
+import { createKeyEditor } from './index';
 import {
   DETAIL,
   deepFreeze,
@@ -44,14 +45,14 @@ const partLook = (p: Project, values: Record<string, number>) =>
   referenceTarget(p.model, { type: 'part', id: 'face' }, values);
 
 describe('基準状態の編集', () => {
-  it('編集中のパラメータが無いと Part の値を変える（位置・回転は加算、拡縮・不透明度は掛ける、ピボットも動かす）', () => {
+  it('編集中のパラメータが無いと Part の値を変える（位置・回転は加算、拡縮は掛け、不透明度はその値にする、ピボットも動かす）', () => {
     const project = baseProject();
     const result = command(
       keyEditor.transformEdit(project, editorAt({}), ['face', 'hair'], {
         dPosition: { x: 10, y: -5 },
         dRotation: 15,
         scaleFactor: { x: 2, y: 0.5 },
-        opacityFactor: 4,
+        opacity: 4,
         dPivot: { x: 3, y: 4 },
       }),
     ).apply(project);
@@ -117,7 +118,7 @@ describe('1つのパラメータでの編集', () => {
     expect(left.model.bindings[0]!.keys.map((k) => k.coords)).toEqual([[0], [-30]]);
   });
 
-  it('キーのある値で編集すると、そのキーの差分が変わる（位置・回転は加算、拡縮・不透明度は掛ける）', () => {
+  it('キーのある値で編集すると、そのキーの差分が変わる（位置・回転は加算、拡縮は掛ける）', () => {
     const original = faceXBinding([
       { coords: [0], delta: delta(), source: 'auto', locked: false },
       { coords: [15], delta: delta({ rotation: 1 }), source: 'generated', locked: false },
@@ -134,14 +135,13 @@ describe('1つのパラメータでの編集', () => {
         dPosition: { x: 5, y: -2 },
         dRotation: 3,
         scaleFactor: { x: 0.5, y: 2 },
-        opacityFactor: 0.5,
       }),
     ).apply(project);
     const b = result.model.bindings[0]!;
     expect(result.model.bindings).toHaveLength(1);
     expect(b.id).toBe('b-face');
     expect(b.keys[2]!.delta).toEqual(
-      delta({ position: { x: 15, y: -2 }, rotation: 8, scale: { x: 0.6, y: 2 }, opacity: 0.4 }),
+      delta({ position: { x: 15, y: -2 }, rotation: 8, scale: { x: 0.6, y: 2 }, opacity: 0.8 }),
     );
     // source は manual にする。詳細モードでは locked を変えない
     expect(b.keys[2]).toMatchObject({ source: 'manual', locked: false });
@@ -492,52 +492,116 @@ describe('2つのパラメータでの編集', () => {
   });
 });
 
-describe('デフォルト値のキーの編集（defaultKeyTransformEdit、I-038）', () => {
-  // かんたんセットアップの頬染めと同じ形: デフォルト値に不透明度の倍率 0.001、値 30 に差分なし
-  const hidden = () =>
+describe('不透明度のキー（絶対値。I-026）', () => {
+  const opacities = (b: Binding | undefined) => b!.keys.map((k) => (k.delta as TransformDelta).opacity);
+  const faceOpacity = (p: Project, values: Record<string, number>) => partOpacity(p.model, 'face', values);
+  const withFace = (opacity: number, bindings: Binding[] = []) =>
+    deepFreeze(projectWith({ parts: [part('face', { opacity })], bindings }));
+  const moving = () =>
     faceXBinding([
-      { coords: [0], delta: delta({ opacity: 0.001 }), source: 'auto', locked: false },
-      { coords: [30], delta: delta(), source: 'auto', locked: false },
+      { coords: [0], delta: delta(), source: 'auto', locked: false },
+      { coords: [30], delta: delta({ position: { x: 10, y: 0 } }), source: 'auto', locked: false },
     ]);
+  const setOpacity = (p: Project, values: Record<string, number>, opacity: number) =>
+    command(keyEditor.transformEdit(p, editorAt(values), ['face'], { opacity })).apply(p);
 
-  it('デフォルト値のキーの差分を変え、基準状態は変えない（transformEdit と同じく手で直したキーにし、かんたんではロック）', () => {
-    const project = baseProject([hidden()]);
-    const cmd = defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }), 'face', {
-      opacityFactor: 600,
-      dPosition: { x: 4, y: 0 },
-      dPivot: { x: 9, y: 9 },
-    });
-    const out = command(cmd!).apply(project);
-    expect(out.model.parts).toBe(project.model.parts);
+  it('パラメータの編集中は、その組のバインディングを不透明度のバインディングにし、いまの値のキーにその値を記録する', () => {
+    const out = setOpacity(withFace(0.6, [moving()]), { FaceAngleX: 30 }, 0.2);
     const b = out.model.bindings[0]!;
-    expect(b.keyValues).toEqual([[0, 30]]);
-    expect(b.keys[0]).toMatchObject({ coords: [0], source: 'manual', locked: true });
-    expect(b.keys[0]!.delta).toMatchObject({ position: { x: 4, y: 0 }, opacity: expect.closeTo(0.6, 9) });
-    expect(b.keys[1]).toEqual(hidden().keys[1]);
-    // 詳細モードではロックしない
-    const detail = defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }, DETAIL), 'face', { opacityFactor: 2 });
-    expect(command(detail!).apply(project).model.bindings[0]!.keys[0]!.locked).toBe(false);
+    expect(b.controlsOpacity).toBe(true);
+    // デフォルト値のキーは基準の不透明度。位置の差分はそのまま
+    expect(opacities(b)).toEqual([0.6, 0.2]);
+    expect(b.keys[1]!.delta).toMatchObject({ position: { x: 10, y: 0 } });
+    expect(b.keys[1]).toMatchObject({ source: 'manual', locked: true });
+    expect(out.model.parts[0]!.opacity).toBe(0.6);
+    expect(faceOpacity(out, { FaceAngleX: 30 })).toBeCloseTo(0.2);
+    expect(faceOpacity(out, { FaceAngleX: 15 })).toBeCloseTo(0.4);
+    expect(faceOpacity(out, {})).toBe(0.6);
   });
 
-  it('デフォルト値でない・編集中のパラメータが無い・デフォルト値のキーが無い・無いパーツなら null', () => {
-    const project = baseProject([hidden()]);
-    const change = { opacityFactor: 2 };
-    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 30 }), 'face', change)).toBeNull();
-    expect(defaultKeyTransformEdit(project, editorAt({}), 'face', change)).toBeNull();
-    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleY: 0 }), 'face', change)).toBeNull(); // 組が違う
-    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }), 'hair', change)).toBeNull();
-    expect(defaultKeyTransformEdit(project, editorAt({ FaceAngleX: 0 }), 'nothing', change)).toBeNull();
-    const onlyThirty = faceXBinding([{ coords: [30], delta: delta(), source: 'auto', locked: false }]);
-    expect(defaultKeyTransformEdit(baseProject([onlyThirty]), editorAt({ FaceAngleX: 0 }), 'face', change)).toBeNull();
+  it('0 にしたキーも、あとから上げられる（0.001 の代わりは使わない）', () => {
+    const hidden = setOpacity(withFace(1, [moving()]), { FaceAngleX: 30 }, 0);
+    expect(opacities(hidden.model.bindings[0])).toEqual([1, 0]);
+    const shown = setOpacity(hidden, { FaceAngleX: 30 }, 0.7);
+    expect(faceOpacity(shown, { FaceAngleX: 30 })).toBeCloseTo(0.7);
   });
 
-  it('コマンドは純粋（入力を書き換えず、キーが無くなったプロジェクトには何もしない）', () => {
-    const project = baseProject([hidden()]);
-    const cmd = defaultKeyTransformEdit(project, deepFreeze(editorAt({ FaceAngleX: 0 })), 'face', {
-      opacityFactor: 3,
-    })!;
+  it('基準の不透明度が 0 のパーツも、キーで見せられる（バインディングが無ければ作る）', () => {
+    const out = setOpacity(withFace(0), { FaceAngleX: 30 }, 1);
+    const b = out.model.bindings[0]!;
+    expect(b.controlsOpacity).toBe(true);
+    expect(b.keys.map((k) => k.coords[0])).toEqual([0, 30]);
+    expect(opacities(b)).toEqual([0, 1]);
+    expect(faceOpacity(out, { FaceAngleX: 30 })).toBe(1);
+    expect(faceOpacity(out, {})).toBe(0);
+  });
+
+  it('ほかの不透明度のバインディングの分を除いた値を記録し、見える不透明度をその値にする', () => {
+    const y: Binding = {
+      ...faceXBinding([
+        { coords: [0], delta: delta({ opacity: 0.5 }), source: 'manual', locked: false },
+        { coords: [30], delta: delta({ opacity: 0.3 }), source: 'manual', locked: false },
+      ]),
+      id: 'b-y',
+      parameterIds: ['FaceAngleY'],
+      controlsOpacity: true,
+    };
+    const project = withFace(0.5, [y]);
+    const editor = editorAt({ FaceAngleX: 30 }, { editorParamValues: { FaceAngleX: 30, FaceAngleY: 30 } });
+    const out = command(keyEditor.transformEdit(project, editor, ['face'], { opacity: 0.6 })).apply(project);
+    const x = out.model.bindings.find((b) => b.parameterIds[0] === 'FaceAngleX');
+    expect(opacities(x)).toEqual([0.5, expect.closeTo(0.8)]);
+    expect(faceOpacity(out, { FaceAngleX: 30, FaceAngleY: 30 })).toBeCloseTo(0.6);
+  });
+
+  it('デフォルト値では基準の不透明度（Part.opacity）と、不透明度のバインディングのデフォルト値のキーを変える', () => {
+    const keyed = setOpacity(withFace(0.5, [moving()]), { FaceAngleX: 30 }, 1);
+    const out = setOpacity(keyed, { FaceAngleX: 0 }, 0.2);
+    expect(out.model.parts[0]!.opacity).toBe(0.2);
+    expect(opacities(out.model.bindings[0])).toEqual([0.2, 1]);
+    expect(faceOpacity(out, { FaceAngleX: 30 })).toBe(1);
+  });
+
+  it('キーの無い値では needsKey。キーを足すと前後の不透明度から補間した値になる', () => {
+    const keyed = setOpacity(withFace(0.5, [moving()]), { FaceAngleX: 30 }, 1);
+    expect(keyEditor.transformEdit(keyed, editorAt({ FaceAngleX: 15 }), ['face'], { opacity: 0 })).toBe('needsKey');
+    const added = keyEditor.addKeyAtCurrentValue(keyed, editorAt({ FaceAngleX: 15 }), { partId: 'face' }).apply(keyed);
+    expect(opacities(added.model.bindings[0])).toEqual([0.5, 0.75, 1]);
+    expect(faceOpacity(added, { FaceAngleX: 15 })).toBeCloseTo(0.75);
+  });
+
+  it('2パラメータの格子の代用は (x, y0) + (x0, y) − (x0, y0) で、キーを足しても見た目が変わらない', () => {
+    const pair: Binding = {
+      id: 'b-xy',
+      target: { type: 'part', id: 'face' },
+      channel: 'transform',
+      parameterIds: ['FaceAngleX', 'FaceAngleY'],
+      keyValues: [
+        [0, 30],
+        [0, 30],
+      ],
+      keys: [
+        { coords: [0, 0], delta: delta({ opacity: 0.5 }), source: 'auto', locked: false },
+        { coords: [30, 0], delta: delta({ opacity: 1 }), source: 'manual', locked: false },
+        { coords: [0, 30], delta: delta({ opacity: 0.2 }), source: 'manual', locked: false },
+      ],
+      generation: 'linear',
+      divisions: null,
+      controlsOpacity: true,
+    };
+    const project = withFace(0.5, [pair]);
+    const values = { FaceAngleX: 30, FaceAngleY: 30 };
+    expect(faceOpacity(project, values)).toBeCloseTo(0.7);
+    const added = keyEditor.addKeyAtCurrentValue(project, editorAt(values), { partId: 'face' }).apply(project);
+    const key = added.model.bindings[0]!.keys.find((k) => k.coords[0] === 30 && k.coords[1] === 30);
+    expect((key!.delta as TransformDelta).opacity).toBeCloseTo(0.7);
+    expect(faceOpacity(added, values)).toBeCloseTo(0.7);
+  });
+
+  it('コマンドは純粋（同じ入力に同じ結果、入力を書き換えない）', () => {
+    const project = withFace(0.3);
+    const editor = deepFreeze(editorAt({ FaceAngleX: 30 }));
+    const cmd = command(keyEditor.transformEdit(project, editor, ['face'], { opacity: 1 }));
     expect(cmd.apply(project)).toEqual(cmd.apply(project));
-    const removed = baseProject();
-    expect(cmd.apply(removed)).toBe(removed);
   });
 });

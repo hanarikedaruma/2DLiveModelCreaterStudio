@@ -1,4 +1,4 @@
-import type { Binding, Parameter, TransformDelta } from '@app/schema';
+import type { Binding, Parameter, Part, TransformDelta } from '@app/schema';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createBindingEvaluator, parameterValue } from './evaluator';
 import { delta, gridWarp, lineMesh, pointsBinding, shift, testModel, transformBinding } from './testModel';
@@ -14,7 +14,8 @@ function expectDelta(actual: TransformDelta | undefined, expected: TransformDelt
   expect(actual!.rotation).toBeCloseTo(expected.rotation, 5);
   expect(actual!.scale.x).toBeCloseTo(expected.scale.x, 5);
   expect(actual!.scale.y).toBeCloseTo(expected.scale.y, 5);
-  expect(actual!.opacity).toBeCloseTo(expected.opacity, 5);
+  // transform の opacity は使わない（1 のまま）。パーツの不透明度は opacities に出す（I-026）
+  expect(actual!.opacity).toBe(1);
 }
 
 function evalOne(binding: Binding, params: Record<string, number>, patch = {}) {
@@ -50,7 +51,7 @@ describe('createBindingEvaluator: 1パラメータ', () => {
     ],
   );
 
-  it('キーの間を成分ごとに線形補間する（拡縮・不透明度は倍率のまま）', () => {
+  it('キーの間を成分ごとに線形補間する（拡縮は倍率のまま）', () => {
     expectDelta(
       evalOne(b, { FaceAngleX: 5 }).transforms.part,
       delta({ px: 20, py: 5, rot: 10, sx: 1.5, sy: 1.25, op: 0.5 }),
@@ -318,8 +319,143 @@ describe('createBindingEvaluator: 2パラメータ', () => {
   });
 });
 
+describe('createBindingEvaluator: 不透明度（絶対値のキー。I-026）', () => {
+  const part = (id: string, opacity: number): Part => ({
+    id,
+    name: id,
+    kind: 'group',
+    standardType: null,
+    assetId: null,
+    meshId: null,
+    parentId: null,
+    position: { x: 0, y: 0 },
+    rotation: 0,
+    scale: { x: 1, y: 1 },
+    pivot: { x: 0, y: 0 },
+    opacity,
+    blendMode: 'normal',
+    depth: 0,
+    mask: null,
+    physicsId: null,
+    visible: true,
+    locked: false,
+  });
+  const opacityBinding = (id: string, ids: string[], keyValues: number[][], keys: [number[], number][]): Binding => ({
+    ...transformBinding(
+      id,
+      'p',
+      ids,
+      keyValues,
+      keys.map(([coords, op]) => [coords, delta({ op })]),
+    ),
+    controlsOpacity: true,
+  });
+  const evalWith = (opacity: number, bindings: Binding[], params: Record<string, number>) =>
+    createBindingEvaluator().evaluate(testModel({ parts: [part('p', opacity)], bindings }), params);
+
+  it('キーの値がそのままパーツ自身の不透明度になり、キーの間は線形補間する', () => {
+    const b = opacityBinding(
+      'b',
+      ['FaceAngleX'],
+      [[-10, 0, 10]],
+      [
+        [[-10], 0],
+        [[0], 0.5],
+        [[10], 1],
+      ],
+    );
+    expect(evalWith(0.5, [b], { FaceAngleX: 10 }).opacities?.p).toBeCloseTo(1);
+    expect(evalWith(0.5, [b], { FaceAngleX: 5 }).opacities?.p).toBeCloseTo(0.75);
+    expect(evalWith(0.5, [b], { FaceAngleX: -10 }).opacities?.p).toBeCloseTo(0);
+    expect(evalWith(0.5, [b], { FaceAngleX: 0 }).opacities?.p).toBeCloseTo(0.5);
+    // 不透明度のバインディングでなければ、キーの opacity は使わない
+    const plain = { ...b, controlsOpacity: undefined };
+    expect(evalWith(0.5, [plain], { FaceAngleX: 10 }).opacities).toBeUndefined();
+  });
+
+  it('基準の不透明度が 0 でも、キーで見せられる（頬染め）', () => {
+    const cheek = opacityBinding(
+      'c',
+      ['FaceAngleX'],
+      [[0, 30]],
+      [
+        [[0], 0],
+        [[30], 1],
+      ],
+    );
+    expect(evalWith(0, [cheek], { FaceAngleX: 30 }).opacities?.p).toBeCloseTo(1);
+    expect(evalWith(0, [cheek], { FaceAngleX: 15 }).opacities?.p).toBeCloseTo(0.5);
+    expect(evalWith(0, [cheek], {}).opacities?.p).toBe(0);
+  });
+
+  it('同じパーツの複数のバインディングは、デフォルト値からの変化を足す（0..1 に収める）', () => {
+    const a = opacityBinding(
+      'a',
+      ['FaceAngleX'],
+      [[0, 30]],
+      [
+        [[0], 0.8],
+        [[30], 0.2],
+      ],
+    );
+    const b = opacityBinding(
+      'b',
+      ['FaceAngleY'],
+      [[0, 30]],
+      [
+        [[0], 0.8],
+        [[30], 1],
+      ],
+    );
+    expect(evalWith(0.8, [a, b], { FaceAngleX: 30, FaceAngleY: 30 }).opacities?.p).toBeCloseTo(0.8 - 0.6 + 0.2);
+    expect(evalWith(0.8, [a, b], { FaceAngleY: 30 }).opacities?.p).toBeCloseTo(1);
+    const c = opacityBinding(
+      'c',
+      ['FaceAngleZ'],
+      [[0, 30]],
+      [
+        [[0], 0.8],
+        [[30], 0],
+      ],
+    );
+    expect(evalWith(0.8, [a, c], { FaceAngleX: 30, FaceAngleZ: 30 }).opacities?.p).toBe(0);
+  });
+
+  it('デフォルト値では Part.opacity（デフォルト値のキーが違っていても）', () => {
+    const b = opacityBinding(
+      'b',
+      ['FaceAngleX'],
+      [[0, 30]],
+      [
+        [[0], 0.3],
+        [[30], 0.6],
+      ],
+    );
+    expect(evalWith(0.5, [b], {}).opacities?.p).toBeCloseTo(0.5);
+    expect(evalWith(0.5, [b], { FaceAngleX: 30 }).opacities?.p).toBeCloseTo(0.8); // 0.5 + (0.6 − 0.3)
+  });
+
+  it('2パラメータの格子に無い組み合わせは (x, y0) + (x0, y) − (x0, y0) で代用する', () => {
+    const b = opacityBinding(
+      'b',
+      ['FaceAngleX', 'FaceAngleY'],
+      [
+        [0, 30],
+        [0, 30],
+      ],
+      [
+        [[0, 0], 0.5],
+        [[30, 0], 1],
+        [[0, 30], 0.2],
+      ],
+    );
+    expect(evalWith(0.5, [b], { FaceAngleX: 30, FaceAngleY: 30 }).opacities?.p).toBeCloseTo(0.7);
+    expect(evalWith(0.5, [b], { FaceAngleX: 30 }).opacities?.p).toBeCloseTo(1);
+  });
+});
+
 describe('createBindingEvaluator: 合成', () => {
-  it('同じパーツの transform は位置・回転を加算、拡縮・不透明度を乗算する', () => {
+  it('同じパーツの transform は位置・回転を加算、拡縮を乗算する', () => {
     const a = transformBinding(
       'a',
       'part',

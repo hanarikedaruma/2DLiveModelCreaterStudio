@@ -124,7 +124,7 @@ describe('FakeKeyEditor', () => {
       dPosition: { x: 3, y: 4 },
       dRotation: 15,
       scaleFactor: { x: 2, y: 0.5 },
-      opacityFactor: 2,
+      opacity: 1.6,
       dPivot: { x: 1, y: -1 },
     });
     if (cmd === 'needsKey') throw new Error('needsKey になった');

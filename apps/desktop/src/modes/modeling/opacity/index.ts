@@ -2,7 +2,7 @@
 import { registerPanelSection } from '../../../shell/api';
 import { OpacityKeySection } from './OpacityKeySection';
 
-export { OPACITY_FLOOR, opacityAt, opacityCommand } from './opacityKey';
+export { opacityAt, opacityCommand } from './opacityKey';
 
 export const OPACITY_KEY_SECTION_ID = 'transform.opacityKey';
 

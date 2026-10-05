@@ -65,6 +65,7 @@ export interface BindingPlan {
   parameterId: string;
   generation: Binding['generation'];
   keys: KeySpec[];
+  controlsOpacity?: boolean; // キーの opacity でパーツ自身の不透明度を決める（頬染め。I-026）
 }
 
 // まばたきの方式。lids = まぶたを動かす、squash = 目全体を縦に縮める、null = 目のパーツが無い
@@ -238,6 +239,8 @@ export function applyMotionPlans(model: Model, plans: readonly BindingPlan[], ne
       keep: keepOnRerun,
       generation: plan.generation,
       newId,
+      controlsOpacity: plan.controlsOpacity === true,
+      opacityBase: model.parts.find((p) => p.id === plan.partId)?.opacity ?? 1,
     });
     planned.add(binding.id);
     if (at >= 0) bindings[at] = binding;

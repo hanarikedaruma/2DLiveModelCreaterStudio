@@ -19,6 +19,8 @@ interface PreparedBase {
 export interface PreparedTransform extends PreparedBase {
   kind: 'transform';
   values: TransformDelta[]; // 格子の点ごと。添字は i * ys.length + j
+  // 不透明度のバインディング（controlsOpacity）の、デフォルト値での不透明度。ほかは null（I-026）
+  opacityAtDefault: number | null;
 }
 export interface PreparedPoints extends PreparedBase {
   kind: 'points';
@@ -50,6 +52,33 @@ function flatten(points: Vec2[]): Float32Array {
     out[i * 2 + 1] = p.y;
   }
   return out;
+}
+
+// 昇順の位置 axis の中で v をはさむ2つと割合（範囲外は端）
+function bracket(axis: number[], v: number): [number, number, number] {
+  const last = axis.length - 1;
+  if (last <= 0 || v <= axis[0]!) return [0, 0, 0];
+  if (v >= axis[last]!) return [last, last, 0];
+  let i = 0;
+  while (i < last - 1 && v > axis[i + 1]!) i++;
+  return [i, i + 1, (v - axis[i]!) / (axis[i + 1]! - axis[i]!)];
+}
+
+// 格子の不透明度を (x, y) で双線形補間する（評価と同じ規則。1パラメータは ys = [0]）
+function opacityAt(xs: number[], ys: number[], values: TransformDelta[], x: number, y: number): number {
+  if (values.length === 0) return 1;
+  const ny = ys.length;
+  const [i0, i1, tx] = bracket(xs, x);
+  const [j0, j1, ty] = ny > 1 ? bracket(ys, y) : [0, 0, 0];
+  const v = (i: number, j: number) => values[i * ny + j]!.opacity;
+  const low = v(i0, j0) + (v(i1, j0) - v(i0, j0)) * tx;
+  const high = v(i0, j1) + (v(i1, j1) - v(i0, j1)) * tx;
+  return low + (high - low) * ty;
+}
+
+// 下ごしらえした transform のバインディングの、(x, y) での不透明度
+export function preparedOpacityAt(prep: PreparedTransform, x: number, y: number): number {
+  return opacityAt(prep.xs, prep.ys, prep.values, x, y);
 }
 
 function addPoints(a: Float32Array | undefined, b: Float32Array | undefined, count: number): Float32Array {
@@ -115,9 +144,12 @@ export function prepareBinding(binding: Binding, defaults: number[]): PreparedBi
         used.push(key);
       }
     });
-    return isTransform
-      ? { ...base, kind: 'transform', xs: usedXs, ys, values: used.map((k) => k.delta as TransformDelta) }
-      : { ...base, kind: 'points', count, xs: usedXs, ys, values: used.map((k) => flatten(k.delta as Vec2[])) };
+    if (!isTransform) {
+      return { ...base, kind: 'points', count, xs: usedXs, ys, values: used.map((k) => flatten(k.delta as Vec2[])) };
+    }
+    const values = used.map((k) => k.delta as TransformDelta);
+    const opacityAtDefault = binding.controlsOpacity ? opacityAt(usedXs, ys, values, defaults[0]!, 0) : null;
+    return { ...base, kind: 'transform', xs: usedXs, ys, values, opacityAtDefault };
   }
 
   // 2パラメータ: 欠けた点は (x, y) = (x, y0) + (x0, y)。どちらも無ければ 0
@@ -126,6 +158,9 @@ export function prepareBinding(binding: Binding, defaults: number[]): PreparedBi
   const at = (i: number, j: number) => (i >= 0 && j >= 0 ? cells[i * ny + j] : undefined);
 
   if (isTransform) {
+    // 不透明度のバインディングの不透明度は絶対値なので、欠けた点は (x, y0) + (x0, y) − (x0, y0)（I-026）
+    const origin = binding.controlsOpacity ? (at(i0, j0)?.delta as TransformDelta | undefined) : undefined;
+    const originOpacity = origin ? origin.opacity : 1;
     const values: TransformDelta[] = [];
     for (let i = 0; i < xs.length; i++) {
       for (let j = 0; j < ny; j++) {
@@ -136,10 +171,15 @@ export function prepareBinding(binding: Binding, defaults: number[]): PreparedBi
         }
         const a = at(i, j0)?.delta as TransformDelta | undefined;
         const b = at(i0, j)?.delta as TransformDelta | undefined;
-        values.push(composeDelta(a ?? identityDelta(), b ?? identityDelta()));
+        const value = composeDelta(a ?? identityDelta(), b ?? identityDelta());
+        if (binding.controlsOpacity) {
+          value.opacity = (a ? a.opacity : originOpacity) + (b ? b.opacity : originOpacity) - originOpacity;
+        }
+        values.push(value);
       }
     }
-    return { ...base, kind: 'transform', xs, ys, values };
+    const opacityAtDefault = binding.controlsOpacity ? opacityAt(xs, ys, values, defaults[0]!, defaults[1]!) : null;
+    return { ...base, kind: 'transform', xs, ys, values, opacityAtDefault };
   }
 
   const flat = cells.map((key) => (key ? flatten(key.delta as Vec2[]) : undefined));

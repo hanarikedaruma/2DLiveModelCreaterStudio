@@ -135,7 +135,7 @@ function compareCoords(a: ParameterKey, b: ParameterKey): number {
   return 0;
 }
 
-function replaceBinding(model: Model, binding: Binding): Model {
+export function replaceBinding(model: Model, binding: Binding): Model {
   return { ...model, bindings: model.bindings.map((b) => (b.id === binding.id ? binding : b)) };
 }
 
@@ -165,12 +165,19 @@ export interface KeySpec<D extends Delta> {
   easy: boolean;
   newBindingId: string; // バインディングを作るときの id（apply を純粋にするため先に決めておく）
   ops: DeltaOps<D>;
+  // バインディングごとに差分の扱い方を変えるとき（不透明度のバインディング。I-026）。無ければ ops。
+  // binding は見つかったバインディング（作るときは undefined）
+  opsFor?: (binding: Binding | undefined) => DeltaOps<D>;
 }
+
+const opsOf = <D extends Delta>(spec: KeySpec<D>, binding: Binding | undefined): DeltaOps<D> =>
+  spec.opsFor ? spec.opsFor(binding) : spec.ops;
 
 // 現在値のキーの差分を edit で変える。格子上の組み合わせは補間したキーをその場で足す
 export function editKey<D extends Delta>(model: Model, spec: KeySpec<D>, edit: (d: D) => D): Model | 'needsKey' {
-  const { target, params, easy, ops } = spec;
+  const { target, params, easy } = spec;
   const binding = findBinding(model, target, params);
+  const ops = opsOf(spec, binding);
   if (!binding) {
     const current: ParameterKey = {
       coords: params.map((p) => p.value),
@@ -195,8 +202,9 @@ export function editKey<D extends Delta>(model: Model, spec: KeySpec<D>, edit: (
 
 // 現在値にキーを足す。差分は前後のキーから補間するので見た目は変わらない。すでにあれば何もしない
 export function addKey<D extends Delta>(model: Model, spec: KeySpec<D>): Model {
-  const { target, params, easy, ops } = spec;
+  const { target, params, easy } = spec;
   const binding = findBinding(model, target, params);
+  const ops = opsOf(spec, binding);
   if (!binding) {
     // バインディングが無い = 差分 0 なので、差分 0 のキーで作る
     const current: ParameterKey = {

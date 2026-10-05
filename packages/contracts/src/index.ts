@@ -20,9 +20,12 @@ import type {
 
 export type ParamValues = Record<string, number>;
 export interface TargetDeltas {
-  transforms: Record<string, TransformDelta>; // partId → 合成済みの差分
+  transforms: Record<string, TransformDelta>; // partId → 合成済みの差分（opacity は使わない。1 のまま）
   vertices: Record<string, Float32Array>; // meshId → [dx0, dy0, dx1, dy1, ...]
   warpPoints: Record<string, Float32Array>; // warpId → 制御点の差分（同じ並び）
+  // partId → パーツ自身の不透明度（0..1。親は掛けていない）。不透明度のバインディング（controlsOpacity）があるパーツだけ。
+  // 無いパーツは Part.opacity（I-026）
+  opacities?: Record<string, number>;
 }
 export interface BindingEvaluator {
   evaluate(model: Model, params: ParamValues): TargetDeltas;
@@ -212,7 +215,10 @@ export type TransformChange = {
   dPosition?: Vec2;
   dRotation?: number;
   scaleFactor?: Vec2;
-  opacityFactor?: number;
+  // パーツ自身の不透明度（0..1。親は掛けない）をいまの値でこの値にする（I-026）。基準状態では Part.opacity
+  // （不透明度のバインディングのデフォルト値のキーも同じ値にする）、パラメータの編集中はそのバインディングのキー
+  // （不透明度のバインディングにして、ほかの不透明度のバインディングの分を除いた値を記録する）
+  opacity?: number;
   dPivot?: Vec2;
 };
 export type PointsTarget = { kind: 'mesh'; meshId: string } | { kind: 'warp'; warpId: string };

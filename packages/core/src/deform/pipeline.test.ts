@@ -178,26 +178,26 @@ describe('createDeformPipeline: 頂点', () => {
 });
 
 describe('createDeformPipeline: 不透明度と表示', () => {
-  it('自身から祖先までの Part.opacity × Δopacity を掛け合わせる', () => {
+  it('自身から祖先までの不透明度を掛け合わせる。不透明度のキーがあるパーツは opacities の値を使う（I-026）', () => {
     const parts = [
       groupPart('grand', { opacity: 0.5 }),
       groupPart('parent', { parentId: 'grand', opacity: 0.8 }),
-      imagePart('child', { parentId: 'parent' }),
+      imagePart('child', { parentId: 'parent', opacity: 0 }),
       imagePart('root', {}),
     ];
-    const out = createDeformPipeline().deform(
-      modelOf(parts),
-      deltasWith({ parent: delta({ op: 0.5 }), child: delta({ op: 0.5 }) }),
-    );
-    expect(out.byPartId.child!.opacity).toBeCloseTo(0.1, 10);
+    const out = createDeformPipeline().deform(modelOf(parts), {
+      ...deltasWith({ parent: delta({ op: 0.5 }) }), // transforms の opacity は使わない
+      opacities: { parent: 0.4, child: 0.5 }, // Part.opacity の代わり（0 からでも上がる）
+    });
+    expect(out.byPartId.child!.opacity).toBeCloseTo(0.5 * 0.4 * 0.5, 10);
     expect(out.byPartId.root!.opacity).toBe(1);
   });
 
   it('掛けた結果は 0..1 に収める', () => {
-    const out = createDeformPipeline().deform(
-      modelOf([imagePart('p', { opacity: 0.5 })]),
-      deltasWith({ p: delta({ op: 3 }) }),
-    );
+    const out = createDeformPipeline().deform(modelOf([imagePart('p', { opacity: 0.5 })]), {
+      ...deltasWith({}),
+      opacities: { p: 3 },
+    });
     expect(out.byPartId.p!.opacity).toBe(1);
   });
 

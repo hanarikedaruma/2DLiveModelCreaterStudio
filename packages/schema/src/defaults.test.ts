@@ -7,7 +7,7 @@ describe('createEmptyProject', () => {
   it('MVP の標準パラメータと全パラメータグループ入り', () => {
     const p = createEmptyProject('はじめて');
     expect(p.name).toBe('はじめて');
-    expect(p.schemaVersion).toBe(1);
+    expect(p.schemaVersion).toBe(2);
     expect(p.model.parameters.map((x) => x.id)).toEqual([
       'FaceAngleX',
       'FaceAngleY',

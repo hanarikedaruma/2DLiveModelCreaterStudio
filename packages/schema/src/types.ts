@@ -43,7 +43,7 @@ export interface Part {
   rotation: number; // 度。初期値 0
   scale: Vec2; // 初期値 {x: 1, y: 1}
   pivot: Vec2; // 回転・拡縮の中心（キャンバス座標）
-  opacity: number; // 0..1
+  opacity: number; // 0..1。パーツ自身の不透明度の基準値（不透明度のキーが無いとき・デフォルト値での値。I-026）
   blendMode: BlendMode;
   depth: number; // 奥行き。手前が正（-1..1 が目安）
   mask: { sourcePartIds: Id[]; inverted: boolean } | null;
@@ -142,7 +142,9 @@ export interface TransformDelta {
   scale: Vec2;
   opacity: number;
 }
-// position・rotation は加算、scale・opacity は倍率（1 = 変化なし）
+// position・rotation は加算、scale は倍率（1 = 変化なし）。
+// opacity は controlsOpacity のバインディングでだけ使い、その姿勢でのパーツ自身の不透明度（0..1 の絶対値）。
+// 使わないバインディングでは 1 のまま（I-026。schemaVersion 1 では倍率だった）
 export interface Binding {
   id: Id;
   target: { type: 'part' | 'mesh' | 'warp'; id: Id }; // transform → part、vertices → mesh、warpPoints → warp
@@ -152,6 +154,10 @@ export interface Binding {
   keys: ParameterKey[];
   generation: 'linear' | 'depth' | 'rotate' | 'surface' | 'ease';
   divisions: number | null; // 中間キーの分割数（自動なら null）
+  // transform だけ。キーの opacity でパーツ自身の不透明度を決める（省略は false。I-026）。デフォルト値のキーは
+  // Part.opacity と同じ値にする。パーツ自身の不透明度 = Part.opacity + Σ（このバインディングのいまの値 − デフォルト値での値）
+  // （0..1 に収める）。不透明度のバインディングが1つなら、いまの値がそのままパーツの不透明度になる
+  controlsOpacity?: boolean;
 }
 export interface ParameterKey {
   coords: number[]; // parameterIds と同じ順の値
@@ -174,7 +180,7 @@ export interface Model {
   setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
 }
 export interface Project {
-  schemaVersion: number; // 現在は 1
+  schemaVersion: number; // 現在は 2（1 → 2 で不透明度のキーを倍率から絶対値にした。I-026）
   id: Id;
   name: string;
   assets: Asset[];

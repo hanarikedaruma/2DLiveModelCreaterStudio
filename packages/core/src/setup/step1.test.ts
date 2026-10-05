@@ -19,7 +19,6 @@ import { createProjectStore } from '../store';
 import { createAutoSetup } from './autoSetup';
 import { closedLineY, meshSpanAt, normalizeClosedLine } from './closedLine';
 import { faceTurnCrossTerm, sphereTurn } from './faceTurn';
-import { STEP1_MOTION } from './step1';
 
 // fixtures の sample-model に、3×3 の格子のメッシュと頬（顔と同じ素材）を足したもの（値を手で確かめやすい）
 function sampleWithMeshes(): Project {
@@ -291,10 +290,11 @@ describe('目 笑顔・眉・口 横幅・体の追従・頬染め（transform�
       );
     }
     expect(binding(p, 'bodyRoot', ['BodyAngleY'])).toBeUndefined();
-    // 頬染め: 値 0 で消える（0 ではなく、あとからキーで上げ直せる 0.001）、値 1 で差分なし
+    // 頬染め: 不透明度のバインディング。基準の不透明度を 0 にし、値 0 で 0（消える）、値 1 でもとの不透明度（I-026）
     const cheek = binding(p, 'cheek', ['Cheek']);
-    expect(STEP1_MOTION.cheekHidden).toBe(0.001);
-    expect(transformAt(cheek, 0)).toEqual({ ...ZERO, opacity: 0.001 });
+    expect(cheek!.controlsOpacity).toBe(true);
+    expect(part(p, 'cheek').opacity).toBe(0);
+    expect(transformAt(cheek, 0)).toEqual({ ...ZERO, opacity: 0 });
     expect(transformAt(cheek, 1)).toEqual(ZERO);
 
     const step1 = new Set([
@@ -346,10 +346,34 @@ describe('目 笑顔・眉・口 横幅・体の追従・頬染め（transform�
     const width = (q: Vec2[]) => Math.max(...q.map((v) => v.x)) - Math.min(...q.map((v) => v.x));
     expect(width(deformAt(p, { MouthWidth: 1 })('part-upperLip'))).toBeCloseTo(88 * 1.2, 3);
     expect(width(deformAt(p, { MouthWidth: -1 })('part-upperLip'))).toBeCloseTo(88 * 0.75, 3);
-    // 頬染め: デフォルト値 0 で 0.001、1 で元の不透明度
-    expect(base.opacity('cheek')).toBeCloseTo(0.001, 9);
+    // 頬染め: デフォルト値 0 で 0（消える）、1 でもとの不透明度
+    expect(base.opacity('cheek')).toBe(0);
     expect(deformAt(p, { Cheek: 1 }).opacity('cheek')).toBe(1);
-    expect(deformAt(p, { Cheek: 0.5 }).opacity('cheek')).toBeCloseTo(0.5005, 9);
+    expect(deformAt(p, { Cheek: 0.5 }).opacity('cheek')).toBeCloseTo(0.5, 9);
+  });
+
+  it('頬染めの値 1 は、もとの不透明度。やり直しても基準の不透明度と値 1 の不透明度は変えない（I-026）', () => {
+    const before = sampleWithMeshes();
+    before.model.parts.find((q) => q.id === 'cheek')!.opacity = 0.6;
+    const p = run(before);
+    expect(part(p, 'cheek').opacity).toBe(0);
+    expect(transformAt(binding(p, 'cheek', ['Cheek']), 1).opacity).toBe(0.6);
+    expect(deformAt(p, { Cheek: 1 }).opacity('cheek')).toBeCloseTo(0.6, 9);
+
+    // 基準の不透明度を 0.1 に、値 1 の自動のキーを 0.9 にしてから、やり直す
+    const cheek = binding(p, 'cheek', ['Cheek'])!;
+    const edited = structuredClone(p);
+    edited.model.parts.find((q) => q.id === 'cheek')!.opacity = 0.1;
+    const b = edited.model.bindings.find((x) => x.id === cheek.id)!;
+    b.keys = b.keys.map((k) => ({
+      ...k,
+      delta: { ...(k.delta as TransformDelta), opacity: k.coords[0] === 0 ? 0.1 : 0.9 },
+    }));
+    const again = run(edited);
+    expect(part(again, 'cheek').opacity).toBe(0.1);
+    expect(transformAt(binding(again, 'cheek', ['Cheek']), 0).opacity).toBe(0.1);
+    expect(transformAt(binding(again, 'cheek', ['Cheek']), 1).opacity).toBe(0.9);
+    expect(run(again)).toBe(again);
   });
 });
 

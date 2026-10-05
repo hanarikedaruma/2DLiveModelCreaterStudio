@@ -167,28 +167,30 @@ export function lockCellCommand(pair: ParameterPair, cell: GridCell, locked: boo
 
 const ZERO = 1e-9;
 
-function isIdentityTransform(d: TransformDelta): boolean {
+// opacity の「変化なし」は、不透明度のバインディングでは基準の不透明度、ほかは 1（I-026）
+function isIdentityTransform(d: TransformDelta, opacity = 1): boolean {
   return (
     Math.abs(d.position.x) <= ZERO &&
     Math.abs(d.position.y) <= ZERO &&
     Math.abs(d.rotation) <= ZERO &&
     Math.abs(d.scale.x - 1) <= ZERO &&
     Math.abs(d.scale.y - 1) <= ZERO &&
-    Math.abs(d.opacity - 1) <= ZERO
+    Math.abs(d.opacity - opacity) <= ZERO
   );
 }
 
-// 差分 0 のキー（transform は変化なし、頂点・制御点はすべて 0）
-export function isIdentityKey(key: ParameterKey): boolean {
+// 差分 0 のキー（transform は変化なし、頂点・制御点はすべて 0）。opacity は transform の不透明度の「変化なし」の値
+export function isIdentityKey(key: ParameterKey, opacity = 1): boolean {
   if (Array.isArray(key.delta)) {
     return (key.delta as Vec2[]).every((p) => Math.abs(p.x) <= ZERO && Math.abs(p.y) <= ZERO);
   }
-  return isIdentityTransform(key.delta);
+  return isIdentityTransform(key.delta, opacity);
 }
 
 // 残しておく意味のあるキーか（差分があるか、組み合わせのマスのキーで状態に出るもの）
 function meaningful(model: Model, binding: Binding, key: ParameterKey): boolean {
-  if (!isIdentityKey(key)) return true;
+  const base = binding.controlsOpacity ? (model.parts.find((p) => p.id === binding.target.id)?.opacity ?? 1) : 1;
+  if (!isIdentityKey(key, base)) return true;
   return binding.parameterIds.every((id, i) => {
     const p = model.parameters.find((x) => x.id === id);
     return p !== undefined && !near(key.coords[i] ?? p.default, p.default);

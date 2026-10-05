@@ -1,7 +1,7 @@
-// 「Transform」パネルの「不透明度（このキー）」（カード34）。本物の KeyEditor で確かめる
+// 「Transform」パネルの「不透明度（このキー）」（カード34・I-026）。本物の KeyEditor で確かめる
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Binding, Part, Project, TransformDelta } from '@app/schema';
+import type { Part, Project, TransformDelta } from '@app/schema';
 import type { ProjectStoreWithHistory } from '@app/core';
 import { withStep1Parameters } from '../../../project/step1Params';
 import { createKeyEditor } from '../../../services/keyEditor';
@@ -11,7 +11,6 @@ import { NEEDS_KEY_MESSAGE } from '../canvas/liveEdit';
 import { renderShell, sampleProject, stubSize } from '../canvas/testUtils';
 import { basePart } from '../structure/modelOps';
 import { register } from './index';
-import { OPACITY_FLOOR } from './opacityKey';
 import { OPACITY_SLIDER_LABEL } from './OpacityKeySection';
 
 let restoreSize: () => void = () => {};
@@ -71,28 +70,42 @@ describe('不透明度（このキー）のセクション', () => {
     expect(slider()!.value).toBe('1');
   });
 
-  it('頬染めを Cheek で出し入れする: デフォルト値で消し、値 1 のキーで出す（操作ごとに1回の Undo）', () => {
+  it('頬染めを Cheek で出し入れする: デフォルト値で基準の不透明度を 0 にし、値 1 のキーで出す（操作ごとに1回の Undo）', () => {
     const { slider, editing, slide, part, store, keyOpacity, panel } = open();
     editing({ Cheek: 0 });
-    expect(panel().getByText(/デフォルト値では基準状態の不透明度を変える/)).toBeTruthy();
+    expect(panel().getByText(/デフォルト値では基準の不透明度（キーが無いときの値）を変える/)).toBeTruthy();
     slide(0.5, 0.2, 0);
-    expect(part('part-cheek').opacity).toBe(OPACITY_FLOOR);
-    expect(slider()!.value).toBe(String(OPACITY_FLOOR));
+    expect(part('part-cheek').opacity).toBe(0); // 0.001 の代わりは使わない
+    expect(slider()!.value).toBe('0');
     expect(panel().getByText('0', { selector: 'output' })).toBeTruthy();
     expect(store.undoLabel()).toBe('不透明度の変更');
 
+    // 基準の不透明度が 0 でも、値 1 のキーで出せる
     editing({ Cheek: 1 });
+    expect(slider()!.value).toBe('0');
     slide(0.6, 1);
-    expect(keyOpacity('part-cheek', 1)).toBeCloseTo(1 / OPACITY_FLOOR);
-    expect(keyOpacity('part-cheek', 0)).toBe(1); // デフォルト値のキーは差分なし
+    expect(keyOpacity('part-cheek', 1)).toBe(1);
+    expect(keyOpacity('part-cheek', 0)).toBe(0); // デフォルト値のキーは基準の不透明度
     expect(Number(slider()!.value)).toBeCloseTo(1);
-    expect(part('part-cheek').opacity).toBe(OPACITY_FLOOR);
+    expect(part('part-cheek').opacity).toBe(0);
 
     act(() => store.undo());
     expect(store.get().model.bindings).toHaveLength(0);
     act(() => store.undo());
     expect(part('part-cheek').opacity).toBe(1);
     expect(store.canUndo()).toBe(false);
+  });
+
+  it('不透明度のキーがあっても、デフォルト値では基準の不透明度とデフォルト値のキーを一緒に変える', () => {
+    const { slider, editing, slide, part, keyOpacity } = open();
+    editing({ Cheek: 1 });
+    slide(0.4);
+    editing({ Cheek: 0 });
+    expect(Number(slider()!.value)).toBe(1);
+    slide(0.3);
+    expect(part('part-cheek').opacity).toBeCloseTo(0.3);
+    expect(keyOpacity('part-cheek', 0)).toBeCloseTo(0.3);
+    expect(keyOpacity('part-cheek', 1)).toBeCloseTo(0.4); // ほかの値のキーはそのまま
   });
 
   it('キーの無い値では、キーを足すか確かめてから記録する（キーの追加と変更で1回の Undo）', async () => {
@@ -134,51 +147,11 @@ describe('不透明度（このキー）のセクション', () => {
     expect(keyOpacity('part-lowerLip', 1)).toBeCloseTo(0.3);
   });
 
-  it('かんたんセットアップの頬染め（値 0 に倍率 0.001 のキー）は、デフォルト値でそのキーを表示して変える（I-038）', () => {
-    // かんたんセットアップ（カード42）が作るのと同じ形
-    const setup: Binding = {
-      id: 'b-cheek',
-      target: { type: 'part', id: 'part-cheek' },
-      channel: 'transform',
-      parameterIds: ['Cheek'],
-      keyValues: [[0, 1]],
-      keys: [
-        {
-          coords: [0],
-          delta: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 }, opacity: OPACITY_FLOOR },
-          source: 'auto',
-          locked: false,
-        },
-        {
-          coords: [1],
-          delta: { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 }, opacity: 1 },
-          source: 'auto',
-          locked: false,
-        },
-      ],
-      generation: 'linear',
-      divisions: null,
-    };
-    const p = cheekProject();
-    const { editing, slide, slider, part, store, keyOpacity, panel } = open({
-      ...p,
-      model: { ...p.model, bindings: [...p.model.bindings, setup] },
-    });
-    editing({ Cheek: 0 });
-    // 見た目どおり 0（基準状態の 1 ではない）。デフォルト値のキーに記録すると出す
-    expect(Number(slider()!.value)).toBeCloseTo(OPACITY_FLOOR);
-    expect(panel().getByText('0', { selector: 'output' })).toBeTruthy();
-    expect(panel().getByText(/デフォルト値のこのキーに記録する/)).toBeTruthy();
-    expect(panel().queryByText(/デフォルト値では基準状態の不透明度を変える/)).toBeNull();
-
-    slide(0.3, 0.7);
-    expect(keyOpacity('part-cheek', 0)).toBeCloseTo(0.7);
-    expect(keyOpacity('part-cheek', 1)).toBe(1);
-    expect(part('part-cheek').opacity).toBe(1);
-    expect(Number(slider()!.value)).toBeCloseTo(0.7);
-    expect(store.undoLabel()).toBe('不透明度の変更');
-    act(() => store.undo());
-    expect(keyOpacity('part-cheek', 0)).toBe(OPACITY_FLOOR);
-    expect(store.canUndo()).toBe(false);
+  it('ほかのパラメータの不透明度のキーもあれば、そのことを出す', () => {
+    const { editing, slide, panel } = open();
+    editing({ Cheek: 1 });
+    slide(0.4);
+    editing({ MouthOpen: 1 });
+    expect(panel().queryByText(/ほかのパラメータの不透明度のキーもある/)).toBeTruthy();
   });
 });

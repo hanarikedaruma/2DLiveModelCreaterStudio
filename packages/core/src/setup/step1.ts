@@ -40,9 +40,6 @@ export const STEP1_MOTION = {
   mouthNarrow: 0.75, // 口 横幅 −1 での横の倍率
   bodyTilt: 4, // 体 傾き 10 での回転（度）
   bodyShift: 0.03, // 体 左右 10 での横の移動（胴体の幅に対する割合）
-  // 頬染め 0 の不透明度の倍率。倍率は掛け算なので 0 にするとキーで上げ直せない（I-026）。
-  // 0 の代わりに、見た目では消える 0.001 にする（カード34の不透明度のキーと同じ）
-  cheekHidden: 0.001,
 };
 
 // 斜め方向の合成のキーの位置（FaceAngleX・FaceAngleY。方向グリッドと同じ −30 / 0 / 30）
@@ -61,6 +58,7 @@ export interface PointPlan {
 
 export interface Step1Plan {
   transforms: BindingPlan[]; // MVP の計画（閉じた線で置き換えるものを除く）と STEP1 の transform
+  partOpacities: ReadonlyMap<string, number>; // 基準の不透明度（Part.opacity）を変えるパーツ（頬染め。I-026）
   points: PointPlan[];
   // かんたんセットアップが作る頂点・制御点のバインディングか（計画に無く、残すキーも無ければ消す）
   owns(binding: Binding): boolean;
@@ -313,17 +311,39 @@ export function planStep1(
       symmetric(10, (s) => ({ x: s * torso.width * STEP1_MOTION.bodyShift })),
     );
 
-  // ---- 頬染め: 値 0 で消え（倍率 0.001）、値 1 で差分なし ----
+  // ---- 頬染め: 不透明度のバインディングで、値 0（デフォルト値）で消え、値 1 で見える（I-026） ----
+  // 初めては、いまの不透明度を値 1 の不透明度にし、基準の不透明度（Part.opacity。値 0 での値）を 0 にする。
+  // すでに不透明度のバインディングなら、基準の不透明度と値 1 の不透明度はそのまま
+  const cheekBases = new Map<string, number>();
   for (const cheek of index.images('cheek')) {
-    add(cheek, 'Cheek', [
-      { coord: 0, delta: transformDelta({ opacity: STEP1_MOTION.cheekHidden }) },
-      { coord: 1, delta: zero },
-    ]);
+    const existing = model.bindings.find(
+      (b) =>
+        b.channel === 'transform' &&
+        b.target.id === cheek.id &&
+        b.parameterIds.length === 1 &&
+        b.parameterIds[0] === 'Cheek',
+    );
+    const keyed = existing?.controlsOpacity === true;
+    const shownKey = keyed ? existing.keys.find((k) => k.coords.length === 1 && sameCoord(k.coords[0]!, 1)) : undefined;
+    const shown = shownKey && !Array.isArray(shownKey.delta) ? shownKey.delta.opacity : cheek.opacity;
+    const hidden = keyed ? cheek.opacity : 0;
+    if (!keyed) cheekBases.set(cheek.id, 0);
+    transforms.push({
+      partId: cheek.id,
+      parameterId: 'Cheek',
+      generation: 'linear',
+      controlsOpacity: true,
+      keys: [
+        { coord: 0, delta: transformDelta({ opacity: hidden }) },
+        { coord: 1, delta: transformDelta({ opacity: shown }) },
+      ],
+    });
   }
 
   const base = basePlans.filter((p) => !(replaced.has(p.partId) && p.parameterId.startsWith('EyeOpen')));
   return {
     transforms: [...base, ...transforms],
+    partOpacities: cheekBases,
     points,
     owns: (b) =>
       b.channel !== 'transform' && (owned.get(b.target.id) ?? []).some((ids) => sameSet(ids, b.parameterIds)),

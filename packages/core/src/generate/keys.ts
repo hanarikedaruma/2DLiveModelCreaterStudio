@@ -99,16 +99,26 @@ export interface RebuildInput {
   keep: (key: ParameterKey) => boolean; // 残す既存のキー
   generation: Binding['generation'];
   newId: () => string;
+  // keys の opacity でパーツ自身の不透明度を決める（I-026）。既存が不透明度のバインディングなら false でもそのまま
+  controlsOpacity?: boolean;
+  opacityBase?: number; // パーツの Part.opacity。不透明度のバインディングに、不透明度を決めないキーを足すときの値
 }
 
 // 1パラメータの transform バインディングを作り直す。keep のキーは残し、同じ位置には新しいキーを作らない。
 // 結果が既存と同じ内容なら既存をそのまま返す
 export function rebuildTransformBinding(input: RebuildInput): Binding {
   const { existing } = input;
-  const kept = existing ? existing.keys.filter(input.keep) : [];
+  const controls = input.controlsOpacity === true || existing?.controlsOpacity === true;
+  let kept = existing ? existing.keys.filter(input.keep) : [];
+  // 不透明度のバインディングにするとき、残すキーの opacity（使っていなかった値）は計画のキーから補間する
+  if (input.controlsOpacity && existing && !existing.controlsOpacity) {
+    kept = kept.map((k) => withOpacity(k, opacityOfSpecs(input.keys, keyCoord(k))));
+  }
   const fresh: ParameterKey[] = input.keys
     .filter((spec) => !kept.some((k) => sameCoord(keyCoord(k), spec.coord)))
-    .map((spec) => ({ coords: [spec.coord], delta: spec.delta, source: 'auto', locked: false }));
+    .map((spec): ParameterKey => ({ coords: [spec.coord], delta: spec.delta, source: 'auto', locked: false }))
+    // 不透明度を決めない計画のキーは、不透明度のバインディングでは基準値のまま（変化なし）にする
+    .map((k) => (controls && !input.controlsOpacity ? withOpacity(k, input.opacityBase ?? 1) : k));
   const keys = sortKeys([...kept, ...fresh]);
   const binding: Binding = {
     id: existing?.id ?? input.newId(),
@@ -119,6 +129,24 @@ export function rebuildTransformBinding(input: RebuildInput): Binding {
     keys,
     generation: input.generation,
     divisions: existing?.divisions ?? null,
+    ...(controls ? { controlsOpacity: true } : {}),
   };
   return existing && deepEqual(binding, existing) ? existing : binding;
+}
+
+function withOpacity(key: ParameterKey, opacity: number): ParameterKey {
+  return Array.isArray(key.delta) ? key : { ...key, delta: { ...key.delta, opacity } };
+}
+
+// 計画のキーの opacity を coord で線形補間する（範囲外は端）
+function opacityOfSpecs(specs: readonly KeySpec[], coord: number): number {
+  const points = specs.map((s) => ({ c: s.coord, o: s.delta.opacity })).sort((a, b) => a.c - b.c);
+  if (points.length === 0) return 1;
+  if (coord <= points[0]!.c) return points[0]!.o;
+  for (let i = 0; i + 1 < points.length; i++) {
+    const a = points[i]!;
+    const b = points[i + 1]!;
+    if (coord <= b.c) return b.c > a.c ? a.o + ((b.o - a.o) * (coord - a.c)) / (b.c - a.c) : a.o;
+  }
+  return points[points.length - 1]!.o;
 }

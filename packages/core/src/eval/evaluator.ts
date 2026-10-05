@@ -137,6 +137,7 @@ export function createBindingEvaluator(): BindingEvaluator {
       }
       const vertexCounts = pointCounts(meshCounts, model.meshes, (m) => m.vertices.length);
       const controlCounts = pointCounts(warpCounts, model.warps, (w) => w.points.length);
+      const opacityChanges = new Map<string, number>(); // partId → 不透明度のバインディングの変化の和
 
       for (const binding of model.bindings) {
         const ids = binding.parameterIds;
@@ -180,13 +181,16 @@ export function createBindingEvaluator(): BindingEvaluator {
           const acc: TransformDelta = Object.hasOwn(out.transforms, targetId)
             ? out.transforms[targetId]!
             : (out.transforms[targetId] = identityDelta());
-          // 同じパーツの差分: 位置・回転は加算、拡縮・不透明度は乗算
+          // 同じパーツの差分: 位置・回転は加算、拡縮は乗算
           acc.position.x += px;
           acc.position.y += py;
           acc.rotation += rot;
           acc.scale.x *= sx;
           acc.scale.y *= sy;
-          acc.opacity *= op;
+          // 不透明度のバインディングは、デフォルト値からの変化を足す（あとで Part.opacity に足す。I-026）
+          if (prep.opacityAtDefault !== null) {
+            opacityChanges.set(targetId, (opacityChanges.get(targetId) ?? 0) + op - prep.opacityAtDefault);
+          }
           continue;
         }
 
@@ -208,6 +212,15 @@ export function createBindingEvaluator(): BindingEvaluator {
           ? record[targetId]!
           : (record[targetId] = new Float32Array(expected * 2));
         addWeighted(acc, prep.values, n);
+      }
+      // パーツ自身の不透明度 = Part.opacity + 不透明度のバインディングの変化の和（0..1 に収める。I-026）
+      if (opacityChanges.size > 0) {
+        const opacities: Record<string, number> = {};
+        for (const part of model.parts) {
+          const change = opacityChanges.get(part.id);
+          if (change !== undefined) opacities[part.id] = clamp(part.opacity + change, 0, 1);
+        }
+        out.opacities = opacities;
       }
       return out;
     },

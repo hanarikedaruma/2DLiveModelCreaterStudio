@@ -101,7 +101,7 @@ export class FakeKeyEditor implements KeyEditor {
               scale: change.scaleFactor
                 ? { x: part.scale.x * change.scaleFactor.x, y: part.scale.y * change.scaleFactor.y }
                 : part.scale,
-              opacity: change.opacityFactor !== undefined ? clamp01(part.opacity * change.opacityFactor) : part.opacity,
+              opacity: change.opacity !== undefined ? clamp01(change.opacity) : part.opacity,
               pivot: change.dPivot
                 ? { x: part.pivot.x + change.dPivot.x, y: part.pivot.y + change.dPivot.y }
                 : part.pivot,

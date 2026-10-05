@@ -21,6 +21,22 @@
 
 ## 記録
 
+### CC-006 不透明度のキーを、その姿勢でのパーツ自身の不透明度（絶対値）にする
+
+- 決めた日 / ステップ: 2026-10-05 / 承認済み方針（I-026「姿勢ごとの絶対値キー」）。実装・自動確認は2026-10-06（別のセッション。CO と同時に着手しないよう実装記録に書いて進めた）。
+- 対象の契約: `@app/schema` の `Binding`・`TransformDelta`・`Part.opacity`・schemaVersion（カード02）、`@app/contracts` の `TargetDeltas`・`TransformChange`（カード03・06・07・19・26）。
+- 変更前: キーの `TransformDelta.opacity` は倍率（1 = 変化なし）。パーツの不透明度 = 親 × `Part.opacity` × 全バインディングの倍率の積。`TransformChange.opacityFactor?: number`（いまの値に掛ける）。倍率 0 からは上げられず、0 の代わりに 0.001 を記録していた（カード34・42）。
+- 変更後:
+  - `Binding.controlsOpacity?: boolean`（transform だけ。省略は false）。true のバインディングのキーの `opacity` は、その姿勢でのパーツ自身の不透明度（0..1 の絶対値。親は掛けない）。false のバインディングのキーの `opacity` は使わない（1 のまま）。
+  - `Part.opacity` は基準の不透明度（不透明度のキーが無いとき・デフォルト値での値）。不透明度のバインディングのデフォルト値のキーは `Part.opacity` と同じ値にする（`patchPart` と KeyEditor の基準状態の編集が一緒に変える）。
+  - 合成: パーツ自身の不透明度 = `Part.opacity` + Σ（不透明度のバインディングのいまの値 − そのバインディングのデフォルト値での値）を 0..1 に収めたもの。不透明度のバインディングが1つなら、いまの値がそのまま不透明度になる。2パラメータの格子の欠けた点は (x, y0) + (x0, y) − (x0, y0)。親の不透明度は最後に掛ける。
+  - `TargetDeltas.opacities?: Record<string, number>`（partId → パーツ自身の不透明度。不透明度のバインディングがあるパーツだけ）。`transforms[].opacity` は使わない（1）。変形（pipeline）は `opacities` があればそれ、無ければ `Part.opacity` を親に掛ける。
+  - `TransformChange.opacity?: number`（いまの値で、パーツ自身の不透明度をこの値にする）に置き換え、`opacityFactor` は削除。基準状態では `Part.opacity`（とデフォルト値のキー）、パラメータの編集中はその組のバインディングを不透明度のバインディングにして（既存のキーの opacity は基準の不透明度にそろえる）、ほかの不透明度のバインディングの分を除いた値を記録する。
+  - schemaVersion を 2 にし、1 → 2 の変換を足した（`MIGRATIONS[1]`）。倍率が 1 でないキーを持つ transform のバインディングを不透明度のバインディングにし、キーの値 = `Part.opacity` × そのキーの倍率 × ほかのバインディングのデフォルト値での倍率、新しい `Part.opacity` = `Part.opacity` × 各バインディングのデフォルト値での倍率の積。0.001 以下の倍率は 0。バインディングが1つなら見た目は変わらない。複数が同時にデフォルト値から外れたときだけ、積から和に変わる。変換前のファイルはこれまでどおり backups/project.v1.<日時>.json に残る。
+- 理由: I-026。完全な 0 から戻せるようにし、基準の不透明度が 0 のパーツもキーで見せられるようにする。0.001 の回避と、I-038 のデフォルト値のキーの専用の口（`defaultKeyTransformEdit`）をやめる。
+- 影響するカード: 評価06、変形07、KeyEditor19、不透明度34、かんたんセットアップ42（頬染めは基準の不透明度 0・値 1 のキーにもとの不透明度）、保存16（版 2）。
+- 移行: schema（型・検証・migrate）、contracts（型・FakeKeyEditor）、core（evaluator・prepare・pipeline・opacity.ts の `partOpacity`/`rawPartOpacity`/`bindingOpacity`/`withPartOpacity`、`patchPart`、かんたんセットアップの頬染めと `rebuildTransformBinding`）、desktop（KeyEditor の transform と common の `KeySpec.opsFor`、不透明度のセクション、方向グリッドの「差分 0」の判定、キャンバスの変更の判定）。fixtures のプロジェクトは版 1 のまま（開くときに変換される）。
+
 ### CC-004 カメラの設定と実動作の計測を公開する
 
 - 決めた日 / ステップ: 2026-10-05 / あるべき姿をユーザーが承認。実装・自動確認は2026-10-06。

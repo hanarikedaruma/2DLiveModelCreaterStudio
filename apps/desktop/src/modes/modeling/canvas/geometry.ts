@@ -285,6 +285,6 @@ export function isIdentityChange(c: TransformChange): boolean {
     zero(c.dPivot) &&
     one(c.scaleFactor) &&
     Math.abs(c.dRotation ?? 0) < EPS &&
-    Math.abs((c.opacityFactor ?? 1) - 1) < EPS
+    c.opacity === undefined // 不透明度はその値にする指定なので、指定があれば変更として扱う（I-026）
   );
 }

@@ -27,7 +27,7 @@ describe('保存と読み込み', () => {
     expect(await fs.list(`${DIR}/assets`)).toEqual(project.assets.map((a) => `${a.id}.png`).sort());
     const text = await fs.readText(`${DIR}/project.json`);
     expect(text).toBe(projectToJson(project));
-    expect(text.startsWith('{\n  "schemaVersion": 1,')).toBe(true);
+    expect(text.startsWith('{\n  "schemaVersion": 2,')).toBe(true);
   });
 
   it('保存先のフォルダが無ければ途中のフォルダも作る（unsaved/<id>/ など）', async () => {
@@ -139,7 +139,7 @@ describe('古い版の読み込み', () => {
   it('変換前のファイルを backups/project.v<版>.<日時>.json に残してから変換する', async () => {
     const fs = new MemoryFileSystem();
     const { project, pngs } = await projectWithAssets(1);
-    await createProjectIO(fs).save(DIR, project, pngs);
+    await createProjectIO(fs).save(DIR, { ...project, schemaVersion: 1 }, pngs);
     const original = await fs.readText(`${DIR}/project.json`);
 
     const loaded = await createProjectIO(fs, options).load(DIR);
@@ -154,7 +154,7 @@ describe('古い版の読み込み', () => {
   it('同じ日時に2回読んでもバックアップを上書きしない', async () => {
     const fs = new MemoryFileSystem();
     const { project, pngs } = await projectWithAssets(0);
-    await createProjectIO(fs).save(DIR, project, pngs);
+    await createProjectIO(fs).save(DIR, { ...project, schemaVersion: 1 }, pngs);
     const io = createProjectIO(fs, options);
     await io.load(DIR);
     await io.load(DIR);

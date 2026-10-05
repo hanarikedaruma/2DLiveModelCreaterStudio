@@ -166,6 +166,6 @@ describe('ドラッグの量', () => {
     expect(isIdentityChange({})).toBe(true);
     expect(isIdentityChange({ dPosition: { x: 0, y: 0 }, scaleFactor: { x: 1, y: 1 }, dRotation: 0 })).toBe(true);
     expect(isIdentityChange({ dPosition: { x: 0.5, y: 0 } })).toBe(false);
-    expect(isIdentityChange({ opacityFactor: 0.5 })).toBe(false);
+    expect(isIdentityChange({ opacity: 0.5 })).toBe(false);
   });
 });

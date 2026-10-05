@@ -1,5 +1,6 @@
 import type { Model, Part, Project } from '@app/schema';
 import type { Command, ProjectStore } from '@app/contracts';
+import { withPartOpacity } from '../eval/opacity';
 
 export const HISTORY_LIMIT = 200;
 
@@ -113,7 +114,8 @@ export function modelCommand(label: string, fn: (model: Model) => Model): Comman
   };
 }
 
-// パーツの項目を書き換えるコマンド。パーツが無いか、値が同じなら何もしない
+// パーツの項目を書き換えるコマンド。パーツが無いか、値が同じなら何もしない。
+// 不透明度を変えるときは、不透明度のバインディングのデフォルト値のキーも同じ値にする（I-026）
 export function patchPart(label: string, partId: string, patch: Partial<Part>): Command {
   return modelCommand(label, (model) => {
     const index = model.parts.findIndex((p) => p.id === partId);
@@ -123,6 +125,7 @@ export function patchPart(label: string, partId: string, patch: Partial<Part>): 
     if (!changed) return model;
     const parts = model.parts.slice();
     parts[index] = { ...part, ...patch };
-    return { ...model, parts };
+    const next = { ...model, parts };
+    return patch.opacity !== undefined ? withPartOpacity(next, partId, patch.opacity) : next;
   });
 }

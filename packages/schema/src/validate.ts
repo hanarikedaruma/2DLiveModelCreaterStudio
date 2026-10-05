@@ -232,6 +232,7 @@ const binding: z.ZodType<Binding> = z
     keys: z.array(parameterKey),
     generation: z.enum(['linear', 'depth', 'rotate', 'surface', 'ease']),
     divisions: num.int().min(1).nullable(),
+    controlsOpacity: z.boolean().optional(),
   })
   .superRefine((b, ctx) => {
     if (b.target.type !== TARGET_TYPE_OF_CHANNEL[b.channel]) {
@@ -240,6 +241,9 @@ const binding: z.ZodType<Binding> = z
         path: ['target', 'type'],
         message: `channel '${b.channel}' の対象は '${TARGET_TYPE_OF_CHANNEL[b.channel]}' であるべき`,
       });
+    }
+    if (b.controlsOpacity && b.channel !== 'transform') {
+      ctx.addIssue({ code: 'custom', path: ['controlsOpacity'], message: 'transform のバインディングでだけ使える' });
     }
     const n = b.parameterIds.length;
     if (b.keyValues.length !== n) {
@@ -268,6 +272,17 @@ const binding: z.ZodType<Binding> = z
           path: ['keys', i, 'delta'],
           message: b.channel === 'transform' ? 'TransformDelta であるべき' : '頂点・制御点ごとの差分（配列）であるべき',
         });
+      }
+      // 不透明度のバインディングのキーの opacity は、パーツ自身の不透明度（絶対値）
+      if (b.controlsOpacity && isTransform) {
+        const opacity = (k.delta as TransformDelta).opacity;
+        if (opacity < 0 || opacity > 1) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['keys', i, 'delta', 'opacity'],
+            message: '不透明度のバインディングでは 0..1 であるべき',
+          });
+        }
       }
     });
   });

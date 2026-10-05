@@ -96,15 +96,15 @@ export function createDeformPipeline(): DeformPipeline {
         return m;
       };
 
-      // 自身と祖先の visible と不透明度の積
+      // 自身と祖先の visible と不透明度の積。パーツ自身の不透明度は、不透明度のキーがあれば評価の値（I-026）
       const chains = new Map<string, { visible: boolean; opacity: number }>();
       const chainOf = (part: Part): { visible: boolean; opacity: number } => {
         let c = chains.get(part.id);
         if (c) return c;
         const parent = parentOf(part);
         const up = parent ? chainOf(parent) : { visible: true, opacity: 1 };
-        const d = own(deltas.transforms, part.id);
-        c = { visible: up.visible && part.visible, opacity: up.opacity * part.opacity * (d ? d.opacity : 1) };
+        const keyed = deltas.opacities ? own(deltas.opacities, part.id) : undefined;
+        c = { visible: up.visible && part.visible, opacity: up.opacity * (keyed ?? part.opacity) };
         chains.set(part.id, c);
         return c;
       };

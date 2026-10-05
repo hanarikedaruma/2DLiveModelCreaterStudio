@@ -4,8 +4,6 @@ import type { KeyEditor } from '@app/contracts';
 import { addPointsKey, pointsEdit } from './points';
 import { addTransformKey, transformEdit } from './transform';
 
-export { defaultKeyTransformEdit } from './transform'; // デフォルト値のキーの編集（I-038。契約の外）
-
 export function createKeyEditor(): KeyEditor {
   return {
     transformEdit,

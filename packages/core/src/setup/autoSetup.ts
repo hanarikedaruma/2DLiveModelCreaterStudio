@@ -89,6 +89,16 @@ export function runAutoSetup(project: Project, nextId: () => string, options: Au
     headPoints.length > 0
       ? plan.transforms.filter((p) => p.parameterId !== 'FaceAngleX' && p.parameterId !== 'FaceAngleY')
       : plan.transforms;
+  // 頬染めの基準の不透明度（値 0 で消える。I-026）
+  if (plan.partOpacities.size > 0) {
+    model = {
+      ...model,
+      parts: model.parts.map((p) => {
+        const opacity = plan.partOpacities.get(p.id);
+        return opacity === undefined || opacity === p.opacity ? p : { ...p, opacity };
+      }),
+    };
+  }
   model = applyMotionPlans(model, [...transforms, ...step2], nextId); // 8 バインディング（transform）
   model = applyPointPlans(
     model,

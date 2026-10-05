@@ -35,6 +35,3 @@
   color: var(--text-dim);
   font-size: 12px;
 }
-.opacity-key-warn {
-  color: var(--danger);
-}

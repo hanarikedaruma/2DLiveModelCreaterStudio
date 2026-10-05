@@ -77,7 +77,7 @@ describe('projectToJson', () => {
     const { schemaVersion, name, ...rest } = project;
     const shuffled = { name, ...rest, schemaVersion };
     const text = projectToJson(shuffled);
-    expect(text.startsWith('{\n  "schemaVersion": 1,\n  "name": "モデル",')).toBe(true);
+    expect(text.startsWith('{\n  "schemaVersion": 2,\n  "name": "モデル",')).toBe(true);
     expect(text.endsWith('}\n')).toBe(true);
     expect(JSON.parse(text)).toEqual(project);
   });
