@@ -100,13 +100,13 @@ describe('モデリングの通し', () => {
     await page.waitForFunction(() => window.__studio.services.store.get().model.bindings.length > 0);
     const bindingCount = await page.evaluate(() => window.__studio.services.store.get().model.bindings.length);
 
-    // 4. FaceAngleX を ±30 にすると、顔と前髪がその向きへはっきり動き、後ろ髪も頭について同じ向きへ動く
-    //    （I-039 で、頭の共通の曲面のワープに変えた。MVP の「後ろ髪は逆へ」の奥行きの動きではない）
+    // 4. FaceAngleX を ±30 にすると、顔（目鼻の寄る中ほど）と前髪がその向きへはっきり動き、後ろ髪は頭の後ろ側として
+    //    逆へ動く（I-039 の根本改善: 共通の姿勢から顔・髪・耳を個別に変形する。頭全体に同じワープは掛けない）
     for (const sign of [1, -1]) {
       const shifts = await shiftsAt(30 * sign);
       expect(shifts.face * sign).toBeGreaterThan(10);
       expect(shifts.frontHair * sign).toBeGreaterThan(10);
-      expect(shifts.backHair * sign).toBeGreaterThan(0);
+      expect(shifts.backHair * sign).toBeLessThan(0);
     }
     const shifts = await shiftsAt(30); // 7. で開き直したあとと比べる
     await page.evaluate(() => window.__studio.services.editor.set({ editorParamValues: { FaceAngleX: 30 } }));

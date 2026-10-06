@@ -11,9 +11,11 @@ export const HEAD_TURN_ANGLE = { FaceAngleX: 12, FaceAngleY: 6 } as const;
 const VALUES = [-30, -20, -10, 0, 10, 20, 30];
 const scaled = (id: SurfaceParameter, value: number) => (value * HEAD_TURN_ANGLE[id]) / SURFACE_MAX_ANGLE;
 
-export function faceTurnBindings(model: Model): Binding[] {
-  const face = indexStandardParts(model.parts).group('faceGroup');
-  const ids = new Set(model.warps.filter((w) => w.partId === face?.id).map((w) => w.id));
+// 顔（faceGroup）のワープの顔の向きのバインディング。withHead なら頭（headRoot）のワープのものも
+export function faceTurnBindings(model: Model, withHead = false): Binding[] {
+  const index = indexStandardParts(model.parts);
+  const groups = [index.group('faceGroup')?.id, withHead ? index.group('headRoot')?.id : undefined];
+  const ids = new Set(model.warps.filter((w) => groups.includes(w.partId)).map((w) => w.id));
   return model.bindings.filter(
     (b) =>
       b.target.type === 'warp' &&
@@ -31,6 +33,14 @@ export function headTurnBlockReason(model: Model): string | null {
   const warp = headWarpOf(model);
   if (warp && !isUsableWarp(warp)) return '頭の変形のワープが使えない形のため、頭部共通の曲面方式には切り替えません';
   return null;
+}
+
+// 共通の姿勢の方式（headPose.ts）に切り替えられない理由。顔・頭のワープの顔の向きに、手で直したキー・ロックした
+// キーがあれば、勝手に作り直さずに残す
+export function headPoseBlockReason(model: Model): string | null {
+  return faceTurnBindings(model, true).some((b) => b.keys.some(keepOnRerun))
+    ? '顔・頭のワープの顔の向きに手動編集・ロック済みの変形があるため、顔・髪・耳を個別に動かす方式には切り替えず、顔の向きの設定を残します'
+    : null;
 }
 
 export function planHeadTurn(model: Model): PointPlan[] {

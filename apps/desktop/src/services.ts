@@ -125,7 +125,7 @@ export function createServices(): Services {
       parameters: () => store.get().model.parameters,
     }),
     // I-039 暫定: 顔側の曲面変形を頭部共通にし、髪も追従させる。
-    autoSetup: createAutoSetup({ faceTurn: 'head-surface' }),
+    autoSetup: createAutoSetup({ faceTurn: 'head-pose' }),
     keyEditor: createKeyEditor(),
     importer: createImporter(),
     io,

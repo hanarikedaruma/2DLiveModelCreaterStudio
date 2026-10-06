@@ -4,7 +4,8 @@ import { rectOfAsset } from '../generate/bounds';
 import { deepEqual } from '../generate/equal';
 import { withDrawOrder } from './drawOrder';
 import { withFaceWarp, withHeadWarp } from './faceTurn';
-import { faceTurnBindings, headTurnBlockReason, planHeadTurn } from './headTurn';
+import { headMeshIds, isHeadPoseBinding, planHeadPose } from './headPose';
+import { faceTurnBindings, headPoseBlockReason, headTurnBlockReason, planHeadTurn } from './headTurn';
 import { buildHierarchy } from './hierarchy';
 import { applyMasksAndDepth } from './masksDepth';
 import { applyMotionPlans, planMotions } from './motions';
@@ -16,7 +17,9 @@ import { setupWarnings } from './warnings';
 export const AUTO_SETUP_LABEL = 'かんたんセットアップ';
 
 export interface AutoSetupOptions {
-  faceTurn?: 'surface' | 'depth' | 'head-surface';
+  // 顔の向きの作り方。head-pose = 共通の姿勢から顔・髪・耳を個別に変形する（I-039 の根本改善）、
+  // head-surface = 頭全体に同じ曲面のワープ（I-039 の暫定）、surface = 顔だけの曲面（カード42）、depth = 奥行きの移動
+  faceTurn?: 'surface' | 'depth' | 'head-surface' | 'head-pose';
 }
 
 export function createAutoSetup(options: AutoSetupOptions = {}): AutoSetup {
@@ -27,10 +30,14 @@ export function createAutoSetup(options: AutoSetupOptions = {}): AutoSetup {
       return {
         command: { label: AUTO_SETUP_LABEL, apply: (p) => runAutoSetup(p, pooledIds(pool, p), options) },
         warnings:
-          options.faceTurn === 'head-surface'
+          options.faceTurn === 'head-surface' || options.faceTurn === 'head-pose'
             ? [
                 ...setupWarnings(project.model, true),
-                ...[headTurnBlockReason(project.model)].filter((w): w is string => w !== null),
+                ...[
+                  options.faceTurn === 'head-pose'
+                    ? headPoseBlockReason(project.model)
+                    : headTurnBlockReason(project.model),
+                ].filter((w): w is string => w !== null),
               ]
             : setupWarnings(project.model, options.faceTurn !== 'depth'),
       };
@@ -75,20 +82,29 @@ export function runAutoSetup(project: Project, nextId: () => string, options: Au
   // （STEP2 の標準パラメータはプロジェクトを開いたときにアプリが足す。無ければ STEP2 の動きは作らない）
   model = ensureStandardParameters(model, 'step1');
   const headTurn = options.faceTurn === 'head-surface';
-  const blocked = headTurn && headTurnBlockReason(model) !== null;
-  const surfaceFaceTurn = !headTurn && options.faceTurn !== 'depth';
+  const headPose = options.faceTurn === 'head-pose';
+  const blocked =
+    (headTurn && headTurnBlockReason(model) !== null) || (headPose && headPoseBlockReason(model) !== null);
+  const surfaceFaceTurn = !headTurn && !headPose && options.faceTurn !== 'depth';
   if (surfaceFaceTurn) model = withFaceWarp(model, boundsOf, nextId);
   if (headTurn && !blocked) model = withHeadWarp(model, boundsOf, nextId);
   const plan = planStep1(model, planMotions(model, boundsOf), boundsOf, surfaceFaceTurn);
-  const headPoints = headTurn && !blocked ? planHeadTurn(model) : [];
+  const posePlan = headPose && !blocked ? planHeadPose(model, boundsOf) : null;
+  const headPoints = headTurn && !blocked ? planHeadTurn(model) : (posePlan?.points ?? []);
+  // 共通の姿勢の方式では、それまでの方式の自動のキー（顔・頭のワープ、頭の頂点の顔の向き）を作り直す対象にする
+  const poseMeshes = headPose && !blocked ? headMeshIds(model) : new Set<string>();
+  const oldTurns = new Set(headPose && !blocked ? faceTurnBindings(model, true).map((b) => b.id) : []);
   // 手動の旧顔ワープがある場合は、他軸の自動キーも含め旧顔の向きを一式残す。
   const preservedFace = new Set(blocked ? faceTurnBindings(model).map((b) => b.id) : []);
   const step2 = planStep2(model, boundsOf); // 呼吸・腕（カード53）
   // 頭部の曲面と従来の奥行き移動を二重に掛けない。手動・ロック済みの旧キーは applyMotionPlans が残す。
-  const transforms =
-    headPoints.length > 0
+  const replacesDepth = headPoints.length > 0 || (posePlan?.transforms.length ?? 0) > 0;
+  const transforms = [
+    ...(replacesDepth
       ? plan.transforms.filter((p) => p.parameterId !== 'FaceAngleX' && p.parameterId !== 'FaceAngleY')
-      : plan.transforms;
+      : plan.transforms),
+    ...(posePlan?.transforms ?? []),
+  ];
   // 頬染めの基準の不透明度（値 0 で消える。I-026）
   if (plan.partOpacities.size > 0) {
     model = {
@@ -103,7 +119,7 @@ export function runAutoSetup(project: Project, nextId: () => string, options: Au
   model = applyPointPlans(
     model,
     [...plan.points, ...headPoints],
-    (b) => plan.owns(b) && !preservedFace.has(b.id),
+    (b) => (plan.owns(b) && !preservedFace.has(b.id)) || oldTurns.has(b.id) || isHeadPoseBinding(model, poseMeshes, b),
     nextId,
   );
   return deepEqual(model, project.model) ? project : { ...project, model };

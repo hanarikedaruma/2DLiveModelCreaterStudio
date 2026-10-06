@@ -24,19 +24,21 @@ afterEach(() => {
 });
 
 describe('STEP2 の結合', () => {
-  it('I-039: 顔だけでなく頭部全体に曲面変形を作る', () => {
+  it('I-039: 共通の姿勢から顔・髪を個別に動かす（頭全体のワープは作らない。メッシュの無い fixture は位置のキー）', () => {
     const s = createServices();
     const before = loadProjectJson(sampleJson);
     const p = s.autoSetup.plan(before).command.apply(before);
-    expect(p.model.warps).toHaveLength(1);
-    const head = p.model.parts.find((q) => q.standardType === 'headRoot')!;
-    expect(p.model.warps[0]!.partId).toBe(head.id);
-    expect(p.model.bindings.some((b) => b.channel === 'warpPoints' && b.target.id === p.model.warps[0]!.id)).toBe(true);
-    for (const type of ['face', 'frontHair']) {
+    expect(p.model.warps).toHaveLength(0);
+    const shiftAt30 = (type: string) => {
       const part = p.model.parts.find((q) => q.standardType === type)!;
-      const turn = p.model.bindings.find((b) => b.target.id === part.id && b.parameterIds[0] === 'FaceAngleX');
-      expect(turn).toBeUndefined();
-    }
+      const turn = p.model.bindings.find((b) => b.target.id === part.id && b.parameterIds[0] === 'FaceAngleX')!;
+      const key = turn.keys.find((k) => k.coords[0] === 30)!;
+      return (key.delta as { position: { x: number } }).position.x;
+    };
+    // 目や前髪は向きへ、後ろ髪は逆へ
+    expect(shiftAt30('irisL')).toBeGreaterThan(0);
+    expect(shiftAt30('frontHair')).toBeGreaterThan(0);
+    expect(shiftAt30('backHair')).toBeLessThan(0);
   });
 
   it('4つのサービスは本物で、構築時には機器を開かない', () => {

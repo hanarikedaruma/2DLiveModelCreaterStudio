@@ -1,0 +1,96 @@
+{
+  "head-pose": [
+    {
+      "x": -30,
+      "y": 0,
+      "file": "head-pose_x-30_y0.png"
+    },
+    {
+      "x": -15,
+      "y": 0,
+      "file": "head-pose_x-15_y0.png"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "file": "head-pose_x0_y0.png"
+    },
+    {
+      "x": 15,
+      "y": 0,
+      "file": "head-pose_x15_y0.png"
+    },
+    {
+      "x": 30,
+      "y": 0,
+      "file": "head-pose_x30_y0.png"
+    },
+    {
+      "x": 0,
+      "y": 30,
+      "file": "head-pose_x0_y30.png"
+    },
+    {
+      "x": 0,
+      "y": -30,
+      "file": "head-pose_x0_y-30.png"
+    },
+    {
+      "x": 30,
+      "y": 30,
+      "file": "head-pose_x30_y30.png"
+    },
+    {
+      "x": -30,
+      "y": -30,
+      "file": "head-pose_x-30_y-30.png"
+    }
+  ],
+  "head-surface": [
+    {
+      "x": -30,
+      "y": 0,
+      "file": "head-surface_x-30_y0.png"
+    },
+    {
+      "x": -15,
+      "y": 0,
+      "file": "head-surface_x-15_y0.png"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "file": "head-surface_x0_y0.png"
+    },
+    {
+      "x": 15,
+      "y": 0,
+      "file": "head-surface_x15_y0.png"
+    },
+    {
+      "x": 30,
+      "y": 0,
+      "file": "head-surface_x30_y0.png"
+    },
+    {
+      "x": 0,
+      "y": 30,
+      "file": "head-surface_x0_y30.png"
+    },
+    {
+      "x": 0,
+      "y": -30,
+      "file": "head-surface_x0_y-30.png"
+    },
+    {
+      "x": 30,
+      "y": 30,
+      "file": "head-surface_x30_y30.png"
+    },
+    {
+      "x": -30,
+      "y": -30,
+      "file": "head-surface_x-30_y-30.png"
+    }
+  ]
+}
