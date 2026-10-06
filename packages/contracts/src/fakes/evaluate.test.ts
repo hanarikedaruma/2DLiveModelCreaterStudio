@@ -101,3 +101,18 @@ describe('FakeMixer', () => {
     expect(out).not.toHaveProperty('Unknown');
   });
 });
+
+describe('FakeMixer の層の順（STEP3 のカード65）', () => {
+  it('配列の順ではなく LAYER_ORDER の順に上書きする', () => {
+    const p = { id: 'A', name: 'A', groupId: 'other' as const, min: 0, max: 1, default: 0, standard: false };
+    const out = new FakeMixer().mix(
+      [p],
+      [
+        { id: 'hotkey', weight: 1, values: { A: 0.7 } },
+        { id: 'auto', weight: 1, values: { A: 0.2 } },
+        { id: 'tracking', weight: 1, values: { A: 0.9 } },
+      ],
+    );
+    expect(out.A).toBe(0.7);
+  });
+});

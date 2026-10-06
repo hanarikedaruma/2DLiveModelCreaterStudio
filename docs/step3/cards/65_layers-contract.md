@@ -55,4 +55,11 @@
 
 ## 記録
 
-（作業中に書く）
+- 2026-10-07 CL: 契約を変えた（CC-010）。
+  - LayerId に auto・hotkey を足し、順を tracking → auto → bodyFollow → expression → hotkey → animation → lipSync → periodic → physics にした。
+  - FrameContext に layersSoFar（それまでの層そのもの）を足した。既存の19ファイルが FrameContext を組み立てているので、任意の項目にした（実行部は必ず渡す。カード66）。
+  - Environment に autoBlink（既定 true）と output.adapterId（null は自動）を足した。
+  - FakeMixer も LAYER_ORDER の順に合成するようにした（合成の方法は上書きのまま。本物との写しを1つにするのは、contracts が core に頼れないのでやめた）。
+  - 移行: 層の順・既定値を確かめるテストの期待値と、出力の設定を組み立てている apps/desktop/src/output/spout/controller.test.ts（adapterId: null を足しただけ。カード69 の担当の CO のフォルダだが、着手の前なので直した）。
+- 確かめたこと（実装の担当の回帰テスト）: core の mixer.test.ts に2件（層の順、auto と hotkey の効く位置）、contracts の evaluate.test.ts に1件（FakeMixer の順）。全体のテスト（`pnpm -r test`）と型検査が通った。
+- 確かめていないこと: 層を作る側の切り替え（カード66・68）。

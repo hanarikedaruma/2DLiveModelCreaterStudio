@@ -472,6 +472,7 @@ export const environmentSchema: z.ZodType<Environment> = z.object({
   silenceThreshold: num,
   trackingPreset: z.enum(['stable', 'standard', 'large', 'custom']),
   eyeTracking: z.boolean(),
+  autoBlink: z.boolean(),
   trackingCustom: z.object({
     minCutoff: num.positive(),
     beta: num.nonnegative(),
@@ -485,6 +486,7 @@ export const environmentSchema: z.ZodType<Environment> = z.object({
     width: num.int().min(1),
     height: num.int().min(1),
     fps: num.min(1),
+    adapterId: z.string().nullable(),
   }),
   uiLevel: z.object({ modeling: uiLevel, animation: uiLevel, studio: uiLevel }),
   lastProjectDir: z.string().nullable(),

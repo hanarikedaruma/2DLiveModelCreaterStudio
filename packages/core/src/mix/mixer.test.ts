@@ -138,3 +138,35 @@ describe('createParameterMixer: 範囲と知らない id', () => {
     expect({ ps, layers }).toEqual(before);
   });
 });
+
+describe('createParameterMixer: 層の順（STEP3 のカード65・CC-010）', () => {
+  it('順は tracking → auto → bodyFollow → expression → hotkey → animation → lipSync → periodic → physics', () => {
+    expect(LAYER_ORDER).toEqual([
+      'tracking',
+      'auto',
+      'bodyFollow',
+      'expression',
+      'hotkey',
+      'animation',
+      'lipSync',
+      'periodic',
+      'physics',
+    ]);
+  });
+
+  it('auto はトラッキングの後・表情の前、hotkey は表情の後・アニメーションの前に効く（配列の順に関係なく）', () => {
+    const ps = [param('EyeOpenL', 0, 1, 1), param('Tail', -1, 1, 0)];
+    const layers = [
+      layer('expression', 1, { EyeOpenL: 0.5 }, { EyeOpenL: 'multiply' }),
+      layer('auto', 1, { EyeOpenL: 0.2 }),
+      layer('tracking', 1, { EyeOpenL: 0.9 }),
+      layer('animation', 1, { Tail: 0.3 }),
+      layer('hotkey', 1, { Tail: 1 }),
+    ];
+    const out = mixer.mix(ps, layers);
+    // tracking 0.9 を auto 0.2 が上書きし、表情が 0.5 倍する
+    expect(out.EyeOpenL).toBeCloseTo(0.1);
+    // hotkey の 1 をアニメーションの 0.3 が上書きする
+    expect(out.Tail).toBeCloseTo(0.3);
+  });
+});

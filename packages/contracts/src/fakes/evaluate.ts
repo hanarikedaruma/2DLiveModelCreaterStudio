@@ -1,13 +1,14 @@
 import type { Model, Parameter, Part, Vec2 } from '@app/schema';
-import type {
-  BindingEvaluator,
-  DeformPipeline,
-  DeformedModel,
-  DrawItem,
-  Layer,
-  ParamValues,
-  ParameterMixer,
-  TargetDeltas,
+import {
+  LAYER_ORDER,
+  type BindingEvaluator,
+  type DeformPipeline,
+  type DeformedModel,
+  type DrawItem,
+  type Layer,
+  type ParamValues,
+  type ParameterMixer,
+  type TargetDeltas,
 } from '../index';
 
 export function emptyDeltas(): TargetDeltas {
@@ -72,12 +73,14 @@ export class FakePipeline implements DeformPipeline {
   }
 }
 
-// デフォルト値に、各レイヤーの値を重みで上書きする
+// デフォルト値に、各レイヤーの値を重みで上書きする。順は本物と同じ LAYER_ORDER（同じ id の中は配列の順）。
+// 合成の方法（add・multiply など）は使わず、すべて上書きにする
 export class FakeMixer implements ParameterMixer {
   mix(parameters: Parameter[], layers: Layer[]): ParamValues {
     const out: ParamValues = {};
     for (const p of parameters) out[p.id] = p.default;
-    for (const layer of layers) {
+    const ordered = LAYER_ORDER.flatMap((id) => layers.filter((l) => l.id === id));
+    for (const layer of ordered) {
       for (const [id, v] of Object.entries(layer.values)) {
         if (!(id in out)) continue;
         const weight =

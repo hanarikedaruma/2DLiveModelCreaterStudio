@@ -322,10 +322,12 @@ export interface Environment {
   silenceThreshold: number; // dBFS
   trackingPreset: 'stable' | 'standard' | 'large' | 'custom';
   eyeTracking: boolean;
+  autoBlink: boolean; // 目の値がカメラから来ていない間の自動まばたき（STEP3 のカード65）
   trackingCustom: { minCutoff: number; beta: number; gain: number; deadZone: number };
   bodyFollowStrength: 'low' | 'standard' | 'high';
   expressionMode: 'stack' | 'single';
-  output: { method: 'window' | 'spout2'; width: number; height: number; fps: number };
+  // adapterId: Spout2 で描く GPU（アダプターの識別子）。null は自動（既定のアダプター）。STEP3 のカード65
+  output: { method: 'window' | 'spout2'; width: number; height: number; fps: number; adapterId: string | null };
   uiLevel: Record<ModeId, UiLevel>;
   lastProjectDir: string | null;
 }

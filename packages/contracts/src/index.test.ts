@@ -5,8 +5,10 @@ describe('@app/contracts の公開', () => {
   it('レイヤーの順番', () => {
     expect(contracts.LAYER_ORDER).toEqual([
       'tracking',
+      'auto',
       'bodyFollow',
       'expression',
+      'hotkey',
       'animation',
       'lipSync',
       'periodic',

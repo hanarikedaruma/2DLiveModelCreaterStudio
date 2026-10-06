@@ -53,11 +53,16 @@ export interface DeformPipeline {
 
 // ---- 合成の契約 ----
 
-export type LayerId = 'tracking' | 'bodyFollow' | 'expression' | 'animation' | 'lipSync' | 'periodic' | 'physics';
+// 層。値の出どころごとに分ける（STEP3 のカード65・CC-010）: tracking はカメラから来た値だけ、auto はプログラムが作る値
+// （自動まばたき）、hotkey はホットキーのパラメータの上書き（表情の後・アニメーションの前）
+export type LayerId =
+  'tracking' | 'auto' | 'bodyFollow' | 'expression' | 'hotkey' | 'animation' | 'lipSync' | 'periodic' | 'physics';
 export const LAYER_ORDER: LayerId[] = [
   'tracking',
+  'auto',
   'bodyFollow',
   'expression',
+  'hotkey',
   'animation',
   'lipSync',
   'periodic',
@@ -80,6 +85,8 @@ export interface FrameContext {
   dt: number; // ミリ秒
   project: Project;
   mixedSoFar: ParamValues; // それまでのレイヤーを合成した値
+  // それまでのレイヤーそのもの（合成する前の値と重み。順に並ぶ）。実行部は必ず渡す。省いたら空として扱う（CC-010）
+  layersSoFar?: readonly Layer[];
   flags: { lipSyncWeight: number; physicsActive: boolean }; // 前のレイヤーが後のレイヤーへ伝える値（初期値 1・true）
 }
 export interface LayerProducer {

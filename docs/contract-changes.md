@@ -21,6 +21,20 @@
 
 ## 記録
 
+### CC-010 層の出どころを分ける（auto・hotkey の層）と、自動まばたき・出力の GPU の設定
+
+- 決めた日 / ステップ: 2026-10-07 / STEP3 のカード65（I-055・I-007・I-032 の契約の部分）。
+- 対象の契約: `@app/contracts` の `LayerId`・`LAYER_ORDER`・`FrameContext`（カード03・26・45）、`@app/schema` の `Environment`（カード02）。
+- 変更前: 層の順は tracking → bodyFollow → expression → animation → lipSync → periodic → physics。自動まばたきはトラッキングの層の中（CC-002）と、カメラ停止中の実行部の経路で作っていた。ホットキーのパラメータの上書きは表情と同じ id の層で、順番は登録の順。Environment.output は `{ method; width; height; fps }`。
+- 変更後:
+  - `LayerId` に `auto`（プログラムが作る値。自動まばたき）と `hotkey`（ホットキーのパラメータの上書き）を足した。順は tracking → auto → bodyFollow → expression → hotkey → animation → lipSync → periodic → physics。auto は体の追従の前（自動の動きで頭が動いたら体も追う）、hotkey は表情の後・アニメーションの前（今までの登録の順と同じ効き方）。
+  - `FrameContext.layersSoFar?: readonly Layer[]`: それまでの層そのもの（合成する前の値と重み）。auto の層は、目の値がトラッキングの層から来たかをこれで判定する。実行部は必ず渡す。テストで省いたら空として扱う（既存のテストを変えないため任意にした）。
+  - `Environment.autoBlink: boolean`（既定 true）、`Environment.output.adapterId: string | null`（null は自動＝既定のアダプター）。読み込み時に無ければ既定値で補う（parseEnvironment の重ね方のまま）。
+  - 仮実装の `FakeMixer` も LAYER_ORDER の順に合成する（合成の方法は上書きのまま）。
+- 理由: カメラから来た値とプログラムが作る値を分け（I-055 の自動まばたきの穴、同じ処理が2か所）、層ごとの値を計測の表示に出す（I-007）。ホットキーの効く順を登録の順に頼らない。GPU が2つある PC で Spout2 の GPU を選ぶ（I-032）。
+- 影響するカード: ミキサー09、実行部22、STEP3 のカード66（auto の層と層ごとの値）・67（計測の表示）・68（ホットキーの層）・69（GPU の選択）。
+- 移行: contracts（型・FakeMixer）、schema（Environment の型・既定値・検証）、core（ミキサーは LAYER_ORDER をそのまま使う）。テストの期待値（層の順・既定値）と、出力の設定を組み立てている `apps/desktop/src/output/spout/controller.test.ts`（adapterId を足しただけ。カード69 の着手の前）を直した。保存形式の版は変えない（Environment はプロジェクトに入らない）。
+
 ### CC-009 開いたときに分かったことを返す（欠けた素材・保存の途中の .tmp・切れた参照）
 
 - 決めた日 / ステップ: 2026-10-07 / STEP3 のカード58（I-056・I-057・I-027）。

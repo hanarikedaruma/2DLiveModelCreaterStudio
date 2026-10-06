@@ -126,10 +126,11 @@ describe('createDefaultEnvironment', () => {
       silenceThreshold: -50,
       trackingPreset: 'standard',
       eyeTracking: true,
+      autoBlink: true,
       trackingCustom: { minCutoff: 1, beta: 0.02, gain: 1, deadZone: 0.5 },
       bodyFollowStrength: 'standard',
       expressionMode: 'stack',
-      output: { method: 'window', width: 1920, height: 1080, fps: 60 },
+      output: { method: 'window', width: 1920, height: 1080, fps: 60, adapterId: null },
       uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
       lastProjectDir: null,
     });
