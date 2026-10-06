@@ -1,25 +1,17 @@
 // メッシュ編集ツール。選択中の画像パーツのワイヤーフレームを描き、頂点の移動・矩形選択・追加・削除・自動生成をする
 import type { Mesh, Model, Part, Project, Vec2 } from '@app/schema';
 import type { DeformedModel, TargetDeltas, ViewTransform } from '@app/contracts';
+import { pointsToModelSpace } from '@app/core';
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
-import {
-  applyAffine,
-  applyLinear,
-  distance,
-  hitTestItems,
-  invert,
-  itemPoints,
-  linearOnly,
-  pointInTriangle,
-  type Affine,
-} from '../canvas/geometry';
+import { applyAffine, distance, hitTestItems, invert, itemPoints, pointInTriangle } from '../canvas/geometry';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
 import { isLockedDeep, paramValuesOf, partById, partMatrix } from '../canvas/parts';
 import { addVertex, markEditedIfChanged, remeshCommand, removeVertices } from './meshOps';
 import { densityOf, generateShape, regenerateOutcome, reshapeWithTransfer, type ReshapeOutcome } from './remesh';
+import { createMeshDragMapper, meshLocalPositions, type MeshMove } from './meshDrag';
 
 export const MESH_TOOL_ID = 'modeling.mesh';
 
@@ -27,6 +19,8 @@ export const VERTEX_RADIUS = 7; // 画面のピクセル
 export const DOUBLE_CLICK_MS = 400;
 const DOUBLE_CLICK_DISTANCE = 6;
 const DRAG_THRESHOLD = 3;
+const INVERSE_FAILED_MESSAGE =
+  '変形を逆算できないため、頂点を移動できません。ワープの潰れやパーツの拡縮を確認してください。';
 
 // ---- 対象と表示の位置（純粋関数） ----
 
@@ -46,7 +40,7 @@ export function meshTarget(model: Model, selectedIds: string[]): MeshTarget | nu
 }
 
 // 頂点の見えている位置。変形の結果（lastDeformed）の頂点がメッシュと同じ数ならそれを使う。
-// 合わないとき（描き直す前・メッシュを使わない仮の変形）は、頂点の差分と自身・親の変形から求める
+// 合わないときは、頂点の差分と自身・親の変形・ワープから求める
 export function displayPositions(
   model: Model,
   deltas: TargetDeltas,
@@ -56,10 +50,7 @@ export function displayPositions(
 ): Vec2[] {
   const item = deformed?.byPartId[part.id];
   if (item && item.positions.length === mesh.vertices.length * 2) return itemPoints(item);
-  const m = partMatrix(model, deltas.transforms, part.id);
-  const d = deltas.vertices[mesh.id];
-  const useDelta = d !== undefined && d.length === mesh.vertices.length * 2;
-  return mesh.vertices.map((v, i) => applyAffine(m, useDelta ? { x: v.x + d[i * 2]!, y: v.y + d[i * 2 + 1]! } : v));
+  return pointsToModelSpace(model, deltas, part.id, meshLocalPositions(mesh, deltas));
 }
 
 // 画面上でいちばん近い頂点（radius の内側だけ）
@@ -124,7 +115,7 @@ function createSelectionStore() {
 
 // ---- ツール ----
 
-type Move = { index: number; d: Vec2 };
+type Move = MeshMove;
 
 type Drag =
   | {
@@ -132,8 +123,8 @@ type Drag =
       start: Vec2;
       screenStart: Vec2;
       started: boolean;
-      indices: number[];
-      inverse: Affine | null;
+      moves: (delta: Vec2) => Move[] | null;
+      inverseErrorNotified: boolean;
       keyed: KeyedDrag<Move[]>;
       blocked: boolean; // プレビューが基準状態と違う間は動かさない（I-046）
     }
@@ -279,9 +270,8 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
       start: e.canvasPoint,
       screenStart: e.screenPoint,
       started: false,
-      indices,
-      // キャンバス上の移動量を、基準の頂点の座標での移動量にする（自身と親の変形の逆。ワープは含めない）
-      inverse: invert(linearOnly(partMatrix(project.model, deltas.transforms, target.part.id))),
+      moves: createMeshDragMapper(project.model, deltas, target.part.id, mesh, indices),
+      inverseErrorNotified: false,
       keyed: startKeyedDrag<Move[]>({
         store,
         dialogs: env.dialogs,
@@ -365,8 +355,13 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
       }
       if (drag.blocked) return;
       const delta = { x: e.canvasPoint.x - drag.start.x, y: e.canvasPoint.y - drag.start.y };
-      const d = drag.inverse ? applyLinear(drag.inverse, delta) : delta;
-      drag.keyed.move(drag.indices.map((index) => ({ index, d })));
+      const moves = drag.moves(delta);
+      if (!moves) {
+        if (!drag.inverseErrorNotified) slot.get()?.dialogs.notify(INVERSE_FAILED_MESSAGE);
+        drag.inverseErrorNotified = true;
+        return;
+      }
+      drag.keyed.move(moves);
     },
 
     onPointerUp(e) {
