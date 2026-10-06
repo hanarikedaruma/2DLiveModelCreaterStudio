@@ -68,4 +68,12 @@
 
 ## 記録
 
-（作業中に書く）
+- 2026-10-07 CL: 実装した。
+  - I-056: `ProjectIO.load` は素材が欠けていても開き、同じ大きさの透明な PNG の代わりで返して `report.missingAssetIds` に入れる。ハッシュが記録と違う素材は `changedAssetIds`（読み込みは続ける）。アプリは開いたときに知らせ、素材トレイに「欠けた素材」（`apps/desktop/src/project/MissingAssetsSection.tsx`）を出す。PNG か PSD を選んで差し替える（PSD は元のレイヤー名と同じレイヤー、無ければ選ぶ）。差し替えは新しい素材の id にしてパーツの参照を付け替えるので、1回の Undo で欠けた状態に戻る。保存では欠けたままの素材を書かない（`SaveOptions.skipAssetIds`）。
+  - I-057: 置き換えで移動先を消すのをやめた（`apps/desktop/src/platform/rename.ts` の `renameWithRetry`）。Tauri の fs プラグインの rename は `std::fs::rename` で、Windows では移動先があれば1回の操作で置き換える（tauri-plugin-fs 2.6.0 の commands.rs で確かめた）。失敗はほかのプログラムがファイルを開いているときなので、50・200・800ms 待って試し直し、それでも駄目なら前のファイルを残したままエラーにする。開くときに project.json が無く .tmp だけがあれば、そこから開き、保存するまで変更ありにする。素材の .tmp も同じ。
+  - カードから変えた点: カードの「Rust 側で置き換えるコマンドを足す」は、rename がすでに置き換えなので不要だった。src-tauri には触っていない。
+  - I-027: パラメータを消すと、出力先がそのパラメータの物理も物理ごと消し、パーツの physicsId も外す（1回の Undo）。確認の文に「物理（出力先） N 個」を出す。前の版で残っていたものは、開くときに `packages/io/src/project/repair.ts` で外して知らせる。
+  - 契約の変更: CC-009（`LoadReport`・`LoadedProject`・`SaveOptions`・`emptyLoadReport`）。
+- 確かめたこと（実装の担当の回帰テスト）: io の projectIO.test.ts に6件（欠けた素材・欠けたままの保存・ハッシュの違い・project.json.tmp から開く・素材の .tmp・出力先の無い物理）、desktop の rename.test.ts 3件、userParams.test.ts 1件（と既存の期待値の直し）、actions.test.ts 3件、MissingAssetsSection.test.tsx 2件。直す前のコードでは落ちる内容。
+- 確かめていないこと: 本物のアプリでの欠けた素材の差し替え（CO の e2e `recovery.c58.e2e.ts` とカード70・72 の UC-11）。Windows で rename が実際に失敗する場合（ファイルを開いたままにする）の確認。
+- 気づいたこと: 透明な PNG を作るのに `packages/io/src/import/png.ts` の encodePng を使っている（カード57 の担当のフォルダ。import しているだけ）。

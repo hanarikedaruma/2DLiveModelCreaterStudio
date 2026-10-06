@@ -174,9 +174,27 @@ export interface Importer {
     files: { name: string; data: Uint8Array }[],
   ): Promise<{ assets: ImportedAsset[]; warnings: ImportWarning[] }>;
 }
+// 開いたときに分かったこと・直したこと（STEP3 のカード58。CC-009）
+export interface LoadReport {
+  missingAssetIds: string[]; // ファイルが無く、透明な画像の代わりで開いた素材
+  changedAssetIds: string[]; // 記録のハッシュと違う素材（外で書き換えられた。そのまま読んだ）
+  repairs: string[]; // 開くときに直したこと（人に見せる文）
+  openedFromTmp: boolean; // project.json が無く、保存の途中の project.json.tmp から開いた（保存すると戻る）
+}
+export interface LoadedProject {
+  project: Project;
+  assetPngs: Record<string, Uint8Array>;
+  report: LoadReport;
+}
+export interface SaveOptions {
+  skipAssetIds?: string[]; // 書かずに欠けたままにする素材（開いたときに欠けていて、まだ差し替えていないもの）
+}
 export interface ProjectIO {
-  save(dir: string, project: Project, assetPngs: Record<string, Uint8Array>): Promise<void>;
-  load(dir: string): Promise<{ project: Project; assetPngs: Record<string, Uint8Array> }>;
+  save(dir: string, project: Project, assetPngs: Record<string, Uint8Array>, options?: SaveOptions): Promise<void>;
+  load(dir: string): Promise<LoadedProject>;
+}
+export function emptyLoadReport(): LoadReport {
+  return { missingAssetIds: [], changedAssetIds: [], repairs: [], openedFromTmp: false };
 }
 export interface AutoSaver {
   start(dir: string): void;

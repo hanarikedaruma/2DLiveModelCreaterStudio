@@ -234,3 +234,50 @@ describe('起動時の復元', () => {
     expect(declined.services.store.get()).toBe(before);
   });
 });
+
+describe('欠けた素材と保存の途中の .tmp（STEP3 のカード58）', () => {
+  // a1・a2 を持つプロジェクトを /work/proj に保存し、a1 のファイルを消す
+  async function savedWithMissing() {
+    const ctx = setup();
+    const { actions, services, picked, fs } = ctx;
+    await services.assets.put('a1', PNG);
+    await services.assets.put('a2', PNG);
+    services.store.dispatch({ label: '素材', apply: (p) => ({ ...p, assets: [asset('a1'), asset('a2')] }) });
+    picked.push('/work/proj');
+    await actions.save();
+    await fs.remove('/work/proj/assets/a1.png');
+    return ctx;
+  }
+
+  it('開くと欠けた素材を覚えて知らせ、保存しても欠けた素材は書かない', async () => {
+    const { actions, dialogs, fs } = await savedWithMissing();
+    await actions.open('/work/proj');
+    expect(actions.missingAssetIds()).toEqual(['a1']);
+    expect(dialogs.notify).toHaveBeenCalledWith(expect.stringContaining('素材のファイルが 1 個無い'));
+    await actions.save();
+    expect(await fs.exists('/work/proj/assets/a1.png')).toBe(false);
+  });
+
+  it('差し替えると欠けた一覧から消え、新しい素材のファイルを書く。Undo で欠けた状態に戻る', async () => {
+    const { actions, services, fs } = await savedWithMissing();
+    await actions.open('/work/proj');
+    const replacement = { asset: { ...asset('n1'), hash: 'n' }, png: new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9]) };
+    await actions.replaceMissingAsset('a1', replacement);
+    expect(actions.missingAssetIds()).toEqual([]);
+    expect(services.store.get().assets.map((a) => a.id)).toEqual(['n1', 'a2']);
+    await actions.save();
+    expect([...(await fs.readBinary('/work/proj/assets/n1.png'))]).toEqual([...replacement.png]);
+    services.store.undo();
+    expect(actions.missingAssetIds()).toEqual(['a1']);
+  });
+
+  it('project.json.tmp から開いたときは変更ありにし、保存で project.json に戻す', async () => {
+    const { actions, fs, dialogs } = await savedWithMissing();
+    await fs.rename('/work/proj/project.json', '/work/proj/project.json.tmp');
+    await actions.open('/work/proj');
+    expect(actions.isDirty()).toBe(true);
+    expect(dialogs.notify).toHaveBeenCalledWith(expect.stringContaining('project.json.tmp'));
+    await actions.save();
+    expect(await fs.exists('/work/proj/project.json')).toBe(true);
+  });
+});

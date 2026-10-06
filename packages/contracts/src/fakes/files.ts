@@ -1,6 +1,15 @@
 import { newId } from '@app/schema';
 import type { Asset, Project } from '@app/schema';
-import type { AutoSaver, FileSystem, ImportWarning, ImportedAsset, Importer, ProjectIO } from '../index';
+import {
+  emptyLoadReport,
+  type AutoSaver,
+  type FileSystem,
+  type ImportWarning,
+  type ImportedAsset,
+  type Importer,
+  type LoadedProject,
+  type ProjectIO,
+} from '../index';
 
 // ---- MemoryFileSystem ----
 
@@ -172,10 +181,10 @@ export class FakeProjectIO implements ProjectIO {
     this.saved.set(normalize(dir), structuredClone({ project, assetPngs }));
   }
 
-  async load(dir: string): Promise<{ project: Project; assetPngs: Record<string, Uint8Array> }> {
+  async load(dir: string): Promise<LoadedProject> {
     const entry = this.saved.get(normalize(dir));
     if (!entry) throw notFound(dir);
-    return structuredClone(entry);
+    return { ...structuredClone(entry), report: emptyLoadReport() };
   }
 }
 

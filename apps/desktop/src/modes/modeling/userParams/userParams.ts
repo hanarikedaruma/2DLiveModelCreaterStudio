@@ -131,6 +131,7 @@ export interface ParameterUsage {
   hotkeys: number;
   animationTracks: number;
   physicsInputs: number;
+  physicsOutputs: number; // 出力先がこのパラメータの物理（削除で物理ごと消える。カード58・I-027）
 }
 
 export function parameterUsage(project: Project, id: string): ParameterUsage {
@@ -142,6 +143,7 @@ export function parameterUsage(project: Project, id: string): ParameterUsage {
     hotkeys: count(project.studio.hotkeys, (h) => h.action === 'parameter' && h.targetId === id),
     animationTracks: project.animations.reduce((n, a) => n + count(a.tracks, (t) => t.parameterId === id), 0),
     physicsInputs: project.physics.reduce((n, ph) => n + count(ph.inputs, (x) => x.parameterId === id), 0),
+    physicsOutputs: count(project.physics, (ph) => ph.outputParameterId === id),
   };
 }
 
@@ -152,6 +154,7 @@ const USAGE_WORDS: [keyof ParameterUsage, string][] = [
   ['hotkeys', 'ホットキー'],
   ['animationTracks', 'アニメーションのトラック'],
   ['physicsInputs', '物理の入力'],
+  ['physicsOutputs', '物理（出力先）'],
 ];
 
 // 削除の確認の文
@@ -162,7 +165,8 @@ export function deleteMessage(parameter: Parameter, usage: ParameterUsage): stri
 }
 
 // ユーザー定義パラメータと、それを使うバインディング・トラッキングのマッピング・表情の項目・ホットキー・
-// アニメーションのトラック・物理の入力・母音の値を消す。標準パラメータは消さない
+// アニメーションのトラック・物理の入力・母音の値と、出力先がこのパラメータの物理（とそれを指すパーツの physicsId）を消す。
+// 標準パラメータは消さない
 export function removeParameterCommand(id: string): Command {
   return {
     label: 'パラメータの削除',
@@ -170,11 +174,16 @@ export function removeParameterCommand(id: string): Command {
       const { model } = project;
       if (!model.parameters.some((p) => p.id === id && !p.standard)) return project;
       const keep = <T extends { parameterId: string }>(list: T[]) => list.filter((x) => x.parameterId !== id);
+      // 出力先が無くなる物理は物理ごと消す（I-027）
+      const removedPhysics = new Set(project.physics.filter((ph) => ph.outputParameterId === id).map((ph) => ph.id));
       return {
         ...project,
         model: {
           ...model,
           parameters: model.parameters.filter((p) => p.id !== id),
+          parts: model.parts.map((part) =>
+            part.physicsId !== null && removedPhysics.has(part.physicsId) ? { ...part, physicsId: null } : part,
+          ),
           bindings: model.bindings.filter((b) => !b.parameterIds.includes(id)),
           lipSync: {
             ...model.lipSync,
@@ -193,9 +202,9 @@ export function removeParameterCommand(id: string): Command {
         animations: project.animations.map((a) =>
           a.tracks.some((t) => t.parameterId === id) ? { ...a, tracks: keep(a.tracks) } : a,
         ),
-        physics: project.physics.map((ph) =>
-          ph.inputs.some((x) => x.parameterId === id) ? { ...ph, inputs: keep(ph.inputs) } : ph,
-        ),
+        physics: project.physics
+          .filter((ph) => !removedPhysics.has(ph.id))
+          .map((ph) => (ph.inputs.some((x) => x.parameterId === id) ? { ...ph, inputs: keep(ph.inputs) } : ph)),
         studio: {
           ...project.studio,
           hotkeys: project.studio.hotkeys.filter((h) => !(h.action === 'parameter' && h.targetId === id)),

@@ -1,5 +1,6 @@
 // Tauri の fs プラグインの上の FileSystem（カード23）。パスは / 区切りの絶対パス
 import type { FileSystem } from '@app/contracts';
+import { renameWithRetry } from './rename';
 
 export class TauriFileSystem implements FileSystem {
   private fs = import('@tauri-apps/plugin-fs');
@@ -33,15 +34,10 @@ export class TauriFileSystem implements FileSystem {
   async remove(path: string) {
     await (await this.fs).remove(path, { recursive: true });
   }
-  // 移動先にファイルがあれば置き換える（Windows の MoveFileEx と同じ。念のため先に消す）
+  // 移動先にファイルがあれば置き換える（std::fs::rename。Windows では MoveFileEx の置き換えと同じ1回の操作）。
+  // 失敗しても移動先は消さず、少し待って試し直す（カード58・I-057）
   async rename(from: string, to: string) {
     const fs = await this.fs;
-    try {
-      await fs.rename(from, to);
-    } catch (e) {
-      if (!(await fs.exists(to))) throw e;
-      await fs.remove(to);
-      await fs.rename(from, to);
-    }
+    await renameWithRetry((a, b) => fs.rename(a, b), from, to);
   }
 }

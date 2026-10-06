@@ -21,6 +21,20 @@
 
 ## 記録
 
+### CC-009 開いたときに分かったことを返す（欠けた素材・保存の途中の .tmp・切れた参照）
+
+- 決めた日 / ステップ: 2026-10-07 / STEP3 のカード58（I-056・I-057・I-027）。
+- 対象の契約: `@app/contracts` の `ProjectIO`（カード03・14）。
+- 変更前: `save(dir, project, assetPngs): Promise<void>`、`load(dir): Promise<{ project; assetPngs }>`。素材の PNG が1つでも無いと load は MissingAssetFilesError で止まった。
+- 変更後:
+  - `load(dir): Promise<LoadedProject>`。`LoadedProject = { project; assetPngs; report: LoadReport }`。
+  - `LoadReport = { missingAssetIds: string[]; changedAssetIds: string[]; repairs: string[]; openedFromTmp: boolean }`。欠けた素材は同じ大きさの透明な PNG の代わりで返す。記録のハッシュと違う素材は changedAssetIds（読み込みは続ける）。開くときに直したこと（出力先の無い物理を外した、.tmp から読んだ）は repairs。project.json が無く project.json.tmp があれば、そこから開いて openedFromTmp を true にする。
+  - `save(dir, project, assetPngs, options?: SaveOptions)`。`SaveOptions = { skipAssetIds?: string[] }` の素材は書かない（欠けたまま）。
+  - `emptyLoadReport()` を足した。MissingAssetFilesError はやめた。
+- 理由: 素材が1つ欠けるとプロジェクト全体が開けなかった（I-056）。保存の置き換えの途中で止まった跡から開けるようにする（I-057）。前の版で残った、出力先の無い物理を開くときに直す（I-027）。
+- 影響するカード: 保存・読み込み14、モデリングの結合23、STEP3 のカード58。
+- 移行: contracts（型・`FakeProjectIO`）、io（projectIO.ts・repair.ts）、desktop（project/actions.ts・MissingAssetsSection.tsx）。保存形式の版は変えない。
+
 ### CC-008 3つ以上のパラメータの組み合わせのキーと、プレビュー中の編集の止め方
 
 - 決めた日 / ステップ: 2026-10-05 / 承認済み方針（I-028「キー編集と複数パラメータのプレビューを分離する。3軸以上の専用キーに対応し、2軸断面を指定して編集する」）。実装・自動確認は2026-10-06（別のセッション）。

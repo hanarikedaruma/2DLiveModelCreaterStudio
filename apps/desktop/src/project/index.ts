@@ -2,7 +2,8 @@
 import type { Services } from '@app/contracts';
 import { setProjectDirResolver, writePendingBackgrounds } from '../modes/studio';
 import { appDataDirPath, isTauri, pickFolderWithDialog } from '../platform/tauri';
-import { onAppEvent, registerMenuItem } from '../shell/api';
+import { onAppEvent, registerMenuItem, registerPanelSection } from '../shell/api';
+import { MISSING_ASSETS_SECTION_ID, MissingAssetsSection, setMissingAssetsActions } from './MissingAssetsSection';
 import type { Dialogs } from '../shell/dialogs';
 import type { EnvironmentStore } from '../shell/environment';
 import { createProjectActions, PROJECT_LOADED, type ProjectActions, type ProjectPlatform } from './actions';
@@ -43,6 +44,14 @@ export function registerProject(services: Services, environment: EnvironmentStor
     label: '名前を付けて保存…',
     shortcut: 'Ctrl+Shift+S',
     run: run(() => actions.saveAs()),
+  });
+  // カード58: 開いたときに欠けていた素材の一覧と差し替え（素材トレイ）
+  setMissingAssetsActions(actions);
+  registerPanelSection({
+    id: MISSING_ASSETS_SECTION_ID,
+    panelId: 'assets.tray',
+    order: 5,
+    component: MissingAssetsSection,
   });
   return actions;
 }

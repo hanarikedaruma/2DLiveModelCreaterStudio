@@ -135,7 +135,7 @@ pnpm はリポジトリの中の Corepack で動かす。PowerShell で、毎回
 | 55   | [作業の確定と進め方の準備](cards/55_setup.md)                         | 0   | CL   | —             |      |      | CO     | コミット済み・テスト確認待ち |
 | 56   | [I-039 の区切り](cards/56_i039-cut.md)                                | 1   | CL   | 55            |      | ○    | CO     | 未着手                       |
 | 57   | [PSD の取り込みを Worker へ・素材のメモリ](cards/57_import-worker.md) | 1   | CO   | 55            |      |      | CL     | 未着手                       |
-| 58   | [データ保全](cards/58_data-safety.md)                                 | 1   | CL   | 55            | ○    |      | CO     | 未着手                       |
+| 58   | [データ保全](cards/58_data-safety.md)                                 | 1   | CL   | 55            | ○    |      | CO     | コミット済み・テスト確認待ち |
 | 59   | [回転中心と表示の印](cards/59_pivot-marks.md)                         | 1   | CO   | 55            |      |      | CL     | 未着手                       |
 | 60   | [ワープの導線と範囲](cards/60_warp-guide.md)                          | 1   | CO   | 55            |      |      | CL     | 未着手                       |
 | 61   | [小さいウィンドウと「軽い」の注意](cards/61_layout-density.md)        | 1   | CO   | 55            |      |      | CL     | 未着手                       |

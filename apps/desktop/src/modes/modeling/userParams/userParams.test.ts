@@ -8,7 +8,7 @@ import {
   type Project,
 } from '@app/schema';
 import { createProjectStore } from '@app/core';
-import { deepFreeze, delta } from '../../../services/keyEditor/testing';
+import { deepFreeze, delta, part } from '../../../services/keyEditor/testing';
 import {
   addParameterCommand,
   checkForm,
@@ -254,6 +254,7 @@ describe('削除', () => {
       hotkeys: 1,
       animationTracks: 1,
       physicsInputs: 1,
+      physicsOutputs: 0,
     });
     expect(deleteMessage(tail, usage)).toBe(
       'パラメータ「しっぽ」を削除しますか？使っている バインディング（キー） 2 個・トラッキングのマッピング 1 個・' +
@@ -298,8 +299,24 @@ describe('削除', () => {
       hotkeys: 0,
       animationTracks: 0,
       physicsInputs: 0,
+      physicsOutputs: 0,
     });
     expect(() => validateProject(next)).not.toThrow();
+  });
+
+  it('出力先がそのパラメータの物理は物理ごと消し、パーツの physicsId も外す。1回の Undo で戻る（カード58・I-027）', () => {
+    const base = project();
+    const tailPhysics = { ...physics('ph2', ['FaceAngleX']), outputParameterId: 'tail' };
+    const parts = [part('p1', { physicsId: 'ph2' })];
+    const initial = { ...base, physics: [...base.physics, tailPhysics], model: { ...base.model, parts } };
+    expect(parameterUsage(initial, 'tail').physicsOutputs).toBe(1);
+    expect(deleteMessage(tail, parameterUsage(initial, 'tail'))).toContain('物理（出力先） 1 個');
+    const store = createProjectStore(initial);
+    store.dispatch(removeParameterCommand('tail'));
+    expect(store.get().physics.map((ph) => ph.id)).toEqual(['ph1']);
+    expect(store.get().model.parts[0]!.physicsId).toBeNull();
+    store.undo();
+    expect(store.get()).toBe(initial);
   });
 
   it('1回の Undo で全部戻る。標準パラメータは消さない', () => {

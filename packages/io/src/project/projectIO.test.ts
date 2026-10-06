@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { MemoryFileSystem, sha256Hex } from '@app/contracts';
 import { ProjectValidationError, ProjectVersionError, createEmptyProject } from '@app/schema';
-import { createProjectIO, type MissingAssetFilesError } from './projectIO';
+import { createProjectIO } from './projectIO';
+import { decodePng } from '../import/png';
 import { projectToJson } from './files';
 import { RecordingFileSystem, projectWithAssets } from './testing';
 
@@ -184,21 +185,6 @@ describe('古い版の読み込み', () => {
 });
 
 describe('読み込みのエラー', () => {
-  it('素材のファイルが無ければ、その id を並べたエラーにする', async () => {
-    const fs = new MemoryFileSystem();
-    const io = createProjectIO(fs);
-    const { project, pngs } = await projectWithAssets(3);
-    await io.save(DIR, project, pngs);
-    const [a, , c] = project.assets;
-    await fs.remove(`${DIR}/${a!.path}`);
-    await fs.remove(`${DIR}/${c!.path}`);
-    const error = (await io.load(DIR).catch((e: unknown) => e)) as MissingAssetFilesError;
-    expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe('MissingAssetFilesError');
-    expect(error.message).toBe(`素材のファイルが無い: ${a!.id}, ${c!.id}`);
-    expect(error.assetIds).toEqual([a!.id, c!.id]);
-  });
-
   it('project.json が無ければエラーにする', async () => {
     await expect(createProjectIO(new MemoryFileSystem()).load(DIR)).rejects.toThrow('project.json が無い');
   });
@@ -245,5 +231,105 @@ describe('loadAutosave', () => {
 
   it('backups/ の外のパスはエラーにする', async () => {
     await expect(createProjectIO(new MemoryFileSystem()).loadAutosave('/a/b.json')).rejects.toThrow('backups/');
+  });
+});
+
+describe('欠けた素材・保存の途中の .tmp・切れた参照（STEP3 のカード58）', () => {
+  it('素材のファイルが無くても開き、欠けた素材を報告して、同じ大きさの透明な画像の代わりにする（I-056）', async () => {
+    const fs = new MemoryFileSystem();
+    const io = createProjectIO(fs);
+    const { project, pngs } = await projectWithAssets(3);
+    await io.save(DIR, project, pngs);
+    const [a, b, c] = project.assets;
+    await fs.remove(`${DIR}/${a!.path}`);
+    await fs.remove(`${DIR}/${c!.path}`);
+    const loaded = await io.load(DIR);
+    expect(loaded.report.missingAssetIds).toEqual([a!.id, c!.id]);
+    expect(loaded.project).toEqual(project);
+    expect(loaded.assetPngs[b!.id]).toEqual(pngs[b!.id]);
+    const placeholder = decodePng(loaded.assetPngs[a!.id]!);
+    expect([placeholder.width, placeholder.height]).toEqual([a!.width, a!.height]);
+    expect(placeholder.data.every((v) => v === 0)).toBe(true);
+  });
+
+  it('欠けたままの素材は、保存で書かない（次に開いても欠けたまま）', async () => {
+    const fs = new MemoryFileSystem();
+    const io = createProjectIO(fs);
+    const { project, pngs } = await projectWithAssets(2);
+    await io.save(DIR, project, pngs);
+    const [a] = project.assets;
+    await fs.remove(`${DIR}/${a!.path}`);
+    const loaded = await io.load(DIR);
+    await io.save(DIR, loaded.project, loaded.assetPngs, { skipAssetIds: loaded.report.missingAssetIds });
+    expect(await fs.exists(`${DIR}/${a!.path}`)).toBe(false);
+    expect((await io.load(DIR)).report.missingAssetIds).toEqual([a!.id]);
+  });
+
+  it('記録のハッシュと違う素材を報告し、読み込みは続ける', async () => {
+    const fs = new MemoryFileSystem();
+    const io = createProjectIO(fs);
+    const { project, pngs } = await projectWithAssets(2);
+    await io.save(DIR, project, pngs);
+    const [, b] = project.assets;
+    const edited = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9, 9, 9]);
+    await fs.writeBinary(`${DIR}/${b!.path}`, edited);
+    const loaded = await io.load(DIR);
+    expect(loaded.report.changedAssetIds).toEqual([b!.id]);
+    expect(loaded.assetPngs[b!.id]).toEqual(edited);
+  });
+
+  it('project.json が無く project.json.tmp だけがあれば、そこから開いて報告する（I-057）', async () => {
+    const fs = new MemoryFileSystem();
+    const io = createProjectIO(fs);
+    const { project, pngs } = await projectWithAssets(1);
+    await io.save(DIR, project, pngs);
+    await fs.rename(`${DIR}/project.json`, `${DIR}/project.json.tmp`);
+    const loaded = await io.load(DIR);
+    expect(loaded.project).toEqual(project);
+    expect(loaded.report.openedFromTmp).toBe(true);
+    expect(loaded.report.repairs.join('')).toContain('project.json.tmp');
+    // 保存すると project.json に戻る
+    await io.save(DIR, loaded.project, loaded.assetPngs);
+    expect(await fs.exists(`${DIR}/project.json`)).toBe(true);
+  });
+
+  it('素材のファイルが無く .tmp があれば、それを読んで報告する', async () => {
+    const fs = new MemoryFileSystem();
+    const io = createProjectIO(fs);
+    const { project, pngs } = await projectWithAssets(1);
+    await io.save(DIR, project, pngs);
+    const [a] = project.assets;
+    await fs.rename(`${DIR}/${a!.path}`, `${DIR}/${a!.path}.tmp`);
+    const loaded = await io.load(DIR);
+    expect(loaded.report.missingAssetIds).toEqual([]);
+    expect(loaded.assetPngs[a!.id]).toEqual(pngs[a!.id]);
+    expect(loaded.report.repairs.join('')).toContain(a!.path);
+  });
+
+  it('出力先のパラメータが無い物理を、開くときに外して報告する（I-027）', async () => {
+    const fs = new MemoryFileSystem();
+    const io = createProjectIO(fs);
+    const base = createEmptyProject('物理');
+    const part = { ...base, model: base.model };
+    const physics = {
+      id: 'ph1',
+      partId: 'p1',
+      preset: 'hair' as const,
+      strength: 0.5,
+      direction: 'horizontal' as const,
+      length: 100,
+      spring: 0.5,
+      damping: 0.5,
+      gravity: 0,
+      inertia: 0.5,
+      range: 30,
+      inputs: [],
+      outputParameterId: 'NoSuchParam',
+    };
+    await fs.mkdir(DIR);
+    await fs.writeText(`${DIR}/project.json`, projectToJson({ ...part, physics: [physics] }));
+    const loaded = await io.load(DIR);
+    expect(loaded.project.physics).toEqual([]);
+    expect(loaded.report.repairs.join('')).toContain('出力先のパラメータが無い物理 1 個');
   });
 });
