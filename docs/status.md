@@ -800,3 +800,14 @@
 - 本物のアプリでの通しのテスト apps/desktop/e2e/step2.e2e.ts を足した（呼吸・物理・アニメーションが、スタジオで実際に描いたフレームに出る）。そのために、開発中と通しのテストのときだけ `window.__studio.studio.runtime` を出す。
 - e2e/step1.e2e.ts のグローバルホットキーのテストは、PC がロックされているとき（前面がロック画面・サインイン画面・ウィンドウ無し）はキーの入力が届くことの確認を飛ばす。STEP1 のテストも起動時のプロジェクトの自動保存を止めて、unsaved/ を後片付けする。
 - ワンクリックで起動: `pnpm app:install`（tools/app/install.ps1）で本番用にビルドして `%LOCALAPPDATA%\Programs\2D Live Model Creator Studio` に置き、デスクトップとスタートメニューにショートカットを作る。ショートカットから起動し、画面（モードのボタン・パネル）が読み込まれることを確かめた。`pnpm app:uninstall` で消せる。
+
+## STEP3（カード55〜72）
+
+計画は [docs/step3/README.md](step3/README.md)（改善だけ。機能の追加は [STEP4](step4/README.md)）。担当は CL と CO で、テストは相手が書く。カードごとの記録は各カードのファイルの「記録」に書く。
+
+### 55. 作業の確定と進め方の準備 — コミット済み・テスト確認待ち（CO）
+
+- 出発点: main（`80355ba`、I-039 の試作まで）。作業中だった I-054 の修正・ユースケーステストの更新と結果・操作性の確認・STEP3/STEP4 の文書をコミットした。ブランチは main にそろえた（`feat/i039-head-rotation` は同じコミット）。
+- 既存の確認（2026-10-07、この PC）: `pnpm format:check`・`pnpm lint`・`pnpm typecheck` が通った。`pnpm test` は 223 ファイル・2,105 件がすべて通った。`cargo test`（apps/desktop/src-tauri）は 23 件が通り、1 件は ignore（GPU の性能のテスト）。`pnpm e2e` は 10 件がすべて通った（トラッキング2・STEP1 4・復元・STEP2・モデリング・計測の表示）。
+- `.cache/locks/` を作った（git には入れない）。e2e の間はロックを取った。
+- 気づいたこと: pnpm は PATH の設定（docs/dev-guide.md）をしないと Bash・PowerShell のどちらからも見えない。STEP3 の README に書いた。
