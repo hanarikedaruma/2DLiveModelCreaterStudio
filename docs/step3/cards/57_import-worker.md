@@ -33,6 +33,7 @@
 - `apps/desktop/src/modes/modeling/assets/`（`reload/` を除く。進み具合の表示）
 - `apps/desktop/vite.config.ts`（Worker と chunk の設定）
 - `apps/desktop/e2e/stress.measure.ts`
+- `apps/desktop/src/shell/canvas/CanvasHost.tsx` の素材画像をレンダラーへ渡す部分と、その回帰テスト（2026-10-07 の計測に基づく範囲の補足。未割り当ての画像を一括でGPUへ上げる停止を除く）
 
 ## 触らないもの
 
@@ -74,3 +75,5 @@
 - stress.measure.ts に Long Tasks API の最長処理と16ms のタイマーの最大間隔を追加した。未対応の API は null として、0ms の成功を報告しない。
 - 未確認: 本物の Worker（Tauri/WebView2）の e2e、1440×1000・800×600 の画面、stress の時間・最長停止・割り当て後のメモリ、CL の全受け入れテストと全体の最終検査。数値未取得なので I-003・I-004 はまだ対応済みにしていない。
 - 2026-10-07 CO: 全体の単体テストは成功（カード65の既知の不一致1件は修正待ちで skip）。型検査と Tauri ビルドは CL の作成中の mirrorCopy.c64.test.ts の Binding の型が原因で停止。自分の進捗UIテストの型は修正済み。format:check は CL の importer.c57.test.ts の整形待ち。実アプリ e2e・stress は、このビルドが通ってから行う。
+- 2026-10-07 CO: Edge の開発画面で100枚を取り込み、解析後の確定時に1023msの Long Task が残ることを確認した。CPU の記録では、未割り当ての画像のGPUテクスチャの作成と、100枚のサムネイルの Blob・URL の準備が主な処理だった。README とこのカードの範囲を補足して、CanvasHost は割り当て中の画像だけをレンダラーへ渡すようにし、サムネイルの Blob・URL は画像ごとに別のタスクで準備する。消えたサムネイルの予定とURLは解放する。
+- この停止対策の回帰テスト3件は変更前にすべて失敗し、変更後に成功。割り当て・画像の差し替え・Undo/Redo・別プロジェクトへの切り替え、サムネイルの準備と取消を確認した。既存の素材画面9件・Shell27件と合わせた39件も通った。再計測と実アプリでの検証は続ける。

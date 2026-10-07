@@ -39,6 +39,8 @@ describe('ストレステスト', () => {
       const { services, modeling } = window.__studio;
       const t0 = performance.now();
       const data = await services.fs.readBinary(path);
+      // 読み込みの完了のタスクを終える。IPC の復号など、取り込み前の処理を Long Task に混ぜない。
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       const t1 = performance.now();
       const longTasks: PerformanceEntry[] = [];
       const supported = PerformanceObserver.supportedEntryTypes.includes('longtask');

@@ -31,9 +31,17 @@ function usePngUrl(png: Uint8Array | undefined): string | null {
       setUrl(null);
       return;
     }
-    const made = pngToUrl(png);
-    setUrl(made.url);
-    return made.revoke;
+    // 多くの素材を同時に表示したときも、Blob のコピーを1回の描画タスクへ集めない。
+    setUrl(null);
+    let made: ReturnType<typeof pngToUrl> | undefined;
+    const timer = setTimeout(() => {
+      made = pngToUrl(png);
+      setUrl(made.url);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      made?.revoke();
+    };
   }, [png]);
   return url;
 }

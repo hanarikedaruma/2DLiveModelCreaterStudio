@@ -128,11 +128,12 @@ export function CanvasHost() {
     };
   }, [services, requestDraw]);
 
-  // 素材の画像をレンダラーに渡す
+  // 割り当てている素材だけを渡す。取り込み直後の未使用の画像を一度にGPUへ上げない。
   useEffect(() => {
     const update = () => {
       const images: Record<string, ImageBitmap> = {};
-      for (const id of Object.keys(services.assets.all())) {
+      const ids = new Set(project.model.parts.flatMap((part) => (part.assetId ? [part.assetId] : [])));
+      for (const id of ids) {
         const image = services.assets.getImage(id);
         if (image) images[id] = image;
       }
@@ -141,7 +142,7 @@ export function CanvasHost() {
     };
     update();
     return services.assets.subscribe(update);
-  }, [services, requestDraw]);
+  }, [services, requestDraw, project.model.parts]);
 
   // [全体を表示]
   const fit = useCallback(() => {
