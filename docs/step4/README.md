@@ -74,35 +74,35 @@ STEP3 の README の「共有のファイル」に加えて:
 
 ## カードの一覧
 
-| 番号 | カード                                                                       | 段   | 担当 | 依存                 | 契約 | 実機 | テスト           | 状態   |
-| ---- | ---------------------------------------------------------------------------- | ---- | ---- | -------------------- | ---- | ---- | ---------------- | ------ |
-| 73   | [STEP4 の範囲の確定](cards/73_scope.md)                                      | 0    | CL   | 72                   |      |      | CO               | 未着手 |
-| 74   | [複雑な基準モデル](cards/74_complex-model.md)                                | 0    | CO   | 72                   |      |      | CL               | 未着手 |
-| 75   | [実カメラの記録と実測](cards/75_camera-measurement.md)                       | 1    | CL   | 73                   |      | ○    | CO               | 未着手 |
-| 76   | [関節の曲げの試作と比較](cards/76_joint-prototype.md)                        | 1    | CO   | 74                   |      |      | CL               | 未着手 |
-| 77   | [技術の確かめ（条件付き）](cards/77_tech-spikes.md)                          | 1    | CO   | 73                   |      | ○    | CL               | 未着手 |
-| 78   | [キーのクリップボードと左右の対応表の契約](cards/78_mirror-keys-contract.md) | 2    | CL   | 73                   | ○    |      | CO               | 未着手 |
-| 79   | [動きと入力の契約](cards/79_motion-input-contract.md)                        | 2    | CL   | 75・78（77 の腕）    | ○    |      | CO               | 未着手 |
-| 80   | [頭の回転の補助素材の契約](cards/80_head-aux-contract.md)                    | 2    | CL   | 79                   | ○    |      | CO               | 未着手 |
-| 81   | [保存・出力・入力の契約（条件付き）](cards/81_io-output-contract.md)         | 2    | CL   | 80・77（行う分）     | ○    |      | CO               | 未着手 |
-| 82   | [関節の契約](cards/82_joint-contract.md)                                     | 2    | CO   | 76・81（または 80）  | ○    |      | CL               | 未着手 |
-| 83   | [キーのコピー・貼り付け](cards/83_key-clipboard.md)                          | 3    | CL   | 78                   |      |      | CO               | 未着手 |
-| 84   | [左右へ反映](cards/84_mirror-apply.md)                                       | 3    | CL   | 78・83               |      |      | CO               | 未着手 |
-| 85   | [タイムラインの複数選択とコピー](cards/85_timeline-multi.md)                 | 3    | CO   | 73                   |      |      | CL               | 未着手 |
-| 86   | [顔が外れたときの振る舞い](cards/86_lost-behavior.md)                        | 3    | CL   | 79                   |      |      | CO               | 未着手 |
-| 87   | [自動の視線と待機の動き](cards/87_auto-motion.md)                            | 3    | CL   | 79・75・86           |      |      | CO               | 未着手 |
-| 88   | [表情の入力の拡張と舌](cards/88_expression-inputs.md)                        | 3    | CL   | 79・75               |      | ○    | CO               | 未着手 |
-| 89   | [関節の曲げ](cards/89_joint.md)                                              | 3    | CO   | 82・74               |      |      | CL               | 未着手 |
-| 90   | [頭の回転の補助素材と耳の前後](cards/90_head-aux.md)                         | 3    | CO   | 80                   |      | ○    | CL               | 未着手 |
-| 91   | [共有のファイル（条件付き）](cards/91_share-package.md)                      | 3    | CO   | 81                   |      |      | CL               | 未着手 |
-| 92   | [曲線エディタ（条件付き）](cards/92_curve-editor.md)                         | 3    | CO   | 81・85               |      |      | CL               | 未着手 |
-| 93   | [MIDI の入力（条件付き）](cards/93_midi.md)                                  | 3    | CO   | 81・77               |      | ○    | CL               | 未着手 |
-| 94   | [仮想カメラ（条件付き）](cards/94_virtual-camera.md)                         | 3    | CO   | 81・77               |      | ○    | CL               | 未着手 |
-| 95   | [腕のトラッキング（条件付き）](cards/95_arm-tracking.md)                     | 3    | CL   | 79・77・88           |      | ○    | CO               | 未着手 |
-| 96   | [PSD のクリッピングの細部（条件付き）](cards/96_psd-clipping.md)             | 3    | CL   | 73                   |      |      | CO               | 未着手 |
-| 98   | [胸揺れ](cards/98_chest-sway.md)                                             | 3    | CO   | 79・74               |      | ○    | CL               | 未着手 |
-| 97   | [STEP4 の結合と受け入れ](cards/97_step4-acceptance.md)                       | 4    | CL   | 83〜96・98（行う分） |      | ○    | クロス           | 未着手 |
-| 99   | [流れ線の編集と髪の重力追従](cards/99_curve-guide.md)                        | 先行 | CO   | ユーザーの指示       | ○    | ○    | CO（CL引き継ぎ） | 着手   |
+| 番号 | カード                                                                       | 段   | 担当 | 依存                 | 契約 | 実機 | テスト           | 状態                       |
+| ---- | ---------------------------------------------------------------------------- | ---- | ---- | -------------------- | ---- | ---- | ---------------- | -------------------------- |
+| 73   | [STEP4 の範囲の確定](cards/73_scope.md)                                      | 0    | CL   | 72                   |      |      | CO               | 未着手                     |
+| 74   | [複雑な基準モデル](cards/74_complex-model.md)                                | 0    | CO   | 72                   |      |      | CL               | 未着手                     |
+| 75   | [実カメラの記録と実測](cards/75_camera-measurement.md)                       | 1    | CL   | 73                   |      | ○    | CO               | 未着手                     |
+| 76   | [関節の曲げの試作と比較](cards/76_joint-prototype.md)                        | 1    | CO   | 74                   |      |      | CL               | 未着手                     |
+| 77   | [技術の確かめ（条件付き）](cards/77_tech-spikes.md)                          | 1    | CO   | 73                   |      | ○    | CL               | 未着手                     |
+| 78   | [キーのクリップボードと左右の対応表の契約](cards/78_mirror-keys-contract.md) | 2    | CL   | 73                   | ○    |      | CO               | 未着手                     |
+| 79   | [動きと入力の契約](cards/79_motion-input-contract.md)                        | 2    | CL   | 75・78（77 の腕）    | ○    |      | CO               | 未着手                     |
+| 80   | [頭の回転の補助素材の契約](cards/80_head-aux-contract.md)                    | 2    | CL   | 79                   | ○    |      | CO               | 未着手                     |
+| 81   | [保存・出力・入力の契約（条件付き）](cards/81_io-output-contract.md)         | 2    | CL   | 80・77（行う分）     | ○    |      | CO               | 未着手                     |
+| 82   | [関節の契約](cards/82_joint-contract.md)                                     | 2    | CO   | 76・81（または 80）  | ○    |      | CL               | 未着手                     |
+| 83   | [キーのコピー・貼り付け](cards/83_key-clipboard.md)                          | 3    | CL   | 78                   |      |      | CO               | 未着手                     |
+| 84   | [左右へ反映](cards/84_mirror-apply.md)                                       | 3    | CL   | 78・83               |      |      | CO               | 未着手                     |
+| 85   | [タイムラインの複数選択とコピー](cards/85_timeline-multi.md)                 | 3    | CO   | 73                   |      |      | CL               | 未着手                     |
+| 86   | [顔が外れたときの振る舞い](cards/86_lost-behavior.md)                        | 3    | CL   | 79                   |      |      | CO               | 未着手                     |
+| 87   | [自動の視線と待機の動き](cards/87_auto-motion.md)                            | 3    | CL   | 79・75・86           |      |      | CO               | 未着手                     |
+| 88   | [表情の入力の拡張と舌](cards/88_expression-inputs.md)                        | 3    | CL   | 79・75               |      | ○    | CO               | 未着手                     |
+| 89   | [関節の曲げ](cards/89_joint.md)                                              | 3    | CO   | 82・74               |      |      | CL               | 未着手                     |
+| 90   | [頭の回転の補助素材と耳の前後](cards/90_head-aux.md)                         | 3    | CO   | 80                   |      | ○    | CL               | 未着手                     |
+| 91   | [共有のファイル（条件付き）](cards/91_share-package.md)                      | 3    | CO   | 81                   |      |      | CL               | 未着手                     |
+| 92   | [曲線エディタ（条件付き）](cards/92_curve-editor.md)                         | 3    | CO   | 81・85               |      |      | CL               | 未着手                     |
+| 93   | [MIDI の入力（条件付き）](cards/93_midi.md)                                  | 3    | CO   | 81・77               |      | ○    | CL               | 未着手                     |
+| 94   | [仮想カメラ（条件付き）](cards/94_virtual-camera.md)                         | 3    | CO   | 81・77               |      | ○    | CL               | 未着手                     |
+| 95   | [腕のトラッキング（条件付き）](cards/95_arm-tracking.md)                     | 3    | CL   | 79・77・88           |      | ○    | CO               | 未着手                     |
+| 96   | [PSD のクリッピングの細部（条件付き）](cards/96_psd-clipping.md)             | 3    | CL   | 73                   |      |      | CO               | 未着手                     |
+| 98   | [胸揺れ](cards/98_chest-sway.md)                                             | 3    | CO   | 79・74               |      | ○    | CL               | 未着手                     |
+| 97   | [STEP4 の結合と受け入れ](cards/97_step4-acceptance.md)                       | 4    | CL   | 83〜96・98（行う分） |      | ○    | クロス           | 未着手                     |
+| 99   | [流れ線の編集と髪の重力追従](cards/99_curve-guide.md)                        | 先行 | CO   | ユーザーの指示       | ○    | ○    | CO（CL引き継ぎ） | コミット済み・個別確認待ち |
 
 ## 進める順の目安
 

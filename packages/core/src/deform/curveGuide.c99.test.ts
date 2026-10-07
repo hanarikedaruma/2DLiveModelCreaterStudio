@@ -82,7 +82,10 @@ describe('カード99: 流れ線と重力の変形', () => {
         .reduce((sum, p, i) => sum + Math.hypot(p.x - g.curve[i]!.x, p.y - g.curve[i]!.y), 0);
       expect(length).toBeCloseTo(200, 3);
       const v = out.byPartId.hair!.positions;
-      expect(Math.hypot(v[4]! - v[0]!, v[5]! - v[1]!)).toBeCloseTo(20, 3);
+      for (let row = 0; row <= 20; row++) {
+        const a = row * 6;
+        expect(Math.hypot(v[a + 4]! - v[a]!, v[a + 5]! - v[a + 1]!)).toBeCloseTo(20, 3);
+      }
     }
   });
 

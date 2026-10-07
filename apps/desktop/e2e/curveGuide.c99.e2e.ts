@@ -5,10 +5,12 @@ import { chromium, type Browser, type Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Vec2 } from '@app/schema';
 import { hairProject } from '../src/modes/modeling/curveGuide/testing';
-import { launchApp, waitForStartup, ROOT, slash, type RunningApp, type StudioHook } from './app';
+import { enablePhysicsCommand } from '../src/modes/modeling/physics/commands';
+import { answerDialog, launchApp, waitForStartup, ROOT, slash, type RunningApp, type StudioHook } from './app';
 
 const EDGE = process.env.C99_BROWSER === 'edge';
 const EVIDENCE = join(ROOT, '.cache', 'verification', 'card99-2026-10-08', EDGE ? 'edge' : 'native');
+const SAVE_RUN = join(EVIDENCE, `save-${Date.now()}`);
 let app: RunningApp | null = null;
 let browser: Browser | null = null;
 let page: Page;
@@ -124,7 +126,20 @@ describe('カード99: 一本の流れ線で髪を曲げる', () => {
       expect((await handles())[1]!.x).toBeCloseTo(325, 1);
       // 直毛へ戻して、重力の連続する補正を確認する。
       await page.keyboard.press('Control+z');
-      await panel.getByLabel('重力に沿わせる', { exact: true }).check();
+      const withPhysics = enablePhysicsCommand('hair', {
+        physics: 'c99-ph',
+        transform: 'c99-t',
+        vertices: 'c99-v',
+      }).apply(created);
+      await page.evaluate((project) => window.__studio.services.store.load(project), withPhysics);
+      const gravity = panel.getByLabel('重力に沿わせる', { exact: true });
+      await gravity.click();
+      expect(await answerDialog(page, 'キャンセル')).toContain('既存の揺れを解除');
+      expect(await page.evaluate(() => window.__studio.services.store.get())).toEqual(withPhysics);
+      await gravity.click();
+      expect(await answerDialog(page, 'OK')).toContain('既存の揺れを解除');
+      await page.waitForFunction(() => window.__studio.services.store.get().model.curveGuides?.[0]?.gravity === true);
+      expect(await page.evaluate(() => window.__studio.services.store.get().physics.length)).toBe(0);
       await page.evaluate(() =>
         window.__studio.services.editor.set({
           activeParameterIds: ['FaceAngleZ'],
@@ -160,7 +175,7 @@ describe('カード99: 一本の流れ線で髪を曲げる', () => {
       await page.keyboard.press('Control+z');
       expect(await page.evaluate(() => window.__studio.services.store.get())).toEqual(beforeBake);
       if (!EDGE) {
-        const dir = slash(join(EVIDENCE, `project-${size.width}`));
+        const dir = slash(join(SAVE_RUN, `project-${size.width}`));
         await page.evaluate((d) => window.__studio.project.saveAs(d), dir);
         await page.evaluate((d) => window.__studio.project.open(d), dir);
         await page.evaluate(() => window.__studio.services.autoSaver.stop());
