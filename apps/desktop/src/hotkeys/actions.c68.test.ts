@@ -56,7 +56,7 @@ function permutations<T>(list: T[]): T[][] {
   return list.flatMap((x, i) => permutations([...list.slice(0, i), ...list.slice(i + 1)]).map((rest) => [x, ...rest]));
 }
 
-describe.skip('カード68: ホットキーのパラメータの上書きは hotkey の層（表情の後・アニメーションの前）', () => {
+describe('カード68: ホットキーのパラメータの上書きは hotkey の層（表情の後・アニメーションの前）', () => {
   it('ホットキーの producer の id は hotkey', () => {
     expect(createHotkeyActions().producer.id).toBe('hotkey');
   });
