@@ -1,0 +1,72 @@
+{
+  "psd": {
+    "path": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\fixtures\\stress\\stress-4000x6000-100.psd",
+    "layers": 100,
+    "canvas": "4000x6000"
+  },
+  "gpuRequest": null,
+  "readSeconds": 1.1987999999523162,
+  "importSeconds": 10.621,
+  "mainThread": {
+    "maxLongTaskMs": 57,
+    "maxHeartbeatGapMs": 72.39999997615814,
+    "longTaskCount": 1
+  },
+  "assignSeconds": 0.904,
+  "model": {
+    "parts": 100,
+    "vertices": 32338
+  },
+  "memoryMb": {
+    "before": 463.9,
+    "afterImport": 1175.7,
+    "afterAssign": 1734.2,
+    "afterStudio": 1405.2
+  },
+  "studio": {
+    "render": {
+      "avg": 164.8467030661352,
+      "low1": 130.12618264722516,
+      "frames": 3298
+    },
+    "trackingFps": 0,
+    "latency": {
+      "p95": null,
+      "avg": null,
+      "max": null,
+      "samples": 0
+    },
+    "vowelLatency": {
+      "p95": null,
+      "avg": null,
+      "max": null,
+      "samples": 0
+    }
+  },
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36 Edg/154.0.0.0",
+    "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4050 Laptop GPU (0x000028A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "hardwareConcurrency": 16,
+    "devicePixelRatio": 1,
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "window": {
+      "width": 1440,
+      "height": 900
+    },
+    "output": {
+      "width": 1920,
+      "height": 1080
+    },
+    "cameraCapture": null,
+    "model": {
+      "name": "新しいプロジェクト",
+      "parts": 100,
+      "meshes": 100,
+      "vertices": 32338,
+      "bindings": 0
+    }
+  }
+}
