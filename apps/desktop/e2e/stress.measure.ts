@@ -25,6 +25,8 @@ describe('ストレステスト', () => {
     if (!existsSync(PSD)) throw new Error(`PSD が無い: ${PSD}（pnpm --filter @app/fixtures generate:stress）`);
     app = await launchApp(9341, GPU_ARGS);
     const page = app.page;
+    // 前回の記録と同じ描画領域で比べる。利用者の最後のウィンドウサイズでメモリが変わらないようにする。
+    await page.setViewportSize({ width: 1920, height: 1009 });
     while ((await answerDialog(page, 'キャンセル', 2000)) !== null) {
       // 前の作業の残りは復元しない
     }
