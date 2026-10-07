@@ -1,6 +1,6 @@
 // パーツ構造・描画順・マスクのコマンド（純粋関数）。親子（parentId と兄弟の順）と描画順（drawOrder）は別々に変える
-import { modelCommand, patchPart } from '@app/core';
-import type { Binding, Mesh, Model, Part, Project } from '@app/schema';
+import { curveMeshSignature, modelCommand, patchPart } from '@app/core';
+import type { Binding, CurveGuide, Mesh, Model, Part, Project } from '@app/schema';
 import type { Command } from '@app/contracts';
 import { basePart, childrenOf, idSequence, isInside, partsCenter, removeParts, subtreeIds, topMost } from './modelOps';
 
@@ -168,6 +168,7 @@ export interface DuplicateVariant {
   mesh(original: Mesh, copy: Mesh): Mesh;
   binding(copy: Binding): Binding; // target は差し替え済み
   assetId(id: string | null): string | null;
+  guide?(copy: CurveGuide): CurveGuide;
 }
 
 // パーツ（グループなら子孫ごと）を複製する。複製は元のすぐ後ろの兄弟に入れ、描画順は元のいちばん前面のすぐ前に足す。
@@ -228,6 +229,25 @@ export function duplicateParts(
   }
 
   const originals = model.drawOrder.filter((id) => partIds.has(id));
+  const newGuides: CurveGuide[] = [];
+  for (const g of model.curveGuides ?? []) {
+    const partId = partIds.get(g.partId),
+      meshId = meshIds.get(g.meshId);
+    if (!partId || !meshId) continue;
+    const mesh = newMeshes.find((m) => m.id === meshId)!;
+    const originalMesh = meshes.get(g.meshId)!;
+    let copy: CurveGuide = {
+      ...g,
+      id: next(),
+      partId,
+      meshId,
+      reference: g.reference.map((p) => ({ ...p })) as CurveGuide['reference'],
+      points: g.points.map((p) => ({ ...p })) as CurveGuide['points'],
+      meshSignature: g.meshSignature === curveMeshSignature(originalMesh) ? curveMeshSignature(mesh) : g.meshSignature,
+    };
+    if (variant.guide) copy = variant.guide(copy);
+    newGuides.push(copy);
+  }
   let drawOrder = model.drawOrder;
   if (originals.length > 0) {
     const last = model.drawOrder.indexOf(originals.at(-1)!);
@@ -242,6 +262,7 @@ export function duplicateParts(
       parts,
       meshes: [...model.meshes, ...newMeshes],
       bindings: [...model.bindings, ...newBindings],
+      ...(model.curveGuides ? { curveGuides: [...model.curveGuides, ...newGuides] } : {}),
       drawOrder,
     },
   };

@@ -11,6 +11,7 @@ import type {
   Animation,
   Asset,
   Binding,
+  CurveGuide,
   Environment,
   Expression,
   Hotkey,
@@ -195,6 +196,25 @@ const warp: z.ZodType<Warp> = z
     }
   });
 
+const curveGuide: z.ZodType<CurveGuide> = z
+  .object({
+    id,
+    partId: id,
+    meshId: id,
+    meshSignature: z.string().min(1),
+    reference: z.tuple([vec2, vec2, vec2]),
+    points: z.tuple([vec2, vec2, vec2]),
+    radius: num.positive(),
+    rootFraction: num.min(0).max(0.5),
+    gravity: z.boolean(),
+    enabled: z.boolean(),
+  })
+  .superRefine((g, ctx) => {
+    if (Math.hypot(g.reference[2].x - g.reference[0].x, g.reference[2].y - g.reference[0].y) < 1e-6) {
+      ctx.addIssue({ code: 'custom', path: ['reference'], message: '根元と毛先を別の位置にする' });
+    }
+  });
+
 const parameterGroup: z.ZodType<ParameterGroup> = z.object({ id: parameterGroupId, name: z.string() });
 
 const parameter: z.ZodType<Parameter> = z
@@ -319,6 +339,7 @@ const model: z.ZodType<Model> = z
     parameters: z.array(parameter),
     parameterGroups: z.array(parameterGroup),
     bindings: z.array(binding),
+    curveGuides: z.array(curveGuide).optional(),
     lipSync,
     setupHints: z.object({ closedLineL: z.array(vec2).nullable(), closedLineR: z.array(vec2).nullable() }),
   })
@@ -328,6 +349,13 @@ const model: z.ZodType<Model> = z
     uniqueIds(m.warps, 'warps', ctx);
     uniqueIds(m.parameters, 'parameters', ctx);
     uniqueIds(m.bindings, 'bindings', ctx);
+    uniqueIds(m.curveGuides ?? [], 'curveGuides', ctx);
+    const targets = new Set<string>();
+    (m.curveGuides ?? []).forEach((g, i) => {
+      if (targets.has(g.partId))
+        ctx.addIssue({ code: 'custom', path: ['curveGuides', i, 'partId'], message: 'パーツの流れ線は1本まで' });
+      targets.add(g.partId);
+    });
   });
 
 const expression: z.ZodType<Expression> = z.object({

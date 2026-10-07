@@ -106,6 +106,20 @@ export interface Mesh {
   edited: boolean; // 手で編集したか
 }
 
+// 一本の流れ線。座標はメッシュの局所座標。reference は作成時、points は編集後。
+export interface CurveGuide {
+  id: Id;
+  partId: Id;
+  meshId: Id;
+  meshSignature: string; // 頂点/面の対応が変わった線を無言で再適用しない
+  reference: [Vec2, Vec2, Vec2];
+  points: [Vec2, Vec2, Vec2];
+  radius: number; // 影響幅（局所座標の px）
+  rootFraction: number; // 頭に追従する根元の区間（0..0.5）
+  gravity: boolean;
+  enabled: boolean;
+}
+
 // ---- Warp ----
 
 export interface Warp {
@@ -176,11 +190,12 @@ export interface Model {
   parameters: Parameter[];
   parameterGroups: ParameterGroup[];
   bindings: Binding[];
+  curveGuides?: CurveGuide[]; // 省略は空。カード99 / schemaVersion 4
   lipSync: LipSync;
   setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
 }
 export interface Project {
-  schemaVersion: number; // 現在は 3（1 → 2 で不透明度のキーを絶対値に（I-026）、2 → 3 でトラッキングの割り当ての設定（I-042））
+  schemaVersion: number; // 現在は4（3 → 4で流れ線。旧版は開くときに移行）
   id: Id;
   name: string;
   assets: Asset[];

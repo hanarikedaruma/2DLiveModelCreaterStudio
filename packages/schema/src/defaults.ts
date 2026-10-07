@@ -30,6 +30,7 @@ export function createEmptyProject(name: string): Project {
       parameters: standardParametersFor('mvp').map((p) => ({ ...p })),
       parameterGroups: PARAMETER_GROUPS.map((g) => ({ ...g })),
       bindings: [],
+      curveGuides: [],
       lipSync: { mouthSource: 'max', strength: 'standard', vowels: [] },
       setupHints: { closedLineL: null, closedLineR: null },
     },

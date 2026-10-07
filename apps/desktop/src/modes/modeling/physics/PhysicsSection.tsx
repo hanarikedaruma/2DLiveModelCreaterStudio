@@ -54,6 +54,7 @@ export function PhysicsSection() {
   const part = ids.length === 1 && ids[0] ? partById(project.model, ids[0]) : undefined;
   if (!part) return null;
   const item = physicsOfPart(project, part.id);
+  const curveGravity = project.model.curveGuides?.some((g) => g.partId === part.id && g.enabled && g.gravity) ?? false;
 
   const toggle = (on: boolean) => {
     preview.stop();
@@ -79,9 +80,19 @@ export function PhysicsSection() {
     <div className="physics-section">
       <h3 className="physics-heading">揺れ（物理）</h3>
       <label className="physics-check">
-        <input type="checkbox" checked={item !== undefined} onChange={(e) => toggle(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={item !== undefined}
+          disabled={curveGravity}
+          onChange={(e) => toggle(e.target.checked)}
+        />
         揺らす
       </label>
+      {curveGravity && (
+        <p className="physics-hint">
+          流れ線の重力を使っています。既存の揺れを使う場合は、流れ線の「重力に沿わせる」を解除してください。
+        </p>
+      )}
       {item ? (
         <PhysicsSettings project={project} part={part} item={item} preview={preview} />
       ) : (

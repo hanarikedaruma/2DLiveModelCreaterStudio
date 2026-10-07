@@ -14,7 +14,7 @@ describe('@app/schema の公開', () => {
     ] as const) {
       expect(schema[name], name).toBeTypeOf('function');
     }
-    expect(schema.SCHEMA_VERSION).toBe(3); // I-026 で 2、I-042 で 3 にした
+    expect(schema.SCHEMA_VERSION).toBe(4); // カード99の流れ線
     expect(schema.PARALLAX_RATIO).toBe(0.08);
     expect(schema.STANDARD_PARAMETERS).toHaveLength(26);
   });

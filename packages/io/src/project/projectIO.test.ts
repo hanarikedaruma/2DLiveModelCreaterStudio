@@ -28,7 +28,7 @@ describe('保存と読み込み', () => {
     expect(await fs.list(`${DIR}/assets`)).toEqual(project.assets.map((a) => `${a.id}.png`).sort());
     const text = await fs.readText(`${DIR}/project.json`);
     expect(text).toBe(projectToJson(project));
-    expect(text.startsWith('{\n  "schemaVersion": 3,')).toBe(true);
+    expect(text.startsWith('{\n  "schemaVersion": 4,')).toBe(true);
   });
 
   it('保存先のフォルダが無ければ途中のフォルダも作る（unsaved/<id>/ など）', async () => {
@@ -178,7 +178,7 @@ describe('古い版の読み込み', () => {
     const fs = new MemoryFileSystem();
     const project = createEmptyProject('m');
     await fs.mkdir(DIR);
-    await fs.writeText(`${DIR}/project.json`, projectToJson({ ...project, schemaVersion: 3 }));
+    await fs.writeText(`${DIR}/project.json`, projectToJson({ ...project, schemaVersion: 5 }));
     await expect(createProjectIO(fs, options).load(DIR)).rejects.toThrow(ProjectVersionError);
     expect(await fs.exists(`${DIR}/backups`)).toBe(false);
   });

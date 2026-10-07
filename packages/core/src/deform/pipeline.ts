@@ -1,7 +1,8 @@
 import type { Mesh, Model, Part, TransformDelta, Warp } from '@app/schema';
-import type { DeformPipeline, DeformedModel, DrawItem, TargetDeltas } from '@app/contracts';
+import type { CurveGuideResult, DeformPipeline, DeformedModel, DrawItem, TargetDeltas } from '@app/contracts';
 import { IDENTITY, applyAffine, isIdentity, multiplyAffine, partAffine, type Affine } from './affine';
 import { applyWarp } from './warp';
+import { evaluateCurveGuide } from './curveGuide';
 
 function own<T>(record: Record<string, T>, id: string): T | undefined {
   return Object.hasOwn(record, id) ? record[id] : undefined;
@@ -126,6 +127,8 @@ export function createDeformPipeline(): DeformPipeline {
 
       const items: DrawItem[] = [];
       const byPartId: Record<string, DrawItem> = {};
+      const guides = new Map((model.curveGuides ?? []).map((g) => [g.partId, g]));
+      const curveGuides: Record<string, CurveGuideResult> = {};
       for (const part of order) {
         if (part.assetId === null || part.meshId === null) continue;
         const chain = chainOf(part);
@@ -142,7 +145,7 @@ export function createDeformPipeline(): DeformPipeline {
           warnOnce(mesh, `メッシュ ${mesh.id} の頂点の差分の長さ ${vertexDelta.length} が ${n * 2} と違う（無視する）`);
           vertexDelta = undefined;
         }
-        const positions = new Float32Array(n * 2);
+        let positions = new Float32Array(n * 2);
         let pending: Affine = matrixOf(part);
         let filled = false;
         // ここまでの変形（行列にまとめてある）を点に掛ける
@@ -187,6 +190,13 @@ export function createDeformPipeline(): DeformPipeline {
         }
         flush();
 
+        const guide = guides.get(part.id);
+        if (guide && guide.meshId === mesh.id) {
+          const evaluated = evaluateCurveGuide(model, deltas, guide, mesh, positions);
+          positions = evaluated.positions;
+          curveGuides[guide.id] = evaluated.result;
+        }
+
         const { uvs, indices } = buffersOf(mesh);
         const item: DrawItem = {
           partId: part.id,
@@ -201,7 +211,7 @@ export function createDeformPipeline(): DeformPipeline {
         items.push(item);
         byPartId[part.id] = item;
       }
-      return { items, byPartId };
+      return { items, byPartId, ...(guides.size > 0 ? { curveGuides } : {}) };
     },
   };
 }

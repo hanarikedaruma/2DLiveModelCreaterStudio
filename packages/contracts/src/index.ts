@@ -46,6 +46,13 @@ export interface DrawItem {
 export interface DeformedModel {
   items: DrawItem[]; // 描画順（背面 → 前面）。非表示のパーツは含めない
   byPartId: Record<string, DrawItem>;
+  curveGuides?: Record<string, CurveGuideResult>;
+}
+export interface CurveGuideResult {
+  curve: Vec2[];
+  handles: Vec2[]; // 根元・中間・毛先の表示位置
+  status: 'ok' | 'limited' | 'stale' | 'disabled';
+  strength: number; // 三角形の破綻を避けて適用した割合
 }
 export interface DeformPipeline {
   deform(model: Model, deltas: TargetDeltas): DeformedModel;

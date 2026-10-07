@@ -1,0 +1,50 @@
+.curve-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.curve-target {
+  overflow-wrap: anywhere;
+}
+.curve-hint {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.curve-warning {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.curve-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.curve-field {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 12px;
+}
+.curve-field input {
+  width: 100%;
+  min-width: 0;
+}
+.curve-field output {
+  font-variant-numeric: tabular-nums;
+}
+.curve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.curve-panel button {
+  white-space: normal;
+}

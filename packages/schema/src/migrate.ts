@@ -1,11 +1,16 @@
 import { validateProject } from './validate';
 import type { Project } from './types';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 // { [版]: その版の json を次の版に変換する関数 }
 export type Migrations = Record<number, (json: Record<string, unknown>) => Record<string, unknown>>;
-export const MIGRATIONS: Migrations = { 1: opacityKeysToAbsolute, 2: trackingSetupFromMappings };
+export const MIGRATIONS: Migrations = {
+  1: opacityKeysToAbsolute,
+  2: trackingSetupFromMappings,
+  3: (json) =>
+    isRecord(json.model) ? { ...json, model: { ...json.model, curveGuides: json.model.curveGuides ?? [] } } : json,
+};
 
 export class ProjectVersionError extends Error {
   constructor(message: string) {

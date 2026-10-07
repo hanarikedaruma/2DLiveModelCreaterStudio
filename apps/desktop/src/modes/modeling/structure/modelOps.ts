@@ -133,6 +133,9 @@ export function removeParts(project: Project, ids: readonly string[]): Project {
     warps: model.warps.filter((w) => !removedWarps.has(w.id)),
     drawOrder: model.drawOrder.filter((id) => !removed.has(id)),
     bindings,
+    ...(model.curveGuides
+      ? { curveGuides: model.curveGuides.filter((g) => !removed.has(g.partId) && !removedMeshes.has(g.meshId)) }
+      : {}),
   };
   return {
     ...project,

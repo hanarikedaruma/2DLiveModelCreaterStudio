@@ -5,8 +5,8 @@ import { ProjectValidationError } from './validate';
 import type { Binding, Parameter, Part, TrackingMapping, TransformDelta } from './types';
 
 describe('migrate', () => {
-  it('現在の版は 2', () => {
-    expect(SCHEMA_VERSION).toBe(3);
+  it('現在の版は4', () => {
+    expect(SCHEMA_VERSION).toBe(4);
   });
 
   it('現在の版は何も変えない', () => {
@@ -17,9 +17,9 @@ describe('migrate', () => {
   });
 
   it('このアプリより新しい版のファイルはエラーになる', () => {
-    const p = { ...createEmptyProject('テスト'), schemaVersion: 4 };
+    const p = { ...createEmptyProject('テスト'), schemaVersion: 5 };
     expect(() => migrate(p)).toThrow(ProjectVersionError);
-    expect(() => migrate(p)).toThrow(/新しい版（4）/);
+    expect(() => migrate(p)).toThrow(/新しい版（5）/);
   });
 
   it('版が無い・数でないものはエラー', () => {
@@ -119,7 +119,7 @@ describe('1 → 2: 不透明度のキーを倍率から絶対値にする（I-02
         ],
       ),
     );
-    expect(p.schemaVersion).toBe(3);
+    expect(p.schemaVersion).toBe(4);
     expect(p.model.parts[0]!.opacity).toBe(0.5);
     const b = p.model.bindings[0];
     expect(b!.controlsOpacity).toBe(true);

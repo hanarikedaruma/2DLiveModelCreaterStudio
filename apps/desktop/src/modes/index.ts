@@ -4,6 +4,7 @@ import { register as registerAssets } from './modeling/assets';
 import { register as registerParameters } from './modeling/parameters';
 import { register as registerStructure } from './modeling/structure';
 import { register as registerMeshEdit } from './modeling/mesh';
+import { register as registerCurveGuide } from './modeling/curveGuide';
 import { register as registerStudio } from './studio';
 import { register as registerStudioProducers } from './studio/producers'; // カード36
 import { register as registerWarp } from './modeling/warp'; // カード29
@@ -33,6 +34,7 @@ export function registerModes(): void {
   registerParameters(); // カード19
   registerStructure(); // カード20
   registerMeshEdit(); // カード21
+  registerCurveGuide(); // カード99: 線で曲げる・重力
   registerStudio(); // カード22
   registerStudioProducers(); // カード36
   registerWarp(); // カード29

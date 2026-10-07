@@ -20,18 +20,31 @@ export type MeshMove = { index: number; d: Vec2 };
 
 // Seed each solve from the last accepted positions to prefer the local inverse
 // of a folded warp. Solve all selected vertices together; failure changes none.
-export function createMeshDragMapper(
+export function createMeshTargetMapper(
   model: Model,
   deltas: TargetDeltas,
   partId: string,
   mesh: Mesh,
   indices: number[],
-): (delta: Vec2) => MeshMove[] | null {
+): (targets: Vec2[]) => MeshMove[] | null {
   const local = meshLocalPositions(mesh, deltas);
   const initial = indices.map((i) => local[i]!);
   const forward = (points: Vec2[]) => pointsToModelSpace(model, deltas, partId, points);
+  const solve = createPointTargetMapper(forward, initial);
+  return (targets) => {
+    const solved = solve(targets);
+    return solved
+      ? indices.map((index, i) => ({ index, d: { x: solved[i]!.x - initial[i]!.x, y: solved[i]!.y - initial[i]!.y } }))
+      : null;
+  };
+}
+
+export function createPointTargetMapper(
+  forward: (points: Vec2[]) => Vec2[],
+  initial: Vec2[],
+): (targets: Vec2[]) => Vec2[] | null {
   const visible = forward(initial);
-  const h = local.reduce((extent, p) => Math.max(extent, Math.abs(p.x), Math.abs(p.y)), 1) * 1e-6;
+  const h = initial.reduce((extent, p) => Math.max(extent, Math.abs(p.x), Math.abs(p.y)), 1) * 1e-6;
   let previous = initial;
 
   const solve = (targets: Vec2[]): Vec2[] | null => {
@@ -98,17 +111,34 @@ export function createMeshDragMapper(
     return null;
   };
 
-  return (delta) => {
-    if (delta.x === 0 && delta.y === 0) {
+  return (targets) => {
+    if (targets.length !== initial.length || targets.some((p) => !Number.isFinite(p.x) || !Number.isFinite(p.y)))
+      return null;
+    if (targets.every((p, i) => distance(p, visible[i]!) <= TOLERANCE)) {
       previous = initial;
-      return indices.map((index) => ({ index, d: { x: 0, y: 0 } }));
+      return initial;
     }
-    const solved = solve(visible.map((p) => ({ x: p.x + delta.x, y: p.y + delta.y })));
+    const solved = solve(targets);
     if (!solved) return null;
     previous = solved;
-    return indices.map((index, i) => ({
-      index,
-      d: { x: solved[i]!.x - initial[i]!.x, y: solved[i]!.y - initial[i]!.y },
-    }));
+    return solved;
   };
+}
+
+export function createMeshDragMapper(
+  model: Model,
+  deltas: TargetDeltas,
+  partId: string,
+  mesh: Mesh,
+  indices: number[],
+): (delta: Vec2) => MeshMove[] | null {
+  const local = meshLocalPositions(mesh, deltas);
+  const visible = pointsToModelSpace(
+    model,
+    deltas,
+    partId,
+    indices.map((i) => local[i]!),
+  );
+  const mapper = createMeshTargetMapper(model, deltas, partId, mesh, indices);
+  return (delta) => mapper(visible.map((p) => ({ x: p.x + delta.x, y: p.y + delta.y })));
 }

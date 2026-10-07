@@ -127,7 +127,12 @@ export function enablePhysicsCommand(partId: string, ids: EnablePhysicsIds): Com
     label: '揺らす',
     apply(project) {
       const part = project.model.parts.find((p) => p.id === partId);
-      if (!part || physicsOfPart(project, partId)) return project;
+      if (
+        !part ||
+        physicsOfPart(project, partId) ||
+        project.model.curveGuides?.some((g) => g.partId === partId && g.enabled && g.gravity)
+      )
+        return project;
       const parameterId = swayParameterIdFor(part);
       const item: Physics = {
         id: ids.physics,

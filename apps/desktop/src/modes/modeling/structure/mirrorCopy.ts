@@ -192,6 +192,11 @@ export function mirrorCopy(
           triangles: original.triangles.map(([a, b, d]) => [a, d, b] as [number, number, number]),
         }),
         binding: (copy) => mirrorBinding(model, copy),
+        guide: (copy) => ({
+          ...copy,
+          reference: copy.reference.map((p) => ({ x: mx(p.x), y: p.y })) as typeof copy.reference,
+          points: copy.points.map((p) => ({ x: mx(p.x), y: p.y })) as typeof copy.points,
+        }),
         assetId: (id) => (id !== null ? (prepared.assetMap[id] ?? id) : null),
       });
       return next === withAssets ? project : next;
