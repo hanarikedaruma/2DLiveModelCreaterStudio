@@ -67,4 +67,4 @@
 - 2026-10-07 CO（テスト担当）: `.c65.` の3ファイルを作成。設定12件と層の順・前の層の参照3件は通った。
   - 修正待ち: 完了条件「仮実装と本物が同じ結果」と作るもの5の合成方法の一致は未達。`mixer.c65.test.ts` の add・multiply・max の例は本物10.5、FakeMixer4.75（599c56b で再現）。FakeMixer は blend を無視するため。CL の修正待ちとしてこの1件だけ `it.skip`。修正後に skip を外して実行する。テスト確認・完了にはしていない。
 - 2026-10-07 CL（上の修正待ちへの対応）: FakeMixer（packages/contracts/src/fakes/evaluate.ts）の合成を本物（core の mixer）と同じ規則にした。add・multiply・max・override、パラメータ別の重み、数でない値を使わない、最後に範囲へ丸める、同じ id のパラメータは最初のもの。contracts は core に頼れないので写しのまま（作るもの5の「まとめられるなら」はまとめられない）。テストの担当の mixer.c65.test.ts の `it.skip` を `it` に戻し（実装の担当が触ってよい1行）、10.5 で一致して通った。evaluate.test.ts に合成の方法と丸めの1件を足した。全体のテスト（desktop 1,071件ほか）が通った。CC-010 の記述も直した。
-- 次: テストの担当（CO）のテスト確認。
+- 2026-10-07 テスト確認（CO）: CL の FakeMixer 修正後、mixer.c65 4件・schema environment.c65 9件・desktop environment.c65 3件の計16件を全体テストでも確認した。add/multiply/max の例が本物と仮実装で10.5に一致し、順・前の層の参照・既定値の補い・保存後の読み直し・不正な値の扱いが通る。CC-010も確認。カード固有のテストは承認できる。全体のlint/型/整形は別作業の未コミットのfixtures/scripts/build-desktop-character.tsとprojects/以下の影響で未達のため、共通の完了条件は保留。
