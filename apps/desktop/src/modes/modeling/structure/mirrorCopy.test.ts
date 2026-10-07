@@ -5,6 +5,7 @@ import { createAssetRepository } from '@app/contracts';
 import {
   mirrorCenterX,
   mirrorCopy,
+  mirrorBinding,
   mirrorParameterId,
   mirrorStandardType,
   mirroredAsset,
@@ -154,6 +155,60 @@ describe('中心線', () => {
 });
 
 describe('mirrorCopy', () => {
+  it.each(['FaceAngleX', 'EyeBallX', 'BodyAngleX', 'FaceAngleZ', 'BodyAngleZ'])(
+    '%s の非対称なキー位置も反転し、昇順の格子と手動キーを保つ',
+    (parameterId) => {
+      const p = project();
+      const original = makeBinding('direction', {
+        parameterIds: [parameterId, 'EyeOpenL', 'FaceAngleY', 'CustomAngleX'],
+        keyValues: [
+          [-30, 0, 12],
+          [0, 1],
+          [-30, 0, 30],
+          [-1, 0, 1],
+        ],
+        keys: [
+          { coords: [12, 0, 30, 1], delta: delta(4, -3, 12), source: 'manual', locked: true },
+          { coords: [-30, 1, 0, 0], delta: delta(-9, 0, -20), source: 'auto', locked: false },
+        ],
+      });
+      const copy = mirrorBinding(p.model, original);
+      expect(copy.parameterIds).toEqual([parameterId, 'EyeOpenR', 'FaceAngleY', 'CustomAngleX']);
+      expect(copy.keyValues).toEqual([
+        [-12, 0, 30],
+        [0, 1],
+        [-30, 0, 30],
+        [-1, 0, 1],
+      ]);
+      expect(copy.keys).toEqual([
+        { coords: [-12, 0, 30, 1], delta: delta(-4, -3, -12), source: 'manual', locked: true },
+        { coords: [30, 1, 0, 0], delta: delta(9, 0, 20), source: 'auto', locked: false },
+      ]);
+      expect(original.keys[0]!.coords).toEqual([12, 0, 30, 1]);
+      expect(mirrorBinding(p.model, copy)).toEqual(original);
+    },
+  );
+
+  it('組み合わせの向きの軸をそれぞれ反転し、頂点差分も左右反転する', () => {
+    const binding = makeBinding('mesh-direction', {
+      target: { type: 'mesh', id: 'mw' },
+      channel: 'vertices',
+      parameterIds: ['FaceAngleX', 'EyeBallX', 'MouthOpen'],
+      keyValues: [
+        [-30, 0, 30],
+        [-1, 0, 1],
+        [0, 1],
+      ],
+      keys: [{ coords: [30, -1, 1], delta: [{ x: 2, y: 3 }], source: 'manual', locked: false }],
+    });
+    expect(mirrorBinding(project().model, binding).keys[0]).toEqual({
+      coords: [-30, 1, 1],
+      delta: [{ x: -2, y: 3 }],
+      source: 'manual',
+      locked: false,
+    });
+  });
+
   it('子孫ごと複製し、pivot・頂点・uv を反転、素材を反転した PNG の Asset にする', () => {
     const p = project();
     const next = mirrorCopy(['eyeL'], prepared(), { newId: counterIds('m') }).apply(p);
@@ -206,7 +261,7 @@ describe('mirrorCopy', () => {
       [0, 1],
       [-30, 0, 30],
     ]);
-    expect(eye.keys[0]).toEqual({ coords: [0, 30], delta: delta(-4, -3, -12), source: 'manual', locked: false });
+    expect(eye.keys[0]).toEqual({ coords: [0, -30], delta: delta(-4, -3, -12), source: 'manual', locked: false });
     const mesh = copies.find((b) => b.target.id === 'm4')!;
     expect(mesh).toMatchObject({ channel: 'vertices', parameterIds: ['EyeOpenR'] });
     expect(mesh.keys[0]!.delta).toEqual([

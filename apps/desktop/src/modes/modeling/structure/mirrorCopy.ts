@@ -1,6 +1,7 @@
 // 左右反転コピー。パーツ（グループなら子孫ごと）を複製し、中心線（bodyRoot があればそのピボットの x、無ければキャンバスの中央）で左右反転する。
 // 素材は左右反転した PNG を作って新しい Asset にする。頂点・uv・pivot を反転する。
-// そのパーツを対象にするバインディングも複製し、差分の x と回転の符号を反転し、パラメータ id と standardType の末尾の L / R を入れ替える
+// バインディングの差分の x と回転を反転し、向きのある標準パラメータはキー位置も反転する。
+// パラメータ id と standardType の末尾の L / R を入れ替える
 import { newId as defaultNewId, STANDARD_PART_NAMES } from '@app/schema';
 import type { Asset, Binding, Model, ParameterKey, Project, StandardPartType, TransformDelta, Vec2 } from '@app/schema';
 import type { Command, Services } from '@app/contracts';
@@ -67,6 +68,9 @@ export function mirrorParameterId(model: Model, id: string): string {
 
 const neg = (v: number) => (v === 0 ? 0 : -v);
 
+// 左右・傾きの入力は、鏡像の反対側のキーを使う。上下・開閉とユーザー定義はキー位置を変えない。
+const DIRECTIONAL_PARAMETERS = new Set(['FaceAngleX', 'EyeBallX', 'BodyAngleX', 'FaceAngleZ', 'BodyAngleZ']);
+
 export function mirrorKey(key: ParameterKey): ParameterKey {
   const delta: TransformDelta | Vec2[] = Array.isArray(key.delta)
     ? key.delta.map((d) => ({ x: neg(d.x), y: d.y }))
@@ -79,10 +83,17 @@ export function mirrorKey(key: ParameterKey): ParameterKey {
 }
 
 export function mirrorBinding(model: Model, binding: Binding): Binding {
+  const flipAxis = binding.parameterIds.map((id) => DIRECTIONAL_PARAMETERS.has(id));
   return {
     ...binding,
     parameterIds: binding.parameterIds.map((id) => mirrorParameterId(model, id)),
-    keys: binding.keys.map(mirrorKey),
+    keyValues: binding.keyValues.map((values, axis) =>
+      flipAxis[axis] ? values.map(neg).sort((a, b) => a - b) : [...values],
+    ),
+    keys: binding.keys.map((key) => ({
+      ...mirrorKey(key),
+      coords: key.coords.map((value, axis) => (flipAxis[axis] ? neg(value) : value)),
+    })),
   };
 }
 
