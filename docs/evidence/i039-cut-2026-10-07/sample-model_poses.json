@@ -1,0 +1,129 @@
+{
+  "head-pose": [
+    {
+      "x": -30,
+      "y": -30,
+      "file": "sample-model_head-pose_x-30_y-30.png"
+    },
+    {
+      "x": -15,
+      "y": -30,
+      "file": "sample-model_head-pose_x-15_y-30.png"
+    },
+    {
+      "x": 0,
+      "y": -30,
+      "file": "sample-model_head-pose_x0_y-30.png"
+    },
+    {
+      "x": 15,
+      "y": -30,
+      "file": "sample-model_head-pose_x15_y-30.png"
+    },
+    {
+      "x": 30,
+      "y": -30,
+      "file": "sample-model_head-pose_x30_y-30.png"
+    },
+    {
+      "x": -30,
+      "y": -15,
+      "file": "sample-model_head-pose_x-30_y-15.png"
+    },
+    {
+      "x": -15,
+      "y": -15,
+      "file": "sample-model_head-pose_x-15_y-15.png"
+    },
+    {
+      "x": 0,
+      "y": -15,
+      "file": "sample-model_head-pose_x0_y-15.png"
+    },
+    {
+      "x": 15,
+      "y": -15,
+      "file": "sample-model_head-pose_x15_y-15.png"
+    },
+    {
+      "x": 30,
+      "y": -15,
+      "file": "sample-model_head-pose_x30_y-15.png"
+    },
+    {
+      "x": -30,
+      "y": 0,
+      "file": "sample-model_head-pose_x-30_y0.png"
+    },
+    {
+      "x": -15,
+      "y": 0,
+      "file": "sample-model_head-pose_x-15_y0.png"
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "file": "sample-model_head-pose_x0_y0.png"
+    },
+    {
+      "x": 15,
+      "y": 0,
+      "file": "sample-model_head-pose_x15_y0.png"
+    },
+    {
+      "x": 30,
+      "y": 0,
+      "file": "sample-model_head-pose_x30_y0.png"
+    },
+    {
+      "x": -30,
+      "y": 15,
+      "file": "sample-model_head-pose_x-30_y15.png"
+    },
+    {
+      "x": -15,
+      "y": 15,
+      "file": "sample-model_head-pose_x-15_y15.png"
+    },
+    {
+      "x": 0,
+      "y": 15,
+      "file": "sample-model_head-pose_x0_y15.png"
+    },
+    {
+      "x": 15,
+      "y": 15,
+      "file": "sample-model_head-pose_x15_y15.png"
+    },
+    {
+      "x": 30,
+      "y": 15,
+      "file": "sample-model_head-pose_x30_y15.png"
+    },
+    {
+      "x": -30,
+      "y": 30,
+      "file": "sample-model_head-pose_x-30_y30.png"
+    },
+    {
+      "x": -15,
+      "y": 30,
+      "file": "sample-model_head-pose_x-15_y30.png"
+    },
+    {
+      "x": 0,
+      "y": 30,
+      "file": "sample-model_head-pose_x0_y30.png"
+    },
+    {
+      "x": 15,
+      "y": 30,
+      "file": "sample-model_head-pose_x15_y30.png"
+    },
+    {
+      "x": 30,
+      "y": 30,
+      "file": "sample-model_head-pose_x30_y30.png"
+    }
+  ]
+}

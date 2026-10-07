@@ -3,6 +3,8 @@
 // 使い方: node tools/dev/head-pose-capture.mjs <出力フォルダ> [faceTurn の方式 ...]
 //   例: node tools/dev/head-pose-capture.mjs docs/evidence/i039-head-pose head-pose head-surface
 // 環境変数 DEV_URL で開発サーバーの URL を変えられる。基準モデルのファイルは変えない（メモリ上だけで変える）
+// MODEL で fixtures のモデルを選ぶ（既定 reference-model。sample-model も使える）。
+// POSES=grid で左右・上下を −30・−15・0・15・30 の組み合わせ（25）にする（既定は9つ。STEP3 のカード56）
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -15,17 +17,22 @@ const { chromium } = require('playwright');
 const OUT = resolve(ROOT, process.argv[2] ?? 'docs/evidence/i039-head-pose');
 const METHODS = process.argv.slice(3).length > 0 ? process.argv.slice(3) : ['head-pose'];
 const DEV_URL = process.env.DEV_URL ?? 'http://127.0.0.1:1430/';
-const POSES = [
-  [-30, 0],
-  [-15, 0],
-  [0, 0],
-  [15, 0],
-  [30, 0],
-  [0, 30],
-  [0, -30],
-  [30, 30],
-  [-30, -30],
-];
+const MODEL = process.env.MODEL ?? 'reference-model';
+const STEPS = [-30, -15, 0, 15, 30];
+const POSES =
+  process.env.POSES === 'grid'
+    ? STEPS.flatMap((y) => STEPS.map((x) => [x, y]))
+    : [
+        [-30, 0],
+        [-15, 0],
+        [0, 0],
+        [15, 0],
+        [30, 0],
+        [0, 30],
+        [0, -30],
+        [30, 30],
+        [-30, -30],
+      ];
 
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -37,14 +44,14 @@ const shots = {};
 for (const method of METHODS) {
   // 基準モデルを読み込み、その方式でかんたんセットアップを掛ける
   const result = await page.evaluate(
-    async ({ root, method }) => {
+    async ({ root, method, model }) => {
       const fs = (path) => `/@fs/${root.replace(/\\/g, '/')}/${path}`;
       const schema = await import(fs('packages/schema/src/index.ts'));
       const core = await import(fs('packages/core/src/index.ts'));
-      const project = schema.loadProjectJson(await (await fetch(fs('fixtures/reference-model/project.json'))).text());
+      const project = schema.loadProjectJson(await (await fetch(fs(`fixtures/${model}/project.json`))).text());
       const s = window.__studio;
       for (const a of project.assets) {
-        const bytes = new Uint8Array(await (await fetch(fs(`fixtures/reference-model/${a.path}`))).arrayBuffer());
+        const bytes = new Uint8Array(await (await fetch(fs(`fixtures/${model}/${a.path}`))).arrayBuffer());
         await s.services.assets.put(a.id, bytes);
       }
       const plan = core.createAutoSetup({ faceTurn: method }).plan(project);
@@ -52,9 +59,9 @@ for (const method of METHODS) {
       s.services.editor.set({ mode: 'modeling', selectedPartIds: [], activeParameterIds: [], editorParamValues: {} });
       return { warnings: plan.warnings };
     },
-    { root: ROOT, method },
+    { root: ROOT, method, model: MODEL },
   );
-  console.log(method, JSON.stringify(result));
+  console.log(MODEL, method, JSON.stringify(result));
   await page.getByRole('button', { name: '全体を表示' }).click();
   await page.waitForTimeout(500);
   shots[method] = [];
@@ -64,7 +71,7 @@ for (const method of METHODS) {
       { x, y },
     );
     await page.waitForTimeout(400);
-    const file = join(OUT, `${method}_x${x}_y${y}.png`);
+    const file = join(OUT, `${MODEL}_${method}_x${x}_y${y}.png`);
     const canvas = page.locator('[data-testid=canvas-main]');
     const box = await canvas.boundingBox();
     // 頭のまわり（キャンバスの上の 55%・中央の 70%）
@@ -85,10 +92,10 @@ for (const method of METHODS) {
     })
     .join('');
   await page.setContent(
-    `<style>body{margin:0;background:#f2f3f5;font:20px sans-serif}div{display:flex;flex-wrap:wrap}figure{margin:6px;text-align:center}img{width:420px}</style><h3 style="margin:8px">${method}</h3><div>${cells}</div>`,
+    `<style>body{margin:0;background:#f2f3f5;font:20px sans-serif}div{display:flex;flex-wrap:wrap}figure{margin:6px;text-align:center}img{width:420px}</style><h3 style="margin:8px">${MODEL} / ${method}</h3><div>${cells}</div>`,
   );
   await page.setViewportSize({ width: 2200, height: 1400 });
-  await page.screenshot({ path: join(OUT, `${method}_poses.png`), fullPage: true });
+  await page.screenshot({ path: join(OUT, `${MODEL}_${method}_poses.png`), fullPage: true });
   await page.goto(DEV_URL);
   await page.waitForFunction(() => window.__studio !== undefined, null, { timeout: 30_000 });
 }
@@ -96,6 +103,6 @@ for (const method of METHODS) {
 const names = Object.fromEntries(
   Object.entries(shots).map(([m, list]) => [m, list.map((s) => ({ ...s, file: basename(s.file) }))]),
 );
-writeFileSync(join(OUT, 'poses.json'), JSON.stringify(names, null, 2) + '\n');
+writeFileSync(join(OUT, `${MODEL}_poses.json`), JSON.stringify(names, null, 2) + '\n');
 await browser.close();
 console.log('saved', OUT);
