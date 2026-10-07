@@ -31,6 +31,8 @@
 
 - アプリのソースの中身（コミットするだけで変えない）。
 
+2026-10-07 CO（引き継ぎの範囲の補足）: 全体検査へ別作業の生成物が入る問題について、README の補足に従い `.gitignore`・`.prettierignore`・`eslint.config.js`・`fixtures/tsconfig.json` の対象指定も扱う。除外は `projects/` と `fixtures/scripts/build-desktop-character.ts` のみ。生成物とアプリのソースは変更しない。
+
 ## テスト（担当: CO）
 
 このカードのテストは、実装の担当（CL）ではなく CO が書く（README の「テストの分担」）。テストのファイルは名前にカードの番号（`.c55.`）を入れ、実装の担当は書き換えない。
@@ -52,7 +54,7 @@
 
 ### CO の出発点の確認（2026-10-07）
 
-- `80355ba` の作業フォルダ（I-054 の未コミット修正を含む）で、`pnpm lint`・`pnpm typecheck`・`pnpm test` が通った。単体テストは全 2,205 件（desktop 999 件、io 129 件を含む）。
+- `80355ba` の作業フォルダ（I-054 の未コミット修正を含む）で、`pnpm lint`・`pnpm typecheck`・`pnpm test` が通った。単体テストは全 2,105 件（desktop 999 件、io 129 件を含む。2026-10-07 の引き継ぎで実行ログと照合し、CO の旧記録の2,205件を訂正）。
 - `pnpm format:check` は 12 ファイルで不整形: `docs/step4/cards/73_scope.md`〜`82_joint-contract.md` と、`tests/usecase/changes.md`・`checkpoints.md`。CL の整理後に再確認する。
 - `cargo test` も通った（23 件成功、計測用の 1 件は既定どおり ignored）。e2e は既存変更の確定とアプリのロック取得後に確認する。この時点ではカード全体の「テスト確認」は未確定。
 - 実行環境は既存の `.cache/bin/pnpm.cmd` と `.cache/corepack` を使用（`docs/verification-env.md` の手順）。
@@ -64,3 +66,8 @@
 - 出発点の単体テスト件数は、CL の2,105件と CO の2,205件が不一致。出発点の実行ログは今回見つからず、件数は未確定として残す。現在の追加テストの件数とは区別する。
 - 現在の全体の整形・lint・型検査は、別作業の `fixtures/scripts/build-desktop-character.ts` と `projects/` のため未達。この2パスだけを除いた検査はすべて成功したが、恒久設定は変更していない。現在の別作業を削除・移動・コミットして出発点を作り直す必要はない。
 - 出発点の結果の照合は済み。件数の記録の照合と通常の全体検査を残し、カード全体の「完了」は保留。各カードの締めの条件と生成物の具体的な扱いは[締めに向けた確認](../closure-readiness-2026-10-07.md)に記録した。
+
+### CO の引き継ぎ（2026-10-07）
+
+- ユーザーの「CLの残りの作業を全て引き継ぐ」指示で、CL の作業記録を確認した。出発点の実行ログ（2026-10-07 08:30 JST）の10パッケージを合算すると223ファイル・2,105件。CL の記録が正しく、CO の2,205件は誤記だった。該当ログを `.cache/verification/co-step3-handoff-2026-10-07/baseline-unit.log` に保全し、旧記録を訂正した。
+- 前に検証した除外案を `.gitignore`・`.prettierignore`・ESLint の全体 ignores・fixtures の exclude に適用。生成物そのものは保持し、既存の fixtures の生成スクリプトとテストは検査に残した。

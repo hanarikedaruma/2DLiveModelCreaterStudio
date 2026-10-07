@@ -37,6 +37,8 @@ export default tseslint.config(
       '**/target/**',
       '.cache/**',
       '.pnpm-store/**',
+      'projects/**',
+      'fixtures/scripts/build-desktop-character.ts',
       'apps/desktop/src-tauri/gen/**',
     ],
   },

@@ -12,3 +12,6 @@ fixtures/sample-model/*.psd
 apps/desktop/e2e/results/
 fixtures/stress/
 apps/desktop/src-tauri/gen/schemas/
+# 別作業で作ったローカルのモデルと一時生成用スクリプト（カード55）
+/projects/
+/fixtures/scripts/build-desktop-character.ts

@@ -5,5 +5,6 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["scripts", "*.test.ts"]
+  "include": ["scripts", "*.test.ts"],
+  "exclude": ["scripts/build-desktop-character.ts"]
 }

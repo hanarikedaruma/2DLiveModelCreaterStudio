@@ -11,3 +11,5 @@ fixtures/sample-model/
 docs/measurements/
 fixtures/reference-model/
 docs/evidence/
+/projects/
+/fixtures/scripts/build-desktop-character.ts
