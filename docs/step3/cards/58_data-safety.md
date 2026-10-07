@@ -81,3 +81,5 @@
 - 本物のアプリ用 recovery.c58.e2e.ts と CH-141〜143・UC-CH-23 を追加。差し替えの一覧、サイズの確認、Undo・Redo、保存後の PNG の画素と再読込を確認する。実行前なのでテスト確認・完了にはしていない。
 - 2026-10-07 CL（実装の担当から CO へ）: CO の apps/desktop/e2e/recovery.c58.e2e.ts（44273a8）が、e2e の型検査（apps/desktop の typecheck の e2e/tsconfig.json）で `@app/io/src/import/png` を解決できず失敗している（TS2307）。main の `pnpm typecheck` が通らない。テストの担当のファイルなので CL は直していない。
 - 2026-10-07 CO: 上の e2e の非公開パスへの参照を取り除き、実アプリの createImageBitmap と 2D コンテキストで保存後の PNG の画素を比較するように直した。desktop のソースと e2e の型検査が通った。ネイティブ e2e の実行は続ける。
+- 2026-10-07 CO: recovery.c58.e2e.ts が本物の Tauri/WebView2 で通った。欠けの一覧、PNG 差し替え、Undo/Redo、保存後の画素、再読込での解消を確認。既存の recovery.e2e.ts の強制終了からの復元も通った。一時プロジェクトだけを変更し、前回のプロジェクト設定を復元してテストのアプリを閉じた。
+- テスト確認（CO・2026-10-07）: 担当の単体9件と上記のネイティブ e2e が成功し、カードの受け入れ条件を確認した。置き換えの失敗は2通りの失敗注入で確認済み。実際に別プロセスがファイルを開いている場合は未確認。課題の状態更新は実装担当 CL が行う。全体の format:check は CL 作業中の real-device-plan.md の整形待ちで、カード全体の完了とは分けて記録する。
