@@ -98,4 +98,13 @@ describe('欠けた素材の一覧（カード58）', () => {
     expect(actions.replaced[0]![1].asset.id).toBe('n2');
     await waitFor(() => expect(screen.queryByRole('region', { name: '欠けた素材' })).toBeNull());
   });
+
+  it('［差し替える…］のボタンでファイルを選ぶ。ブラウザのファイルの入力は隠す（素材トレイの幅をはみ出さない）', () => {
+    setup(['a1']);
+    const input = screen.getByLabelText(/を差し替えるファイル$/) as HTMLInputElement;
+    expect(input.hidden).toBe(true);
+    const click = vi.spyOn(input, 'click').mockImplementation(() => {});
+    fireEvent.click(screen.getByRole('button', { name: '差し替える…' }));
+    expect(click).toHaveBeenCalledTimes(1);
+  });
 });

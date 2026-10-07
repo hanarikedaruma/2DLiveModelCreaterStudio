@@ -1,6 +1,6 @@
 // 素材トレイの「欠けた素材」（STEP3 のカード58・I-056）。開いたときにファイルが無く、透明な画像の代わりで
 // 開いた素材があるときだけ出す。PNG か PSD を選んで差し替える（PSD は元のレイヤー名と同じレイヤー、無ければ選ぶ）
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import type { ImportedAsset } from '@app/contracts';
 import type { Asset, Project } from '@app/schema';
 import { useDialogs, useProject, useServices } from '../shell/api';
@@ -32,6 +32,30 @@ async function readBytes(file: Blob): Promise<Uint8Array> {
 
 function sourceText(asset: Asset): string {
   return asset.source.layerName ? `${asset.source.file} の「${asset.source.layerName}」` : asset.source.file;
+}
+
+// ［差し替える…］のボタンと、隠したファイルの入力（ブラウザの入力の見た目は素材トレイの幅に収まらないため）
+function ReplacePick({ label, onFile }: { label: string; onFile(file: File): void }) {
+  const input = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <button type="button" className="missing-assets-pick" onClick={() => input.current?.click()}>
+        差し替える…
+      </button>
+      <input
+        ref={input}
+        type="file"
+        accept={ACCEPT_REPLACEMENT}
+        hidden
+        aria-label={label}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (file) onFile(file);
+        }}
+      />
+    </>
+  );
 }
 
 interface Pending {
@@ -127,19 +151,10 @@ export function MissingAssetsSection() {
                   </button>
                 </span>
               ) : (
-                <label className="missing-assets-pick">
-                  差し替える…
-                  <input
-                    type="file"
-                    accept={ACCEPT_REPLACEMENT}
-                    aria-label={`${parts.join('・') || sourceText(asset)} を差し替えるファイル`}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      e.target.value = '';
-                      if (file) void pick(asset, file);
-                    }}
-                  />
-                </label>
+                <ReplacePick
+                  label={`${parts.join('・') || sourceText(asset)} を差し替えるファイル`}
+                  onFile={(file) => void pick(asset, file)}
+                />
               )}
             </li>
           );
