@@ -24,6 +24,37 @@ export function useAssetRepoVersion(repo: AssetRepository): number {
   return version;
 }
 
+// タイマーを100個一度に並べると、ほかのタイマーや描画が遅れる。次の1枚だけを予定する。
+const thumbnailJobs = new Map<symbol, () => void>();
+let thumbnailTimer: ReturnType<typeof setTimeout> | undefined;
+function scheduleNextThumbnail() {
+  if (thumbnailTimer !== undefined || thumbnailJobs.size === 0) return;
+  thumbnailTimer = setTimeout(() => {
+    thumbnailTimer = undefined;
+    const job = thumbnailJobs.entries().next().value;
+    if (!job) return;
+    thumbnailJobs.delete(job[0]);
+    try {
+      job[1]();
+    } finally {
+      scheduleNextThumbnail();
+    }
+  }, 0);
+}
+
+function scheduleThumbnail(job: () => void): () => void {
+  const id = Symbol();
+  thumbnailJobs.set(id, job);
+  scheduleNextThumbnail();
+  return () => {
+    thumbnailJobs.delete(id);
+    if (thumbnailJobs.size === 0 && thumbnailTimer !== undefined) {
+      clearTimeout(thumbnailTimer);
+      thumbnailTimer = undefined;
+    }
+  };
+}
+
 function usePngUrl(png: Uint8Array | undefined): string | null {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
@@ -34,12 +65,12 @@ function usePngUrl(png: Uint8Array | undefined): string | null {
     // 多くの素材を同時に表示したときも、Blob のコピーを1回の描画タスクへ集めない。
     setUrl(null);
     let made: ReturnType<typeof pngToUrl> | undefined;
-    const timer = setTimeout(() => {
+    const cancel = scheduleThumbnail(() => {
       made = pngToUrl(png);
       setUrl(made.url);
-    }, 0);
+    });
     return () => {
-      clearTimeout(timer);
+      cancel();
       made?.revoke();
     };
   }, [png]);

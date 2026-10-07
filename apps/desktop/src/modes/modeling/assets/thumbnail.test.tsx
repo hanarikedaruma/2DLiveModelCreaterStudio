@@ -26,7 +26,10 @@ describe('サムネイルの準備（カード57）', () => {
       </>,
     );
     expect(createObjectURL).not.toHaveBeenCalled();
-    expect(vi.getTimerCount()).toBe(2);
+    expect(vi.getTimerCount()).toBe(1);
+    act(() => vi.runOnlyPendingTimers());
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(1);
     act(() => vi.runOnlyPendingTimers());
     expect(createObjectURL).toHaveBeenCalledTimes(2);
     expect(view.container.querySelectorAll('img')).toHaveLength(2);
