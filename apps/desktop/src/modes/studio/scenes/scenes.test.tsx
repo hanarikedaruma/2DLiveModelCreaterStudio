@@ -103,6 +103,26 @@ afterEach(() => {
 });
 
 describe('シーンの一覧', () => {
+  it('シーンを消すと対象のホットキーの確認が出て、キャンセル・1回のUndo/Redoで両方を扱う', async () => {
+    const { services } = await setup();
+    const hotkeys = [{ id: 'h', keys: 'Ctrl+1', action: 'scene' as const, targetId: 'chat', mode: 'toggle' as const }];
+    act(() =>
+      services.store.dispatch({ label: '割り当て', apply: (p) => ({ ...p, studio: { ...p.studio, hotkeys } }) }),
+    );
+    const before = services.store.get();
+    click(action('削除'));
+    expect(await screen.findByText(/このシーンのホットキー.*1.*消/)).toBeTruthy();
+    click(screen.getByRole('button', { name: 'キャンセル' }));
+    expect(services.store.get()).toBe(before);
+    click(action('削除'));
+    click(await screen.findByRole('button', { name: 'OK' }));
+    await waitFor(() => expect(services.store.get().studio.scenes.some((s) => s.id === 'chat')).toBe(false));
+    expect(services.store.get().studio.hotkeys).toEqual([]);
+    act(() => services.store.undo());
+    expect(services.store.get()).toBe(before);
+    act(() => services.store.redo());
+    expect(services.store.get().studio.hotkeys).toEqual([]);
+  });
   it('スタジオの left のパネルに出て、中に選んだシーンの編集のセクションが入る', async () => {
     await setup();
     expect(panel().closest('[data-area="left"]')).toBeTruthy();

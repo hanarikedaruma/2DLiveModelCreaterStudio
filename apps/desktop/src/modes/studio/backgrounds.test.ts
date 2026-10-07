@@ -60,6 +60,41 @@ describe('プロジェクトの backgrounds/', () => {
     const files = createBackgroundFiles({ fs: () => fs, images });
     return { fs, images, files };
   };
+  it('画像をプリセットから外し、復元すると同じパスとバイトで一覧に戻る', async () => {
+    const { fs, files } = setup();
+    files.setProjectDirResolver(() => '/projects/a');
+    const data = new Uint8Array([4, 5, 6]);
+    const { path } = await files.importImage({ name: '部屋.png', data });
+    await files.remove(path);
+    expect(await files.list()).not.toContain(path);
+    expect(await fs.exists(`/projects/a/${path}`)).toBe(false);
+    await files.restore(path);
+    expect(await files.list()).toContain(path);
+    expect(await files.load(path)).toEqual(data);
+  });
+  it('未保存の画像も削除・復元でき、削除中には保存しない', async () => {
+    const { fs, files } = setup();
+    const { path } = await files.importImage({ name: 'bg.webp', data: new Uint8Array([7]) });
+    await files.remove(path);
+    expect(files.pending()).toEqual([]);
+    expect(await files.writePending('/projects/a')).toEqual([]);
+    await files.restore(path);
+    expect(files.pending()).toEqual([path]);
+    await files.writePending('/projects/a');
+    expect(await fs.readBinary(`/projects/a/${path}`)).toEqual(new Uint8Array([7]));
+    await expect(files.remove('../project.json')).rejects.toThrow();
+  });
+  it('削除してから別名で保存しても、Undoの復元先は現在のフォルダになる', async () => {
+    const { fs, files } = setup();
+    files.setProjectDirResolver(() => '/projects/a');
+    const data = new Uint8Array([9]);
+    const { path } = await files.importImage({ name: 'a.png', data });
+    await files.remove(path);
+    files.setProjectDirResolver(() => '/projects/b');
+    await files.restore(path);
+    expect(await fs.readBinary(`/projects/b/${path}`)).toEqual(data);
+    expect(await fs.exists(`/projects/a/${path}`)).toBe(false);
+  });
 
   it('フォルダがあれば、選んだ画像を backgrounds/ に写す', async () => {
     const { fs, images, files } = setup();

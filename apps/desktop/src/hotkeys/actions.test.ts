@@ -230,13 +230,13 @@ describe('背景', () => {
 });
 
 describe('パラメータ', () => {
-  it('toggle で max にする値を producer（id expression・override）が出し、もう一度で消す', () => {
+  it('toggle で max にする値を producer（id hotkey・override）が出し、もう一度で消す', () => {
     const tears = hk('parameter', 'Tears');
-    expect(actions.producer.id).toBe('expression');
+    expect(actions.producer.id).toBe('hotkey');
     expect(actions.producer.produce(frame(services.store.get()))).toBeNull();
     press(tears);
     expect(actions.producer.produce(frame(services.store.get()))).toEqual({
-      id: 'expression',
+      id: 'hotkey',
       weight: 1,
       values: { Tears: 1 },
       blend: { Tears: 'override' },

@@ -3,6 +3,7 @@ import { useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { newId, type Hotkey, type Project } from '@app/schema';
 import { useDispatch, useProject } from '../shell/api';
 import { useHotkeyBinding } from './binding';
+import { useBackgroundImagePaths } from '../modes/studio/scenes/useBackgroundImagePaths';
 import { needsModifier, normalizeKeys, recordKeys } from './keys';
 import { hotkeyRuntime, type HotkeyRuntimeState } from './runtime';
 import {
@@ -145,7 +146,8 @@ function HotkeyForm({ project, onClose }: { project: Project; onClose: () => voi
   const [keyError, setKeyError] = useState<string | null>(null);
   const chordDone = useRef(false); // 修飾キーを押したままキーを押し終えた
   const [action, setAction] = useState<HotkeyAction>('expression');
-  const options = targetOptions(action, project);
+  const images = useBackgroundImagePaths();
+  const options = targetOptions(action, project, images.paths);
   const [chosenTarget, setChosenTarget] = useState<string | null>(null);
   const target =
     chosenTarget !== null && options.some((o) => o.value === chosenTarget)

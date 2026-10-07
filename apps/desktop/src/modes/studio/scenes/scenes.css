@@ -32,6 +32,15 @@
 .scene-images {
   margin-top: 6px;
 }
+.scene-image-preset {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.scene-image-remove {
+  font-size: 11px;
+  padding: 3px 4px;
+}
 .scene-image {
   display: inline-flex;
   align-items: center;

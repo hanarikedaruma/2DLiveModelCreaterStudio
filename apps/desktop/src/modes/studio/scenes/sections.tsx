@@ -1,6 +1,6 @@
 // 選んだ（使っている）シーンの編集。シーンのパネル（'scene'）のセクション: 背景・表情・モデルの配置
-import { useCallback, useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react';
-import { useDialogs, useDispatch, useProject } from '../../../shell/api';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useDialogs, useDispatch, useProject, useServices } from '../../../shell/api';
 import { clampModelScale } from '../placement';
 import { studioRuntime } from '../runtime';
 import {
@@ -13,7 +13,9 @@ import {
   type SceneBackground,
 } from '../scene';
 import { setSceneExpressionCommand } from './commands';
-import { BACKGROUND_PRESETS, backgroundImagePaths, backgroundLabel, findBackgroundPreset } from './presets';
+import { BACKGROUND_PRESETS, backgroundLabel, findBackgroundPreset } from './presets';
+import { useBackgroundImagePaths } from './useBackgroundImagePaths';
+import { removeBackgroundImage } from './backgroundRemoval';
 
 function errorText(e: unknown): string {
   return e instanceof Error ? e.message : String(e);
@@ -39,28 +41,6 @@ function useBackgroundImageState(path: string | null) {
     path ? studioRuntime.backgroundFiles.pending().includes(path) : false,
   );
   return { status, pending };
-}
-
-// 背景の画像のプリセット（backgrounds/ にある画像・まだ写していない画像・シーンで使っている画像）
-function useBackgroundImagePaths(): { paths: string[]; refresh(): void } {
-  const project = useProject();
-  const files = studioRuntime.backgroundFiles;
-  const [listed, setListed] = useState<string[]>([]);
-  const [version, refresh] = useReducer((n: number) => n + 1, 0);
-  useEffect(() => files.subscribe(refresh), [files]);
-  useEffect(() => {
-    let alive = true;
-    files.list().then(
-      (paths) => {
-        if (alive) setListed(paths);
-      },
-      (e: unknown) => console.warn('背景の画像の一覧を読めない', e),
-    );
-    return () => {
-      alive = false;
-    };
-  }, [files, version, project.id]);
-  return { paths: backgroundImagePaths(listed, project.studio.scenes), refresh };
 }
 
 const MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
@@ -112,6 +92,8 @@ export function SceneBackgroundSection() {
   const project = useProject();
   const dispatch = useDispatch();
   const dialogs = useDialogs();
+  const { store } = useServices();
+  const [removing, setRemoving] = useState(false);
   const bg = sceneBackground(project);
   const [color, setColor] = useState(bg.type === 'color' ? bg.color : '#ff00ff');
   const colorRef = useRef<HTMLInputElement>(null);
@@ -139,6 +121,16 @@ export function SceneBackgroundSection() {
       images.refresh();
     } catch (e) {
       dialogs.notify(`背景の画像を使えない: ${errorText(e)}`);
+    }
+  };
+  const remove = async (path: string) => {
+    if (removing) return;
+    setRemoving(true);
+    try {
+      await removeBackgroundImage(store, studioRuntime.backgroundFiles, dialogs, path);
+    } finally {
+      setRemoving(false);
+      images.refresh();
     }
   };
 
@@ -173,13 +165,23 @@ export function SceneBackgroundSection() {
       </div>
       <div className="studio-choices scene-images" role="group" aria-label="背景の画像">
         {images.paths.map((path, i) => (
-          <ImagePresetButton
-            key={path}
-            path={path}
-            index={i}
-            pressed={bg.type === 'image' && bg.path === path}
-            onPick={() => set({ type: 'image', path })}
-          />
+          <span className="scene-image-preset" key={path}>
+            <ImagePresetButton
+              path={path}
+              index={i}
+              pressed={bg.type === 'image' && bg.path === path}
+              onPick={() => set({ type: 'image', path })}
+            />
+            <button
+              type="button"
+              className="scene-image-remove"
+              disabled={removing}
+              aria-label={`画像 ${i + 1}（${backgroundLabel({ type: 'image', path })}）を削除`}
+              onClick={() => void remove(path)}
+            >
+              削除
+            </button>
+          </span>
         ))}
         <button type="button" onClick={() => fileRef.current?.click()}>
           画像を足す…

@@ -20,9 +20,7 @@ describe('背景プリセット', () => {
   });
 
   it('ホットキー（カード40）の背景の対象と同じ値で、targetId を行き来できる', () => {
-    expect(BACKGROUND_PRESETS.map(({ label, background }) => ({ label, background }))).toEqual(
-      HOTKEY_BACKGROUND_PRESETS,
-    );
+    expect(BACKGROUND_PRESETS).toBe(HOTKEY_BACKGROUND_PRESETS);
     const image = { type: 'image', path: 'backgrounds/01ABC.png' } as const;
     for (const bg of [...BACKGROUND_PRESETS.map((p) => p.background), image]) {
       expect(backgroundFromTargetId(backgroundTargetId(bg))).toEqual(bg);

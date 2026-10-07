@@ -57,5 +57,12 @@
 
 ## 記録
 
+- 2026-10-07 CO: ホットキーのパラメータを専用の `hotkey` 層へ移した。順はカード65の層で決め、表情の登録順に頼るコメントを削除。背景のプリセット・表示名とシーンの切り替えコマンドはscenesの定義を再利用する。
+- シーンとホットキーの画面は同じ `useBackgroundImagePaths` で未使用の背景画像も読む。`targetOptions(action, project, listedImages)` の3つ目でファイルの一覧を渡す（省略時は従来のシーンの背景）。シーンを削除すると対象ホットキーの数を出して確認し、1回のUndoで両方戻す。確認中の変更では削除しない。
+- 背景の画像の横に削除ボタンを付けた。使うシーンの名前と背景ホットキーの数を確認し、シーンは透明へ、対象ホットキーは削除へ。画像は `backgrounds/.removed/` へ退避し、一覧から外す。履歴のスナップショットに合わせてファイルも復元・退避するため、1回のUndo/Redoで画像と設定が戻る。未保存の画像は保存対象から外し、Undoで戻す。別名で保存した後のUndoは現在のフォルダへ元のバイトを戻す。退避の失敗では設定を変えない。
+- 公開の口: `removeBackgroundImage(store, files, dialogs, path)`、純粋な参照変更は `removeBackgroundImageCommand(path)`、BackgroundFilesには `remove(path)`・`restore(path)`。削除の確定前にファイルも履歴も変えない。
+- 自分の回帰テストは未使用画像・シーン削除の2件と背景ファイルの2件が修正前に失敗。関連129件、型とlintが成功。CLの層の10件は実装コミット後にskipの行だけを外して確認する。
+- 残り: CLの独立したtargets/scenesテスト・CH/UC-CHとテスト確認、Edgeの2画面サイズと全体検査。
+
 - 2026-10-07 CL（テストの担当）: 先に `apps/desktop/src/hotkeys/actions.c68.test.ts`（10件）を書き、`describe.skip`（カード68 の実装待ち）でコミットした。今の公開の口（createHotkeyActions の producer・createStudioRuntime・registerLayerProducer）だけを使う。producer の id が hotkey、表情とホットキーの登録の順2通り・アニメーションを加えた6通りで最後の値と層の並び（表情 → ホットキー → アニメーション）、もう一度押す・押している間を離すと表情の値に戻る。skip を外して今の実装で動かすと10件とも失敗する（直す前の失敗の確認）。実装の担当は、実装をコミットしたら skip の1行だけを戻す。
 - 残り: `targets.c68.test.ts`・`scenes.c68.test.ts` は、背景の画像の一覧の渡し方とシーン・背景の削除の口が決まってから書く（着手したら知らせてほしい）。CH・UC-CH も実装の後。

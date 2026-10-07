@@ -42,7 +42,7 @@ export interface HotkeyActions {
   trackingPaused(): boolean;
   activeParameterIds(): string[];
   subscribe(listener: () => void): () => void;
-  readonly producer: LayerProducer; // id 'expression'。パラメータのホットキーの値を override で出す
+  readonly producer: LayerProducer; // id 'hotkey'。パラメータのホットキーの値を override で出す
 }
 
 interface Switcher<T> {
@@ -201,7 +201,7 @@ export function createHotkeyActions(): HotkeyActions {
   }
 
   const producer: LayerProducer = {
-    id: 'expression',
+    id: 'hotkey',
     produce(frame) {
       if (parameters.size === 0) return null;
       const values: ParamValues = {};
@@ -213,7 +213,7 @@ export function createHotkeyActions(): HotkeyActions {
         blend[id] = 'override';
       }
       if (Object.keys(values).length === 0) return null;
-      return { id: 'expression', weight: 1, values, blend };
+      return { id: 'hotkey', weight: 1, values, blend };
     },
   };
 

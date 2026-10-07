@@ -36,6 +36,7 @@ export function ScenePanel() {
   const project = useProject();
   const dispatch = useDispatch();
   const dialogs = useDialogs();
+  const { store } = useServices();
   const { scenes } = project.studio;
   const active = activeScene(project);
   const index = active ? scenes.findIndex((s) => s.id === active.id) : -1;
@@ -43,6 +44,23 @@ export function ScenePanel() {
   const rename = async (id: string, name: string) => {
     const next = await dialogs.prompt('シーンの名前', name);
     if (next !== null) dispatch(renameSceneCommand(id, next));
+  };
+  const remove = async () => {
+    if (!active || scenes.length <= 1) return;
+    const start = store.get();
+    const count = start.studio.hotkeys.filter((h) => h.action === 'scene' && h.targetId === active.id).length;
+    if (
+      count > 0 &&
+      !(await dialogs.confirm(
+        `このシーンのホットキー（${count} 個）も消しますか？ シーンと一緒に消し、Undoで両方戻せる`,
+      ))
+    )
+      return;
+    if (store.get() !== start) {
+      dialogs.notify('確認中にプロジェクトが変わった。削除を選び直す');
+      return;
+    }
+    dispatch(removeSceneCommand(active.id));
   };
 
   return (
@@ -81,7 +99,7 @@ export function ScenePanel() {
           type="button"
           disabled={!active || scenes.length <= 1}
           title={scenes.length <= 1 ? '最後のシーンは削除できない' : undefined}
-          onClick={() => active && dispatch(removeSceneCommand(active.id))}
+          onClick={() => void remove()}
         >
           削除
         </button>

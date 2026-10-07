@@ -64,6 +64,11 @@ describe('ホットキーの対象', () => {
       '色（#FF00FF）',
     ]);
   });
+  it('シーンで使っていない画像も重複せずに背景の対象に出る', () => {
+    const options = targetOptions('background', project(), ['backgrounds/unused.png', 'backgrounds/room.png']);
+    expect(options.some((o) => o.value === 'image:backgrounds/unused.png')).toBe(true);
+    expect(options.filter((o) => o.value === 'image:backgrounds/room.png')).toHaveLength(1);
+  });
 
   it('パラメータはユーザー定義を先に並べる', () => {
     const options = targetOptions('parameter', project());

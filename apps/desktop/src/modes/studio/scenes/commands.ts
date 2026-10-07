@@ -106,7 +106,11 @@ export function removeSceneCommand(sceneId: string): Command {
       const rest = scenes.filter((s) => s.id !== sceneId);
       const wasActive = activeScene(p)?.id === sceneId;
       const activeSceneId = wasActive ? ((rest[i] ?? rest[i - 1])?.id ?? null) : p.studio.activeSceneId;
-      return withStudio(p, { scenes: rest, activeSceneId });
+      return withStudio(p, {
+        scenes: rest,
+        activeSceneId,
+        hotkeys: p.studio.hotkeys.filter((h) => h.action !== 'scene' || h.targetId !== sceneId),
+      });
     },
   };
 }

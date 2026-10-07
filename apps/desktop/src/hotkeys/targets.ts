@@ -3,6 +3,9 @@ import type { Hotkey, Project } from '@app/schema';
 import type { Command } from '@app/contracts';
 import { sameBackground, type SceneBackground } from '../modes/studio/scene';
 import { normalizeKeys } from './keys';
+import { BACKGROUND_PRESETS, backgroundLabel } from '../modes/studio/scenes/presets';
+export { BACKGROUND_PRESETS, backgroundLabel } from '../modes/studio/scenes/presets';
+export { selectSceneCommand as setActiveSceneCommand } from '../modes/studio/scenes/commands';
 
 export type HotkeyAction = Hotkey['action'];
 export type HotkeyMode = Hotkey['mode'];
@@ -49,26 +52,6 @@ export function backgroundFromTargetId(id: string): SceneBackground | null {
   return null;
 }
 
-export const BACKGROUND_PRESETS: { label: string; background: SceneBackground }[] = [
-  { label: '透明', background: { type: 'transparent' } },
-  { label: '緑', background: { type: 'color', color: '#00ff00' } },
-  { label: '青', background: { type: 'color', color: '#0000ff' } },
-  { label: '白', background: { type: 'color', color: '#ffffff' } },
-  { label: '黒', background: { type: 'color', color: '#000000' } },
-];
-
-function fileName(path: string): string {
-  return path.split('/').pop() || path;
-}
-
-export function backgroundLabel(bg: SceneBackground): string {
-  const preset = BACKGROUND_PRESETS.find((p) => sameBackground(p.background, bg));
-  if (preset) return preset.label;
-  if (bg.type === 'image') return `画像（${fileName(bg.path)}）`;
-  if (bg.type === 'color') return `色（${bg.color}）`;
-  return '透明';
-}
-
 // ---- 対象の選択肢 ----
 
 export interface TargetOption {
@@ -79,7 +62,11 @@ export interface TargetOption {
 
 export const CLEAR_EXPRESSION_LABEL = '（表情を解除）';
 
-export function targetOptions(action: HotkeyAction, project: Project): TargetOption[] {
+export function targetOptions(
+  action: HotkeyAction,
+  project: Project,
+  backgroundImages: readonly string[] = [],
+): TargetOption[] {
   switch (action) {
     case 'expression':
       return [
@@ -93,6 +80,10 @@ export function targetOptions(action: HotkeyAction, project: Project): TargetOpt
       const list = BACKGROUND_PRESETS.map((p) => p.background);
       for (const s of project.studio.scenes) {
         if (!list.some((b) => sameBackground(b, s.background))) list.push(s.background);
+      }
+      for (const path of backgroundImages) {
+        const background: SceneBackground = { type: 'image', path };
+        if (!list.some((b) => sameBackground(b, background))) list.push(background);
       }
       return list.map((b) => ({ value: backgroundTargetId(b), label: backgroundLabel(b) }));
     }
@@ -156,17 +147,6 @@ export function removeHotkeyCommand(id: string): Command {
     apply(p) {
       if (!p.studio.hotkeys.some((h) => h.id === id)) return p;
       return { ...p, studio: { ...p.studio, hotkeys: p.studio.hotkeys.filter((h) => h.id !== id) } };
-    },
-  };
-}
-
-// 使うシーンを変える。無いシーン・いまのシーンなら何もしない
-export function setActiveSceneCommand(sceneId: string): Command {
-  return {
-    label: 'シーンを切り替える',
-    apply(p) {
-      if (p.studio.activeSceneId === sceneId || !p.studio.scenes.some((s) => s.id === sceneId)) return p;
-      return { ...p, studio: { ...p.studio, activeSceneId: sceneId } };
     },
   };
 }

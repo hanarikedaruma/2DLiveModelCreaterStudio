@@ -37,7 +37,7 @@ export function registerModes(): void {
   registerStudioProducers(); // カード36
   registerWarp(); // カード29
   registerBlend(); // カード32
-  registerStudioExpressions(); // カード38（表情の producer をホットキーのパラメータの producer より先に入れ、ホットキーを後に効かせる）
+  registerStudioExpressions(); // カード38（表情とホットキーの順は、カード65の専用の層で決まる）
   registerHotkeys(); // カード40
   registerGrid2d(); // カード30
   registerScenes(); // カード39

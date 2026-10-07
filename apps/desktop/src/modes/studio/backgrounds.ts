@@ -141,6 +141,8 @@ export interface BackgroundFiles {
   load(path: string): Promise<Uint8Array | null>;
   // backgrounds/ にある画像と、まだ写していない画像のパス（プロジェクトからの相対パス。名前の順）。シーンの背景プリセットに使う
   list(): Promise<string[]>;
+  remove(path: string): Promise<void>; // 画像を一覧から外す。Undoに備え、元のバイトは退避する
+  restore(path: string): Promise<void>;
   pending(): string[]; // まだフォルダに写していない画像のパス
   writePending(dir: string): Promise<string[]>; // 手元に置いてある画像をフォルダに写す（保存のときに呼ぶ）
   subscribe(listener: () => void): () => void; // pending が変わったとき
@@ -156,6 +158,8 @@ export function createBackgroundFiles(deps: {
 }): BackgroundFiles {
   let resolveDir: ProjectDirResolver = () => null;
   const waiting = new Map<string, Uint8Array>();
+  const removedWaiting = new Map<string, Uint8Array>();
+  const removedBytes = new Map<string, Uint8Array>();
   const listeners = new Set<() => void>();
   const changed = () => {
     for (const l of [...listeners]) l();
@@ -164,6 +168,10 @@ export function createBackgroundFiles(deps: {
   async function write(fs: FileSystem, dir: string, path: string, data: Uint8Array) {
     await fs.mkdir(join(dir, 'backgrounds'));
     await fs.writeBinary(join(dir, path), data);
+  }
+  function removedPath(path: string): string {
+    if (!/^backgrounds\/[^/\\]+\.(png|jpe?g|webp)$/i.test(path)) throw new Error('背景の画像のパスではない');
+    return `backgrounds/.removed/${path.slice('backgrounds/'.length)}`;
   }
 
   return {
@@ -209,6 +217,41 @@ export function createBackgroundFiles(deps: {
         }
       }
       return [...out].sort();
+    },
+    async remove(path) {
+      const backup = removedPath(path);
+      const dir = await resolveDir();
+      const fs = deps.fs();
+      if (dir && fs && (await fs.exists(join(dir, path)))) {
+        const bytes = await fs.readBinary(join(dir, path));
+        await fs.mkdir(join(dir, 'backgrounds/.removed'));
+        await fs.rename(join(dir, path), join(dir, backup));
+        removedBytes.set(path, bytes);
+      }
+      const bytes = waiting.get(path);
+      if (bytes) {
+        removedWaiting.set(path, bytes);
+        waiting.delete(path);
+      }
+      changed();
+    },
+    async restore(path) {
+      const backup = removedPath(path);
+      const dir = await resolveDir();
+      const fs = deps.fs();
+      if (dir && fs && (await fs.exists(join(dir, backup))) && !(await fs.exists(join(dir, path)))) {
+        await fs.rename(join(dir, backup), join(dir, path));
+      }
+      // 削除のあとに「別名で保存」した場合も、現在のフォルダへ元の画像を戻す。
+      const kept = removedBytes.get(path);
+      if (kept && dir && fs && !(await fs.exists(join(dir, path)))) await write(fs, dir, path, kept);
+      removedBytes.delete(path);
+      const bytes = removedWaiting.get(path);
+      if (bytes) {
+        waiting.set(path, bytes);
+        removedWaiting.delete(path);
+      }
+      changed();
     },
     pending: () => [...waiting.keys()],
     async writePending(dir) {
