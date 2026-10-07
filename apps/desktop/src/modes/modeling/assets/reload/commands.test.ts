@@ -116,7 +116,7 @@ describe('reloadPsdCommand', () => {
   });
 
   it('同じサイズで位置が違えば、メッシュを位置の差だけずらす（手で編集した形とキーはそのまま）', () => {
-    expect(part(after, 'pBrow')).toEqual({ ...part(before, 'pBrow'), assetId: 'brow2' });
+    expect(part(after, 'pBrow')).toEqual({ ...part(before, 'pBrow'), assetId: 'brow2', pivot: { x: 20, y: -10 } });
     const shifted = mesh(after, 'mBrow');
     expect(shifted.vertices).toEqual(rect({ x: 620, y: 240 }, 12, 4).vertices);
     expect(shifted.uvs).toBe(mesh(before, 'mBrow').uvs);

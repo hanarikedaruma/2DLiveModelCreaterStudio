@@ -23,7 +23,7 @@ export interface ReloadInput {
 
 // 素材を差し替えた画像パーツの扱い:
 // - image（大きさも位置も同じ）: assetId だけを替える（メッシュとキーはそのまま）
-// - moved（大きさが同じで位置が違う）: assetId を替え、メッシュを位置の差だけずらす（形とキーはそのまま）
+// - moved（大きさが同じで位置が違う）: assetId を替え、メッシュと回転中心を同じだけずらす（形とキーはそのまま）
 // - resized（大きさが違う）: 新しい素材の位置でメッシュを作り直し、頂点のキーを転写する（カード28 の replaceAssetCommand）
 // パーツの合成モードが前の PSD のレイヤーのままなら、新しいレイヤーの合成モードに合わせる（カード32 の引き継ぎ）
 export function reloadPsdCommand(input: ReloadInput, options: { newId?: () => string } = {}): Command {
@@ -47,7 +47,24 @@ export function reloadPsdCommand(input: ReloadInput, options: { newId?: () => st
         if (update.next.id !== old.id) {
           const mesh = update.change === 'resized' ? (input.meshes[part.id] ?? null) : null;
           p = replaceAssetCommand(part.id, update.next.id, mesh, options).apply(p);
-          if (update.change === 'moved') p = shiftMesh(p, part.meshId, offsetDelta(old, update.next), shifted);
+          if (update.change === 'moved') {
+            const delta = offsetDelta(old, update.next);
+            p = shiftMesh(p, part.meshId, delta, shifted);
+            p = {
+              ...p,
+              model: {
+                ...p.model,
+                parts: p.model.parts.map((item) =>
+                  item.id === part.id
+                    ? {
+                        ...item,
+                        pivot: { x: item.pivot.x + delta.x, y: item.pivot.y + delta.y },
+                      }
+                    : item,
+                ),
+              },
+            };
+          }
         }
         if (part.blendMode === old.sourceBlendMode && update.next.sourceBlendMode !== old.sourceBlendMode) {
           p = setBlendMode(p, part.id, update.next.sourceBlendMode);

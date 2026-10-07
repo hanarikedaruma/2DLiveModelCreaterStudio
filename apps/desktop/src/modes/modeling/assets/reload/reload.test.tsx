@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { newId, type Asset, type Binding, type Vec2 } from '@app/schema';
 import type { Command, ImportWarning, ImportedAsset, Importer, Services } from '@app/contracts';
@@ -305,8 +305,88 @@ describe('素材トレイの [PSD を読み込み直す]', () => {
     expect(services.store.get()).toBe(before);
     expect(rows()).toEqual(['白目', '瞳', '口', '消える']);
 
-    fireEvent.click(within(result).getByRole('button', { name: '結果を閉じる' }));
     expect(screen.queryByRole('status', { name: '再読み込みの結果' })).toBeNull();
+  });
+
+  it('同じサイズでもメッシュの外の描き足しを知らせ、まとめて作り直してキーを移す（カード62）', async () => {
+    const services = await setup();
+    const oldAsset = byName(services, '瞳');
+    const iris = partOf(services, oldAsset.id);
+    const meshId = iris.meshId!;
+    services.store.dispatch({
+      label: '狭い手動メッシュとキー',
+      apply: (p) => ({
+        ...p,
+        model: {
+          ...p.model,
+          meshes: p.model.meshes.map((mesh) =>
+            mesh.id === meshId
+              ? {
+                  ...mesh,
+                  edited: true,
+                  vertices: mesh.vertices.map((v) => ({ x: Math.min(v.x, oldAsset.offset.x + 1), y: v.y })),
+                }
+              : mesh,
+          ),
+          bindings: [
+            ...p.model.bindings,
+            {
+              id: 'iris-keys',
+              target: { type: 'mesh', id: meshId },
+              channel: 'vertices',
+              parameterIds: ['EyeBallX'],
+              keyValues: [[-1, 0, 1]],
+              generation: 'linear',
+              divisions: null,
+              keys: [
+                {
+                  coords: [1],
+                  delta: Array.from({ length: 4 }, () => ({ x: 3, y: -2 })),
+                  source: 'manual',
+                  locked: true,
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    });
+    const readAlpha = services.assets.getImageData;
+    services.assets.getImageData = (id) => {
+      const image = readAlpha(id);
+      if (!image || image.width !== 6) return image;
+      const data = new Uint8ClampedArray(image.data);
+      data[(image.width * image.height - 1) * 4 + 3] = 255;
+      return { ...image, data };
+    };
+    renderShell(services);
+    pickPsd('model_v2.psd');
+    const result = await screen.findByRole('status', { name: '再読み込みの結果' });
+    expect(within(result).getByRole('alert').textContent).toContain('瞳');
+    const beforeRebuild = services.store.get();
+    const rebuild = () =>
+      fireEvent.click(within(result).getByRole('button', { name: '描き足した素材のメッシュをまとめて作り直す' }));
+    rebuild();
+    let dialog = await screen.findByRole('dialog');
+    expect(dialog.textContent).toContain('変形のキーを新しいメッシュへ移します');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'キャンセル' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(services.store.get()).toBe(beforeRebuild);
+    rebuild();
+    dialog = await screen.findByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'OK' }));
+    await waitFor(() => expect(screen.queryByRole('status', { name: '再読み込みの結果' })).toBeNull());
+    const regenerated = services.store.get().model.meshes.find((mesh) => mesh.id === meshId)!;
+    expect(Math.max(...regenerated.vertices.map((v) => v.x))).toBe(oldAsset.offset.x + 6);
+    const transferred = services.store.get().model.bindings.find((binding) => binding.id === 'iris-keys')!;
+    expect(transferred.keys[0]).toMatchObject({
+      coords: [1],
+      source: 'manual',
+      locked: true,
+      delta: Array.from({ length: regenerated.vertices.length }, () => ({ x: 3, y: -2 })),
+    });
+    act(() => services.store.undo());
+    expect(services.store.get()).toBe(beforeRebuild);
   });
 
   it('PSD が2つ以上なら、読み込み直す PSD を選べる', async () => {

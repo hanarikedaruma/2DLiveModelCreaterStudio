@@ -1,9 +1,58 @@
 // PSD の再読み込み（カード43）。直した PSD を最初の取り込みと同じ処理（トリミング・クリッピングの統合・警告）で読み、
 // 前に取り込んだ素材とレイヤーを対応させる。素材やパーツの書き換えは画面の側（コマンド）で行う
-import type { Asset } from '@app/schema';
+import type { Asset, Mesh, Vec2 } from '@app/schema';
 import type { ImportWarning, ImportedAsset, Importer } from '@app/contracts';
 import { createImporter, type ImportFile } from './importer';
-import { hasPsdSignature } from './psd';
+// 署名だけを調べる。同期の PSD 解析部をここから読み込まない（解析は Importer の Worker）。
+const hasPsdSignature = (data: Uint8Array) =>
+  data.length >= 4 && data[0] === 0x38 && data[1] === 0x42 && data[2] === 0x50 && data[3] === 0x53;
+
+// 不透明なテクセルの中心が旧メッシュの三角形に覆われているか。行ごとに覆う区間を合わせ、
+// 隙間の画素だけを見る（画素数×三角形数の全探索をしない）。基準状態のキャンバス座標で比較する。
+export function hasOpaquePixelsOutsideMesh(
+  image: { width: number; height: number; data: ArrayLike<number> },
+  offset: Vec2,
+  mesh: Pick<Mesh, 'vertices' | 'triangles'>,
+): boolean {
+  const rows: [number, number][][] = Array.from({ length: image.height }, () => []);
+  const epsilon = 1e-7;
+  for (const triangle of mesh.triangles) {
+    const [a, b, c] = triangle.map((index) => mesh.vertices[index]);
+    if (!a || !b || !c || Math.abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) < epsilon) continue;
+    const first = Math.max(0, Math.ceil(Math.min(a.y, b.y, c.y) - offset.y - 0.5));
+    const last = Math.min(image.height - 1, Math.floor(Math.max(a.y, b.y, c.y) - offset.y - 0.5));
+    for (let row = first; row <= last; row++) {
+      const y = offset.y + row + 0.5;
+      const xs: number[] = [];
+      for (const [start, end] of [
+        [a, b],
+        [b, c],
+        [c, a],
+      ] as [Vec2, Vec2][]) {
+        if (start.y !== end.y && y >= Math.min(start.y, end.y) && y <= Math.max(start.y, end.y)) {
+          xs.push(start.x + ((y - start.y) / (end.y - start.y)) * (end.x - start.x));
+        }
+      }
+      if (xs.length < 2) continue;
+      const from = Math.max(0, Math.ceil(Math.min(...xs) - offset.x - 0.5 - epsilon));
+      const to = Math.min(image.width - 1, Math.floor(Math.max(...xs) - offset.x - 0.5 + epsilon));
+      if (from <= to) rows[row]!.push([from, to]);
+    }
+  }
+  for (let y = 0; y < image.height; y++) {
+    let cursor = 0;
+    const opaqueInGap = (end: number) => {
+      for (; cursor < end; cursor++) if ((image.data[(y * image.width + cursor) * 4 + 3] ?? 0) > 0) return true;
+      return false;
+    };
+    for (const [from, to] of rows[y]!.sort((a, b) => a[0] - b[0])) {
+      if (opaqueInGap(from)) return true;
+      cursor = Math.max(cursor, to + 1);
+    }
+    if (opaqueInGap(image.width)) return true;
+  }
+  return false;
+}
 
 // レイヤーを見分ける鍵（グループの道筋とレイヤー名）
 export function layerKey(asset: Asset): string {

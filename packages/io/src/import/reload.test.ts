@@ -5,6 +5,7 @@ import { createImporter } from './importer';
 import { decodePng, encodePng } from './png';
 import {
   assetsFromPsd,
+  hasOpaquePixelsOutsideMesh,
   layerChange,
   layerKey,
   matchLayers,
@@ -36,6 +37,37 @@ function asset(id: string, layerName: string | undefined, layerPath: string[], f
 
 const ids = (list: readonly Asset[]) => list.map((a) => a.id);
 const pairIds = (pairs: { old: Asset; next: Asset }[]) => pairs.map((p) => [p.old.id, p.next.id]);
+
+describe('再読み込みの画素とメッシュ（カード62）', () => {
+  const mesh = {
+    vertices: [
+      { x: 10, y: 20 },
+      { x: 12, y: 20 },
+      { x: 10, y: 22 },
+    ],
+    triangles: [[0, 1, 2] as [number, number, number]],
+  };
+  it('三角形の外へ描き足した画素を見つけ、透明な余白は知らせない', () => {
+    const image = makeImage(2, 2, RED, { x: 0, y: 0, width: 1, height: 1 });
+    expect(hasOpaquePixelsOutsideMesh(image, { x: 10, y: 20 }, mesh)).toBe(false);
+    image.data[(1 * 2 + 1) * 4 + 3] = 255;
+    expect(hasOpaquePixelsOutsideMesh(image, { x: 10, y: 20 }, mesh)).toBe(true);
+  });
+  it('位置がずれた画像もキャンバス座標で比較し、同じだけずらしたメッシュなら覆う', () => {
+    const image = makeImage(2, 2, RED, { x: 0, y: 0, width: 1, height: 1 });
+    expect(hasOpaquePixelsOutsideMesh(image, { x: 20, y: 30 }, mesh)).toBe(true);
+    expect(
+      hasOpaquePixelsOutsideMesh(
+        image,
+        { x: 20, y: 30 },
+        {
+          ...mesh,
+          vertices: mesh.vertices.map((v) => ({ x: v.x + 10, y: v.y + 10 })),
+        },
+      ),
+    ).toBe(false);
+  });
+});
 
 describe('matchLayers', () => {
   it('layerPath と layerName が同じものを対応させ、新しいレイヤーと無くなったレイヤーを分ける', () => {

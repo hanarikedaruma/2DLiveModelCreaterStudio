@@ -2,9 +2,10 @@
 // PSD が2つ以上なら、どれを読み込み直すかを選ぶ。終わったら結果（更新・追加・見つからない）を出す
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { psdSourceFiles } from '@app/io';
+import type { Project } from '@app/schema';
 import { onAppEvent, useDialogs, useProject, useServices } from '../../../../shell/api';
 import { readFileBytes } from '../actions';
-import { reloadPsd, type ReloadSummary, type ReloadedItem } from './actions';
+import { rebuildReloadMeshes, reloadPsd, type ReloadSummary, type ReloadedItem } from './actions';
 import './reload.css';
 
 export const ACCEPT_PSD = '.psd,image/vnd.adobe.photoshop';
@@ -47,7 +48,15 @@ function ResultGroup({
   );
 }
 
-export function ReloadResult({ summary, onClose }: { summary: ReloadSummary; onClose(): void }) {
+export function ReloadResult({
+  summary,
+  onClose,
+  onRebuild,
+}: {
+  summary: ReloadSummary;
+  onClose(): void;
+  onRebuild?(): void;
+}) {
   const changeOf = new Map(summary.updated.map((u) => [u.assetId, u.change]));
   return (
     <div className="psd-reload-result" role="status" aria-label="再読み込みの結果">
@@ -78,6 +87,17 @@ export function ReloadResult({ summary, onClose }: { summary: ReloadSummary; onC
       </ul>
       {summary.unchanged > 0 && <p className="am-dim">変わらない: {summary.unchanged} 個</p>}
       {summary.warnings > 0 && <p className="am-dim">取り込みの警告がある（警告の一覧を確認）</p>}
+      {summary.uncovered && summary.uncovered.length > 0 && (
+        <div role="alert">
+          <p>
+            メッシュの外に描き足した画素があります：{summary.uncovered.map((item) => item.name).join('・')}
+            。メッシュを作り直すと表示できます（変形のキーは移します）。
+          </p>
+          <button type="button" onClick={onRebuild}>
+            描き足した素材のメッシュをまとめて作り直す
+          </button>
+        </div>
+      )}
       <p className="am-dim am-hint">「元に戻す」1回で、まとめて読み込み直す前に戻せる</p>
     </div>
   );
@@ -86,15 +106,28 @@ export function ReloadResult({ summary, onClose }: { summary: ReloadSummary; onC
 export function PsdReloadSection() {
   const services = useServices();
   const project = useProject();
-  const { notify } = useDialogs();
+  const dialogs = useDialogs();
+  const { notify } = dialogs;
   const sources = useMemo(() => psdSourceFiles(project.assets), [project.assets]);
   const [chosen, setChosen] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [summary, setSummary] = useState<ReloadSummary | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultProject = useRef<Project | null>(null);
 
   // 新規・開くのあとは前の結果を消す
   useEffect(() => onAppEvent('projectLoaded', () => setSummary(null)), []);
+  // Undo を含め、再読み込みの直後と異なる状態になったら古い結果を閉じる。
+  useEffect(
+    () =>
+      services.store.subscribe((current) => {
+        if (resultProject.current && current !== resultProject.current) {
+          resultProject.current = null;
+          setSummary(null);
+        }
+      }),
+    [services],
+  );
 
   const target = chosen !== null && sources.includes(chosen) ? chosen : (sources[0] ?? null);
   if (target === null && !summary) return null;
@@ -108,6 +141,7 @@ export function PsdReloadSection() {
         notify(outcome.error);
         return;
       }
+      resultProject.current = services.store.get();
       setSummary(outcome.summary);
       setChosen(outcome.summary.file); // 素材は新しいファイル名になるので、次もそれを選ぶ
       if (outcome.summary.warnings > 0) notify('取り込みの警告がある。素材トレイの一覧を確認してください');
@@ -158,7 +192,15 @@ export function PsdReloadSection() {
           />
         </div>
       )}
-      {summary && <ReloadResult summary={summary} onClose={() => setSummary(null)} />}
+      {summary && (
+        <ReloadResult
+          summary={summary}
+          onClose={() => setSummary(null)}
+          onRebuild={() => {
+            void rebuildReloadMeshes(services, dialogs, summary.uncovered?.map((item) => item.assetId) ?? []);
+          }}
+        />
+      )}
     </div>
   );
 }
