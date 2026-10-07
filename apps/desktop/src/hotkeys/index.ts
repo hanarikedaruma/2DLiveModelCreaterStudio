@@ -1,5 +1,5 @@
 // グローバルホットキー（カード40）。register() でスタジオの設定のパネルに割り当ての画面を足し、
-// パラメータのホットキーの値を出す producer（id 'expression'）をスタジオの実行部に登録する
+// パラメータのホットキーの値を出す producer（id 'hotkey'）をスタジオの実行部に登録する
 import { registerPanelSection } from '../shell/api';
 import { registerLayerProducer } from '../modes/studio';
 import { HotkeySection } from './HotkeySection';
