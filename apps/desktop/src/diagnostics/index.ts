@@ -2,7 +2,7 @@
 // 最大5分の記録を JSON に書き出せる。表示は DOM を直接使う小さな窓（どのモードでも出せるように React の外に置く）
 import type { Services } from '@app/contracts';
 import type { AudioLipSyncProducer } from '@app/audio';
-import { studioRuntime } from '../modes/studio/runtime';
+import { studioRuntime, type StudioFrame } from '../modes/studio/runtime';
 import { isTauri } from '../platform/tauri';
 import { registerMenuItem } from '../shell/api';
 import { emitAppEvent } from '../shell/events';
@@ -15,6 +15,7 @@ import {
   type DiagnosticsSnapshot,
 } from './collector';
 import './diagnostics.css';
+import { createLayerDisplay, DEFAULT_DIAGNOSTIC_PARAMETERS, LAYER_SAMPLE_MS } from './layers';
 
 export { createDiagnosticsCollector, type DiagnosticsRecord, type DiagnosticsSnapshot } from './collector';
 
@@ -79,9 +80,13 @@ async function saveRecord(services: Services, record: DiagnosticsRecord): Promis
 
 export function registerDiagnostics(services: Services): Diagnostics {
   const collector = createDiagnosticsCollector();
-  studioRuntime.registerFrameSink(() => {
+  const selected = new Set(DEFAULT_DIAGNOSTIC_PARAMETERS);
+  let latestFrame: StudioFrame | null = null;
+  studioRuntime.registerFrameSink((frame) => {
+    latestFrame = frame;
     const now = performance.now();
     collector.onRenderedFrame(now);
+    if (collector.isRecording()) collector.onLayerFrame(frame, now, selected);
     const lipSync = services.lipSync as Partial<AudioLipSyncProducer>;
     const time = lipSync.vowelFrameTime?.();
     if (time !== undefined && time !== null) collector.onVowelRendered(time, now);
@@ -94,6 +99,7 @@ export function registerDiagnostics(services: Services): Diagnostics {
   let exportButton: HTMLButtonElement | null = null;
   let timer: ReturnType<typeof setInterval> | null = null;
   let last: DiagnosticsRecord | null = null;
+  let layerDisplay: ReturnType<typeof createLayerDisplay> | null = null;
 
   const environment = (): Record<string, unknown> => {
     const project = services.store.get();
@@ -135,6 +141,7 @@ export function registerDiagnostics(services: Services): Diagnostics {
     );
     recordButton.textContent = collector.isRecording() ? '記録を止める' : '記録を始める';
     exportButton.disabled = last === null;
+    layerDisplay?.update(latestFrame, services.store.get().model.parameters);
   };
 
   const show = () => {
@@ -143,6 +150,7 @@ export function registerDiagnostics(services: Services): Diagnostics {
     root.className = 'diagnostics';
     root.setAttribute('role', 'status');
     root.setAttribute('aria-label', '計測');
+    root.setAttribute('aria-live', 'off');
     const title = document.createElement('div');
     title.className = 'diagnostics-title';
     title.textContent = '計測（Ctrl+Shift+D で閉じる）';
@@ -162,7 +170,8 @@ export function registerDiagnostics(services: Services): Diagnostics {
         .catch((e) => emitAppEvent(SHELL_NOTIFY, `書き出せなかった: ${e instanceof Error ? e.message : String(e)}`));
     };
     buttons.append(recordButton, exportButton);
-    root.append(title, lines, buttons);
+    layerDisplay = createLayerDisplay(selected);
+    root.append(title, lines, buttons, layerDisplay.root);
     document.body.append(root);
     update();
     timer = setInterval(() => {
@@ -170,7 +179,7 @@ export function registerDiagnostics(services: Services): Diagnostics {
       const s = collector.snapshot(performance.now());
       if (s.recording.active && s.recording.elapsedMs >= RECORD_LIMIT_MS) api.stopRecording();
       else update();
-    }, 500);
+    }, LAYER_SAMPLE_MS);
   };
 
   const hide = () => {
@@ -178,6 +187,7 @@ export function registerDiagnostics(services: Services): Diagnostics {
     timer = null;
     root?.remove();
     root = lines = recordButton = exportButton = null;
+    layerDisplay = null;
   };
 
   const api: Diagnostics = {

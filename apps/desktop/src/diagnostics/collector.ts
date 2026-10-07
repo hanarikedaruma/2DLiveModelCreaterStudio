@@ -1,6 +1,8 @@
 // 計測の記録（カード25）。スタジオのフレームとトラッキングのフレームを受け取り、
 // 描画の fps（平均と1%最低値）・トラッキングの fps・遅延（TrackingFrame.time から、その値を使ったフレームを描いた時刻まで）を求める
 import type { TrackingFrame } from '@app/contracts';
+import type { StudioFrame } from '../modes/studio/runtime';
+import { LAYER_SAMPLE_MS, sampleLayers, type LayerSample } from './layers';
 import { fpsStats, latencyStats, ratePerSecond, type FpsStats, type LatencyStats } from './stats';
 
 export const DISPLAY_WINDOW_MS = 5000; // 画面に出す値は直近5秒
@@ -26,6 +28,7 @@ export interface DiagnosticsRecord {
     trackingTimes: number[];
     latencies: number[]; // ミリ秒
     vowelLatencies: number[];
+    layers: LayerSample[];
   };
 }
 
@@ -33,6 +36,7 @@ export interface DiagnosticsCollector {
   onRenderedFrame(now: number): void; // スタジオのフレームを描いた直後に呼ぶ
   onTrackingFrame(frame: TrackingFrame, receivedAt: number): void;
   onVowelRendered(frameTime: number, renderedAt: number): void;
+  onLayerFrame(frame: StudioFrame, now: number, parameterIds: Iterable<string>): void;
   snapshot(now: number): DiagnosticsSnapshot;
   startRecording(now: number, startedAt: Date): void;
   stopRecording(now: number, environment?: Record<string, unknown>): DiagnosticsRecord | null;
@@ -61,6 +65,8 @@ export function createDiagnosticsCollector(): DiagnosticsCollector {
     trackingTimes: number[];
     latencies: number[];
     vowelLatencies: number[];
+    layers: LayerSample[];
+    lastLayerAt: number;
   } | null = null;
 
   const trim = (now: number) => {
@@ -77,6 +83,12 @@ export function createDiagnosticsCollector(): DiagnosticsCollector {
   const recordingActive = (now: number) => record !== null && now - record.start <= RECORD_LIMIT_MS;
 
   return {
+    onLayerFrame(frame, now, parameterIds) {
+      if (!recordingActive(now) || now - record!.lastLayerAt < LAYER_SAMPLE_MS) return;
+      const ids = [...parameterIds].filter((id) => Object.hasOwn(frame.params, id));
+      record!.layers.push(sampleLayers(frame, ids, now - record!.start));
+      record!.lastLayerAt = now;
+    },
     onVowelRendered(frameTime, renderedAt) {
       if (
         !Number.isFinite(frameTime) ||
@@ -119,7 +131,16 @@ export function createDiagnosticsCollector(): DiagnosticsCollector {
       };
     },
     startRecording(now, startedAt) {
-      record = { start: now, startedAt, renderTimes: [], trackingTimes: [], latencies: [], vowelLatencies: [] };
+      record = {
+        start: now,
+        startedAt,
+        renderTimes: [],
+        trackingTimes: [],
+        latencies: [],
+        vowelLatencies: [],
+        layers: [],
+        lastLayerAt: -Infinity,
+      };
     },
     stopRecording(now, environment = {}) {
       if (!record) return null;
@@ -143,6 +164,7 @@ export function createDiagnosticsCollector(): DiagnosticsCollector {
           trackingTimes: r.trackingTimes,
           latencies: r.latencies,
           vowelLatencies: r.vowelLatencies,
+          layers: r.layers,
         },
       };
     },

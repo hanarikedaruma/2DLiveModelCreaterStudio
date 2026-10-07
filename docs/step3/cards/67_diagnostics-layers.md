@@ -53,4 +53,11 @@
 
 ## 記録
 
-（作業中に書く）
+### CO 実装（2026-10-07）
+
+- 合成前の9層の値・有効な重み（parameterWeights を優先）・合成方法と、実行部の最後の値を表にした。未担当と0を分け、同じ層に複数 producer がある場合もすべて出す。実行部は変更しない。
+- 顔・目・口・体の9パラメータが既定。モデルのパラメータから表示を選び、この表示のインスタンス内だけで覚える。横スクロール時もパラメータと最後の値を固定し、小さい画面では窓全体を縦にスクロールできる。
+- 表示と記録は500msに1回。記録時だけ選択した有限の値を写し、元データが変更されても記録は変わらない。非表示でも記録できる。従来の version 1 の JSON に samples.layers を追加（atMs/parameterIds/final/layers。層の values/weight/parameterWeights/blend）。5分で最大601サンプル。
+- 自分の回帰テストは表・選択・記録の3件すべてが実装前に失敗。実装後は既存9件を含む12件が通り、型・lint も確認した。既存 diagnostics.e2e.ts に実自動層・表情の加算と最終値・JSON の間引きを追加。
+- CL 用公開口: registerDiagnostics の従来 API、createLayerDisplay(selected: Set<string>)、sampleLayers(frame, ids, atMs)、collector.onLayerFrame(frame, now, ids)。DOM の表に data-parameter-id / data-layer-id / data-final がある。
+- 残り: CL 独立テスト・テスト確認と CH、Edge 2サイズ、本物のアプリの e2e、pnpm measure で表示前後の比較、全体チェック。I-007 とカード36の確認はこれらの結果を揃えてから締める。

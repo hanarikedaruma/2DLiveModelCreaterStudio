@@ -148,7 +148,7 @@ pnpm はリポジトリの中の Corepack で動かす。PowerShell で、毎回
 | 64   | [左右反転コピーの符号](cards/64_mirror-copy-sign.md)                  | 1   | CO   | 55              |      |      | CL     | コミット済み・テスト確認待ち |
 | 65   | [層と設定の契約](cards/65_layers-contract.md)                         | 1   | CL   | 58              | ○    |      | CO     | コミット済み・テスト確認待ち |
 | 66   | [自動まばたきの層と層ごとの値](cards/66_auto-blink-layer.md)          | 1   | CL   | 65              |      |      | CO     | 完了                         |
-| 67   | [計測の表示に層ごとの値](cards/67_diagnostics-layers.md)              | 1   | CO   | 66              |      |      | CL     | 未着手                       |
+| 67   | [計測の表示に層ごとの値](cards/67_diagnostics-layers.md)              | 1   | CO   | 66              |      |      | CL     | コミット済み・テスト確認待ち |
 | 68   | [シーン・背景・ホットキーの後始末](cards/68_studio-cleanup.md)        | 1   | CO   | 65              |      |      | CL     | コミット済み・テスト確認待ち |
 | 69   | [Spout2 の復帰と GPU の選択](cards/69_spout2.md)                      | 1   | CO   | 65              |      | ○    | CL     | コミット済み・テスト確認待ち |
 | 70   | [実機の確認（1回目）](cards/70_real-device-1.md)                      | 2   | CO   | 55（目視は 56） |      | ○    | CL     | 未着手                       |
