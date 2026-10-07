@@ -62,3 +62,11 @@ GPU のデバイスが失われても Spout2 の出力が自動で戻るよう�
 - 自分の回帰テストは追加前に configureAdapter 不在と状態取得後の再試行で失敗を確認。実装後に出力の38件、Rust の27件（GPU 選択・共有受信と復旧の差し込みを含む）が通った。Rust の性能専用1件は従来どおり ignored。
 - CL 用公開口: `listSpoutAdapters()`、`SpoutSink.configureAdapter(id|null)` / `telemetry()`。Rust `output::recovery::{Backend,RecoveringOutput}` は時刻と factory を差し込める。`render` の true だけを送信に数え、共有 mutex が使用中なら false。`status()` は state/message/sentFrames/failures/recoveries/sendFps を返す。
 - 残り: CL の独立テスト・テスト確認と CH、Edge の2サイズ、全体チェック、Native e2e。OBS の実受信はカード72。2時間の連続動作は今回対象外。
+
+### CL テストの担当（2026-10-07）
+
+- `apps/desktop/src-tauri/src/output/recovery_c69.rs`（10件。`output/mod.rs` に `#[cfg(all(test, windows))] mod recovery_c69;` の2行を足した）と `apps/desktop/src/output/spout/OutputMethodSection.c69.test.tsx`（6件）を足した。`cargo test` 37件（1件は従来の計測用で ignored）と出力の vitest 44件が通る。
+  - Rust: 偽の Backend で、デバイスの消失を 33ms に見つけるとそのフレームは送らず古いデバイスを捨て、100ms 後（133ms）に作り直して最新の素材を同じ画素で送り直し、送信が続く。描画・共有の失敗、素材の転送の失敗でも同じ。続けて失敗すると待ちが 100ms から倍になり 5 秒で止まって試し続け、成功のあとは 100ms に戻る。復旧を待つ間の素材の差し替え・削除・追加を反映する。作り直したデバイスへ素材を送れなければそれも捨てる。古い送り手を消してから作るので同じ名前で登録し直す。受け手が読んでいたフレームは送信にも失敗にも数えない。状態の名前は画面と計測が読む形。本物の D3D11 でも、作り直した共有テクスチャから最新の絵が読める（Spout の送り手は作らない）。
+  - 画面: 一覧は「既定のGPU」の後に並び、案内が出る。選んだ GPU を environment.json に保存し、開き直すと同じ GPU で始める。保存した GPU が一覧に無ければ既定に戻して保存し知らせる。Rust 側が見つけられず既定で始めたときも同じ。一覧を読めないときは保存した GPU を消さずに理由を出す。
+- **実装の担当（CO）へ修正の検討の依頼**: GPU の識別子が DXGI の LUID（`d3d11.rs` の `adapter_id`）で、LUID は Windows の再起動までしか同じであることが保証されない。PC を再起動すると保存した GPU が一覧に無いとみなされ、既定に戻して null で上書きする見込み（完了条件2の「保存・復元」が、アプリの開き直しでは通るが PC の再起動では通らない）。ベンダー・デバイス・サブシステムの ID と名前などの再起動しても変わらない値で保存し、起動時に LUID へ対応付けるのがよいと考える。あわせて、一時的に GPU が見えないとき（外付けの GPU を外した・ドライバの更新中）に選択を null で上書きしてしまうこと、Rust が既定に戻した知らせが状態の取得（1秒ごと）まで遅れること（`spout_start` の結果の adapterFallback を使っていない）も見てほしい。
+- テスト確認はまだ書かない: 上の識別子の扱いの判断、ネイティブの e2e（Spout2 の確認）、CH・UC-CH のあと。復旧中は送り手が Spout の一覧から 100ms 以上消えるので、OBS の受け方はカード72 の実機で見る。

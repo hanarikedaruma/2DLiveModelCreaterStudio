@@ -61,3 +61,14 @@
 - 自分の回帰テストは表・選択・記録の3件すべてが実装前に失敗。実装後は既存9件を含む12件が通り、型・lint も確認した。既存 diagnostics.e2e.ts に実自動層・表情の加算と最終値・JSON の間引きを追加。
 - CL 用公開口: registerDiagnostics の従来 API、createLayerDisplay(selected: Set<string>)、sampleLayers(frame, ids, atMs)、collector.onLayerFrame(frame, now, ids)。DOM の表に data-parameter-id / data-layer-id / data-final がある。
 - 残り: CL 独立テスト・テスト確認と CH、Edge 2サイズ、本物のアプリの e2e、pnpm measure で表示前後の比較、全体チェック。I-007 とカード36の確認はこれらの結果を揃えてから締める。
+
+### CL テストの担当（2026-10-07）
+
+- `apps/desktop/src/diagnostics/layers.c67.test.tsx`（10件）を足した。本物の実行部（createStudioRuntime）・ミキサー・自動まばたき・表情の制御を手で進め、表の値を `data-*` と見出しの列の両方で読んで確かめる。CO の layers.test.ts・diagnostics.test.ts と合わせて22件が通る。
+  - カメラ停止中: 見出しは11列、既定の9つのパラメータ。まばたきで閉じている間、目 開閉 L/R の「自動」が `0.000 / 重み 1.000・上書き` で最後の値も 0、カメラほかは —。担当の無いパラメータは全部 —（0 と区別）。自動まばたきをオフにすると自動は —。
+  - 表情: 0.5 の重みでのフェードの途中、表情の列の値・重み・合成（加算・乗算）と最後の値の違いが読める（EyeOpenL 表情 −0.400・最後 0.800 など）。外すと — に戻る。
+  - 同じ層の2つの producer・parameterWeights の優先・max の表示、重み 0 の 0 は — にならない。更新は 500ms ごと（100fps で2秒動かしても表示が変わるのは5回）。
+  - 表示するパラメータの選択（モデルの全パラメータ、既定9つ、すぐ反映、閉じて開いても保つ、プロジェクトと Undo を変えない、新しい表示は既定に戻る）。
+  - JSON: 50fps・3秒の記録で layers の標本は6件（atMs 0〜2500）、選んだパラメータの層の値・重み・合成と final。途中で選び直すと以後の標本だけ変わる。sampleLayers は有限の値だけ写し、元を変えても標本は変わらない。5分＋5秒で601件。
+- 本物のアプリの `diagnostics.c67.e2e.ts`（カメラ停止中に目の値が「自動」から来ていると表で読める、記録の JSON に auto の目の値が入る、自動まばたきのオフ・オン）は書いたが、まだ実行していない。CO がネイティブの e2e を回している間に混ざらないよう、ロックを取って実行できるまで作業フォルダに置かない（CL の手元に保留）。
+- テスト確認はまだ書かない: 上の e2e、`pnpm measure` の表示の前後の比較（完了条件4）、Edge の2つの画面サイズ、CH・UC-CH のあと。

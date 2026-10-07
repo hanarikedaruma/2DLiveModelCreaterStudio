@@ -20,6 +20,8 @@ pub mod worker;
 
 #[cfg(all(test, windows))]
 mod gpu_tests;
+#[cfg(all(test, windows))]
+mod recovery_c69;
 
 use std::sync::{Arc, Mutex};
 use tauri::ipc::{InvokeBody, Request};
