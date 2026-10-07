@@ -5,6 +5,7 @@
 // - 1920×1080 の描画の時間（cargo test -- --ignored で測る）
 
 use super::d3d11::{create_device, read_texture, Renderer};
+use super::d3d11::{create_device_with_adapter, list_adapters};
 use super::frame::{decode_frame, decode_textures, Background, BlendMode, Frame, Item, View};
 use super::image::{self, encode_png, mul_div_255};
 use super::spout::{
@@ -17,6 +18,24 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::{Duration, Instant};
 use windows::Win32::Foundation::HANDLE;
 use windows::Win32::Graphics::Direct3D11::ID3D11Texture2D;
+
+#[test]
+fn 列挙した各GPUを選び存在しないGPUは既定へ戻す() {
+    let adapters = list_adapters().unwrap();
+    assert!(!adapters.is_empty(), "D3D11のGPUが必要");
+    for adapter in adapters {
+        let gpu = create_device_with_adapter(false, Some(&adapter.id)).unwrap();
+        assert_eq!(gpu.adapter_id, adapter.id);
+        assert!(!gpu.adapter_fallback);
+        unsafe { gpu.device.GetDeviceRemovedReason() }.unwrap();
+    }
+    let gpu = create_device_with_adapter(false, Some("見つからないGPU")).unwrap();
+    assert!(gpu.adapter_fallback);
+    assert_eq!(
+        gpu.adapter_id,
+        create_device_with_adapter(false, None).unwrap().adapter_id
+    );
+}
 
 static NEXT: AtomicU32 = AtomicU32::new(0);
 
@@ -147,6 +166,7 @@ fn 受け手が共有メモリから送り手を見つけて透過のまま読�
         sender_name: name.clone(),
         width,
         height,
+        adapter_id: None,
     })
     .expect("送り手を作れない");
     assert_eq!(worker.started.sender_name, name);
@@ -254,12 +274,14 @@ fn 同じ名前の送り手が動いていれば番号を付ける() {
         sender_name: name.clone(),
         width: 16,
         height: 16,
+        adapter_id: None,
     })
     .unwrap();
     let second = Worker::start(StartOptions {
         sender_name: name.clone(),
         width: 16,
         height: 16,
+        adapter_id: None,
     })
     .unwrap();
     assert_eq!(second.started.sender_name, format!("{name}_1"));
@@ -414,6 +436,7 @@ fn フルhdで_60fps_に間に合う() {
         sender_name: name.clone(),
         width: 1920,
         height: 1080,
+        adapter_id: None,
     })
     .unwrap();
     for textures in scene_textures(&dir, "sample-model") {

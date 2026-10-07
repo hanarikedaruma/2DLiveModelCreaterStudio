@@ -54,4 +54,11 @@ GPU のデバイスが失われても Spout2 の出力が自動で戻るよう�
 
 ## 記録
 
-（作業中に書く）
+### CO 実装（2026-10-07）
+
+- DXGI の実アダプターを LUID で選び、実際に使った GPU を返す。設定を保存・復元し、無い GPU は既定へ戻して画面で知らせる。
+- GetDeviceRemovedReason と描画・共有の失敗を検出し、送信者→共有テクスチャ→デバイスの順に破棄して作り直す。100ms から最大5秒の待ち時間、同じ送信名、最新の素材の再送を維持する。素材の保持は圧縮データで行う。
+- 復旧中の表示と実送信数・失敗数・復旧数を追加。既存 studio.measure.ts が Rust の実送信数から送信 fps を記録する。状態取得の失敗からの手動再試行も再起動する。
+- 自分の回帰テストは追加前に configureAdapter 不在と状態取得後の再試行で失敗を確認。実装後に出力の38件、Rust の27件（GPU 選択・共有受信と復旧の差し込みを含む）が通った。Rust の性能専用1件は従来どおり ignored。
+- CL 用公開口: `listSpoutAdapters()`、`SpoutSink.configureAdapter(id|null)` / `telemetry()`。Rust `output::recovery::{Backend,RecoveringOutput}` は時刻と factory を差し込める。`render` の true だけを送信に数え、共有 mutex が使用中なら false。`status()` は state/message/sentFrames/failures/recoveries/sendFps を返す。
+- 残り: CL の独立テスト・テスト確認と CH、Edge の2サイズ、全体チェック、Native e2e。OBS の実受信はカード72。2時間の連続動作は今回対象外。

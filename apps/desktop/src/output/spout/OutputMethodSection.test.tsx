@@ -1,6 +1,6 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createEmptyProject } from '@app/schema';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createDefaultEnvironment, createEmptyProject } from '@app/schema';
 import type { Background, DeformedModel, OutputSink, Renderer, Services, ViewTransform } from '@app/contracts';
 import { createFakeServices } from '../../services';
 import { createEnvironmentStore, memoryEnvironmentStorage } from '../../shell/environment';
@@ -10,6 +10,8 @@ import { register as registerStudio } from '../../modes/studio';
 import { animationFrameScheduler, studioRuntime } from '../../modes/studio/runtime';
 import { spoutOutput } from './controller';
 import { register } from './index';
+import { listSpoutAdapters } from './adapters';
+vi.mock('./adapters', () => ({ listSpoutAdapters: vi.fn(async () => null) }));
 
 // jsdom には 2D/WebGL のコンテキストが無いので、何も描かないレンダラーにする
 const renderer: Renderer = { init() {}, setTextures() {}, render() {}, dispose() {} };
@@ -58,6 +60,7 @@ const choose = async (name: string) => {
 };
 
 beforeEach(() => {
+  vi.mocked(listSpoutAdapters).mockResolvedValue(null);
   registry.reset();
   registerStudio();
   register();
@@ -69,6 +72,33 @@ afterEach(async () => {
 });
 
 describe('出力の方式', () => {
+  it('GPUの一覧から選び、保存したGPUを復元し、GPU変更で送信を作り直す', async () => {
+    vi.mocked(listSpoutAdapters).mockResolvedValue([
+      { id: 'gpu-1', name: '内蔵GPU' },
+      { id: 'gpu-2', name: '外付けGPU' },
+    ]);
+    const env = createDefaultEnvironment();
+    env.output = { ...env.output, method: 'spout2', adapterId: 'gpu-1' };
+    const { environment, sink } = await setup(JSON.stringify(env));
+    const select = (await section().findByRole('combobox', { name: 'Spout2 の GPU' })) as HTMLSelectElement;
+    await waitFor(() => expect(select.disabled).toBe(false));
+    expect(select.value).toBe('gpu-1');
+    await act(async () => {
+      fireEvent.change(select, { target: { value: 'gpu-2' } });
+    });
+    await act(() => spoutOutput.whenIdle());
+    expect(environment.get().output.adapterId).toBe('gpu-2');
+    expect(sink.log).toEqual(['start 1920x1080@60', 'stop', 'start 1920x1080@60']);
+    await environment.flush();
+  });
+  it('保存したGPUが見つからなければ既定へ戻して知らせる', async () => {
+    vi.mocked(listSpoutAdapters).mockResolvedValue([{ id: 'gpu-1', name: '内蔵GPU' }]);
+    const env = createDefaultEnvironment();
+    env.output = { ...env.output, method: 'spout2', adapterId: 'removed' };
+    const { environment } = await setup(JSON.stringify(env));
+    await waitFor(() => expect(environment.get().output.adapterId).toBeNull());
+    expect(section().getByText(/見つからないため、既定のGPUに戻した/)).toBeTruthy();
+  });
   it('はじめはウィンドウで、Spout2 は動かさない', async () => {
     const { sink } = await setup();
     expect(pressed('ウィンドウ')).toBe('true');

@@ -13,6 +13,7 @@ import { createStudioRuntime, type FrameScheduler } from '../../modes/studio/run
 import { setBackgroundCommand } from '../../modes/studio/scene';
 import { createEnvironmentStore, memoryEnvironmentStorage } from '../../shell/environment';
 import { bindSpoutOutput, createSpoutOutputController, fitView, projectPngs } from './controller';
+import type { SpoutTelemetry } from './sink';
 
 const idle: FrameScheduler = { request: () => () => {} }; // 自動では回さない（tick で進める）
 
@@ -200,6 +201,35 @@ describe('Spout2 の出力の制御', () => {
     const { services } = await setup();
     expect(Object.keys(projectPngs(services)).sort()).toEqual(['a1', 'a2']);
   });
+  it('復旧中と実際の送信数を毎秒表示し、停止したら状態の読み取りも止める', async () => {
+    const { controller, services, sink } = await setup();
+    let telemetry: SpoutTelemetry = {
+      state: 'recovering',
+      message: 'デバイスが失われた',
+      sentFrames: 12,
+      failures: 1,
+      recoveries: 0,
+      elapsedSeconds: 2,
+      sendFps: 6,
+      senderName: '2D Liver_1',
+      adapterId: 'gpu',
+      adapterFallback: false,
+    };
+    const read = vi.fn(async () => telemetry);
+    Object.assign(sink, { telemetry: read });
+    controller.sync(services, output());
+    await controller.whenIdle();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(controller.status()).toMatchObject({ state: 'recovering', telemetry: { failures: 1, sentFrames: 12 } });
+    telemetry = { ...telemetry, state: 'running', message: null, recoveries: 1, sentFrames: 72, sendFps: 24 };
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(controller.status()).toMatchObject({ state: 'running', telemetry: { recoveries: 1, sentFrames: 72 } });
+    await controller.stop();
+    const reads = read.mock.calls.length;
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(read).toHaveBeenCalledTimes(reads);
+    expect(controller.status()).toEqual({ state: 'off' });
+  });
 
   it('bindSpoutOutput は環境設定を見張って sync する', async () => {
     const { services, sink, controller } = await setup();
@@ -214,5 +244,19 @@ describe('Spout2 の出力の制御', () => {
     off();
     await controller.stop();
     expect(sink.log.at(-1)).toBe('stop');
+  });
+
+  it('状態の読み取りに失敗した後も、やり直すと古い送信を閉じて始め直す', async () => {
+    const { controller, services, sink } = await setup();
+    Object.assign(sink, { telemetry: vi.fn().mockRejectedValue(new Error('状態を取得できない')) });
+    controller.sync(services, output());
+    await controller.whenIdle();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(controller.status()).toMatchObject({ state: 'error' });
+    controller.retry();
+    await controller.whenIdle();
+    expect(sink.log.slice(2)).toEqual(['stop', 'start 1920x1080@60', 'textures a1,a2']);
+    expect(controller.status()).toMatchObject({ state: 'running' });
+    await controller.stop();
   });
 });

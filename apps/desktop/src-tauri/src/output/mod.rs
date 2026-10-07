@@ -12,6 +12,8 @@ pub mod plan;
 #[cfg(windows)]
 pub mod d3d11;
 #[cfg(windows)]
+pub mod recovery;
+#[cfg(windows)]
 pub mod spout;
 #[cfg(windows)]
 pub mod worker;
@@ -27,6 +29,8 @@ use tauri::ipc::{InvokeBody, Request};
 pub struct StartResult {
     sender_name: String,
     msaa_samples: u32,
+    adapter_id: String,
+    adapter_fallback: bool,
 }
 
 #[derive(Default)]
@@ -56,6 +60,7 @@ pub async fn spout_start(
     width: u32,
     height: u32,
     fps: f64,
+    adapter_id: Option<String>,
 ) -> Result<StartResult, String> {
     if !fps.is_finite() || fps <= 0.0 {
         return Err(format!("fps が合わない: {fps}"));
@@ -72,10 +77,13 @@ pub async fn spout_start(
             sender_name: spout::SENDER_NAME.into(),
             width,
             height,
+            adapter_id,
         })?;
         let result = StartResult {
             sender_name: w.started.sender_name.clone(),
             msaa_samples: w.started.msaa_samples,
+            adapter_id: w.started.adapter_id.clone(),
+            adapter_fallback: w.started.adapter_fallback,
         };
         *slot = Some(w);
         Ok(result)
@@ -144,6 +152,24 @@ pub async fn spout_stop(state: tauri::State<'_, SpoutState>) -> Result<(), Strin
     .map_err(join_error)?
 }
 
+#[cfg(windows)]
+#[tauri::command]
+pub async fn spout_adapters() -> Result<Vec<d3d11::AdapterInfo>, String> {
+    tauri::async_runtime::spawn_blocking(d3d11::list_adapters)
+        .await
+        .map_err(join_error)?
+}
+
+#[cfg(windows)]
+#[tauri::command]
+pub fn spout_status(state: tauri::State<'_, SpoutState>) -> Result<Option<worker::Status>, String> {
+    let slot = state
+        .worker
+        .lock()
+        .map_err(|_| "Spout2 の状態が壊れている".to_string())?;
+    Ok(slot.as_ref().and_then(worker::Worker::status))
+}
+
 // アプリを閉じるときに呼ぶ（送り手を Spout の一覧から消す）
 #[cfg(windows)]
 pub fn shutdown(state: &SpoutState) {
@@ -161,7 +187,12 @@ const NOT_WINDOWS: &str = "Spout2 の出力は Windows でだけ使える";
 #[cfg(not(windows))]
 #[tauri::command]
 #[allow(unused_variables)]
-pub async fn spout_start(width: u32, height: u32, fps: f64) -> Result<StartResult, String> {
+pub async fn spout_start(
+    width: u32,
+    height: u32,
+    fps: f64,
+    adapter_id: Option<String>,
+) -> Result<StartResult, String> {
     Err(NOT_WINDOWS.into())
 }
 
@@ -183,6 +214,18 @@ pub async fn spout_submit(request: Request<'_>) -> Result<(), String> {
 #[tauri::command]
 pub async fn spout_stop() -> Result<(), String> {
     Ok(())
+}
+
+#[cfg(not(windows))]
+#[tauri::command]
+pub async fn spout_adapters() -> Result<Vec<serde_json::Value>, String> {
+    Err(NOT_WINDOWS.into())
+}
+
+#[cfg(not(windows))]
+#[tauri::command]
+pub fn spout_status() -> Option<serde_json::Value> {
+    None
 }
 
 #[cfg(not(windows))]

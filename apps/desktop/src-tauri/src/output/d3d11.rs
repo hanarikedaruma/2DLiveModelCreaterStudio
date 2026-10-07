@@ -14,16 +14,64 @@ use windows::core::{Interface, PCSTR};
 use windows::Win32::Foundation::HMODULE;
 use windows::Win32::Graphics::Direct3D::Fxc::{D3DCompile, D3DCOMPILE_OPTIMIZATION_LEVEL3};
 use windows::Win32::Graphics::Direct3D::{
-    ID3DBlob, D3D_DRIVER_TYPE, D3D_DRIVER_TYPE_HARDWARE, D3D_DRIVER_TYPE_WARP, D3D_FEATURE_LEVEL,
-    D3D_FEATURE_LEVEL_10_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1,
-    D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+    ID3DBlob, D3D_DRIVER_TYPE, D3D_DRIVER_TYPE_HARDWARE, D3D_DRIVER_TYPE_UNKNOWN,
+    D3D_DRIVER_TYPE_WARP, D3D_FEATURE_LEVEL, D3D_FEATURE_LEVEL_10_0, D3D_FEATURE_LEVEL_10_1,
+    D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_11_1, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
 };
 use windows::Win32::Graphics::Direct3D11::*;
 use windows::Win32::Graphics::Dxgi::Common::{
     DXGI_FORMAT, DXGI_FORMAT_B8G8R8A8_UNORM, DXGI_FORMAT_R32G32_FLOAT, DXGI_FORMAT_R32_UINT,
     DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8_UNORM, DXGI_SAMPLE_DESC,
 };
-use windows::Win32::Graphics::Dxgi::{IDXGIAdapter, IDXGIResource};
+use windows::Win32::Graphics::Dxgi::{
+    CreateDXGIFactory1, IDXGIAdapter, IDXGIAdapter1, IDXGIDevice, IDXGIFactory1, IDXGIResource,
+    DXGI_ADAPTER_FLAG_SOFTWARE, DXGI_ERROR_NOT_FOUND,
+};
+
+#[derive(Clone, Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AdapterInfo {
+    pub id: String,
+    pub name: String,
+}
+
+fn adapter_id(high: i32, low: u32) -> String {
+    format!("{:08x}:{:08x}", high as u32, low)
+}
+
+fn adapters() -> Result<Vec<(AdapterInfo, IDXGIAdapter1)>, String> {
+    let factory: IDXGIFactory1 =
+        unsafe { CreateDXGIFactory1() }.map_err(err("GPU の一覧を読めない"))?;
+    let mut found = Vec::new();
+    for i in 0.. {
+        let adapter = match unsafe { factory.EnumAdapters1(i) } {
+            Ok(a) => a,
+            Err(e) if e.code() == DXGI_ERROR_NOT_FOUND => break,
+            Err(e) => return Err(format!("GPU の一覧を読めない: {e}")),
+        };
+        let desc = unsafe { adapter.GetDesc1() }.map_err(err("GPU の名前を読めない"))?;
+        if desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE.0 as u32 != 0 {
+            continue;
+        }
+        let end = desc
+            .Description
+            .iter()
+            .position(|&c| c == 0)
+            .unwrap_or(desc.Description.len());
+        found.push((
+            AdapterInfo {
+                id: adapter_id(desc.AdapterLuid.HighPart, desc.AdapterLuid.LowPart),
+                name: String::from_utf16_lossy(&desc.Description[..end]),
+            },
+            adapter,
+        ));
+    }
+    Ok(found)
+}
+
+pub fn list_adapters() -> Result<Vec<AdapterInfo>, String> {
+    Ok(adapters()?.into_iter().map(|(info, _)| info).collect())
+}
 
 const SHADERS: &str = r#"
 cbuffer Params : register(b0) {
@@ -85,12 +133,36 @@ pub struct Gpu {
     pub context: ID3D11DeviceContext,
     #[cfg_attr(not(test), allow(dead_code))]
     pub warp: bool,
+    pub adapter_id: String,
+    pub adapter_fallback: bool,
 }
 
 // GPU（既定のアダプター）で D3D11 を使う。allow_warp なら、使えないときにソフトウェアの描画（WARP）にする（テスト用）
+#[cfg(test)]
 pub fn create_device(allow_warp: bool) -> Result<Gpu, String> {
+    create_device_with_adapter(allow_warp, None)
+}
+
+pub fn create_device_with_adapter(
+    allow_warp: bool,
+    requested: Option<&str>,
+) -> Result<Gpu, String> {
+    let selected = if let Some(id) = requested {
+        adapters()?
+            .into_iter()
+            .find(|(info, _)| info.id == id)
+            .map(|(_, a)| a)
+    } else {
+        None
+    };
+    let selected: Option<IDXGIAdapter> = selected
+        .map(|a| a.cast())
+        .transpose()
+        .map_err(err("GPU を選べない"))?;
     let mut last = String::new();
-    let drivers: &[D3D_DRIVER_TYPE] = if allow_warp {
+    let drivers: &[D3D_DRIVER_TYPE] = if selected.is_some() {
+        &[D3D_DRIVER_TYPE_UNKNOWN]
+    } else if allow_warp {
         &[D3D_DRIVER_TYPE_HARDWARE, D3D_DRIVER_TYPE_WARP]
     } else {
         &[D3D_DRIVER_TYPE_HARDWARE]
@@ -114,7 +186,7 @@ pub fn create_device(allow_warp: bool) -> Result<Gpu, String> {
             let mut level = D3D_FEATURE_LEVEL::default();
             let r = unsafe {
                 D3D11CreateDevice(
-                    None::<&IDXGIAdapter>,
+                    selected.as_ref(),
                     driver,
                     HMODULE::default(),
                     D3D11_CREATE_DEVICE_BGRA_SUPPORT,
@@ -127,11 +199,16 @@ pub fn create_device(allow_warp: bool) -> Result<Gpu, String> {
             };
             match (r, device, context) {
                 (Ok(()), Some(device), Some(context)) => {
+                    let dxgi: IDXGIDevice = device.cast().map_err(err("GPU を調べられない"))?;
+                    let actual = unsafe { dxgi.GetAdapter() }.map_err(err("GPU を調べられない"))?;
+                    let desc = unsafe { actual.GetDesc() }.map_err(err("GPU を調べられない"))?;
                     return Ok(Gpu {
                         device,
                         context,
                         warp: driver == D3D_DRIVER_TYPE_WARP,
-                    })
+                        adapter_id: adapter_id(desc.AdapterLuid.HighPart, desc.AdapterLuid.LowPart),
+                        adapter_fallback: requested.is_some() && selected.is_none(),
+                    });
                 }
                 (Err(e), _, _) => last = e.to_string(),
                 _ => last = "デバイスが返らない".into(),
@@ -286,6 +363,11 @@ fn blend_state(
 }
 
 impl Renderer {
+    pub fn device_error(&self) -> Option<String> {
+        unsafe { self.gpu.device.GetDeviceRemovedReason() }
+            .err()
+            .map(|e| format!("GPU のデバイスが失われた: {e}"))
+    }
     // width × height の透過の絵を描く。shared なら送り先を他のプロセスと共有できるテクスチャにする
     pub fn new(gpu: Gpu, width: u32, height: u32, shared: bool) -> Result<Self, String> {
         if width == 0 || height == 0 || width > 16384 || height > 16384 {

@@ -20,7 +20,9 @@ pub fn run() {
             output::spout_start,
             output::spout_set_textures,
             output::spout_submit,
-            output::spout_stop
+            output::spout_stop,
+            output::spout_adapters,
+            output::spout_status
         ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {

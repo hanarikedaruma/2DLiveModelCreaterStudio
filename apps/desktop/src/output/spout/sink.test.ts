@@ -16,6 +16,18 @@ interface Call {
   args: unknown;
 }
 
+describe('GPUと送信の状態', () => {
+  it('選んだGPUを開始のコマンドへ渡し、Rustで実際に送れた数を読む', async () => {
+    const fake = fakeInvoke();
+    const sink = createSpoutSink({ invoke: fake.invoke });
+    sink.configureAdapter('gpu-1');
+    await sink.start({ width: 64, height: 64, fps: 60 });
+    expect(fake.calls.find((c) => c.command === COMMAND_START)?.args).toMatchObject({ adapterId: 'gpu-1' });
+    await sink.telemetry();
+    expect(fake.calls.at(-1)?.command).toBe('spout_status');
+  });
+});
+
 // 呼ばれたコマンドを記録する invoke。submit は hold で止めておける
 function fakeInvoke(options: { failStart?: string } = {}) {
   const calls: Call[] = [];
@@ -101,7 +113,7 @@ describe('createSpoutSink', () => {
     await sink.setTextures({ a }); // 始める前は覚えるだけ
     expect(fake.calls).toEqual([]);
     await sink.start({ width: 1920, height: 1080, fps: 60 });
-    expect(fake.of(COMMAND_START)[0]?.args).toEqual({ width: 1920, height: 1080, fps: 60 });
+    expect(fake.of(COMMAND_START)[0]?.args).toEqual({ width: 1920, height: 1080, fps: 60, adapterId: null });
     expect(sink.running()).toBe(true);
     expect(sink.started()).toEqual({ senderName: '2D Liver', msaaSamples: 4 });
     const sent = fake.of(COMMAND_SET_TEXTURES);

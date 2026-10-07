@@ -89,6 +89,19 @@ describe('計測', () => {
       await sleep(2000); // 立ち上がりを落ち着かせる
 
       await page.evaluate(() => window.__studio.diagnostics.startRecording());
+      // Rust側で実際に共有テクスチャへ送れた数。JSのsubmitの呼び出し数ではない。
+      const spoutBefore = await page.evaluate(async () => {
+        const sink = window.__studio.services.spout as typeof window.__studio.services.spout & {
+          telemetry?(): Promise<{
+            sentFrames: number;
+            failures: number;
+            recoveries: number;
+            elapsedSeconds: number;
+            adapterId: string;
+          } | null>;
+        };
+        return (await sink.telemetry?.()) ?? null;
+      });
       const memory: { atSeconds: number; mb: number }[] = [{ atSeconds: 0, mb: appMemoryMb() }];
       const started = Date.now();
       while (Date.now() - started < SECONDS * 1000) {
@@ -96,6 +109,18 @@ describe('計測', () => {
         memory.push({ atSeconds: Math.round((Date.now() - started) / 1000), mb: appMemoryMb() });
       }
       const record = await page.evaluate(() => window.__studio.diagnostics.stopRecording());
+      const spoutAfter = await page.evaluate(async () => {
+        const sink = window.__studio.services.spout as typeof window.__studio.services.spout & {
+          telemetry?(): Promise<{
+            sentFrames: number;
+            failures: number;
+            recoveries: number;
+            elapsedSeconds: number;
+            adapterId: string;
+          } | null>;
+        };
+        return (await sink.telemetry?.()) ?? null;
+      });
       expect(record).not.toBeNull();
 
       const result = {
@@ -105,6 +130,19 @@ describe('計測', () => {
         outputWindow: OBS ? { width: 1920, height: 1080, background: 'green' } : null,
         tracking: cameras.length > 0 ? cameras.map((c) => c.label) : null,
         cameraCapture: record!.environment.cameraCapture ?? null,
+        spout:
+          spoutBefore && spoutAfter
+            ? {
+                before: spoutBefore,
+                after: spoutAfter,
+                frames: spoutAfter.sentFrames - spoutBefore.sentFrames,
+                failures: spoutAfter.failures - spoutBefore.failures,
+                recoveries: spoutAfter.recoveries - spoutBefore.recoveries,
+                fps:
+                  (spoutAfter.sentFrames - spoutBefore.sentFrames) /
+                  Math.max(0.001, spoutAfter.elapsedSeconds - spoutBefore.elapsedSeconds),
+              }
+            : null,
         memory,
         summary: record!.summary,
         environment: record!.environment,

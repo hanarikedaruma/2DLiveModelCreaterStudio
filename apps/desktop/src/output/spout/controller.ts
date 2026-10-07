@@ -6,13 +6,21 @@ import type { Environment } from '@app/schema';
 import type { OutputSink, Services, ViewTransform } from '@app/contracts';
 import { fitFrame, type Size } from '../../modes/studio/placement';
 import { studioRuntime, type StudioRuntime } from '../../modes/studio/runtime';
+import type { SpoutSink, SpoutTelemetry } from './sink';
 
 export type OutputSettings = Environment['output'];
 
 export type SpoutStatus =
   | { state: 'off' }
   | { state: 'starting' }
-  | { state: 'running'; width: number; height: number; fps: number; senderName: string | null }
+  | {
+      state: 'running' | 'recovering';
+      width: number;
+      height: number;
+      fps: number;
+      senderName: string | null;
+      telemetry?: SpoutTelemetry;
+    }
   | { state: 'error'; message: string };
 
 export const TEXTURE_BATCH_MS = 300; // 素材の変更はこの間隔でまとめて送る
@@ -58,10 +66,11 @@ interface Session {
   settings: OutputSettings;
   offs: (() => void)[];
   timer: ReturnType<typeof setTimeout> | null;
+  healthTimer: ReturnType<typeof setInterval> | null;
 }
 
 const sameSettings = (a: OutputSettings, b: OutputSettings) =>
-  a.width === b.width && a.height === b.height && a.fps === b.fps;
+  a.width === b.width && a.height === b.height && a.fps === b.fps && a.adapterId === b.adapterId;
 
 export function createSpoutOutputController(options: {
   runtime: StudioRuntime;
@@ -84,6 +93,7 @@ export function createSpoutOutputController(options: {
 
   async function close(s: Session) {
     if (s.timer !== null) clearTimeout(s.timer);
+    if (s.healthTimer !== null) clearInterval(s.healthTimer);
     s.timer = null;
     for (const off of s.offs.splice(0)) off();
     try {
@@ -111,9 +121,10 @@ export function createSpoutOutputController(options: {
 
   async function open(services: Services, settings: OutputSettings) {
     const sink = services.spout;
-    const s: Session = { services, sink, settings, offs: [], timer: null };
+    const s: Session = { services, sink, settings, offs: [], timer: null, healthTimer: null };
     setStatus({ state: 'starting' });
     try {
+      (sink as Partial<SpoutSink>).configureAdapter?.(settings.adapterId);
       await sink.start({ width: settings.width, height: settings.height, fps: settings.fps });
       await sink.setTextures(projectPngs(services));
     } catch (e) {
@@ -138,14 +149,44 @@ export function createSpoutOutputController(options: {
     );
     const senderName = (sink as { started?: () => { senderName: string } | null }).started?.()?.senderName ?? null;
     setStatus({ state: 'running', width: settings.width, height: settings.height, fps: settings.fps, senderName });
+    const read = (sink as Partial<SpoutSink>).telemetry;
+    if (read) {
+      let reading = false;
+      s.healthTimer = setInterval(() => {
+        if (reading || session !== s) return;
+        reading = true;
+        void read
+          .call(sink)
+          .then(
+            (telemetry) => {
+              if (session !== s || !telemetry) return;
+              setStatus({
+                state: telemetry.state,
+                width: settings.width,
+                height: settings.height,
+                fps: settings.fps,
+                senderName: telemetry.senderName,
+                telemetry,
+              });
+            },
+            (e: unknown) => {
+              if (session === s) setStatus({ state: 'error', message: `送信の状態を読めない: ${errorText(e)}` });
+            },
+          )
+          .finally(() => {
+            reading = false;
+          });
+      }, 1000);
+    }
   }
 
   // 望む状態に合わせる（順に1つずつ行う。sync のたびに積むので、最後には最新の望みに合う）
-  function reconcile() {
+  function reconcile(forceRestart = false) {
     work = work.then(async () => {
       const target = wanted;
       const current = session;
       if (
+        !forceRestart &&
         current &&
         target &&
         current.services === target.services &&
@@ -197,7 +238,7 @@ export function createSpoutOutputController(options: {
     retry() {
       failed = null;
       if (wanted) setStatus({ state: 'starting' });
-      reconcile();
+      reconcile(true);
     },
     async stop() {
       wanted = null;

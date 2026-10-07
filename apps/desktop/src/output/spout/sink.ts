@@ -34,11 +34,28 @@ export interface SpoutSinkOptions {
 export interface SpoutStartResult {
   senderName: string; // 同じ名前の送り手があると「2D Liver_1」などになる
   msaaSamples: number;
+  adapterId?: string;
+  adapterFallback?: boolean;
+}
+
+export interface SpoutTelemetry {
+  state: 'running' | 'recovering';
+  message: string | null;
+  sentFrames: number;
+  failures: number;
+  recoveries: number;
+  elapsedSeconds: number;
+  sendFps: number;
+  senderName: string;
+  adapterId: string;
+  adapterFallback: boolean;
 }
 
 export interface SpoutSink extends OutputSink {
   running(): boolean;
   started(): SpoutStartResult | null;
+  configureAdapter(adapterId: string | null): void;
+  telemetry(): Promise<SpoutTelemetry | null>;
 }
 
 function errorText(e: unknown): string {
@@ -79,6 +96,7 @@ export function createSpoutSink(options: SpoutSinkOptions = {}): SpoutSink {
   const colors = new Map<string, WireBackground>();
 
   let started: SpoutStartResult | null = null;
+  let adapterId: string | null = null;
   let attempted = false; // stop していない start がある（Rust の側が動いているかもしれない）
   let generation = 0; // start・stop のたびに増やす（古い送信の結果を捨てる）
   // start・stop・テクスチャの送信は順に行う（start の途中の stop で Rust の側が残らないように）
@@ -190,11 +208,13 @@ export function createSpoutSink(options: SpoutSinkOptions = {}): SpoutSink {
         reset();
         started = null;
         attempted = true;
-        const result = (await invoke(COMMAND_START, { width: o.width, height: o.height, fps: o.fps })) as
+        const result = (await invoke(COMMAND_START, { width: o.width, height: o.height, fps: o.fps, adapterId })) as
           Partial<SpoutStartResult> | null | undefined;
         started = {
           senderName: typeof result?.senderName === 'string' ? result.senderName : SPOUT_SENDER_NAME,
           msaaSamples: typeof result?.msaaSamples === 'number' ? result.msaaSamples : 1,
+          adapterId: result?.adapterId,
+          adapterFallback: result?.adapterFallback,
         };
         interval = o.fps > 0 ? 1000 / o.fps : 1000 / 60;
         reported = false;
@@ -233,5 +253,11 @@ export function createSpoutSink(options: SpoutSinkOptions = {}): SpoutSink {
     },
     running: () => started !== null,
     started: () => started,
+    configureAdapter(id) {
+      adapterId = id;
+    },
+    async telemetry() {
+      return started ? ((await invoke('spout_status')) as SpoutTelemetry | null) : null;
+    },
   };
 }
