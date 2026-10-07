@@ -1,5 +1,5 @@
 // カード58の受け入れテスト担当 CO。欠けた素材を、本物の Tauri アプリの一覧から差し替える。
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type { Page } from 'playwright';
@@ -111,5 +111,41 @@ describe('カード58: 欠けた素材の復旧', () => {
     await page.evaluate((dir) => window.__studio.project.open(dir), slash(workDir));
     expect(await page.evaluate(() => window.__studio.project.missingAssetIds())).toEqual([]);
     expect(await section.count()).toBe(0);
+  });
+
+  // カード72・CO引き継ぎ: 本物のファイルIOで壊れたJSONを拒否し、開いているモデルを保つ。
+  it('構文が壊れたJSONとスキーマが違うJSONを知らせ、元のプロジェクトを引き続き保存できる', async () => {
+    const before = await page.evaluate(() => ({
+      project: window.__studio.services.store.get(),
+      dir: window.__studio.project.dir(),
+      missing: window.__studio.project.missingAssetIds(),
+      last: window.__studio.environment.get().lastProjectDir,
+    }));
+    for (const [name, json] of [
+      ['truncated', '{"schemaVersion":'],
+      ['wrong-schema', JSON.stringify({ schemaVersion: 2, model: { parts: 'invalid' } })],
+    ]) {
+      const brokenDir = join(workDir, name!);
+      mkdirSync(brokenDir);
+      writeFileSync(join(brokenDir, 'project.json'), json!);
+      // 前の通知を閉じ、今回の失敗が実画面に出たことを確かめる。
+      while ((await page.locator('.toast').count()) > 0) await page.locator('.toast').first().click();
+      await page.evaluate((dir) => window.__studio.project.open(dir), slash(brokenDir));
+      await page
+        .getByRole('status')
+        .getByText(/開けなかった:/)
+        .waitFor({ state: 'visible' });
+      expect(
+        await page.evaluate(() => ({
+          project: window.__studio.services.store.get(),
+          dir: window.__studio.project.dir(),
+          missing: window.__studio.project.missingAssetIds(),
+          last: window.__studio.environment.get().lastProjectDir,
+        })),
+      ).toEqual(before);
+    }
+    await page.evaluate(() => window.__studio.project.save());
+    expect(JSON.parse(readFileSync(join(workDir, 'project.json'), 'utf8'))).toEqual(before.project);
+    expect(await page.evaluate(() => window.__studio.project.isDirty())).toBe(false);
   });
 });
