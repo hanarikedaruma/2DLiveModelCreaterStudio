@@ -43,7 +43,12 @@ function Area({ area }: { area: PanelDef['area'] }) {
   const panels = panelsFor(snapshot, editor.mode, area, editor.uiLevel[editor.mode]);
   if (panels.length === 0) return null;
   return (
-    <aside className={`shell-area shell-area-${area}`} data-area={area}>
+    <aside
+      className={`shell-area shell-area-${area}`}
+      data-area={area}
+      aria-label={area === 'right' ? '右のパネル' : undefined}
+      tabIndex={area === 'right' ? 0 : undefined}
+    >
       {panels.map((p) => {
         const isCollapsed = collapsed.has(p.id);
         return (

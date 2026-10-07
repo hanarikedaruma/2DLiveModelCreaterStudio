@@ -178,6 +178,17 @@ kbd {
 .shell-area-right {
   border-left: 1px solid var(--border);
 }
+/* 小さいウィンドウでは右のパネルを潰さず、列全体をスクロールして使う。 */
+@media (max-height: 700px) {
+  .shell-area-right > .panel:not(.collapsed) {
+    min-height: 180px;
+    flex-shrink: 0;
+  }
+  .shell-area-right > .panel:not(.collapsed) > .panel-body {
+    min-height: 140px;
+    flex-shrink: 0;
+  }
+}
 .shell-area-bottom {
   flex-direction: row;
   height: 220px;

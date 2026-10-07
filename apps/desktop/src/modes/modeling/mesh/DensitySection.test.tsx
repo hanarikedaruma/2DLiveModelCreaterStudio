@@ -12,6 +12,7 @@ import { testAsset } from '../warp/testProject';
 import { MESH_DENSITY_SECTION_ID, meshEditor, register } from './index';
 import { TRANSFER_CONFIRM_MESSAGE } from './remesh';
 import { alphaImage, appearanceError } from './testAppearance';
+import { densityKeyError } from './DensitySection';
 
 // 画像パーツ p（素材 400×300、キャンバスの (300,350) から。中は楕円）とグループ g
 const OFFSET: Vec2 = { x: 300, y: 350 };
@@ -130,6 +131,66 @@ function shapeOf(item: DrawItem) {
 }
 
 describe('変形の細かさのセクション', () => {
+  it('確認中にモデルが変わったら、古い誤差の承認でメッシュを置き換えない', async () => {
+    const shell = await open(testProject(generated('standard')));
+    fireEvent.click(shell.radio('軽い'));
+    await screen.findByText(/最大ずれ.*px/);
+    act(() => shell.store.dispatch({ label: '名前を変える', apply: (p) => ({ ...p, name: '変更後' }) }));
+    const changed = shell.store.get();
+    fireEvent.click(screen.getByRole('button', { name: 'OK' }));
+    expect(await screen.findByText(/確認中にモデルが変わった/)).toBeTruthy();
+    expect(shell.store.get()).toBe(changed);
+    expect(shell.mesh()!.density).toBe('standard');
+  });
+
+  it('「軽い」で失われる中心の20pxの変形を、全キーの比較で20pxと算出する', () => {
+    const corners = [
+      { x: 0, y: 0 },
+      { x: 100, y: 0 },
+      { x: 100, y: 100 },
+      { x: 0, y: 100 },
+    ];
+    const old: Mesh = {
+      ...generated('standard'),
+      id: 'm',
+      vertices: [...corners, { x: 50, y: 50 }],
+      triangles: [
+        [0, 1, 4],
+        [1, 2, 4],
+        [2, 3, 4],
+        [3, 0, 4],
+      ],
+    };
+    const b: Binding = {
+      ...vertexBinding(old),
+      target: { type: 'mesh', id: 'm' },
+      keys: [
+        { ...vertexBinding(old).keys[0]!, delta: old.vertices.map(() => ({ x: 0, y: 0 })) },
+        { ...vertexBinding(old).keys[1]!, delta: old.vertices.map((_, i) => ({ x: i === 4 ? 20 : 0, y: 0 })) },
+      ],
+    };
+    const before = testProject(old, false);
+    before.model.bindings = [b];
+    const after: Project = {
+      ...before,
+      model: {
+        ...before.model,
+        meshes: [
+          {
+            ...old,
+            vertices: corners,
+            triangles: [
+              [0, 1, 2],
+              [0, 2, 3],
+            ],
+          },
+        ],
+        bindings: [{ ...b, keys: b.keys.map((k) => ({ ...k, delta: corners.map(() => ({ x: 0, y: 0 })) })) }],
+      },
+    };
+    expect(densityKeyError(before, after, 'm')).toEqual({ max: 20, keys: 2 });
+  });
+
   it('「パーツの設定」の中に、画像パーツを1つ選んだときだけ出る。いまの細かさが選ばれている', async () => {
     const shell = await open(testProject(generated('standard')));
     const settings = within(document.querySelector<HTMLElement>('[data-panel-id="partSettings"]')!);
@@ -175,7 +236,7 @@ describe('変形の細かさのセクション', () => {
       const drawnBefore = shell.drawn()!;
       // キャンセルなら何もしない
       fireEvent.click(shell.radio(label));
-      expect(await screen.findByText(TRANSFER_CONFIRM_MESSAGE)).toBeTruthy();
+      expect(await screen.findByText(density === 'light' ? /最大ずれ.*px/ : TRANSFER_CONFIRM_MESSAGE)).toBeTruthy();
       fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }));
       await waitFor(() => expect(shell.radio(label).disabled).toBe(false));
       expect(shell.store.get()).toBe(before);
@@ -208,9 +269,16 @@ describe('変形の細かさのセクション', () => {
     });
   }
 
-  it('キーが無ければ確認しない', async () => {
+  it('キーが無くても「軽い」の限界を知らせ、取り消すとメッシュは変えない', async () => {
     const shell = await open(testProject(generated('standard'), false));
+    const before = shell.store.get();
     fireEvent.click(shell.radio('軽い'));
+    expect(await screen.findByText(/既存の頂点キーは無い/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }));
+    await waitFor(() => expect(shell.radio('軽い').disabled).toBe(false));
+    expect(shell.store.get()).toBe(before);
+    fireEvent.click(shell.radio('軽い'));
+    fireEvent.click(await screen.findByRole('button', { name: 'OK' }));
     await waitFor(() => expect(shell.mesh()!.density).toBe('light'));
     expect(screen.queryByText(TRANSFER_CONFIRM_MESSAGE)).toBeNull();
   });
