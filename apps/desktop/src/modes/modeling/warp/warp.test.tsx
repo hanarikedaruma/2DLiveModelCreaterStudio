@@ -2,7 +2,7 @@ import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createEmptyProject, type Binding, type Part, type Project, type Vec2, type Warp } from '@app/schema';
 import type { ProjectStoreWithHistory } from '@app/core';
-import { createBindingEvaluator, createDeformPipeline } from '@app/core';
+import { createBindingEvaluator, createDeformPipeline, patchPart } from '@app/core';
 import { createKeyEditor } from '../../../services/keyEditor';
 import { registry } from '../../../shell/registry';
 import { register as registerCanvasEdit } from '../canvas';
@@ -133,6 +133,36 @@ const activeTool = () =>
     .find((b) => b.getAttribute('aria-pressed') === 'true')?.textContent;
 
 describe('ワープのセクション', () => {
+  it('画像から親グループを選べ、親がなければ1回のUndoで戻せるグループを作れる', async () => {
+    const shell = await open(testProject(), { select: ['a'] });
+    fireEvent.click(shell.section().getByRole('button', { name: 'グループ「g」を選ぶ' }));
+    expect(shell.services.editor.get().selectedPartIds).toEqual(['g']);
+    act(() => shell.services.editor.set({ selectedPartIds: ['o'] }));
+    fireEvent.click(shell.section().getByRole('button', { name: 'グループを作る' }));
+    const group = shell.store.get().model.parts.find((p) => p.id === shell.services.editor.get().selectedPartIds[0])!;
+    expect(group.kind).toBe('group');
+    expect(shell.store.get().model.parts.find((p) => p.id === 'o')!.parentId).toBe(group.id);
+    act(() => shell.store.undo());
+    expect(shell.store.get().model.parts.find((p) => p.id === 'o')!.parentId).toBeNull();
+    expect(shell.store.get().model.parts.some((p) => p.id === group.id)).toBe(false);
+  });
+
+  it('プレビュー中は格子を追加できず、値を戻す理由を示す', async () => {
+    const shell = await open(testProject());
+    act(() => shell.services.editor.set({ editorParamValues: { FaceAngleX: 12 } }));
+    expect((shell.section().getByRole('button', { name: 'ワープを追加' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(shell.section().getByText(/プレビュー中は編集できない/)).toBeTruthy();
+    expect(shell.store.get().model.warps).toEqual([]);
+  });
+
+  it('ツールだけを選んでもキャンバスに次の手順が出る', async () => {
+    const shell = await open(testProject(), { select: [] });
+    fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
+    const ctx = new RecordingContext();
+    warpEditor.tool.drawOverlay!(ctx.asContext(), shell.canvas.getState().view);
+    expect(ctx.texts.join('')).toContain('グループを選ぶ');
+  });
+
   it('詳細モードの「パーツの設定」にだけ出る', async () => {
     const shell = await open(testProject(), { detail: false });
     expect(shell.sectionEl()).toBeNull();
@@ -143,7 +173,7 @@ describe('ワープのセクション', () => {
 
   it('グループでなければ案内、画像パーツの無いグループでは追加できない', async () => {
     const shell = await open(testProject(), { select: ['a'] });
-    expect(shell.section().getByText(/グループを選ぶと/)).toBeTruthy();
+    expect(shell.section().getByText(/画像を含むグループを選ぶ/)).toBeTruthy();
     expect(shell.section().queryByRole('button', { name: 'ワープを追加' })).toBeNull();
     act(() => shell.services.editor.set({ selectedPartIds: ['empty'] }));
     expect((shell.section().getByRole('button', { name: 'ワープを追加' }) as HTMLButtonElement).disabled).toBe(true);
@@ -152,6 +182,42 @@ describe('ワープのセクション', () => {
 });
 
 describe('ワープの追加・削除と Undo', () => {
+  it('子が格子外に出たら案内し、範囲と全キーを1回のUndo/Redoで戻す', async () => {
+    const warp = regularWarp();
+    const key: Binding = {
+      id: 'key',
+      target: { type: 'warp', id: 'w' },
+      channel: 'warpPoints',
+      parameterIds: ['FaceAngleX'],
+      keyValues: [[0, 30]],
+      generation: 'linear',
+      divisions: null,
+      keys: [0, 30].map((v) => ({
+        coords: [v],
+        delta: warp.points.map((_, i) => ({ x: v * Math.sin(i), y: v * Math.cos(i) })),
+        source: 'manual',
+        locked: true,
+      })),
+    };
+    const shell = await open(testProject({}, { warps: [warp], bindings: [key] }));
+    act(() => shell.store.dispatch(patchPart('子を移す', 'b', { position: { x: 400, y: 100 } })));
+    await redrawn(shell.canvas, (m) => expect(m.byPartId.b!.positions[0]).toBeGreaterThan(800));
+    const before = shell.store.get();
+    const vertices = shell.positions('b');
+    expect(shell.section().getByText(/格子の範囲の外/)).toBeTruthy();
+    fireEvent.click(shell.section().getByRole('button', { name: '範囲を合わせ直す' }));
+    expect(shell.warp()!.columns).toBeGreaterThan(4);
+    expect(shell.store.get().model.bindings[0]!.keys.map((k) => [k.coords, k.source, k.locked])).toEqual(
+      key.keys.map((k) => [k.coords, k.source, k.locked]),
+    );
+    await redrawn(shell.canvas, (m) => expect(m.byPartId.b!.positions[0]).toBeCloseTo(vertices[0]!.x, 2));
+    shell.positions('b').forEach((p, i) => near(p, vertices[i]!, 2));
+    expect(shell.section().queryByRole('button', { name: '範囲を合わせ直す' })).toBeNull();
+    act(() => shell.store.undo());
+    expect(shell.store.get()).toBe(before);
+    act(() => shell.store.redo());
+    expect(shell.warp()!.columns).toBeGreaterThan(4);
+  });
   it('追加: 子の外接矩形 + 5% の余白に 4×4 の規則的な格子。見た目は変わらず、ワープ編集ツールになる。Undo で消える', async () => {
     const shell = await open(testProject());
     const before = { a: shell.positions('a'), b: shell.positions('b') };
@@ -253,6 +319,7 @@ describe('ワープ編集ツール', () => {
     const shell = await openWithWarp();
     shell.ptr.drag({ x: 500, y: 500 }, { x: 540, y: 520 });
     near(shell.warp()!.points[CENTER]!, { x: 540, y: 520 });
+    expect(shell.section().getByText('選んだ制御点: 1 個')).toBeTruthy();
     expect(shell.store.undoLabel()).toBe('制御点の移動');
     // b の左上の頂点は真ん中の制御点の上にあるので同じだけ動き、格子の外の o は動かない
     await redrawn(shell.canvas, (m) => expect(m.byPartId.b!.positions[0]).toBeCloseTo(540, 3));

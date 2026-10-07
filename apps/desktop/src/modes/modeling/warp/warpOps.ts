@@ -1,7 +1,7 @@
 // ワープの追加・削除のコマンドと、追加するときの格子の計算（カード29）。計算は純粋関数
 import { newId, type Model, type Part, type Project, type Vec2, type Warp } from '@app/schema';
 import type { Command, TargetDeltas } from '@app/contracts';
-import { pointsToAncestorSpace, regularWarpPoints } from '@app/core';
+import { pointsToAncestorSpace, refitWarp, regularWarpPoints } from '@app/core';
 import { imageDescendants, partById } from '../canvas/parts';
 
 export const WARP_DIVISIONS = { min: 2, max: 8, initial: 4 } as const;
@@ -131,3 +131,37 @@ export function removeWarpCommand(warpId: string): Command {
 }
 
 export const removeWarpMessage = (count: number) => `このワープのキー（${count}個）も消えます`;
+
+export function warpNeedsRefit(project: Project, warp: Warp): boolean {
+  const rect = descendantImageBounds(project, warp.partId);
+  const b = warp.bounds;
+  return (
+    rect !== null &&
+    (rect.x < b.x - 1e-6 ||
+      rect.y < b.y - 1e-6 ||
+      rect.x + rect.width > b.x + b.width + 1e-6 ||
+      rect.y + rect.height > b.y + b.height + 1e-6)
+  );
+}
+
+export function refitWarpCommand(project: Project, warpId: string): Command | null {
+  const warp = project.model.warps.find((w) => w.id === warpId);
+  const rect = warp ? descendantImageBounds(project, warp.partId) : null;
+  if (!warp || !rect) return null;
+  const result = refitWarp(warp, warpBoundsFor(rect), project.model.bindings);
+  if (!result) return null;
+  return {
+    label: 'ワープの範囲を合わせ直す',
+    apply: (p) =>
+      p !== project || result.warp === warp
+        ? p
+        : {
+            ...p,
+            model: {
+              ...p.model,
+              warps: p.model.warps.map((w) => (w.id === warpId ? result.warp : w)),
+              bindings: result.bindings,
+            },
+          },
+  };
+}

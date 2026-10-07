@@ -12,6 +12,7 @@ import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../can
 import { paramValuesOf, partById } from '../canvas/parts';
 import { nearestVertex, verticesInRect } from '../mesh/meshTool';
 import { warpOfPart } from './warpOps';
+import { warpGuide } from './warpGuide';
 
 export const WARP_TOOL_ID = 'modeling.warp';
 
@@ -314,6 +315,26 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       const snap = snapshot(env);
       const { target, points } = snap;
       const accent = cssVar('--accent', '#5b8def');
+      const guide = warpGuide(snap.project, snap.editor);
+      if (guide) {
+        ctx.save();
+        ctx.font = '12px sans-serif';
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = cssVar('--text', '#eeeeee');
+        const width = Math.max(80, (ctx.canvas?.clientWidth || ctx.canvas?.width || 800) - 24);
+        let line = '';
+        let y = 12;
+        for (const char of guide) {
+          if (line && ctx.measureText(line + char).width > width) {
+            ctx.fillText(line, 12, y);
+            line = '';
+            y += 18;
+          }
+          line += char;
+        }
+        if (line) ctx.fillText(line, 12, y);
+        ctx.restore();
+      }
       if (target && points) {
         const toScreen = (p: Vec2) => canvasToScreen(view, p);
         ctx.strokeStyle = accent;
