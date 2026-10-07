@@ -33,6 +33,7 @@
 - `apps/desktop/src/modes/modeling/assets/`（`reload/` を除く。進み具合の表示）
 - `apps/desktop/vite.config.ts`（Worker と chunk の設定）
 - `apps/desktop/e2e/stress.measure.ts`
+- `apps/desktop/e2e/modeling.e2e.ts` の準備・後始末（保存済みのパネルの折りたたみに左右されず、本物のWorkerから保存・再読込までを確かめるため）
 - `apps/desktop/src/shell/canvas/CanvasHost.tsx` の素材画像をレンダラーへ渡す部分と、その回帰テスト（2026-10-07 の計測に基づく範囲の補足。未割り当ての画像を一括でGPUへ上げる停止を除く）
 
 ## 触らないもの

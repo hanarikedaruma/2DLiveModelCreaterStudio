@@ -13,6 +13,7 @@ let app: RunningApp | null = null;
 let page: Page;
 let workDir = '';
 let previousLastProjectDir: string | null = null;
+let previousCollapsedPanels: string | null = null;
 
 // FaceAngleX を値 v にしたときのパーツの x の平均の移動量（0 との差）
 function shiftsAt(v: number) {
@@ -50,6 +51,7 @@ beforeAll(async () => {
   app = await launchApp(9333);
   page = app.page;
   previousLastProjectDir = await page.evaluate(() => window.__studio.environment.get().lastProjectDir);
+  previousCollapsedPanels = await page.evaluate(() => localStorage.getItem('live2d-studio.collapsedPanels'));
   // 起動時に前回の自動保存の復元を聞かれたら断る（テストの前の状態に左右されないように）
   while ((await answerDialog(page, 'キャンセル', 2000)) !== null) {
     // 断り続ける
@@ -58,6 +60,13 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (page) {
+    await page
+      .evaluate((previous) => {
+        const key = 'live2d-studio.collapsedPanels';
+        if (previous === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, previous);
+      }, previousCollapsedPanels)
+      .catch(() => {});
     // 利用者の環境設定に、消してしまうテストのフォルダを残さない
     await page
       .evaluate(async (dir) => {
@@ -95,7 +104,9 @@ describe('モデリングの通し', () => {
     });
     expect(assigned).toEqual({ parts: 28, meshes: 28 });
 
-    // 3. [かんたんセットアップ] を押す
+    // 3. 利用者がたたんでいた場合だけ割り当てのパネルを開き、[かんたんセットアップ] を押す。
+    const assignToggle = page.locator('[data-panel-id="assets.assign"] .panel-title button');
+    if ((await assignToggle.getAttribute('aria-expanded')) === 'false') await assignToggle.click();
     await page.getByRole('button', { name: 'かんたんセットアップ' }).click();
     await page.waitForFunction(() => window.__studio.services.store.get().model.bindings.length > 0);
     const bindingCount = await page.evaluate(() => window.__studio.services.store.get().model.bindings.length);
