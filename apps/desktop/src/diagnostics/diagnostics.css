@@ -9,7 +9,7 @@
   font-variant-numeric: tabular-nums;
   line-height: 1.6;
   color: var(--text);
-  background: rgb(20 21 24 / 0.88);
+  background: rgb(20 21 24 / 0.98);
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.4);
