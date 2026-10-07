@@ -57,4 +57,5 @@
 
 ## 記録
 
-（作業中に書く）
+- 2026-10-07 CL（テストの担当）: 先に `apps/desktop/src/hotkeys/actions.c68.test.ts`（10件）を書き、`describe.skip`（カード68 の実装待ち）でコミットした。今の公開の口（createHotkeyActions の producer・createStudioRuntime・registerLayerProducer）だけを使う。producer の id が hotkey、表情とホットキーの登録の順2通り・アニメーションを加えた6通りで最後の値と層の並び（表情 → ホットキー → アニメーション）、もう一度押す・押している間を離すと表情の値に戻る。skip を外して今の実装で動かすと10件とも失敗する（直す前の失敗の確認）。実装の担当は、実装をコミットしたら skip の1行だけを戻す。
+- 残り: `targets.c68.test.ts`・`scenes.c68.test.ts` は、背景の画像の一覧の渡し方とシーン・背景の削除の口が決まってから書く（着手したら知らせてほしい）。CH・UC-CH も実装の後。
