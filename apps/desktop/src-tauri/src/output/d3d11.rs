@@ -25,7 +25,7 @@ use windows::Win32::Graphics::Dxgi::Common::{
 };
 use windows::Win32::Graphics::Dxgi::{
     CreateDXGIFactory1, IDXGIAdapter, IDXGIAdapter1, IDXGIDevice, IDXGIFactory1, IDXGIResource,
-    DXGI_ADAPTER_FLAG_SOFTWARE, DXGI_ERROR_NOT_FOUND,
+    DXGI_ADAPTER_DESC1, DXGI_ADAPTER_FLAG_SOFTWARE, DXGI_ERROR_NOT_FOUND,
 };
 
 #[derive(Clone, Debug, serde::Serialize)]
@@ -33,10 +33,29 @@ use windows::Win32::Graphics::Dxgi::{
 pub struct AdapterInfo {
     pub id: String,
     pub name: String,
+    pub legacy_id: String,
 }
 
-fn adapter_id(high: i32, low: u32) -> String {
-    format!("{:08x}:{:08x}", high as u32, low)
+fn adapter_info(desc: &DXGI_ADAPTER_DESC1) -> AdapterInfo {
+    let end = desc
+        .Description
+        .iter()
+        .position(|&c| c == 0)
+        .unwrap_or(desc.Description.len());
+    let legacy_id = format!(
+        "{:08x}:{:08x}",
+        desc.AdapterLuid.HighPart as u32, desc.AdapterLuid.LowPart
+    );
+    let name = String::from_utf16_lossy(&desc.Description[..end]);
+    AdapterInfo {
+        // LUID は再起動で変わる。保存する識別子はハードウェアの情報から作る。
+        id: format!(
+            "pci:{:04x}:{:04x}:{:08x}:{:08x}:{}",
+            desc.VendorId, desc.DeviceId, desc.SubSysId, desc.Revision, name
+        ),
+        name,
+        legacy_id,
+    }
 }
 
 fn adapters() -> Result<Vec<(AdapterInfo, IDXGIAdapter1)>, String> {
@@ -53,24 +72,61 @@ fn adapters() -> Result<Vec<(AdapterInfo, IDXGIAdapter1)>, String> {
         if desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE.0 as u32 != 0 {
             continue;
         }
-        let end = desc
-            .Description
-            .iter()
-            .position(|&c| c == 0)
-            .unwrap_or(desc.Description.len());
-        found.push((
-            AdapterInfo {
-                id: adapter_id(desc.AdapterLuid.HighPart, desc.AdapterLuid.LowPart),
-                name: String::from_utf16_lossy(&desc.Description[..end]),
-            },
-            adapter,
-        ));
+        found.push((adapter_info(&desc), adapter));
     }
     Ok(found)
 }
 
 pub fn list_adapters() -> Result<Vec<AdapterInfo>, String> {
     Ok(adapters()?.into_iter().map(|(info, _)| info).collect())
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::*;
+
+    fn descriptor() -> DXGI_ADAPTER_DESC1 {
+        let mut desc = DXGI_ADAPTER_DESC1 {
+            VendorId: 0x10de,
+            DeviceId: 0x28a1,
+            SubSysId: 0x12345678,
+            Revision: 1,
+            ..Default::default()
+        };
+        let name: Vec<u16> = "NVIDIA GeForce RTX 4050".encode_utf16().collect();
+        desc.Description[..name.len()].copy_from_slice(&name);
+        desc.AdapterLuid.LowPart = 123;
+        desc
+    }
+
+    #[test]
+    fn reboot_luid_change_preserves_saved_gpu_identity() {
+        let before = descriptor();
+        let mut after = before;
+        after.AdapterLuid.HighPart = 7;
+        after.AdapterLuid.LowPart = 456;
+        assert_eq!(adapter_info(&before).id, adapter_info(&after).id);
+        assert_ne!(
+            adapter_info(&before).legacy_id,
+            adapter_info(&after).legacy_id
+        );
+    }
+
+    #[test]
+    fn different_hardware_is_not_the_saved_gpu() {
+        let original = descriptor();
+        for changed_field in 0..5 {
+            let mut other = original;
+            match changed_field {
+                0 => other.VendorId += 1,
+                1 => other.DeviceId += 1,
+                2 => other.SubSysId += 1,
+                3 => other.Revision += 1,
+                _ => other.Description[0] = 'A' as u16,
+            }
+            assert_ne!(adapter_info(&original).id, adapter_info(&other).id);
+        }
+    }
 }
 
 const SHADERS: &str = r#"
@@ -150,7 +206,7 @@ pub fn create_device_with_adapter(
     let selected = if let Some(id) = requested {
         adapters()?
             .into_iter()
-            .find(|(info, _)| info.id == id)
+            .find(|(info, _)| info.id == id || info.legacy_id == id)
             .map(|(_, a)| a)
     } else {
         None
@@ -201,12 +257,13 @@ pub fn create_device_with_adapter(
                 (Ok(()), Some(device), Some(context)) => {
                     let dxgi: IDXGIDevice = device.cast().map_err(err("GPU を調べられない"))?;
                     let actual = unsafe { dxgi.GetAdapter() }.map_err(err("GPU を調べられない"))?;
-                    let desc = unsafe { actual.GetDesc() }.map_err(err("GPU を調べられない"))?;
+                    let actual: IDXGIAdapter1 = actual.cast().map_err(err("GPU を調べられない"))?;
+                    let desc = unsafe { actual.GetDesc1() }.map_err(err("GPU を調べられない"))?;
                     return Ok(Gpu {
                         device,
                         context,
                         warp: driver == D3D_DRIVER_TYPE_WARP,
-                        adapter_id: adapter_id(desc.AdapterLuid.HighPart, desc.AdapterLuid.LowPart),
+                        adapter_id: adapter_info(&desc).id,
                         adapter_fallback: requested.is_some() && selected.is_none(),
                     });
                 }

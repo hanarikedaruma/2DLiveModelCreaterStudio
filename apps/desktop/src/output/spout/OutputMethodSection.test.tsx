@@ -72,6 +72,19 @@ afterEach(async () => {
 });
 
 describe('出力の方式', () => {
+  it('従来のLUIDで保存したGPUが見つかれば、既定に戻さず保存用の識別子へ移す', async () => {
+    const id = 'pci:10de:28a1:12345678:00000001:NVIDIA GeForce RTX 4050';
+    const legacyId = '00000000:00013a29';
+    vi.mocked(listSpoutAdapters).mockResolvedValue([{ id, name: 'NVIDIA GeForce RTX 4050', legacyId }]);
+    const env = createDefaultEnvironment();
+    env.output = { ...env.output, method: 'spout2', adapterId: legacyId };
+    const { environment } = await setup(JSON.stringify(env));
+    await waitFor(() => expect(environment.get().output.adapterId).toBe(id));
+    expect((section().getByRole('combobox', { name: 'Spout2 の GPU' }) as HTMLSelectElement).value).toBe(id);
+    expect(section().queryByText('選んだGPUが見つからないため、既定のGPUに戻した')).toBeNull();
+    await environment.flush();
+  });
+
   it('GPUの一覧から選び、保存したGPUを復元し、GPU変更で送信を作り直す', async () => {
     vi.mocked(listSpoutAdapters).mockResolvedValue([
       { id: 'gpu-1', name: '内蔵GPU' },

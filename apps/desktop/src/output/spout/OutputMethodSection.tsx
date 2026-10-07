@@ -39,8 +39,13 @@ export function OutputMethodSection() {
     };
   }, []);
   useEffect(() => {
+    const found = adapters?.find((a) => a.id === output.adapterId || a.legacyId === output.adapterId);
+    if (output.adapterId && found && found.id !== output.adapterId) {
+      setEnv({ output: { ...output, adapterId: found.id } });
+      return;
+    }
     const fallback = (status.state === 'running' || status.state === 'recovering') && status.telemetry?.adapterFallback;
-    if (output.adapterId && (fallback || (adapters !== null && !adapters.some((a) => a.id === output.adapterId)))) {
+    if (output.adapterId && (fallback || (adapters !== null && !found))) {
       setAdapterNotice('選んだGPUが見つからないため、既定のGPUに戻した');
       setEnv({ output: { ...output, adapterId: null } });
     }
