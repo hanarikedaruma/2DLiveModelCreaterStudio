@@ -67,3 +67,8 @@
 
 - 2026-10-07 CL（テストの担当）: 先に `apps/desktop/src/hotkeys/actions.c68.test.ts`（10件）を書き、`describe.skip`（カード68 の実装待ち）でコミットした。今の公開の口（createHotkeyActions の producer・createStudioRuntime・registerLayerProducer）だけを使う。producer の id が hotkey、表情とホットキーの登録の順2通り・アニメーションを加えた6通りで最後の値と層の並び（表情 → ホットキー → アニメーション）、もう一度押す・押している間を離すと表情の値に戻る。skip を外して今の実装で動かすと10件とも失敗する（直す前の失敗の確認）。実装の担当は、実装をコミットしたら skip の1行だけを戻す。
 - 残り: `targets.c68.test.ts`・`scenes.c68.test.ts` は、背景の画像の一覧の渡し方とシーン・背景の削除の口が決まってから書く（着手したら知らせてほしい）。CH・UC-CH も実装の後。
+- 2026-10-07 CL（テストの担当）: `apps/desktop/src/hotkeys/targets.c68.test.ts`（10件）と `apps/desktop/src/modes/studio/scenes/scenes.c68.test.ts`（12件）を足した。actions.c68.test.ts と合わせた32件が通る。
+  - targets: 使っていない画像（sky.webp・unused.png）も対象に出て、3つ目を省くと前と同じ7つ。使っていない画像のホットキーで背景が替わり、もう一度で戻る。BACKGROUND_PRESETS・backgroundLabel・setActiveSceneCommand が scenes と同じもの（toBe）、表示名・並び・コマンドの結果が scenes の画面と同じ。本物の Shell で、シーンの画像の一覧とホットキーの対象が同じ2枚（memo.txt は出ない）、画像を消すと開いているホットキーの対象からも消え、1回の Undo で両方に戻る。
+  - scenes: シーンを消すと、そのシーンのホットキー（toggle・hold）だけを消し、ほかのシーン・背景・パラメータのホットキーは残る。画面で数を出して確かめ、キャンセルでは何も変えない（履歴も増えない）。OK で両方消え、1回の Undo・Redo でそのまま戻る。確認中に変わったら消さない。背景の画像を消すと使うシーンは透明に、その画像のホットキーだけ消え、ファイルは backgrounds/.removed/ へ同じバイトで移る。確認の文に使うシーンの名前とホットキーの数。1回の Undo でファイルも戻る。キャンセル・移動の失敗では何も変えない。
+- 実装の担当（CO）へ（合否には関係しない気づき）: `apps/desktop/src/hotkeys/index.ts` の頭のコメントが、producer の id を 'expression' のままにしている（今は 'hotkey'）。backgrounds/.removed/ に退避した画像は消されずに残り続ける（保存の前の OK の時点で移す）。
+- テスト確認はまだ書かない: CH・UC-CH（UC-26・UC-27 の続き）を書いてから、Edge の2つの画面サイズの結果とあわせて記録する。
