@@ -1,4 +1,4 @@
-import type { AutoBlink, Layer, ParamValues, TrackingFrame, TrackingLayerProducer } from '@app/contracts';
+import type { Layer, ParamValues, TrackingFrame, TrackingLayerProducer } from '@app/contracts';
 import type { Environment, Parameter, TrackingCombineMethod, TrackingMapping, TrackingSetup } from '@app/schema';
 import { applyCalibration, normalizeCalibration, sameCalibration, type TrackingCalibration } from './calibrate';
 import { createDefaultTrackingMappings } from './defaults';
@@ -19,14 +19,9 @@ import {
 // （既定の顔の角度 [−30, 30] では度のまま。目や口の 0..1 も同じ割合の動きなら同じように追う）
 export const FILTER_SPAN = 60;
 
-// 自動まばたきを渡されていないときの目（開けたまま）
-const EYES_OPEN = Object.freeze({ EyeOpenL: 1, EyeOpenR: 1 });
 const EYE_PARAMETERS = ['EyeOpenL', 'EyeOpenR'] as const;
 
 export interface TrackingLayerOptions {
-  // 目のトラッキングをオフにしたときと外れたときの EyeOpenL / R（@app/core の createAutoBlink など）。
-  // 無ければ目を開けたまま（アプリではカード44で services.autoBlink を渡す）
-  autoBlink?: AutoBlink;
   // 同じパラメータへの割り当てが複数あるときの合わせ方（I-042）。無いパラメータは add
   combine?: TrackingSetup['combine'];
 }
@@ -54,12 +49,7 @@ export function createTrackingLayerProducer(
   mappings?: TrackingMapping[],
   options: TrackingLayerOptions = {},
 ): TrackingLayerProducer {
-  return new TrackingLayer(
-    parameters,
-    mappings ?? createDefaultTrackingMappings(),
-    options.autoBlink ?? null,
-    options.combine ?? [],
-  );
+  return new TrackingLayer(parameters, mappings ?? createDefaultTrackingMappings(), options.combine ?? []);
 }
 
 class TrackingLayer implements TrackingLayerProducer {
@@ -76,12 +66,7 @@ class TrackingLayer implements TrackingLayerProducer {
   private lastDetectedFrame: TrackingFrame | null = null;
   private lastTick: number | null = null;
 
-  constructor(
-    parameters: Parameter[],
-    mappings: TrackingMapping[],
-    private readonly autoBlink: AutoBlink | null,
-    combine: TrackingSetup['combine'],
-  ) {
+  constructor(parameters: Parameter[], mappings: TrackingMapping[], combine: TrackingSetup['combine']) {
     this.parametersById = new Map(parameters.map((p) => [p.id, p]));
     this.resolved = [];
     const groups = new Map<string, MappingGroup>();
@@ -116,19 +101,13 @@ class TrackingLayer implements TrackingLayerProducer {
     this.values = this.compute(frame);
   }
 
-  // 目のトラッキングがオフのときと外れたときは、EyeOpenL / R を自動まばたきの値にする
-  // 顔の正面復帰の重みと分け、未検出でも目の動きは継続する。
+  // カメラから来た値だけを出す（STEP3 のカード66・CC-010）。目のトラッキングがオフのときと外れたときは
+  // EyeOpenL / R を出さず、自動の層（@app/core の createAutoLayerProducer）が自動まばたきにする
   tick(now: number): Layer {
     this.lastTick = now;
     const values = { ...this.values };
-    const fallback = !this.eyeTracking || this.status() === 'lost';
-    if (fallback) this.applyBlink(values, now);
-    const layer: Layer = { id: 'tracking', weight: clamp(this.weight.weightAt(now), 0, 1), values };
-    if (fallback)
-      layer.parameterWeights = Object.fromEntries(
-        EYE_PARAMETERS.filter((id) => this.parametersById.has(id)).map((id) => [id, 1]),
-      );
-    return layer;
+    if (!this.eyeTracking || this.status() === 'lost') for (const id of EYE_PARAMETERS) delete values[id];
+    return { id: 'tracking', weight: clamp(this.weight.weightAt(now), 0, 1), values };
   }
 
   // 最後のフレームが detected でないか、detected のフレームが 0.5秒より長く来ていなければ 'lost'
@@ -188,15 +167,6 @@ class TrackingLayer implements TrackingLayerProducer {
 
   private refresh(): void {
     if (this.lastDetectedFrame) this.values = this.compute(this.lastDetectedFrame);
-  }
-
-  private applyBlink(values: ParamValues, now: number): void {
-    const blink = this.autoBlink ? this.autoBlink.tick(now) : EYES_OPEN;
-    for (const id of EYE_PARAMETERS) {
-      const parameter = this.parametersById.get(id);
-      const v = blink[id];
-      if (parameter && Number.isFinite(v)) values[id] = clamp(v, parameter.min, parameter.max);
-    }
   }
 
   // キャリブレーション → ミラー → 入力範囲で丸めてならす → 写像（deadZone はマッピングの値 + プリセットの値）

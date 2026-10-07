@@ -163,7 +163,9 @@ describe('createTrackingLayerProducer', () => {
       expect(p.tick(2500).weight).toBe(1);
       expect(p.tick(3000).weight).toBeCloseTo(0.5, 9);
       expect(p.tick(3500).weight).toBe(0);
-      expect(p.tick(3500).values).toEqual(held);
+      // 目は外れたときに出さない（自動の層がまばたきにする。STEP3 のカード66）。ほかは最後の値のまま
+      const { EyeOpenL: _l, EyeOpenR: _r, ...face } = held;
+      expect(p.tick(3500).values).toEqual(face);
       expect(held.FaceAngleX).toBeCloseTo(20, 6);
     });
 
@@ -193,14 +195,9 @@ describe('createTrackingLayerProducer', () => {
       expect(p.tick(5000).weight).toBe(0);
     });
 
-    it('まだ一度も検出していなければ顔の weight は0、目はフォールバック・lost', () => {
+    it('まだ一度も検出していなければ weight は0で何も出さない・lost（目は自動の層が出す。STEP3 のカード66）', () => {
       const p = createTrackingLayerProducer(MVP);
-      expect(p.tick(0)).toEqual({
-        id: 'tracking',
-        weight: 0,
-        values: { EyeOpenL: 1, EyeOpenR: 1 },
-        parameterWeights: { EyeOpenL: 1, EyeOpenR: 1 },
-      });
+      expect(p.tick(0)).toEqual({ id: 'tracking', weight: 0, values: {} });
       expect(p.status()).toBe('lost');
     });
 

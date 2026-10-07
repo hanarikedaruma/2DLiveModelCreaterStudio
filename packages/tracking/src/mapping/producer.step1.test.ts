@@ -1,5 +1,5 @@
 // カード35: 追加の入力・キャリブレーション・プリセット・目のトラッキング
-import type { AutoBlink, TrackingFrame } from '@app/contracts';
+import type { TrackingFrame } from '@app/contracts';
 import { standardParametersFor } from '@app/schema';
 import { describe, expect, it } from 'vitest';
 import { applyDeadZone } from './map';
@@ -24,18 +24,6 @@ function frame(time: number, patch: Partial<TrackingFrame> = {}): TrackingFrame 
     eyeBallY: 0,
     mouthOpen: 0,
     ...patch,
-  };
-}
-
-// 呼ばれた時刻を記録し、決まった値を返す自動まばたき
-function fakeBlink(value = { EyeOpenL: 0.25, EyeOpenR: 0.75 }): AutoBlink & { calls: number[] } {
-  const calls: number[] = [];
-  return {
-    calls,
-    tick(now) {
-      calls.push(now);
-      return value;
-    },
   };
 }
 
@@ -237,84 +225,54 @@ describe('setPreset', () => {
   });
 });
 
-describe('setEyeTracking', () => {
+describe('setEyeTracking（STEP3 のカード66: 目の値を出さず、自動の層に任せる）', () => {
   const tracked = frame(0, { eyeOpenL: 0.4, eyeOpenR: 0.6, faceYaw: 12 });
 
-  it('オフにすると EyeOpenL / R が autoBlink.tick(now) の値になる。ほかの値はトラッキングのまま', () => {
-    const blink = fakeBlink();
-    const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: blink });
+  it('オフにすると EyeOpenL / R を出さない。ほかの値はトラッキングのまま', () => {
+    const p = createTrackingLayerProducer(MVP);
     p.update(tracked);
     expect(p.tick(0).values).toMatchObject({ EyeOpenL: 0.6, EyeOpenR: 0.4 });
-    expect(blink.calls).toEqual([]); // オンで検出中なら呼ばない
     p.setEyeTracking(false);
-    const v = p.tick(10).values;
-    expect(v).toMatchObject({ EyeOpenL: 0.25, EyeOpenR: 0.75 });
-    expect(v.FaceAngleX).toBeCloseTo(12, 9);
-    expect(blink.calls).toEqual([10]);
+    const layer = p.tick(10);
+    expect(Object.keys(layer.values)).not.toContain('EyeOpenL');
+    expect(Object.keys(layer.values)).not.toContain('EyeOpenR');
+    expect(layer.values.FaceAngleX).toBeCloseTo(12, 9);
+    expect(layer.parameterWeights).toBeUndefined();
     expect(p.status()).toBe('tracking');
   });
 
   it('オンに戻すと、すぐにトラッキングの目の値に戻る', () => {
-    const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: fakeBlink() });
+    const p = createTrackingLayerProducer(MVP);
     p.setEyeTracking(false);
     p.update(tracked);
-    expect(p.tick(0).values).toMatchObject({ EyeOpenL: 0.25, EyeOpenR: 0.75 });
+    expect(Object.keys(p.tick(0).values)).not.toContain('EyeOpenL');
     p.setEyeTracking(true);
     expect(p.tick(0).values).toMatchObject({ EyeOpenL: 0.6, EyeOpenR: 0.4 });
   });
 
-  it('外れたとき（status が lost）も autoBlink の値を使う', () => {
-    const blink = fakeBlink();
-    const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: blink });
+  it('外れたとき（status が lost）も目の値を出さない。ほかは最後の値のまま。再び検出したら目も戻る', () => {
+    const p = createTrackingLayerProducer(MVP);
     p.setLostBehavior('hold');
     p.update(tracked);
     p.update(frame(FRAME, { detected: false, eyeOpenL: 0, eyeOpenR: 0 }));
     const layer = p.tick(FRAME);
     expect(p.status()).toBe('lost');
-    expect(layer.values).toMatchObject({ EyeOpenL: 0.25, EyeOpenR: 0.75 });
-    expect(layer.values.FaceAngleX).toBeCloseTo(12, 9); // ほかは最後の値のまま
-    // 再び検出したらトラッキングの目に戻る
+    expect(Object.keys(layer.values)).not.toContain('EyeOpenL');
+    expect(layer.values.FaceAngleX).toBeCloseTo(12, 9);
     p.update(frame(2 * FRAME, { eyeOpenL: 0.4, eyeOpenR: 0.6 }));
     expect(p.tick(2 * FRAME).values.EyeOpenL).toBeCloseTo(0.6, 2);
   });
 
-  it('フレームが来なくなって 0.5秒を過ぎたときも lost として autoBlink の値を使う', () => {
-    const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: fakeBlink() });
-    p.update(tracked);
-    expect(p.tick(400).values.EyeOpenL).toBeCloseTo(0.6, 9);
-    expect(p.tick(600).values).toMatchObject({ EyeOpenL: 0.25, EyeOpenR: 0.75 });
-  });
-
-  it('autoBlink を渡していなければ、オフのとき目を開けたまま（1）', () => {
+  it('フレームが来なくなって 0.5秒を過ぎたときも lost として目の値を出さない', () => {
     const p = createTrackingLayerProducer(MVP);
     p.update(tracked);
-    p.setEyeTracking(false);
-    expect(p.tick(0).values).toMatchObject({ EyeOpenL: 1, EyeOpenR: 1 });
+    expect(p.tick(400).values.EyeOpenL).toBeCloseTo(0.6, 9);
+    expect(Object.keys(p.tick(600).values)).not.toContain('EyeOpenL');
   });
 
-  it('autoBlink の値はパラメータの範囲で丸め、モデルに目のパラメータが無ければ出さない', () => {
-    const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: fakeBlink({ EyeOpenL: 1.5, EyeOpenR: -1 }) });
-    p.update(tracked);
+  it('まだ一度も検出していなければ、何も出さない（重みは0）', () => {
+    const p = createTrackingLayerProducer(MVP);
     p.setEyeTracking(false);
-    expect(p.tick(0).values).toMatchObject({ EyeOpenL: 1, EyeOpenR: 0 });
-
-    const noEyes = MVP.filter((x) => !x.id.startsWith('EyeOpen'));
-    const q = createTrackingLayerProducer(noEyes, undefined, { autoBlink: fakeBlink() });
-    q.update(tracked);
-    q.setEyeTracking(false);
-    expect(Object.keys(q.tick(0).values)).not.toContain('EyeOpenL');
-  });
-
-  it('まだ一度も検出していなくても、自動まばたきを独立した重みで出す', () => {
-    const blink = fakeBlink();
-    const p = createTrackingLayerProducer(MVP, undefined, { autoBlink: blink });
-    p.setEyeTracking(false);
-    expect(p.tick(0)).toEqual({
-      id: 'tracking',
-      weight: 0,
-      values: { EyeOpenL: 0.25, EyeOpenR: 0.75 },
-      parameterWeights: { EyeOpenL: 1, EyeOpenR: 1 },
-    });
-    expect(blink.calls).toEqual([0]);
+    expect(p.tick(0)).toEqual({ id: 'tracking', weight: 0, values: {} });
   });
 });

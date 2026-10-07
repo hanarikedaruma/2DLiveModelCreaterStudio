@@ -171,7 +171,18 @@ export function CalibrationSection() {
         <input type="checkbox" checked={env.eyeTracking} onChange={(e) => setEnv({ eyeTracking: e.target.checked })} />
         目のトラッキング
       </label>
-      {!env.eyeTracking && <p className="studio-note">目の開け閉めは自動のまばたきにする</p>}
+      {!env.eyeTracking && (
+        <p className="studio-note">
+          {env.autoBlink ? '目の開け閉めは自動のまばたきにする' : '目は開いたままにする（自動のまばたきがオフ）'}
+        </p>
+      )}
+      <label className="studio-check calibration-auto-blink">
+        <input type="checkbox" checked={env.autoBlink} onChange={(e) => setEnv({ autoBlink: e.target.checked })} />
+        自動のまばたき
+      </label>
+      <p className="studio-note">
+        目の値がカメラから来ていない間（顔が外れた・カメラ停止中・割り当てに目が無い）にまばたきする
+      </p>
 
       {phase.kind !== 'idle' && <CalibrationDialog flow={flow} />}
     </div>

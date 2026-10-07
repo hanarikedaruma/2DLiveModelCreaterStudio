@@ -68,9 +68,8 @@ describe('1フレームの処理', () => {
     const { runtime, services } = setup();
     services.mixer = createParameterMixer();
     services.autoBlink = { tick: () => ({ EyeOpenL: 0.25, EyeOpenR: 0.75 }) };
-    services.trackingLayer = createTrackingLayerProducer(services.store.get().model.parameters, undefined, {
-      autoBlink: services.autoBlink,
-    });
+    // 自動まばたきは実行部の自動の層が services.autoBlink から出す（STEP3 のカード66）
+    services.trackingLayer = createTrackingLayerProducer(services.store.get().model.parameters);
     const detach = runtime.attach(services);
     expect(runtime.tick(0)!.params).toMatchObject({ FaceAngleX: 0, EyeOpenL: 0.25, EyeOpenR: 0.75 });
     vi.spyOn(services.tracking, 'start').mockResolvedValue();

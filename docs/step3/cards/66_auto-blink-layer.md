@@ -60,4 +60,11 @@
 
 ## 記録
 
-（作業中に書く）
+- 2026-10-07 CL: 実装した。
+  - トラッキングの層（packages/tracking/src/mapping/producer.ts）はカメラから来た値だけを出す。目のトラッキングがオフのときと外れたときは EyeOpenL / R を出さない（前は自動まばたきの値と目だけの重み1を入れていた。CC-002 の parameterWeights はもう使わない）。TrackingLayerOptions.autoBlink をやめた。
+  - 自動の層（packages/core/src/layers/autoLayer.ts の createAutoLayerProducer）: 前の層ごとの結果（layersSoFar）を見て、トラッキングの層が目の値を持っていなければ、自動まばたきの値を重み1で出す。片目だけ来ていなければ片目だけ。Environment.autoBlink がオフなら出さない。
+  - 実行部（apps/desktop/src/modes/studio/runtime.ts）: カメラ停止中にトラッキングの層の代わりに自動まばたきを出していた経路を消し、自動の層を足した（まばたきの処理は1か所）。producer に layersSoFar を渡し、StudioFrame に layers（そのフレームの層）を足した。setAutoBlink を足し、bindStudioEnvironment から Environment.autoBlink を渡す。
+  - スタジオの設定（トラッキング）に「自動のまばたき」のチェックを足した（CalibrationSection.tsx）。
+- 確かめたこと: core の autoLayer.test.ts 5件（カメラ停止中・目がカメラから来ている間は出さない・割り当てに目が無い・片目・オフ・範囲・目のパラメータが無い）。tracking の producer のテストを新しい動きに書き直した（目の値を出さない5件）。desktop の runtime.test.ts（I-030 の確認: 見失って3秒後もまばたき・表情の閉じ目が優先）と services.step1.test.ts を新しい動きで通した。全体のテスト（`pnpm -r test`）と型検査が通った。Edge（開発用の画面）で、設定のチェックが保存され、オフで自動の層が出ず、オンで出て、カメラ停止中に目が閉じる（7秒で最小 0）ことを確かめた。
+- 確かめていないこと: `pnpm e2e`。CO がカード57・64 を作業中でアプリのソースに書きかけがあるので、区切りまでコミットされてから回す。実カメラでの確認（カード70・72 の UC-23）。
+- 締めるときに残っていること: docs/issues.md の I-055 を対応済みに、I-030 に自動の層へ移したことを追記（CO が issues.md を書きかけなので、そのコミットの後）。

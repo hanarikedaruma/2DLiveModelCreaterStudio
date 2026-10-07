@@ -54,20 +54,18 @@ describe('STEP1 の本物のサービスの組み立て', () => {
     expect((services.spout as SpoutSink).running()).toBe(false);
   });
 
-  it('目の追従をオフにすると同じ自動まばたきを使い、プロジェクトを読み直してもつながる', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0);
+  it('目の追従をオフにすると目の値を出さず（自動の層がまばたきにする）、プロジェクトを読み直しても設定がつながる（STEP3 のカード66）', () => {
     const services = createServices();
     services.trackingLayer.setEyeTracking(false);
-    services.autoBlink.tick(0);
     services.trackingLayer.update(frame(2040));
-    expect(services.autoBlink.tick(2040)).toEqual({ EyeOpenL: 0.5, EyeOpenR: 0.5 });
-    expect(services.trackingLayer.tick(2040).values).toMatchObject({ EyeOpenL: 0.5, EyeOpenR: 0.5 });
+    expect(Object.keys(services.trackingLayer.tick(2040).values)).not.toContain('EyeOpenL');
 
-    // 標準パラメータを足すとトラッキングのレイヤーが作り直される
+    // 標準パラメータを足すとトラッキングのレイヤーが作り直される。目の追従の設定は引き継ぐ
     expect(applyStep1Parameters(services.store)).toBe(true);
     services.trackingLayer.update(frame(2080));
-    expect(services.trackingLayer.tick(2080).values).toMatchObject({ EyeOpenL: 0, EyeOpenR: 0 });
-    expect(services.autoBlink.tick(2080)).toEqual({ EyeOpenL: 0, EyeOpenR: 0 });
+    expect(Object.keys(services.trackingLayer.tick(2080).values)).not.toContain('EyeOpenL');
+    services.trackingLayer.setEyeTracking(true);
+    expect(services.trackingLayer.tick(2080).values).toHaveProperty('EyeOpenL');
   });
 
   it('キャリブレーションの中央値を、本物のトラッキングへ反映する', () => {

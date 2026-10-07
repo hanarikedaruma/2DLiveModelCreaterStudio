@@ -11,6 +11,7 @@ import {
   type Services,
   type ViewTransform,
 } from '@app/contracts';
+import { createAutoLayerProducer, type AutoLayerProducer } from '@app/core';
 import {
   createBackgroundFiles,
   createBackgroundImages,
@@ -34,6 +35,7 @@ export interface StudioFrame {
   background: Background;
   params: ParamValues;
   now: number;
+  layers: Layer[]; // そのフレームの層（合成する前の値と重み。合成した順）。STEP3 のカード66
 }
 export type StudioTrackingStatus = 'tracking' | 'lost' | 'stopped';
 // running: フレームの処理を回しているか（スタジオの画面か出力ウィンドウが開いている間）。
@@ -82,6 +84,7 @@ export interface StudioRuntime {
   modelTransform(): ModelTransform; // 今使っている配置
   setPreview(draw: ((frame: StudioFrame) => void) | null): () => void;
   setScheduler(scheduler: FrameScheduler): void;
+  setAutoBlink(on: boolean): void; // Environment.autoBlink（自動の層のまばたき）。STEP3 のカード66
   readonly backgrounds: BackgroundImages;
   readonly backgroundFiles: BackgroundFiles;
 }
@@ -132,17 +135,25 @@ export function createStudioRuntime(
     for (const l of [...listeners]) l();
   }
 
-  // カメラを停止しても自動まばたきは動かす。表情・アニメーションより前に合成する。
+  // トラッキングの層はカメラから来た値だけ（カメラ停止中は出さない）。自動まばたきは自動の層が、目の値が
+  // トラッキングの層から来ていない間に出す（STEP3 のカード66・CC-010。カメラ停止中もここで動く）
   const trackingProducer: LayerProducer = {
     id: 'tracking',
-    produce: (ctx) =>
-      tracking
-        ? tracking.services.trackingLayer.tick(ctx.now)
-        : services
-          ? { id: 'tracking', weight: 1, values: services.autoBlink.tick(ctx.now) }
-          : null,
+    produce: (ctx) => (tracking ? tracking.services.trackingLayer.tick(ctx.now) : null),
   };
   producers.push(trackingProducer);
+  let autoBlinkEnabled = true;
+  let auto: { services: Services; producer: AutoLayerProducer } | null = null;
+  const autoProducer: LayerProducer = {
+    id: 'auto',
+    produce(ctx) {
+      if (!services) return null;
+      if (auto?.services !== services) auto = { services, producer: createAutoLayerProducer(services.autoBlink) };
+      auto.producer.setBlinkEnabled(autoBlinkEnabled);
+      return auto.producer.produce(ctx);
+    },
+  };
+  producers.push(autoProducer);
   producers.push({ id: 'physics', produce: (ctx) => services?.physics.produce(ctx) ?? null });
 
   function ordered(): LayerProducer[] {
@@ -163,7 +174,7 @@ export function createStudioRuntime(
     for (const p of ordered()) {
       let produced: Layer | Layer[] | null;
       try {
-        produced = p.produce({ now, dt, project, mixedSoFar, flags });
+        produced = p.produce({ now, dt, project, mixedSoFar, flags, layersSoFar: [...layers] });
       } catch (e) {
         report(p, `レイヤー（${p.id}）`, e);
         continue;
@@ -178,7 +189,7 @@ export function createStudioRuntime(
     const model = s.pipeline.deform(project.model, s.evaluator.evaluate(project.model, params));
     const view = outputView(modelRect(project), override ?? sceneModelTransform(project), outputSize);
     const background = backgrounds.resolve(sceneBackground(project));
-    const frame: StudioFrame = { model, view, background, params, now };
+    const frame: StudioFrame = { model, view, background, params, now, layers: [...layers] };
     last = frame;
     if (preview) {
       try {
@@ -310,6 +321,9 @@ export function createStudioRuntime(
       cancelFrame = null;
       scheduler = next;
       if (attachments > 0) cancelFrame = scheduler.request(loop);
+    },
+    setAutoBlink(on) {
+      autoBlinkEnabled = on;
     },
     backgrounds,
     backgroundFiles,

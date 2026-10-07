@@ -106,7 +106,7 @@ export function createServices(): Services {
     }
     return out;
   };
-  // 自動まばたきは、スタジオ（目のトラッキングをオフにしたとき・外れたとき）とトラッキングのレイヤーで同じものを使う
+  // 自動まばたき。スタジオの実行部の自動の層（STEP3 のカード66）が、目の値がカメラから来ていない間に使う
   const autoBlink = createAutoBlink();
   const audio = createAudioSource();
   const vowels = createVowelEstimator();
@@ -132,7 +132,7 @@ export function createServices(): Services {
     autoSaver: createAutoSaver(fs, io, store, projectAssetPngs),
     tracking: createMediaPipeTrackingSource(),
     trackingLayer: createProjectTrackingLayer(store, (parameters, mappings, combine) =>
-      createTrackingLayerProducer(parameters, mappings, { autoBlink, combine }),
+      createTrackingLayerProducer(parameters, mappings, { combine }),
     ),
     // STEP1（カード44で本物に差し替えた）
     audio,

@@ -143,7 +143,7 @@ pnpm はリポジトリの中の Corepack で動かす。PowerShell で、毎回
 | 63   | [キーを1つ消す・動かす、「間を生成」の範囲](cards/63_key-ops.md)      | 1   | CL   | 55            |      |      | CO     | 未着手                       |
 | 64   | [左右反転コピーの符号](cards/64_mirror-copy-sign.md)                  | 1   | CO   | 55            |      |      | CL     | 未着手                       |
 | 65   | [層と設定の契約](cards/65_layers-contract.md)                         | 1   | CL   | 58            | ○    |      | CO     | コミット済み・テスト確認待ち |
-| 66   | [自動まばたきの層と層ごとの値](cards/66_auto-blink-layer.md)          | 1   | CL   | 65            |      |      | CO     | 未着手                       |
+| 66   | [自動まばたきの層と層ごとの値](cards/66_auto-blink-layer.md)          | 1   | CL   | 65            |      |      | CO     | コミット済み・テスト確認待ち |
 | 67   | [計測の表示に層ごとの値](cards/67_diagnostics-layers.md)              | 1   | CO   | 66            |      |      | CL     | 未着手                       |
 | 68   | [シーン・背景・ホットキーの後始末](cards/68_studio-cleanup.md)        | 1   | CO   | 65            |      |      | CL     | 未着手                       |
 | 69   | [Spout2 の復帰と GPU の選択](cards/69_spout2.md)                      | 1   | CO   | 65            |      | ○    | CL     | 未着手                       |
