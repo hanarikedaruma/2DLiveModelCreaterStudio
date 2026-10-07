@@ -103,6 +103,19 @@ describe('選択', () => {
 });
 
 describe('変形のドラッグ', () => {
+  it('幅の狭いキャンバスでは回転中心の説明を折り返し、描画ピクセル数で位置を決めない', async () => {
+    const { ptr, services, canvas } = await open();
+    ptr.click(TORSO);
+    act(() => services.editor.set({ editorParamValues: { FaceAngleX: 12 } }));
+    ptr.move(TORSO_PIVOT);
+    const ctx = new RecordingContext();
+    Object.assign(ctx, { canvas: { clientWidth: 240, clientHeight: 600, width: 800, height: 1200 } });
+    selectTool.tool.drawOverlay!(ctx.asContext(), canvas.getState().view);
+    const bubble = ctx.named('fillRect').at(-1)!;
+    expect(bubble[0]! + bubble[2]!).toBeLessThanOrEqual(240);
+    expect(ctx.texts.length).toBeGreaterThan(1);
+    expect(ctx.texts.join('')).toBe('回転中心（プレビュー中は移せない。値をすべて戻す）');
+  });
   it('回転中心に乗せたときだけ説明を描き、プレビュー中と複数選択では動かせない理由を出す', async () => {
     const { ptr, services, canvas } = await open();
     ptr.click(TORSO);

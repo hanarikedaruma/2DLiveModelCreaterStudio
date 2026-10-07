@@ -454,13 +454,27 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
         ctx.save();
         ctx.font = '12px sans-serif';
         ctx.textBaseline = 'middle';
-        const width = ctx.measureText(message).width + 16;
-        const x = Math.max(4, Math.min(hover.x + 14, (ctx.canvas?.width ?? Infinity) - width - 4));
-        const y = Math.max(4, Math.min(hover.y + 14, (ctx.canvas?.height ?? Infinity) - 28));
+        const canvasWidth = ctx.canvas?.clientWidth || ctx.canvas?.width || Infinity;
+        const canvasHeight = ctx.canvas?.clientHeight || ctx.canvas?.height || Infinity;
+        const maxTextWidth = Math.max(12, canvasWidth - 24);
+        const lines: string[] = [];
+        let line = '';
+        for (const char of message) {
+          if (line && ctx.measureText(line + char).width > maxTextWidth) {
+            lines.push(line);
+            line = '';
+          }
+          line += char;
+        }
+        if (line) lines.push(line);
+        const width = Math.max(...lines.map((text) => ctx.measureText(text).width)) + 16;
+        const height = lines.length * 18 + 8;
+        const x = Math.max(4, Math.min(hover.x + 14, canvasWidth - width - 4));
+        const y = Math.max(4, Math.min(hover.y + 14, canvasHeight - height - 4));
         ctx.fillStyle = cssVar('--bg-raised', '#303238');
-        ctx.fillRect(x, y, width, 24);
+        ctx.fillRect(x, y, width, height);
         ctx.fillStyle = cssVar('--text', '#eeeeee');
-        ctx.fillText(message, x + 8, y + 12);
+        lines.forEach((text, i) => ctx.fillText(text, x + 8, y + 13 + i * 18));
         ctx.restore();
       }
     },
