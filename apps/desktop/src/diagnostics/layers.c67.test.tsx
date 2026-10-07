@@ -4,7 +4,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, getByRole, within } from '@testing-library/dom';
 import { LAYER_ORDER, type Layer, type LayerId, type LayerProducer } from '@app/contracts';
-import { createAutoBlink, createExpressionController, createParameterMixer } from '@app/core';
+import {
+  BODY_FOLLOW_RATES,
+  createAutoBlink,
+  createBodyFollowProducer,
+  createExpressionController,
+  createParameterMixer,
+} from '@app/core';
 import { createEmptyProject, ensureStandardParameters, standardParametersFor, type Expression } from '@app/schema';
 import { createStudioRuntime, type StudioFrame, type StudioRuntime } from '../modes/studio/runtime';
 import { createFakeServices } from '../services';
@@ -277,6 +283,41 @@ describe('カード67: 層ごとの値と最後の値の表', () => {
     expect(mouth).toBeCloseTo(0.201, 6);
     // 表の値が変わったのは 500ms ごとの4回だけ（初めの表示を含めて5つ）
     expect(seen).toEqual(['0.001', '0.050', '0.100', '0.150', '0.200']);
+  });
+});
+
+describe('カード67: 体の追従を計測の表示で読む（カード36 の「計測の表示で確認」・I-007）', () => {
+  it('顔の向き（カメラの層の代わり）に合わせて、体 左右・体 傾きが「体の追従」の列から来て、顔 × 率 になる', () => {
+    const { runtime, diagnostics } = setup();
+    // カメラの層の代わり（本物のカメラはカード70・72）。顔 左右 20・顔 傾き −10
+    runtime.registerLayerProducer({
+      id: 'tracking',
+      produce: (): Layer => ({ id: 'tracking', weight: 1, values: { FaceAngleX: 20, FaceAngleZ: -10 } }),
+    });
+    const body = createBodyFollowProducer(); // 本物の体の追従（標準の率）
+    runtime.registerLayerProducer(body);
+    diagnostics.toggle();
+    runtime.tick(10_000);
+    vi.advanceTimersByTime(LAYER_SAMPLE_MS);
+
+    const rate = BODY_FOLLOW_RATES.standard;
+    expect(rate).toBe(0.3);
+    const x = readRow('BodyAngleX');
+    expect(x.final).toBe((20 * rate).toFixed(3)); // 6.000
+    onlyLayers(x, { bodyFollow: '6.000 / 重み 1.000・上書き' });
+    const z = readRow('BodyAngleZ');
+    expect(z.final).toBe('-3.000');
+    onlyLayers(z, { bodyFollow: '-3.000 / 重み 1.000・上書き' });
+    // 体 上下は追従しない
+    onlyLayers(readRow('BodyAngleY'), {});
+    // 顔の値はカメラの列から来ている
+    onlyLayers(readRow('FaceAngleX'), { tracking: '20.000 / 重み 1.000・上書き' });
+
+    // 強さを「強め」にすると、次の更新で率が変わって読める
+    body.setStrength('high');
+    runtime.tick(10_600);
+    vi.advanceTimersByTime(LAYER_SAMPLE_MS);
+    expect(readRow('BodyAngleX').final).toBe((20 * BODY_FOLLOW_RATES.high).toFixed(3)); // 9.000
   });
 });
 

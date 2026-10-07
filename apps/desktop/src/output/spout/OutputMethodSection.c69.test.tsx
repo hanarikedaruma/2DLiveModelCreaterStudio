@@ -184,6 +184,43 @@ describe('カード69 Spout2 の GPU の選択', () => {
     expect(savedAdapterId(storageAfterRestart)).toBeNull();
   });
 
+  it('前の版が LUID で保存した GPU は、同じ GPU の新しい識別子へ移して保存する。再起動で LUID が変わっても、新しい識別子の GPU はそのまま選ばれる', async () => {
+    // 新しい識別子（再起動で変わらない）と、今の起動中の LUID（legacyId）
+    const LEGACY_B = '00000000:0000b001';
+    vi.mocked(listSpoutAdapters).mockResolvedValue([
+      { id: 'gpu-a', name: '内蔵GPU（Intel）', legacyId: '00000000:0000a001' },
+      { id: 'gpu-b', name: '外付けGPU（NVIDIA）', legacyId: LEGACY_B },
+    ]);
+    const storage = memoryEnvironmentStorage(saved({ method: 'spout2', adapterId: LEGACY_B }));
+    const rust = fakeRust(['gpu-a', 'gpu-b', LEGACY_B]); // Rust は前の版の LUID も受け付ける
+    const app = await open(storage, rust);
+    await adaptersLoaded();
+    await waitFor(() => expect(app.environment.get().output.adapterId).toBe('gpu-b'));
+    await act(() => spoutOutput.whenIdle());
+    expect(gpuSelect().value).toBe('gpu-b');
+    expect(section().queryByRole('status')).toBeNull(); // 既定に戻した知らせは出ない
+    expect(rust.starts.at(-1)).toBe('gpu-b');
+    expect(rust.using).toEqual({ adapterId: 'gpu-b', fallback: false });
+    await app.environment.flush();
+    expect(savedAdapterId(storage)).toBe('gpu-b');
+
+    // PC を再起動した: 同じ GPU の LUID が変わる。保存してあるのは新しい識別子なので、そのまま選ばれる
+    app.view.unmount();
+    await spoutOutput.stop();
+    vi.mocked(listSpoutAdapters).mockResolvedValue([
+      { id: 'gpu-a', name: '内蔵GPU（Intel）', legacyId: '00000000:0000a777' },
+      { id: 'gpu-b', name: '外付けGPU（NVIDIA）', legacyId: '00000000:0000b777' },
+    ]);
+    const afterReboot = fakeRust(['gpu-a', 'gpu-b']);
+    const rebootedStorage = memoryEnvironmentStorage(storage.text);
+    const rebooted = await open(rebootedStorage, afterReboot);
+    await adaptersLoaded();
+    expect(gpuSelect().value).toBe('gpu-b');
+    expect(rebooted.environment.get().output.adapterId).toBe('gpu-b');
+    expect(afterReboot.starts).toEqual(['gpu-b']);
+    expect(section().queryByRole('status')).toBeNull();
+  });
+
   it('保存した GPU が一覧に無ければ既定の GPU に戻して保存し、画面で知らせる', async () => {
     const storage = memoryEnvironmentStorage(saved({ method: 'spout2', adapterId: 'gpu-gone' }));
     const rust = fakeRust(['gpu-a', 'gpu-b']);

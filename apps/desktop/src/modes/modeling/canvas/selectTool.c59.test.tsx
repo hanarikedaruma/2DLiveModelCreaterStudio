@@ -421,3 +421,47 @@ describe('カード59: 数値欄の名前', () => {
     expect(hint(canvas)[0]!.startsWith('回転中心')).toBe(true);
   });
 });
+
+describe('I-062: 数値欄で回転中心を変えても、回転・拡縮したパーツの画像は動かない（◎のドラッグと同じ）', () => {
+  it('回転 30 度・拡縮 1.2×0.8 の胴体で X・Y を入れても頂点は動かず、そのあと回すと見えている◎のまわりで回る。1回の Undo で戻る', async () => {
+    const { ptr, canvas, part, store, select, field } = await open();
+    act(() => store.dispatch(patchPart('回転', 'part-torso', { rotation: 30, scale: { x: 1.2, y: 0.8 } })));
+    const posed = await deformedWhen(canvas, (m) => expect(positionsOf(m, 'part-torso')[0]).not.toBeCloseTo(200));
+    const before = positionsOf(posed, 'part-torso');
+    select(['part-torso']);
+    const beforeX = store.get();
+
+    fireEvent.change(field('回転中心 X'), { target: { value: '420' } });
+    fireEvent.keyDown(field('回転中心 X'), { key: 'Enter' });
+    expect(part('part-torso').pivot).toEqual({ x: 420, y: 1170 });
+    // 位置で打ち消す（直す前は位置が 0 のままで、画像が約 10px ずれていた）
+    expect(part('part-torso').position).not.toEqual({ x: 0, y: 0 });
+    const movedX = await nextDeformed(canvas, posed);
+    expectPoints(positionsOf(movedX, 'part-torso'), before);
+
+    fireEvent.change(field('回転中心 Y'), { target: { value: '1020' } });
+    fireEvent.keyDown(field('回転中心 Y'), { key: 'Enter' });
+    const t = part('part-torso');
+    expect(t.pivot).toEqual({ x: 420, y: 1020 });
+    expect(t.rotation).toBe(30);
+    expect(t.scale).toEqual({ x: 1.2, y: 0.8 });
+    const movedY = await nextDeformed(canvas, movedX);
+    expectPoints(positionsOf(movedY, 'part-torso'), before);
+
+    // 見えている中心（ルートのパーツなので position + pivot）のまわりで回る。◎もそこに描く
+    const center = { x: t.position.x + t.pivot.x, y: t.position.y + t.pivot.y };
+    ptr.move(center);
+    expect(hint(canvas)).toEqual([HINT_MOVABLE]);
+    fireEvent.change(field('Rotation'), { target: { value: '120' } });
+    fireEvent.keyDown(field('Rotation'), { key: 'Enter' });
+    const turned = await nextDeformed(canvas, movedY);
+    expectPoints(positionsOf(turned, 'part-torso'), rotateAround(before, center, 90));
+
+    // 回転・Y・X の3回の Undo で、中心と位置がそろって元に戻る（数値の変更は1回ずつ）
+    act(() => store.undo());
+    act(() => store.undo());
+    expect(part('part-torso').pivot).toEqual({ x: 420, y: 1170 });
+    act(() => store.undo());
+    expect(store.get()).toBe(beforeX);
+  });
+});
