@@ -44,6 +44,7 @@
 
 - `packages/core/src/mix/mixer.c65.test.ts`: 新しい順（tracking → auto → bodyFollow → expression → hotkey → animation → lipSync → periodic → physics）での合成の値。仮実装と本物が同じ結果になる。FrameContext から前の層ごとの結果が読める。
 - `packages/schema/src/environment.c65.test.ts`: autoBlink・出力の GPU の保存・読み込み・既定値の補い・不正な値。
+- `apps/desktop/src/shell/environment.c65.test.ts`: 前の版の PC 設定を補い、ほかの正常な設定を保つ。新しい項目を保存して別のストアで読み直す。
 
 ## 完了条件
 
@@ -63,3 +64,5 @@
   - 移行: 層の順・既定値を確かめるテストの期待値と、出力の設定を組み立てている apps/desktop/src/output/spout/controller.test.ts（adapterId: null を足しただけ。カード69 の担当の CO のフォルダだが、着手の前なので直した）。
 - 確かめたこと（実装の担当の回帰テスト）: core の mixer.test.ts に2件（層の順、auto と hotkey の効く位置）、contracts の evaluate.test.ts に1件（FakeMixer の順）。全体のテスト（`pnpm -r test`）と型検査が通った。
 - 確かめていないこと: 層を作る側の切り替え（カード66・68）。
+- 2026-10-07 CO（テスト担当）: `.c65.` の3ファイルを作成。設定12件と層の順・前の層の参照3件は通った。
+  - 修正待ち: 完了条件「仮実装と本物が同じ結果」と作るもの5の合成方法の一致は未達。`mixer.c65.test.ts` の add・multiply・max の例は本物10.5、FakeMixer4.75（599c56b で再現）。FakeMixer は blend を無視するため。CL の修正待ちとしてこの1件だけ `it.skip`。修正後に skip を外して実行する。テスト確認・完了にはしていない。

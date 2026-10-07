@@ -77,3 +77,5 @@
 - 確かめたこと（実装の担当の回帰テスト）: io の projectIO.test.ts に6件（欠けた素材・欠けたままの保存・ハッシュの違い・project.json.tmp から開く・素材の .tmp・出力先の無い物理）、desktop の rename.test.ts 3件、userParams.test.ts 1件（と既存の期待値の直し）、actions.test.ts 3件、MissingAssetsSection.test.tsx 2件。直す前のコードでは落ちる内容。
 - 確かめていないこと: 本物のアプリでの欠けた素材の差し替え（CO の e2e `recovery.c58.e2e.ts` とカード70・72 の UC-11）。Windows で rename が実際に失敗する場合（ファイルを開いたままにする）の確認。
 - 気づいたこと: 透明な PNG を作るのに `packages/io/src/import/png.ts` の encodePng を使っている（カード57 の担当のフォルダ。import しているだけ）。
+- 2026-10-07 CO（テスト担当）: projectIO.c58.test.ts 7件と userParams.c58.test.ts 2件が通った。複数の欠け、書き込みを伴わない読み込み、代用品を書かない保存、外部で変わった PNG、2種類の置き換え失敗、素材の .tmp、壊れた JSON、物理の削除・Undo・Redo・再読込を確認。
+- 本物のアプリ用 recovery.c58.e2e.ts と CH-141〜143・UC-CH-23 を追加。差し替えの一覧、サイズの確認、Undo・Redo、保存後の PNG の画素と再読込を確認する。実行前なのでテスト確認・完了にはしていない。
