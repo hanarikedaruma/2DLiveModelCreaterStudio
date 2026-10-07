@@ -1,3 +1,7 @@
+.shell-area-right > .panel[data-panel-id='curveGuide']:not(.collapsed) {
+  flex-shrink: 0;
+}
+
 .curve-panel {
   display: flex;
   flex-direction: column;
