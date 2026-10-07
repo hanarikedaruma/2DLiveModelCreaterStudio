@@ -2,10 +2,12 @@ import { act, fireEvent, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Part } from '@app/schema';
 import type { ProjectStoreWithHistory } from '@app/core';
+import { createDeformPipeline } from '@app/core';
 import { registerPanelSection } from '../../../shell/api';
 import { registry } from '../../../shell/registry';
 import { register } from './index';
 import { formatNumber, PREVIEW_OFF_BASE_NOTE } from './TransformPanel';
+import { makeMesh } from '../structure/testing';
 import { openSample, pointer, renderShell, stubSize } from './testUtils';
 
 let restoreSize: () => void = () => {};
@@ -57,17 +59,18 @@ describe('Transform パネル', () => {
     type('Rotation', '30', 'enter');
     type('Scale X', '1.5');
     type('Scale Y', '0.5');
+    expect(part('part-torso').position).toEqual({ x: 12.5, y: -4 });
     type('回転中心 X', '480');
     type('回転中心 Y', '1200');
     type('Opacity', '0.25');
     expect(part('part-torso')).toMatchObject({
-      position: { x: 12.5, y: -4 },
       rotation: 30,
       scale: { x: 1.5, y: 0.5 },
       pivot: { x: 480, y: 1200 },
       opacity: 0.25,
     });
-    expect(input('X').value).toBe('12.5');
+    // 回転中心を変えたあとは、画像を保つために補った位置も欄に反映する。
+    expect(input('X').value).toBe('-0.98');
 
     act(() => store.undo());
     expect(part('part-torso').opacity).toBe(1);
@@ -105,6 +108,54 @@ describe('Transform パネル', () => {
     expect(part('part-torso').position.y).toBe(0);
     expect(part('part-face').position.y).toBe(0);
   });
+
+  it.each([
+    { ids: ['part-torso'], label: '回転中心 X', value: 480, axis: 'x' as const },
+    { ids: ['part-face'], label: '回転中心 Y', value: 470, axis: 'y' as const },
+    { ids: ['part-torso', 'part-face'], label: '回転中心 Y', value: 1200, axis: 'y' as const },
+  ])(
+    '$labelを数値で変えても、回転・拡縮した親子の頂点は動かず1回のUndoで戻る（$ids・I-062）',
+    async ({ ids, label, value, axis }) => {
+      const { select, type, part, store } = await open();
+      const project = store.get();
+      const mesh = makeMesh('numeric-pivot-mesh');
+      act(() =>
+        store.load({
+          ...project,
+          model: {
+            ...project.model,
+            meshes: [...project.model.meshes, mesh],
+            parts: project.model.parts.map((p) =>
+              p.id === 'part-torso'
+                ? { ...p, meshId: mesh.id, rotation: 30, scale: { x: 1.5, y: 0.5 } }
+                : p.id === 'part-face'
+                  ? { ...p, meshId: mesh.id, parentId: 'part-torso', rotation: -23, scale: { x: -0.8, y: 1.4 } }
+                  : p,
+            ),
+          },
+        }),
+      );
+      select(ids);
+      const before = store.get();
+      const pipeline = createDeformPipeline();
+      const positions = () =>
+        pipeline
+          .deform(store.get().model, { transforms: {}, vertices: {}, warpPoints: {} })
+          .items.map((item) => ({ id: item.partId, points: Array.from(item.positions) }));
+      const original = positions();
+      expect(original).toHaveLength(2);
+
+      type(label, String(value), 'enter');
+      for (const id of ids) expect(part(id).pivot[axis]).toBe(value);
+      const after = positions();
+      expect(after.map((item) => item.id)).toEqual(original.map((item) => item.id));
+      after.forEach((item, i) => item.points.forEach((v, j) => expect(v).toBeCloseTo(original[i]!.points[j]!, 3)));
+      expect(store.get().model.bindings).toBe(before.model.bindings);
+      act(() => store.undo());
+      expect(store.get()).toBe(before);
+      expect(store.canUndo()).toBe(false);
+    },
+  );
 
   it('キャンバスでのドラッグの結果が数値に出る', async () => {
     const { select, input, canvas } = await open();

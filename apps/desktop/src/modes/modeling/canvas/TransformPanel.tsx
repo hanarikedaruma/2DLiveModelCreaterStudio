@@ -1,13 +1,14 @@
 // Transform パネル。選択中のパーツの基準状態の値を数値で表示・編集する
 // （パラメータの編集中と、値だけがデフォルト値でない間は読み取り専用）
 import { useRef, useState, type FC } from 'react';
-import type { Part, Project } from '@app/schema';
+import type { Part, Project, Vec2 } from '@app/schema';
 import type { Command, ProjectStore } from '@app/contracts';
 import { patchPart } from '@app/core';
 import { PanelSections, useEditor, useProject, useServices } from '../../../shell/api';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { useBindEnv, type EnvSlot } from './env';
 import { beginLiveEdit, type LiveEdit } from './liveEdit';
+import { applyLinear, poseMatrix } from './geometry';
 import './transform.css';
 
 // 編集中のパラメータが無いのに値だけがデフォルト値でない（表情を作っている途中など）ときの案内（I-029）
@@ -33,8 +34,8 @@ const LABELS: Record<FieldKey, string> = {
   rotation: '回転の変更',
   scaleX: '拡縮の変更',
   scaleY: '拡縮の変更',
-  pivotX: 'ピボットの変更',
-  pivotY: 'ピボットの変更',
+  pivotX: '回転中心の変更',
+  pivotY: '回転中心の変更',
   opacity: '不透明度の変更',
 };
 
@@ -61,6 +62,17 @@ export function fieldValue(part: Part, key: FieldKey): number {
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
+// ◎のドラッグと同じく、回転中心の変更による (I − R·S)·δ のずれを位置で打ち消す。
+// 自身の変形を保つので、回転・拡縮した親や子があっても基準の頂点は動かない。
+function pivotPatch(part: Part, pivot: Vec2): Partial<Part> {
+  const delta = { x: pivot.x - part.pivot.x, y: pivot.y - part.pivot.y };
+  const moved = applyLinear(poseMatrix(part), delta);
+  return {
+    pivot,
+    position: { x: part.position.x + moved.x - delta.x, y: part.position.y + moved.y - delta.y },
+  };
+}
+
 export function fieldPatch(part: Part, key: FieldKey, value: number): Partial<Part> {
   switch (key) {
     case 'x':
@@ -74,9 +86,9 @@ export function fieldPatch(part: Part, key: FieldKey, value: number): Partial<Pa
     case 'scaleY':
       return { scale: { x: part.scale.x, y: value } };
     case 'pivotX':
-      return { pivot: { x: value, y: part.pivot.y } };
+      return pivotPatch(part, { x: value, y: part.pivot.y });
     case 'pivotY':
-      return { pivot: { x: part.pivot.x, y: value } };
+      return pivotPatch(part, { x: part.pivot.x, y: value });
     case 'opacity':
       return { opacity: clamp(value, 0, 1) };
   }
