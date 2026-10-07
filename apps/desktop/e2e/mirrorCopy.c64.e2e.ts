@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { chromium, type Browser, type Page } from 'playwright';
 import { createEmptyProject, ensureStandardParameters, type Binding, type TransformDelta } from '@app/schema';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { answerDialog, launchApp, ROOT, type RunningApp, type StudioHook } from './app';
+import { launchApp, waitForStartup, ROOT, type RunningApp, type StudioHook } from './app';
 
 const EDGE = process.env.C64_BROWSER === 'edge';
 const EVIDENCE = join(ROOT, '.cache', 'verification', 'co-step3-handoff-2026-10-07', 'mirror-copy');
@@ -27,9 +27,7 @@ beforeAll(async () => {
     page = app.page;
   }
   page.on('pageerror', (error) => errors.push(error.message));
-  while ((await answerDialog(page, 'キャンセル', 1000)) !== null) {
-    // 利用者の自動保存は復元しない。
-  }
+  await waitForStartup(page);
   environment = await page.evaluate(() => window.__studio.environment.get());
   collapsed = await page.evaluate(() => localStorage.getItem('live2d-studio.collapsedPanels'));
   await page.evaluate(() => window.__studio.services.autoSaver.stop());

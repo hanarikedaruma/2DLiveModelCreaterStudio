@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromium, type Browser, type Page } from 'playwright';
 import { createEmptyProject, ensureStandardParameters, type Asset, type Mesh, type Project } from '@app/schema';
-import { answerDialog, launchApp, ROOT, type RunningApp, type StudioHook } from './app';
+import { answerDialog, launchApp, waitForStartup, ROOT, type RunningApp, type StudioHook } from './app';
 
 interface Pixels {
   data: Uint8ClampedArray;
@@ -69,9 +69,7 @@ beforeAll(async () => {
     page = app.page;
   }
   page.on('pageerror', (error) => errors.push(error.message));
-  while ((await answerDialog(page, 'キャンセル', 1000)) !== null) {
-    // 利用者の自動保存は復元しない。
-  }
+  await waitForStartup(page);
   previousEnvironment = await page.evaluate(() => window.__studio.environment.get());
   previousCollapsed = await page.evaluate(() => localStorage.getItem('live2d-studio.collapsedPanels'));
   await page.evaluate(() => window.__studio.services.autoSaver.stop());

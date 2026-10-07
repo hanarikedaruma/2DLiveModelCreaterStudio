@@ -16,7 +16,7 @@ const APP_DATA = join(process.env.APPDATA ?? '', 'jp.co.globalsystems.live2dstud
 let app: RunningApp | null = null;
 let workDir = '';
 let projectId = '';
-let previous: Pick<Environment, 'lastProjectDir' | 'output'> | null = null;
+let previous: Pick<Environment, 'lastProjectDir' | 'output' | 'bodyFollowStrength'> | null = null;
 const warnings: string[] = [];
 
 function powershell(script: string): string {
@@ -54,7 +54,8 @@ beforeAll(async () => {
   projectId = await app.page.evaluate(() => window.__studio.services.store.get().id);
   previous = await app.page.evaluate(() => {
     const env = window.__studio.environment.get();
-    return { lastProjectDir: env.lastProjectDir, output: env.output };
+    window.__studio.environment.set({ bodyFollowStrength: 'standard' });
+    return { lastProjectDir: env.lastProjectDir, output: env.output, bodyFollowStrength: env.bodyFollowStrength };
   });
 }, 180_000);
 

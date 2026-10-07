@@ -11,6 +11,7 @@ import type { Diagnostics } from '../src/diagnostics';
 import type { StudioRuntime } from '../src/modes/studio/runtime';
 
 export interface StudioHook {
+  startup: Promise<unknown>;
   services: Services;
   environment: EnvironmentStore;
   project: ProjectActions;
@@ -117,6 +118,20 @@ export async function answerDialog(page: Page, button: 'OK' | 'キャンセル',
   const message = await dialog.locator('.dialog-message').textContent();
   await dialog.getByRole('button', { name: button }).click();
   return message;
+}
+
+// 復元を試すテストでは呼ばない。利用者の自動保存を承認せず、起動処理そのものの完了を待つ。
+export async function waitForStartup(page: Page): Promise<void> {
+  let done = false;
+  const ready = page
+    .evaluate(async () => {
+      await window.__studio.startup;
+    })
+    .finally(() => {
+      done = true;
+    });
+  while (!done) await answerDialog(page, 'キャンセル', 1000);
+  await ready;
 }
 
 // アプリ（live2d-studio.exe と、その WebView2 のプロセス）の使っているメモリ（ワーキングセット、MB）

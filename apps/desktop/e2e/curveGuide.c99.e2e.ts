@@ -5,7 +5,7 @@ import { chromium, type Browser, type Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Vec2 } from '@app/schema';
 import { hairProject } from '../src/modes/modeling/curveGuide/testing';
-import { answerDialog, launchApp, ROOT, slash, type RunningApp, type StudioHook } from './app';
+import { launchApp, waitForStartup, ROOT, slash, type RunningApp, type StudioHook } from './app';
 
 const EDGE = process.env.C99_BROWSER === 'edge';
 const EVIDENCE = join(ROOT, '.cache', 'verification', 'card99-2026-10-08', EDGE ? 'edge' : 'native');
@@ -28,9 +28,7 @@ beforeAll(async () => {
     page = app.page;
   }
   page.on('pageerror', (error) => errors.push(error.message));
-  while (await answerDialog(page, 'キャンセル', 1000)) {
-    /* 利用者の自動保存を復元しない。 */
-  }
+  await waitForStartup(page);
   environment = await page.evaluate(() => window.__studio.environment.get());
   collapsed = await page.evaluate(() => localStorage.getItem('live2d-studio.collapsedPanels'));
   await page.evaluate(() => window.__studio.services.autoSaver.stop());

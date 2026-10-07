@@ -16,6 +16,7 @@
 - `apps/desktop/src/modes/modeling/structure/` と `packages/io/src/` の削除・複製・反転・読込時の流れ線の参照の保護。
 - `apps/desktop/e2e/curveGuide.c99.e2e.ts`、既存の検査の版番号の追従。
 - `apps/desktop/src/shell/Layout.c61.test.tsx` の右パネル一覧への「流れ線」の追加。CLの引き継ぎとしてCOが追加パネルも既存の小画面検査に含める（検査の条件は維持）。
+- Native検証の準備: `apps/desktop/src/main.tsx` の開発/e2e専用フックへ起動処理のPromise、`apps/desktop/e2e/app.ts` に起動時の復元確認が終わるまで待つヘルパー、`psdReload.c62.e2e.ts`・`mirrorCopy.c64.e2e.ts` にその呼び出し。復元を承認するテストは従来の起動関数を使う。`step1.e2e.ts` の体追従の検証設定と復元も含む。製品の起動処理・強さは変更しない。
 - `docs/contract-changes.md`、候補・計画・課題・状態・設計の実装記録、`tests/usecase/changes.md`。
 
 契約の変更はこのカード1枚だけを行い、カード78〜82と同時に進めない。新しい環境・リモート・開発スクリプトは作らない。別作業の `projects/` と `fixtures/scripts/build-desktop-character.ts` は変更しない。
