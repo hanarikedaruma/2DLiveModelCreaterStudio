@@ -219,6 +219,15 @@ export class KeyedStubEditor implements KeyEditor {
 
 // 呼ばれた描画の命令を記録する 2D コンテキスト
 export class RecordingContext {
+  texts: string[] = [];
+  font = '';
+  textBaseline = 'alphabetic';
+  measureText(text: string) {
+    return { width: text.length * 12 };
+  }
+  fillText(text: string) {
+    this.texts.push(text);
+  }
   calls: { name: string; args: number[] }[] = [];
   strokeStyle: unknown = '';
   fillStyle: unknown = '';

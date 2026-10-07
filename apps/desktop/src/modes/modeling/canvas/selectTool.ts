@@ -440,6 +440,29 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       const { project, editor, info } = snapshot(env);
       const handles = computeHandles(info, view, pivotMovable(project.model, editor, info));
       if (handles) drawHandles(ctx, handles, hotHandle(handles));
+      // 動かせない中心にも説明を出す。ドラッグの判定や中心の移動量は変えない。
+      if (!drag?.keyed.active() && handles?.pivot && hover && distance(handles.pivot, hover) <= HANDLE_RADIUS) {
+        const message = isPreviewOffBase(project.model, editor)
+          ? '回転中心（プレビュー中は移せない。値をすべて戻す）'
+          : editor.activeParameterIds.length > 0
+            ? '回転中心（パラメータ編集中は移せない）'
+            : info.targets.length !== 1
+              ? '回転中心（1つのパーツを選ぶと移せる）'
+              : handles.compact
+                ? '回転中心（拡大するとつかめる）'
+                : '回転中心（ドラッグで移す）';
+        ctx.save();
+        ctx.font = '12px sans-serif';
+        ctx.textBaseline = 'middle';
+        const width = ctx.measureText(message).width + 16;
+        const x = Math.max(4, Math.min(hover.x + 14, (ctx.canvas?.width ?? Infinity) - width - 4));
+        const y = Math.max(4, Math.min(hover.y + 14, (ctx.canvas?.height ?? Infinity) - 28));
+        ctx.fillStyle = cssVar('--bg-raised', '#303238');
+        ctx.fillRect(x, y, width, 24);
+        ctx.fillStyle = cssVar('--text', '#eeeeee');
+        ctx.fillText(message, x + 8, y + 12);
+        ctx.restore();
+      }
     },
   };
 

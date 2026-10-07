@@ -47,8 +47,8 @@ describe('Transform パネル', () => {
     select(['part-torso']);
     expect(panel().getByText('胴体')).toBeTruthy();
     expect(input('X').value).toBe('0');
-    expect(input('Pivot X').value).toBe('500');
-    expect(input('Pivot Y').value).toBe('1170');
+    expect(input('回転中心 X').value).toBe('500');
+    expect(input('回転中心 Y').value).toBe('1170');
     expect(input('Scale X').value).toBe('1');
     expect(input('Opacity').value).toBe('1');
 
@@ -57,8 +57,8 @@ describe('Transform パネル', () => {
     type('Rotation', '30', 'enter');
     type('Scale X', '1.5');
     type('Scale Y', '0.5');
-    type('Pivot X', '480');
-    type('Pivot Y', '1200');
+    type('回転中心 X', '480');
+    type('回転中心 Y', '1200');
     type('Opacity', '0.25');
     expect(part('part-torso')).toMatchObject({
       position: { x: 12.5, y: -4 },

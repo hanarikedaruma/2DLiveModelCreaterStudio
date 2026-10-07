@@ -100,6 +100,22 @@ function TreeRow({
 }) {
   const dispatch = useDispatch();
   const { part, depth } = row;
+  const ancestors = new Set([part.id]);
+  let parent = model.parts.find((p) => p.id === part.parentId);
+  let parentHidden = false;
+  while (parent && !ancestors.has(parent.id)) {
+    ancestors.add(parent.id);
+    parentHidden ||= !parent.visible;
+    parent = model.parts.find((p) => p.id === parent!.parentId);
+  }
+  const visibility = !part.visible ? 'hidden' : parentHidden ? 'parent-hidden' : 'visible';
+  const visibilityLabel = `${part.name}：${
+    !part.visible
+      ? '非表示（押すと表示する）'
+      : parentHidden
+        ? '親が非表示（このパーツは表示に設定。押すと隠す）'
+        : '表示中（押すと隠す）'
+  }`;
   const isGroup = part.kind === 'group';
   const drop = useDropTarget<RowZone>({
     accepts: acceptsParts,
@@ -168,10 +184,11 @@ function TreeRow({
       )}
       <button
         type="button"
-        className="part-toggle"
-        aria-label="表示"
+        className="part-toggle part-visibility"
+        aria-label={visibilityLabel}
         aria-pressed={part.visible}
-        title={part.visible ? '表示中（押すと隠す）' : '非表示（押すと表示する）'}
+        title={visibilityLabel}
+        data-visibility={visibility}
         onClick={(e) => {
           e.stopPropagation();
           dispatch(setPartVisible(part.id, !part.visible));

@@ -22,8 +22,8 @@ const FIELDS: { key: FieldKey; label: string; digits: number }[] = [
   { key: 'rotation', label: 'Rotation', digits: 2 },
   { key: 'scaleX', label: 'Scale X', digits: 3 },
   { key: 'scaleY', label: 'Scale Y', digits: 3 },
-  { key: 'pivotX', label: 'Pivot X', digits: 2 },
-  { key: 'pivotY', label: 'Pivot Y', digits: 2 },
+  { key: 'pivotX', label: '回転中心 X', digits: 2 },
+  { key: 'pivotY', label: '回転中心 Y', digits: 2 },
   { key: 'opacity', label: 'Opacity', digits: 2 },
 ];
 

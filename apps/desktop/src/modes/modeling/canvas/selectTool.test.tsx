@@ -103,6 +103,27 @@ describe('選択', () => {
 });
 
 describe('変形のドラッグ', () => {
+  it('回転中心に乗せたときだけ説明を描き、プレビュー中と複数選択では動かせない理由を出す', async () => {
+    const { ptr, services, canvas } = await open();
+    ptr.click(TORSO);
+    const hint = () => {
+      const ctx = new RecordingContext();
+      selectTool.tool.drawOverlay!(ctx.asContext(), canvas.getState().view);
+      return ctx.texts;
+    };
+    ptr.move(TORSO_PIVOT);
+    expect(hint()).toEqual(['回転中心（ドラッグで移す）']);
+    ptr.move(EMPTY);
+    expect(hint()).toEqual([]);
+    act(() => services.editor.set({ activeParameterIds: ['FaceAngleX'] }));
+    ptr.move(TORSO_PIVOT);
+    expect(hint()).toEqual(['回転中心（パラメータ編集中は移せない）']);
+    act(() => services.editor.set({ activeParameterIds: [], editorParamValues: { FaceAngleX: 12 } }));
+    expect(hint()).toEqual(['回転中心（プレビュー中は移せない。値をすべて戻す）']);
+    act(() => services.editor.set({ editorParamValues: {}, selectedPartIds: ['part-torso', 'part-face'] }));
+    expect(hint()).toEqual(['回転中心（1つのパーツを選ぶと移せる）']);
+  });
+
   it('移動: ドラッグで動き、1回のドラッグが1回の Undo になる', async () => {
     const { ptr, part, store } = await open();
     ptr.drag(TORSO, { x: TORSO.x + 100, y: TORSO.y + 50 });

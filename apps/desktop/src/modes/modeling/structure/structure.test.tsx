@@ -125,6 +125,24 @@ function openMenu(id: string, item: string) {
 }
 
 describe('パーツ構造', () => {
+  it('目の記号はパーツ名と表示状態を伝え、親が隠れている場合も自分の表示設定を保つ', async () => {
+    const { services } = await setup();
+    const eye = (id: string) => within(treeRow(id) as HTMLElement).getByRole('button', { name: /表示|非表示/ });
+    expect(eye('face').getAttribute('title')).toBe('顔：表示中（押すと隠す）');
+    expect(eye('face').getAttribute('data-visibility')).toBe('visible');
+    fireEvent.click(eye('head'));
+    expect(eye('face').getAttribute('title')).toBe('顔：親が非表示（このパーツは表示に設定。押すと隠す）');
+    expect(eye('face').getAttribute('data-visibility')).toBe('parent-hidden');
+    expect(eye('face').getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(eye('face'));
+    expect(eye('face').getAttribute('data-visibility')).toBe('hidden');
+    expect(eye('face').getAttribute('title')).toBe('顔：非表示（押すと表示する）');
+    fireEvent.click(eye('head'));
+    expect(partOf(services, 'face')!.visible).toBe(false);
+    fireEvent.click(eye('face'));
+    expect(eye('face').getAttribute('data-visibility')).toBe('visible');
+  });
+
   it('ドラッグで親を変えても描画順が変わらない。兄弟の並び替えもできる', async () => {
     const { services } = await setup();
     const drawOrder = services.store.get().model.drawOrder;
@@ -169,7 +187,7 @@ describe('パーツ構造', () => {
   it('表示・ロックの切り替えと名前の変更', async () => {
     const { services } = await setup();
     const row = treeRow('face') as HTMLElement;
-    fireEvent.click(within(row).getByRole('button', { name: '表示' }));
+    fireEvent.click(within(row).getByRole('button', { name: '顔：表示中（押すと隠す）' }));
     expect(partOf(services, 'face')!.visible).toBe(false);
     fireEvent.click(within(row).getByRole('button', { name: 'ロック' }));
     expect(partOf(services, 'face')!.locked).toBe(true);
@@ -347,7 +365,7 @@ describe('Undo', () => {
   it('構造・描画順・マスクの操作はすべて Undo で最初に戻る', async () => {
     const { services, initial } = await setup();
     dragTo(treeRow('hair'), treeRow('head'));
-    fireEvent.click(within(treeRow('face') as HTMLElement).getByRole('button', { name: '表示' }));
+    fireEvent.click(within(treeRow('face') as HTMLElement).getByRole('button', { name: '顔：表示中（押すと隠す）' }));
     openMenu('face', 'コピー');
     fireEvent.click(treeRow('eyeL'));
     fireEvent.change(screen.getByLabelText('マスク'), { target: { value: 'face' } });
