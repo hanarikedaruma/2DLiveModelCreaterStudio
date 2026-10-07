@@ -38,7 +38,7 @@ describe('カード65: 層の順番と仮実装の一致', () => {
   });
 
   // 599c56b では FakeMixer が blend を無視し、10.5 ではなく 4.75 になる。カード65の記録を参照。
-  it.skip('add・multiply・max とパラメータ別の重みも、本物と仮実装が同じ値になる', () => {
+  it('add・multiply・max とパラメータ別の重みも、本物と仮実装が同じ値になる', () => {
     const layers = [
       { id: 'tracking', weight: 1, values: { value: 2 } },
       { id: 'auto', weight: 0, parameterWeights: { value: 0.5 }, values: { value: 4 }, blend: { value: 'add' } },

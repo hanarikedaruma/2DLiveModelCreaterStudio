@@ -1,4 +1,4 @@
-import type { Model, Parameter, Part, Vec2 } from '@app/schema';
+import type { BlendOp, Model, Parameter, Part, Vec2 } from '@app/schema';
 import {
   LAYER_ORDER,
   type BindingEvaluator,
@@ -73,24 +73,47 @@ export class FakePipeline implements DeformPipeline {
   }
 }
 
-// デフォルト値に、各レイヤーの値を重みで上書きする。順は本物と同じ LAYER_ORDER（同じ id の中は配列の順）。
-// 合成の方法（add・multiply など）は使わず、すべて上書きにする
+// デフォルト値に、各レイヤーの値を重みで合わせる。順は本物と同じ LAYER_ORDER（同じ id の中は配列の順）。
+// 合成の方法（add・multiply・max・override）・パラメータ別の重み・範囲への丸めも本物（core の mixer）と同じ規則にする。
+// contracts は core に頼れないので写しを持つ（同じ値になることは core の mixer.c65.test.ts で確かめる。カード65）
+function blend(op: BlendOp, v: number, t: number, w: number): number {
+  switch (op) {
+    case 'add':
+      return v + t * w;
+    case 'multiply':
+      return v * (1 + (t - 1) * w);
+    case 'max':
+      return v + (Math.max(v, t) - v) * w;
+    case 'override':
+    default:
+      return v + (t - v) * w;
+  }
+}
+
+const unit = (w: number) => (Number.isNaN(w) ? 0 : Math.min(1, Math.max(0, w)));
+
 export class FakeMixer implements ParameterMixer {
   mix(parameters: Parameter[], layers: Layer[]): ParamValues {
     const out: ParamValues = {};
-    for (const p of parameters) out[p.id] = p.default;
+    const first = new Map<string, Parameter>(); // 同じ id が2つあれば、本物と同じく最初のものを使う
+    for (const p of parameters) {
+      if (first.has(p.id)) continue;
+      first.set(p.id, p);
+      out[p.id] = p.default;
+    }
     const ordered = LAYER_ORDER.flatMap((id) => layers.filter((l) => l.id === id));
     for (const layer of ordered) {
-      for (const [id, v] of Object.entries(layer.values)) {
-        if (!(id in out)) continue;
+      for (const [id, t] of Object.entries(layer.values)) {
+        if (!Object.hasOwn(out, id) || typeof t !== 'number' || !Number.isFinite(t)) continue;
         const weight =
           layer.parameterWeights && Object.hasOwn(layer.parameterWeights, id)
             ? layer.parameterWeights[id]!
-            : layer.weight;
-        const w = Number.isNaN(weight) ? 0 : Math.min(1, Math.max(0, weight));
-        out[id] = out[id]! * (1 - w) + v * w;
+            : unit(layer.weight);
+        const op = layer.blend && Object.hasOwn(layer.blend, id) ? layer.blend[id]! : 'override';
+        out[id] = blend(op, out[id]!, t, unit(weight));
       }
     }
+    for (const [id, p] of first) out[id] = Math.min(p.max, Math.max(p.min, out[id]!));
     return out;
   }
 }

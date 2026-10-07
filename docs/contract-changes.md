@@ -30,7 +30,7 @@
   - `LayerId` に `auto`（プログラムが作る値。自動まばたき）と `hotkey`（ホットキーのパラメータの上書き）を足した。順は tracking → auto → bodyFollow → expression → hotkey → animation → lipSync → periodic → physics。auto は体の追従の前（自動の動きで頭が動いたら体も追う）、hotkey は表情の後・アニメーションの前（今までの登録の順と同じ効き方）。
   - `FrameContext.layersSoFar?: readonly Layer[]`: それまでの層そのもの（合成する前の値と重み）。auto の層は、目の値がトラッキングの層から来たかをこれで判定する。実行部は必ず渡す。テストで省いたら空として扱う（既存のテストを変えないため任意にした）。
   - `Environment.autoBlink: boolean`（既定 true）、`Environment.output.adapterId: string | null`（null は自動＝既定のアダプター）。読み込み時に無ければ既定値で補う（parseEnvironment の重ね方のまま）。
-  - 仮実装の `FakeMixer` も LAYER_ORDER の順に合成する（合成の方法は上書きのまま）。
+  - 仮実装の `FakeMixer` も LAYER_ORDER の順に合成する。合成の方法（add・multiply・max・override）・パラメータ別の重み・範囲への丸めも本物と同じ規則にした（2026-10-07 の追記。contracts は core に頼れないので写しを持ち、同じ値になることを core の mixer.c65.test.ts で確かめる）。
 - 理由: カメラから来た値とプログラムが作る値を分け（I-055 の自動まばたきの穴、同じ処理が2か所）、層ごとの値を計測の表示に出す（I-007）。ホットキーの効く順を登録の順に頼らない。GPU が2つある PC で Spout2 の GPU を選ぶ（I-032）。
 - 影響するカード: ミキサー09、実行部22、STEP3 のカード66（auto の層と層ごとの値）・67（計測の表示）・68（ホットキーの層）・69（GPU の選択）。
 - 移行: contracts（型・FakeMixer）、schema（Environment の型・既定値・検証）、core（ミキサーは LAYER_ORDER をそのまま使う）。テストの期待値（層の順・既定値）と、出力の設定を組み立てている `apps/desktop/src/output/spout/controller.test.ts`（adapterId を足しただけ。カード69 の着手の前）を直した。保存形式の版は変えない（Environment はプロジェクトに入らない）。

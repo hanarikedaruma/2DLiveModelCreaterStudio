@@ -1,6 +1,7 @@
 import { createEmptyProject, type Part, type Project } from '@app/schema';
 import { describe, expect, it } from 'vitest';
 import { FakeEvaluator, FakeMixer, FakePipeline, transformPoint } from './evaluate';
+import type { Layer } from '../index';
 
 function imagePart(id: string, assetId: string, patch: Partial<Part> = {}): Part {
   return {
@@ -114,5 +115,16 @@ describe('FakeMixer の層の順（STEP3 のカード65）', () => {
       ],
     );
     expect(out.A).toBe(0.7);
+  });
+
+  it('合成の方法（add・multiply・max）と範囲への丸めも本物と同じ規則', () => {
+    const p = { id: 'A', name: 'A', groupId: 'other' as const, min: -5, max: 5, default: 1, standard: false };
+    const mix = (layers: Layer[]) => new FakeMixer().mix([p], layers).A;
+    expect(mix([{ id: 'tracking', weight: 0.5, values: { A: 2 }, blend: { A: 'add' } }])).toBe(2); // 1 + 2×0.5
+    expect(mix([{ id: 'tracking', weight: 1, values: { A: 3 }, blend: { A: 'multiply' } }])).toBe(3); // 1 × 3
+    expect(mix([{ id: 'tracking', weight: 1, values: { A: 0 }, blend: { A: 'max' } }])).toBe(1); // 小さい値では変えない
+    expect(mix([{ id: 'tracking', weight: 1, values: { A: 4 }, blend: { A: 'max' } }])).toBe(4);
+    expect(mix([{ id: 'tracking', weight: 1, values: { A: 9 }, blend: { A: 'add' } }])).toBe(5); // 1 + 9 を max 5 に丸める
+    expect(mix([{ id: 'tracking', weight: 1, values: { A: Number.NaN } }])).toBe(1); // 数でない値は使わない
   });
 });
