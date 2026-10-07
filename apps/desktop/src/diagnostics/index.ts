@@ -132,14 +132,14 @@ export function registerDiagnostics(services: Services): Diagnostics {
         0,
         `カメラ映像 ${camera.width}×${camera.height} / ${camera.cameraFps === null ? '--' : fmt(camera.cameraFps)} fps`,
       );
-    lines.replaceChildren(
-      ...text.map((text) => {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div;
-      }),
-    );
-    recordButton.textContent = collector.isRecording() ? '記録を止める' : '記録を始める';
+    if (lines.childElementCount !== text.length)
+      lines.replaceChildren(...text.map(() => document.createElement('div')));
+    text.forEach((text, i) => {
+      const element = lines!.children[i]!;
+      if (element.textContent !== text) element.textContent = text;
+    });
+    const recordLabel = collector.isRecording() ? '記録を止める' : '記録を始める';
+    if (recordButton.textContent !== recordLabel) recordButton.textContent = recordLabel;
     exportButton.disabled = last === null;
     layerDisplay?.update(latestFrame, services.store.get().model.parameters);
   };

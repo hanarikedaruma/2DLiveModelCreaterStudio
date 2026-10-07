@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, getByLabelText, getByRole } from '@testing-library/dom';
-import { createEmptyProject } from '@app/schema';
+import { createEmptyProject, ensureStandardParameters } from '@app/schema';
 import type { StudioFrame } from '../modes/studio/runtime';
 import { createFakeServices } from '../services';
 import { registerDiagnostics, type Diagnostics } from './index';
@@ -26,7 +26,8 @@ afterEach(() => {
 function setup() {
   vi.useFakeTimers();
   const services = createFakeServices();
-  services.store.load(createEmptyProject('計測'));
+  const project = createEmptyProject('計測');
+  services.store.load({ ...project, model: ensureStandardParameters(project.model, 'step1') });
   api = registerDiagnostics(services);
   api.toggle();
   return api;
@@ -37,10 +38,11 @@ const frame = (): StudioFrame => ({
   view: { scale: 1, offset: { x: 0, y: 0 } },
   background: { type: 'transparent' },
   now: 0,
-  params: { EyeOpenL: 0.8, EyeOpenR: 0, MouthOpen: 0.2 },
+  params: { EyeOpenL: 0.8, EyeOpenR: 0, MouthOpen: 0.2, BodyAngleX: 2, BodyAngleZ: -0.5 },
   layers: [
     { id: 'auto', values: { EyeOpenL: 0.4, EyeOpenR: 0 }, weight: 1 },
     { id: 'expression', values: { EyeOpenL: 0.8 }, weight: 0.5, parameterWeights: { EyeOpenL: 1 } },
+    { id: 'bodyFollow', values: { BodyAngleX: 2, BodyAngleZ: -0.5 }, weight: 1 },
   ],
 });
 
@@ -57,6 +59,12 @@ describe('計測の層の表示と記録', () => {
     const right = table.querySelector('[data-parameter-id="EyeOpenR"]')!;
     expect(right.querySelector('[data-layer-id="auto"]')?.textContent).toContain('0.000');
     expect(right.querySelector('[data-layer-id="expression"]')?.textContent).toBe('—');
+    const body = table.querySelector('[data-parameter-id="BodyAngleZ"]')!;
+    expect(body.querySelector('[data-layer-id="bodyFollow"]')?.textContent).toContain('-0.500');
+    expect(body.querySelector('[data-final]')?.textContent).toBe('-0.500');
+    runtime.sink!({ ...frame(), params: { ...frame().params, EyeOpenL: 0.3 } });
+    vi.advanceTimersByTime(500);
+    expect(table.querySelector('[data-parameter-id="EyeOpenL"] [data-final]')?.textContent).toBe('0.300');
   });
 
   it('選択は表示を閉じて開いても保ち、JSONには選んだパラメータだけを500msごとに写す', () => {

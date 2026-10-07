@@ -93,11 +93,16 @@ export function createLayerDisplay(selected: Set<string>) {
   root.append(choices, scroll, note);
   let parameters: Parameter[] = [];
   let frame: StudioFrame | null = null;
+  let rows: { parameter: Parameter; row: HTMLTableRowElement; cells: HTMLTableCellElement[] }[] = [];
+  const setText = (element: HTMLElement, text: string) => {
+    if (element.textContent !== text) element.textContent = text;
+  };
   const redraw = () => {
     const displayed = parameters.filter((p) => selected.has(p.id));
-    summary.textContent = `表示するパラメータ（${displayed.length}）`;
-    body.replaceChildren(
-      ...displayed.map((parameter) => {
+    setText(summary, `表示するパラメータ（${displayed.length}）`);
+    // 選択が同じなら DOM を保ち、変わった値だけを書き換える。
+    if (rows.length !== displayed.length || rows.some((row, i) => row.parameter !== displayed[i])) {
+      rows = displayed.map((parameter) => {
         const row = document.createElement('tr');
         row.dataset.parameterId = parameter.id;
         const name = document.createElement('th');
@@ -106,29 +111,36 @@ export function createLayerDisplay(selected: Set<string>) {
         name.title = parameter.name;
         const final = document.createElement('td');
         final.dataset.final = '';
-        final.textContent = number(frame?.params[parameter.id]);
         row.append(name, final);
+        const cells = [final];
         for (const id of LAYER_ORDER) {
           const cell = document.createElement('td');
           cell.dataset.layerId = id;
-          // 同じ層の producer が複数あればすべて表示する（最後の値は実行部の結果を使う）。
-          const layers =
-            frame?.layers.filter((layer) => layer.id === id && Object.hasOwn(layer.values, parameter.id)) ?? [];
-          cell.textContent = layers.length
-            ? layers
-                .map((layer) => {
-                  const op = layer.blend?.[parameter.id] ?? 'override';
-                  const blend =
-                    op === 'add' ? '加算' : op === 'multiply' ? '乗算' : op === 'max' ? '大きい方' : '上書き';
-                  return `${number(layer.values[parameter.id])} / 重み ${number(layer.parameterWeights?.[parameter.id] ?? layer.weight)}・${blend}`;
-                })
-                .join('\n')
-            : '—';
           row.append(cell);
+          cells.push(cell);
         }
-        return row;
-      }),
-    );
+        return { parameter, row, cells };
+      });
+      body.replaceChildren(...rows.map(({ row }) => row));
+    }
+    for (const { parameter, cells } of rows) {
+      setText(cells[0]!, number(frame?.params[parameter.id]));
+      for (const [index, id] of LAYER_ORDER.entries()) {
+        // 同じ層の producer が複数あればすべて表示する（最後の値は実行部の結果を使う）。
+        const layers =
+          frame?.layers.filter((layer) => layer.id === id && Object.hasOwn(layer.values, parameter.id)) ?? [];
+        const text = layers.length
+          ? layers
+              .map((layer) => {
+                const op = layer.blend?.[parameter.id] ?? 'override';
+                const blend = op === 'add' ? '加算' : op === 'multiply' ? '乗算' : op === 'max' ? '大きい方' : '上書き';
+                return `${number(layer.values[parameter.id])} / 重み ${number(layer.parameterWeights?.[parameter.id] ?? layer.weight)}・${blend}`;
+              })
+              .join('\n')
+          : '—';
+        setText(cells[index + 1]!, text);
+      }
+    }
   };
   return {
     root,
