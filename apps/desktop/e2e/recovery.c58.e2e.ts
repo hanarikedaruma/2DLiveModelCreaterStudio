@@ -6,7 +6,6 @@ import type { Page } from 'playwright';
 import type { Project } from '@app/schema';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { answerDialog, launchApp, ROOT, slash, type RunningApp } from './app';
-import { decodePng } from '@app/io/src/import/png';
 
 let app: RunningApp | null = null;
 let page: Page;
@@ -79,9 +78,36 @@ describe('カード58: 欠けた素材の復旧', () => {
     expect(existsSync(missingPath)).toBe(false);
     const saved = JSON.parse(readFileSync(join(workDir, 'project.json'), 'utf8')) as Project;
     const replacement = saved.assets.find((a) => a.id === replacementId[0])!;
-    expect(decodePng(readFileSync(join(workDir, replacement.path)))).toEqual(
-      decodePng(readFileSync(join(fixture, asset.path))),
-    );
+    // 実アプリの画像復号で保存後の画素を比較する。io の非公開パスへ依存しない。
+    expect(
+      await page.evaluate(
+        async ([actualBytes, expectedBytes]) => {
+          const pixels = async (bytes: number[]) => {
+            const image = await createImageBitmap(new Blob([new Uint8Array(bytes)], { type: 'image/png' }));
+            try {
+              const canvas = new OffscreenCanvas(image.width, image.height);
+              const context = canvas.getContext('2d', { willReadFrequently: true });
+              if (!context) throw new Error('PNG の画素を比較する 2D コンテキストを作れない');
+              context.drawImage(image, 0, 0);
+              return context.getImageData(0, 0, image.width, image.height);
+            } finally {
+              image.close();
+            }
+          };
+          const actual = await pixels(actualBytes);
+          const expected = await pixels(expectedBytes);
+          return (
+            actual.width === expected.width &&
+            actual.height === expected.height &&
+            actual.data.every((value, index) => value === expected.data[index])
+          );
+        },
+        [
+          Array.from(readFileSync(join(workDir, replacement.path))),
+          Array.from(readFileSync(join(fixture, asset.path))),
+        ] as [number[], number[]],
+      ),
+    ).toBe(true);
     await page.evaluate((dir) => window.__studio.project.open(dir), slash(workDir));
     expect(await page.evaluate(() => window.__studio.project.missingAssetIds())).toEqual([]);
     expect(await section.count()).toBe(0);

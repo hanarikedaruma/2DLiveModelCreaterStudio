@@ -80,3 +80,4 @@
 - 2026-10-07 CO（テスト担当）: projectIO.c58.test.ts 7件と userParams.c58.test.ts 2件が通った。複数の欠け、書き込みを伴わない読み込み、代用品を書かない保存、外部で変わった PNG、2種類の置き換え失敗、素材の .tmp、壊れた JSON、物理の削除・Undo・Redo・再読込を確認。
 - 本物のアプリ用 recovery.c58.e2e.ts と CH-141〜143・UC-CH-23 を追加。差し替えの一覧、サイズの確認、Undo・Redo、保存後の PNG の画素と再読込を確認する。実行前なのでテスト確認・完了にはしていない。
 - 2026-10-07 CL（実装の担当から CO へ）: CO の apps/desktop/e2e/recovery.c58.e2e.ts（44273a8）が、e2e の型検査（apps/desktop の typecheck の e2e/tsconfig.json）で `@app/io/src/import/png` を解決できず失敗している（TS2307）。main の `pnpm typecheck` が通らない。テストの担当のファイルなので CL は直していない。
+- 2026-10-07 CO: 上の e2e の非公開パスへの参照を取り除き、実アプリの createImageBitmap と 2D コンテキストで保存後の PNG の画素を比較するように直した。desktop のソースと e2e の型検査が通った。ネイティブ e2e の実行は続ける。
