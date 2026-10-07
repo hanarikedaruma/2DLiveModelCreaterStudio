@@ -54,8 +54,25 @@ for (const method of METHODS) {
         const bytes = new Uint8Array(await (await fetch(fs(`fixtures/${model}/${a.path}`))).arrayBuffer());
         await s.services.assets.put(a.id, bytes);
       }
-      const plan = core.createAutoSetup({ faceTurn: method }).plan(project);
-      s.services.store.load(plan.command.apply(project));
+      // メッシュの無い画像パーツは描かれないので、アプリの「サンプルモデルを開く」と同じく作る（sample-model はメッシュが無い）
+      const meshes = [...project.model.meshes];
+      const parts = project.model.parts.map((part) => {
+        if (part.kind !== 'image' || part.meshId || !part.assetId) return part;
+        const asset = project.assets.find((a) => a.id === part.assetId);
+        const alpha = s.services.assets.getImageData(part.assetId);
+        if (!asset || !alpha) return part;
+        const mesh = {
+          id: schema.newId(),
+          ...s.services.meshGenerator.generate(alpha, asset.offset, 'standard'),
+          density: 'standard',
+          edited: false,
+        };
+        meshes.push(mesh);
+        return { ...part, meshId: mesh.id };
+      });
+      const withMeshes = { ...project, model: { ...project.model, parts, meshes } };
+      const plan = core.createAutoSetup({ faceTurn: method }).plan(withMeshes);
+      s.services.store.load(plan.command.apply(withMeshes));
       s.services.editor.set({ mode: 'modeling', selectedPartIds: [], activeParameterIds: [], editorParamValues: {} });
       return { warnings: plan.warnings };
     },
