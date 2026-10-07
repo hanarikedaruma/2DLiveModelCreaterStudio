@@ -93,7 +93,7 @@
   height: 12px;
   pointer-events: none;
 }
-/* 印は押せる（押すとその値へ移動、右クリックでロック / ロック解除。カード31） */
+/* 印は押せる（押すとその値へ移動、右クリックでキーの操作。カード31・63） */
 .key-mark {
   position: absolute;
   top: 0;

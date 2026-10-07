@@ -275,7 +275,7 @@ export function ParameterPanel() {
         )}
         {active.length > 0 && (
           <p className="parameter-hint">
-            キーの印: 押すとその値へ移動、右クリックでロック、Shift＋ドラッグで範囲を選ぶ
+            キーの印: 押すとその値へ移動、右クリックでキーの操作（ロック・消す・動かす）、Shift＋ドラッグで範囲を選ぶ
           </p>
         )}
       </div>

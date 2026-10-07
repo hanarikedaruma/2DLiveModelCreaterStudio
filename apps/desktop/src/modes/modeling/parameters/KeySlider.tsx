@@ -82,6 +82,15 @@ export function KeySlider({
   const [selection, setSelection] = useState<Selection | null>(null);
   const [menu, setMenu] = useState<KeyMark | null>(null); // 右クリックした印のキーの操作
   const drag = useRef<Drag | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const firstMenuButton = useRef<HTMLButtonElement | null>(null);
+
+  // 開いたキーの操作へフォーカスを移し、メニュー全体が見えるところまでスクロールする（小さいウィンドウでパネルの下に開くため）
+  useEffect(() => {
+    if (!menu) return;
+    firstMenuButton.current?.focus({ preventScroll: true });
+    menuRef.current?.scrollIntoView?.({ block: 'nearest' });
+  }, [menu]);
 
   // 編集をやめたら選択も消す
   useEffect(() => {
@@ -197,10 +206,19 @@ export function KeySlider({
         )}
       </div>
       {keyActions && showMarks && menu && (
-        <div className="key-menu" role="group" aria-label={`キー ${format(menu.value)} の操作`}>
+        <div
+          ref={menuRef}
+          className="key-menu"
+          role="group"
+          aria-label={`キー ${format(menu.value)} の操作`}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setMenu(null);
+          }}
+        >
           <span className="key-range-text">キー: {format(menu.value)}</span>
           <button
             type="button"
+            ref={firstMenuButton}
             onClick={() => {
               setMenu(null);
               keyActions.toggleLock(menu.value);

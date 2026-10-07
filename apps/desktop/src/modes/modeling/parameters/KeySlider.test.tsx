@@ -96,6 +96,20 @@ describe('KeySlider の印', () => {
     ).toBeTruthy();
   });
 
+  it('開いたメニューの最初のボタンにフォーカスが移り、Esc で閉じる', () => {
+    setup();
+    fireEvent.contextMenu(mark(20));
+    const menu = screen.getByRole('group', { name: 'キー 20 の操作' });
+    expect(document.activeElement).toBe(within(menu).getByRole('button', { name: 'ロックする' }));
+    // 別の印を右クリックすると、そのキーのメニューへフォーカスが移る
+    fireEvent.contextMenu(mark(-30));
+    expect(document.activeElement).toBe(
+      within(screen.getByRole('group', { name: 'キー -30 の操作' })).getByRole('button', { name: 'ロックを解除' }),
+    );
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    expect(screen.queryByRole('group', { name: /の操作$/ })).toBeNull();
+  });
+
   it('操作が無ければ右クリックは何もしない', () => {
     setup({ keyActions: undefined });
     expect(fireEvent.contextMenu(mark(20))).toBe(true);
