@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { KeySlider, type KeyActions, type KeySliderProps } from './KeySlider';
 import type { KeyMark } from './marks';
@@ -14,7 +14,13 @@ const marks: KeyMark[] = [
 
 function setup(patch: Partial<KeySliderProps> = {}) {
   const onChange = vi.fn();
-  const keyActions: KeyActions = { toggleLock: vi.fn(), lockRange: vi.fn(), regenerateRange: vi.fn() };
+  const keyActions: KeyActions = {
+    toggleLock: vi.fn(),
+    deleteKey: vi.fn(),
+    moveKey: vi.fn(),
+    lockRange: vi.fn(),
+    regenerateRange: vi.fn(),
+  };
   const props: KeySliderProps = {
     label: '顔 左右',
     min: -30,
@@ -63,11 +69,31 @@ describe('KeySlider の印', () => {
     expect(mark(-10).getAttribute('aria-label')).toBe('生成したキー: -10');
   });
 
-  it('右クリックでロック / ロック解除を頼む（メニューは出さない）', () => {
+  it('右クリックでキーの操作のメニューを出し、ロック・消す・動かすをそれぞれ頼む（STEP3 のカード63）', () => {
     const { keyActions } = setup();
-    const event = fireEvent.contextMenu(mark(20));
-    expect(event).toBe(false);
+    const menu = () => screen.getByRole('group', { name: 'キー 20 の操作' });
+    expect(fireEvent.contextMenu(mark(20))).toBe(false);
+    expect(keyActions.toggleLock).not.toHaveBeenCalled();
+    fireEvent.click(within(menu()).getByRole('button', { name: 'ロックする' }));
     expect(keyActions.toggleLock).toHaveBeenCalledWith(20);
+    expect(screen.queryByRole('group', { name: 'キー 20 の操作' })).toBeNull();
+    fireEvent.contextMenu(mark(20));
+    fireEvent.click(within(menu()).getByRole('button', { name: 'このキーを消す' }));
+    expect(keyActions.deleteKey).toHaveBeenCalledWith(20);
+    fireEvent.contextMenu(mark(20));
+    fireEvent.click(within(menu()).getByRole('button', { name: '別の値へ動かす…' }));
+    expect(keyActions.moveKey).toHaveBeenCalledWith(20);
+    fireEvent.contextMenu(mark(20));
+    fireEvent.click(within(menu()).getByRole('button', { name: 'キーの操作を閉じる' }));
+    expect(screen.queryByRole('group', { name: 'キー 20 の操作' })).toBeNull();
+  });
+
+  it('ロックしたキーのメニューは「ロックを解除」', () => {
+    setup({ marks: [{ value: 20, kind: 'locked' }] });
+    fireEvent.contextMenu(mark(20));
+    expect(
+      within(screen.getByRole('group', { name: 'キー 20 の操作' })).getByRole('button', { name: 'ロックを解除' }),
+    ).toBeTruthy();
   });
 
   it('操作が無ければ右クリックは何もしない', () => {

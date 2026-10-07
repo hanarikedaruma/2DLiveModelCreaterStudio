@@ -1,5 +1,6 @@
 // キーの印つきのスライダー。範囲の 2% 以内でキー（とデフォルト値）に吸い付く。
-// 印を押すとその値へ移動し（そのキーを編集できる）、右クリックでロック / ロック解除。
+// 印を押すとその値へ移動し（そのキーを編集できる）、右クリックでキーの操作（ロック / ロック解除・消す・別の値へ動かす。
+// STEP3 のカード63）。
 // Shift＋ドラッグで値の範囲を選び、範囲のキーをまとめてロック / ロック解除 / 再補間する（カード31）
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { snapToKey, type KeyMark, type MarkKind } from './marks';
@@ -18,6 +19,8 @@ export type ValueRange = [number, number];
 // 印と範囲の操作。無ければ印を押して移動するだけ
 export interface KeyActions {
   toggleLock(value: number): void;
+  deleteKey(value: number): void; // その値のキーを消す（STEP3 のカード63）
+  moveKey(value: number): void; // その値のキーを別の値へ動かす（動かす先は呼ばれた側で聞く）
   lockRange(range: ValueRange, locked: boolean): void;
   regenerateRange(range: ValueRange): void;
 }
@@ -77,6 +80,7 @@ export function KeySlider({
   const selectable = showMarks && keyActions !== undefined;
 
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [menu, setMenu] = useState<KeyMark | null>(null); // 右クリックした印のキーの操作
   const drag = useRef<Drag | null>(null);
 
   // 編集をやめたら選択も消す
@@ -84,6 +88,7 @@ export function KeySlider({
     if (!showMarks) {
       drag.current = null;
       setSelection(null);
+      setMenu(null);
     }
   }, [showMarks]);
 
@@ -171,7 +176,7 @@ export function KeySlider({
                 aria-label={`${KIND_NAME[m.kind]}: ${format(m.value)}`}
                 title={
                   keyActions
-                    ? `${KIND_NAME[m.kind]}: ${format(m.value)}（押すとこの値へ移動、右クリックでロック / ロック解除）`
+                    ? `${KIND_NAME[m.kind]}: ${format(m.value)}（押すとこの値へ移動、右クリックでキーの操作）`
                     : `${KIND_NAME[m.kind]}: ${format(m.value)}（押すとこの値へ移動）`
                 }
                 style={{ left: percent(m.value) }}
@@ -182,7 +187,7 @@ export function KeySlider({
                 onContextMenu={(e) => {
                   if (!keyActions) return;
                   e.preventDefault();
-                  keyActions.toggleLock(m.value);
+                  setMenu(m);
                 }}
               >
                 {SYMBOL[m.kind]}
@@ -191,6 +196,47 @@ export function KeySlider({
           </div>
         )}
       </div>
+      {keyActions && showMarks && menu && (
+        <div className="key-menu" role="group" aria-label={`キー ${format(menu.value)} の操作`}>
+          <span className="key-range-text">キー: {format(menu.value)}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setMenu(null);
+              keyActions.toggleLock(menu.value);
+            }}
+          >
+            {menu.kind === 'locked' ? 'ロックを解除' : 'ロックする'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMenu(null);
+              keyActions.deleteKey(menu.value);
+            }}
+          >
+            このキーを消す
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMenu(null);
+              keyActions.moveKey(menu.value);
+            }}
+          >
+            別の値へ動かす…
+          </button>
+          <button
+            type="button"
+            className="key-range-clear"
+            aria-label="キーの操作を閉じる"
+            title="閉じる"
+            onClick={() => setMenu(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
       {keyActions && shown && !shown.dragging && (
         <div className="key-range-actions" role="group" aria-label="選択範囲のキー">
           <span className="key-range-text">

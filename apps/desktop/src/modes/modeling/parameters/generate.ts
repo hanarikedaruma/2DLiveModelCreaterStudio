@@ -1,5 +1,6 @@
-// [間を生成]・[奥行きで作り直す]・[すべて再補間]・生成方式・キーのロック。
-// keyGenerator の結果をモデルに入れ、操作ごとに1つの transaction（1回の Undo）にする
+// [間を生成]・[奥行きで作り直す]・[すべて再補間]・生成方式・キーのロック・1つのキーを消す・動かす。
+// keyGenerator の結果をモデルに入れ、操作ごとに1つの transaction（1回の Undo）にする。
+// 間を生成・再補間・キーを消す・動かすは、パーツを選んでいればそのパーツ（グループなら子孫も）のバインディングだけに掛ける（STEP3 のカード63）
 import type { Binding, Model } from '@app/schema';
 import type { Command, KeyGenerator, ProjectStore } from '@app/contracts';
 import { modelCommand } from '@app/core';
@@ -65,14 +66,48 @@ export function depthCommand(generator: KeyGenerator, parameterId: DepthParamete
   return modelCommand('奥行きで作り直す', (model) => mergeBindings(model, generator.depthParallax(model, parameterId)));
 }
 
-// パラメータを使う全バインディングに fn を掛け、1回の Undo にする。掛けたバインディングの数を返す
+// ---- 選んだパーツだけ（STEP3 のカード63・I-059） ----
+
+// 選んだパーツとその子孫。選んでいなければ null（全部）
+export function partScope(model: Model, partIds: readonly string[] = []): Set<string> | null {
+  if (partIds.length === 0) return null;
+  const scope = new Set(partIds);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const part of model.parts) {
+      if (part.parentId !== null && scope.has(part.parentId) && !scope.has(part.id)) {
+        scope.add(part.id);
+        grew = true;
+      }
+    }
+  }
+  return scope;
+}
+
+// バインディングの対象（パーツ・パーツのメッシュ・グループのワープ）が scope に入っているか。scope が null なら全部
+export function bindingInScope(model: Model, binding: Binding, scope: Set<string> | null): boolean {
+  if (scope === null) return true;
+  const { type, id } = binding.target;
+  if (type === 'part') return scope.has(id);
+  if (type === 'mesh') return model.parts.some((p) => p.meshId === id && scope.has(p.id));
+  return model.warps.some((w) => w.id === id && scope.has(w.partId));
+}
+
+// パラメータを使う全バインディング（partIds があればそのパーツのものだけ）に fn を掛け、1回の Undo にする。
+// 掛けたバインディングの数を返す
 function eachBinding(
   store: ProjectStore,
   label: string,
   parameterIds: string[],
   fn: (binding: Binding, model: Model) => Binding,
+  partIds: readonly string[] = [],
 ): number {
-  const ids = bindingsUsing(store.get().model, parameterIds).map((b) => b.id);
+  const model = store.get().model;
+  const scope = partScope(model, partIds);
+  const ids = bindingsUsing(model, parameterIds)
+    .filter((b) => bindingInScope(model, b, scope))
+    .map((b) => b.id);
   if (ids.length === 0) return 0;
   store.transaction(label, (dispatch) => {
     for (const id of ids) dispatch(bindingCommand(label, id, fn));
@@ -81,8 +116,13 @@ function eachBinding(
 }
 
 // 編集中のパラメータを使う全バインディングの間を生成する。掛けたバインディングの数を返す
-export function generateBetween(store: ProjectStore, generator: KeyGenerator, parameterIds: string[]): number {
-  return eachBinding(store, '間を生成', parameterIds, (b, m) => between(generator, b, m));
+export function generateBetween(
+  store: ProjectStore,
+  generator: KeyGenerator,
+  parameterIds: string[],
+  partIds: readonly string[] = [],
+): number {
+  return eachBinding(store, '間を生成', parameterIds, (b, m) => between(generator, b, m), partIds);
 }
 
 export function rebuildDepth(store: ProjectStore, generator: KeyGenerator, parameterIds: DepthParameterId[]): void {
@@ -100,9 +140,10 @@ export function regenerateKeys(
   generator: KeyGenerator,
   parameterIds: string[],
   range?: [number, number],
+  partIds: readonly string[] = [],
 ): number {
   const label = range ? '選択範囲だけ再補間' : 'すべて再補間';
-  return eachBinding(store, label, parameterIds, (b, m) => generator.regenerate(b, m, range));
+  return eachBinding(store, label, parameterIds, (b, m) => generator.regenerate(b, m, range), partIds);
 }
 
 // ---- 生成方式（カード31） ----
@@ -202,4 +243,99 @@ export function toggleLockAt(store: ProjectStore, parameterId: string, value: nu
   const locked = !isLockedAt(store.get().model, parameterId, value);
   const label = locked ? 'キーをロック' : 'キーのロックを解除';
   store.dispatch(modelCommand(label, (model) => setKeysLocked(model, parameterId, [value, value], locked)));
+}
+
+// ---- 1つのキーを消す・動かす（STEP3 のカード63・I-058） ----
+// 1つのパラメータのバインディングのキーだけを扱う（組み合わせの補正のキーは方向グリッド・組み合わせの格子で扱う）
+
+// そのパラメータの値 value にあるキー（partIds があればそのパーツのバインディングのものだけ）の数と、そのうちロックした数
+export function keysAt(
+  model: Model,
+  parameterId: string,
+  value: number,
+  partIds: readonly string[] = [],
+): { count: number; locked: number } {
+  const scope = partScope(model, partIds);
+  let count = 0;
+  let locked = 0;
+  for (const b of model.bindings) {
+    if (b.parameterIds.length !== 1 || b.parameterIds[0] !== parameterId || !bindingInScope(model, b, scope)) continue;
+    for (const k of b.keys) {
+      if (Math.abs((k.coords[0] ?? Infinity) - value) > NEAR) continue;
+      count++;
+      if (k.locked) locked++;
+    }
+  }
+  return { count, locked };
+}
+
+function withoutValue(values: number[], value: number): number[] {
+  return values.filter((v) => Math.abs(v - value) > NEAR);
+}
+
+// value のキーを消す。デフォルト値のキー（基準）は消さない。何も変わらなければ同じモデル
+export function deleteKeysAt(model: Model, parameterId: string, value: number, partIds: readonly string[] = []): Model {
+  const parameter = model.parameters.find((p) => p.id === parameterId);
+  if (!parameter || Math.abs(value - parameter.default) <= NEAR) return model;
+  const scope = partScope(model, partIds);
+  let changed = false;
+  const bindings = model.bindings.map((b) => {
+    if (b.parameterIds.length !== 1 || b.parameterIds[0] !== parameterId || !bindingInScope(model, b, scope)) return b;
+    const keys = b.keys.filter((k) => Math.abs((k.coords[0] ?? Infinity) - value) > NEAR);
+    if (keys.length === b.keys.length) return b;
+    changed = true;
+    return { ...b, keys, keyValues: [withoutValue(b.keyValues[0] ?? [], value)] };
+  });
+  return changed ? { ...model, bindings } : model;
+}
+
+// from のキーを to へ動かす（to にあったキーは置き換える）。デフォルト値のキーは動かさず、デフォルト値へも動かさない。
+// 何も変わらなければ同じモデル
+export function moveKeysAt(
+  model: Model,
+  parameterId: string,
+  from: number,
+  to: number,
+  partIds: readonly string[] = [],
+): Model {
+  const parameter = model.parameters.find((p) => p.id === parameterId);
+  if (!parameter || Math.abs(from - to) <= NEAR) return model;
+  if (Math.abs(from - parameter.default) <= NEAR || Math.abs(to - parameter.default) <= NEAR) return model;
+  if (to < parameter.min - NEAR || to > parameter.max + NEAR) return model;
+  const scope = partScope(model, partIds);
+  let changed = false;
+  const bindings = model.bindings.map((b) => {
+    if (b.parameterIds.length !== 1 || b.parameterIds[0] !== parameterId || !bindingInScope(model, b, scope)) return b;
+    const moving = b.keys.filter((k) => Math.abs((k.coords[0] ?? Infinity) - from) <= NEAR);
+    if (moving.length === 0) return b;
+    changed = true;
+    const others = b.keys.filter(
+      (k) => Math.abs((k.coords[0] ?? Infinity) - from) > NEAR && Math.abs((k.coords[0] ?? Infinity) - to) > NEAR,
+    );
+    const keys = [...others, ...moving.map((k) => ({ ...k, coords: [to] }))].sort(
+      (a, c) => (a.coords[0] ?? 0) - (c.coords[0] ?? 0),
+    );
+    const keyValues = [[...withoutValue(withoutValue(b.keyValues[0] ?? [], from), to), to].sort((a, c) => a - c)];
+    return { ...b, keys, keyValues };
+  });
+  return changed ? { ...model, bindings } : model;
+}
+
+export function deleteKeyAt(
+  store: ProjectStore,
+  parameterId: string,
+  value: number,
+  partIds: readonly string[] = [],
+): void {
+  store.dispatch(modelCommand('キーを消す', (model) => deleteKeysAt(model, parameterId, value, partIds)));
+}
+
+export function moveKeyAt(
+  store: ProjectStore,
+  parameterId: string,
+  from: number,
+  to: number,
+  partIds: readonly string[] = [],
+): void {
+  store.dispatch(modelCommand('キーを動かす', (model) => moveKeysAt(model, parameterId, from, to, partIds)));
 }

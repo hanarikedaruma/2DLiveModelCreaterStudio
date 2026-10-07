@@ -140,6 +140,12 @@ function setup(project = sampleProject()) {
 
 const row = (id: string) => document.querySelector<HTMLElement>(`[data-parameter-id="${id}"]`)!;
 const markAt = (id: string, value: number) => row(id).querySelector<HTMLElement>(`[data-value="${value}"]`)!;
+// 印の右クリックのメニューからロック / ロック解除する（STEP3 のカード63）
+function toggleLockByMenu(id: string, value: number) {
+  fireEvent.contextMenu(markAt(id, value));
+  const menu = screen.getByRole('group', { name: /^キー .* の操作$/ });
+  fireEvent.click(within(menu).getByRole('button', { name: /^ロック/ }));
+}
 const kinds = (id: string) =>
   [...row(id).querySelectorAll<HTMLElement>('[data-kind]')].map((m) => [Number(m.dataset.value), m.dataset.kind]);
 const faceKeys = (s: Services) => s.store.get().model.bindings.find((b) => b.id === 'b-face')!.keys;
@@ -191,16 +197,16 @@ describe('印を押して移動・編集', () => {
 });
 
 describe('ロック', () => {
-  it('右クリックでロック / ロック解除し、それぞれ1回で Undo できる', () => {
+  it('右クリックのメニューでロック / ロック解除し、それぞれ1回で Undo できる', () => {
     const { services } = setup();
     const loaded = services.store.get();
     editRow(/^顔 左右/);
     expect(kinds('FaceAngleX').find(([v]) => v === 20)![1]).toBe('generated');
 
-    fireEvent.contextMenu(markAt('FaceAngleX', 20));
+    toggleLockByMenu('FaceAngleX', 20);
     expect(kinds('FaceAngleX').find(([v]) => v === 20)![1]).toBe('locked');
     expect(faceKeys(services).find((k) => k.coords[0] === 20)!.locked).toBe(true);
-    fireEvent.contextMenu(markAt('FaceAngleX', 20));
+    toggleLockByMenu('FaceAngleX', 20);
     expect(kinds('FaceAngleX').find(([v]) => v === 20)![1]).toBe('generated');
 
     fireEvent.keyDown(window, { key: 'z', ctrlKey: true });
@@ -270,7 +276,7 @@ describe('範囲の選択', () => {
     const loaded = services.store.get();
     expect(screen.getByRole('button', { name: 'すべて再補間' }).hasAttribute('disabled')).toBe(true);
     editRow(/^顔 左右/);
-    fireEvent.contextMenu(markAt('FaceAngleX', -10));
+    toggleLockByMenu('FaceAngleX', -10);
     const locked = services.store.get();
     fireEvent.click(screen.getByRole('button', { name: 'すべて再補間' }));
     // -10（ロック、0）を代表状態にして -20 は -15
@@ -343,5 +349,23 @@ describe('生成方式', () => {
     fireEvent.change(select(), { target: { value: 'surface' } });
     expect(screen.getByText('曲面にできるのは、顔の向きのワープのキーだけ')).toBeTruthy();
     expect(services.store.canUndo()).toBe(false);
+  });
+});
+
+describe('1つのキーを消す（STEP3 のカード63・I-058）', () => {
+  it('印の右クリックのメニューで、その値のキーを消して知らせる。1回で Undo できる', async () => {
+    const { services } = setup();
+    const loaded = services.store.get();
+    editRow(/^顔 左右/);
+    expect(faceKeys(services).some((k) => k.coords[0] === 20)).toBe(true);
+    fireEvent.contextMenu(markAt('FaceAngleX', 20));
+    const menu = screen.getByRole('group', { name: /^キー .* の操作$/ });
+    await act(async () => {
+      fireEvent.click(within(menu).getByRole('button', { name: 'このキーを消す' }));
+    });
+    expect(faceKeys(services).some((k) => k.coords[0] === 20)).toBe(false);
+    expect(await screen.findByText(/すべてのパーツのキーを 1 個消した/)).toBeTruthy();
+    fireEvent.keyDown(window, { key: 'z', ctrlKey: true });
+    expect(services.store.get()).toBe(loaded);
   });
 });

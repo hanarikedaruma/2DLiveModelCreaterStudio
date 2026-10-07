@@ -131,7 +131,8 @@
   border-left: 1px solid var(--accent);
   border-right: 1px solid var(--accent);
 }
-.key-range-actions {
+.key-range-actions,
+.key-menu {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -143,7 +144,8 @@
   flex-basis: 100%;
   color: var(--text-dim);
 }
-.key-range-actions button {
+.key-range-actions button,
+.key-menu button {
   padding: 2px 6px;
 }
 

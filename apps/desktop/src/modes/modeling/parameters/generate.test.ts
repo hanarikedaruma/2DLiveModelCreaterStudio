@@ -5,12 +5,17 @@ import { createKeyGenerator, createProjectStore } from '@app/core';
 import {
   applyGeneration,
   bindingsUsing,
+  deleteKeyAt,
+  deleteKeysAt,
   generateBetween,
   generationOf,
   isDepthParameter,
   isLockedAt,
+  keysAt,
   lockRange,
   mergeBindings,
+  moveKeyAt,
+  moveKeysAt,
   rebuildDepth,
   regenerateKeys,
   setKeysLocked,
@@ -287,5 +292,128 @@ describe('キーのロック', () => {
     store.undo();
     expect(store.get()).toBe(loaded);
     expect(store.canUndo()).toBe(false);
+  });
+});
+
+// ---- STEP3 のカード63（選んだパーツだけ・1つのキーを消す・動かす） ----
+
+describe('選んだパーツだけ（I-059）', () => {
+  // グループ g の子に a（メッシュ mesh-a）。b はグループの外。g にはワープ w-g
+  function scoped(): Project {
+    const p = createEmptyProject('範囲');
+    const part = (id: string, parentId: string | null, meshId: string | null) => ({
+      ...p.model.parts[0]!,
+      id,
+      name: id,
+      kind: (meshId ? 'image' : 'group') as 'image' | 'group',
+      parentId,
+      meshId,
+    });
+    const parts = [part('g', null, null), part('a', 'g', 'mesh-a'), part('b', null, null)];
+    const b1 = { ...binding('on-a', ['FaceAngleX']), target: { type: 'mesh' as const, id: 'mesh-a' } };
+    const b2 = { ...binding('on-b', ['FaceAngleX']), target: { type: 'part' as const, id: 'b' } };
+    const b3 = { ...binding('on-g', ['FaceAngleX']), target: { type: 'warp' as const, id: 'w-g' } };
+    const warps = [{ id: 'w-g', partId: 'g', columns: 2, rows: 2, rect: { x: 0, y: 0, width: 1, height: 1 } }];
+    return { ...p, model: { ...p.model, parts, bindings: [b1, b2, b3], warps } } as unknown as Project;
+  }
+
+  it('パーツを選んでいれば、そのパーツと子孫（メッシュ・ワープの持ち主）のバインディングだけに掛ける', () => {
+    const store = createProjectStore(scoped());
+    const linear = vi.fn((b: Binding) => ({ ...b, divisions: 3 }));
+    const generator: KeyGenerator = Object.assign(new FakeKeyGenerator(), { linear });
+    expect(generateBetween(store, generator, ['FaceAngleX'], ['g'])).toBe(2);
+    expect(linear.mock.calls.map(([b]) => b.id).sort()).toEqual(['on-a', 'on-g']);
+    expect(store.get().model.bindings.find((b) => b.id === 'on-b')!.divisions).toBeNull();
+  });
+
+  it('選んでいなければ今までどおり全部に掛ける。再補間も同じ', () => {
+    const store = createProjectStore(scoped());
+    const regenerate = vi.fn((b: Binding) => ({ ...b, divisions: 5 }));
+    const generator: KeyGenerator = Object.assign(new FakeKeyGenerator(), { regenerate });
+    expect(regenerateKeys(store, generator, ['FaceAngleX'])).toBe(3);
+    expect(regenerateKeys(store, generator, ['FaceAngleX'], undefined, ['b'])).toBe(1);
+  });
+});
+
+describe('1つのキーを消す・動かす（I-058）', () => {
+  const key = (v: number, x: number, locked = false) => ({
+    coords: [v],
+    delta: { position: { x, y: 0 }, rotation: 0, scale: { x: 1, y: 1 }, opacity: 1 },
+    source: 'manual' as const,
+    locked,
+  });
+  function withKeys(): Project {
+    const p = createEmptyProject('キー');
+    const one = {
+      ...binding('k1', ['FaceAngleX']),
+      keyValues: [[-30, 0, 15, 30]],
+      keys: [key(-30, -3), key(0, 0), key(15, 2, true), key(30, 4)],
+    };
+    const two = {
+      ...binding('k2', ['FaceAngleX']),
+      target: { type: 'part' as const, id: 'other' },
+      keyValues: [[0, 15]],
+      keys: [key(0, 0), key(15, 9)],
+    };
+    const combo = {
+      ...binding('xy', ['FaceAngleX', 'FaceAngleY']),
+      keyValues: [[0, 15], [0]],
+      keys: [{ ...key(15, 1), coords: [15, 0] }],
+    };
+    return { ...p, model: { ...p.model, bindings: [one, two, combo] } };
+  }
+
+  it('keysAt はその値の1つのパラメータのキーの数とロックの数（組み合わせのキーは数えない）', () => {
+    expect(keysAt(withKeys().model, 'FaceAngleX', 15)).toEqual({ count: 2, locked: 1 });
+    expect(keysAt(withKeys().model, 'FaceAngleX', 15, ['part-k1'])).toEqual({ count: 1, locked: 1 });
+  });
+
+  it('消すと keyValues からも外す。デフォルト値のキーは消さない。1回の Undo で戻る', () => {
+    const store = createProjectStore(withKeys());
+    const loaded = store.get();
+    deleteKeyAt(store, 'FaceAngleX', 15);
+    const [k1, k2, combo] = store.get().model.bindings;
+    expect(k1!.keys.map((k) => k.coords[0])).toEqual([-30, 0, 30]);
+    expect(k1!.keyValues).toEqual([[-30, 0, 30]]);
+    expect(k2!.keys.map((k) => k.coords[0])).toEqual([0]);
+    expect(combo).toBe(loaded.model.bindings[2]);
+    store.undo();
+    expect(store.get()).toBe(loaded);
+    expect(deleteKeysAt(loaded.model, 'FaceAngleX', 0)).toBe(loaded.model);
+  });
+
+  it('選んだパーツがあれば、そのパーツのキーだけを消す', () => {
+    const model = deleteKeysAt(withKeys().model, 'FaceAngleX', 15, ['other']);
+    expect(model.bindings[0]!.keys.map((k) => k.coords[0])).toEqual([-30, 0, 15, 30]);
+    expect(model.bindings[1]!.keys.map((k) => k.coords[0])).toEqual([0]);
+  });
+
+  it('動かすと、差分を保ったまま値を変え、動かす先のキーは置き換える。並びは小さい順', () => {
+    const model = moveKeysAt(withKeys().model, 'FaceAngleX', 15, 30);
+    const k1 = model.bindings[0]!;
+    expect(k1.keys.map((k) => [k.coords[0], (k.delta as { position: { x: number } }).position.x])).toEqual([
+      [-30, -3],
+      [0, 0],
+      [30, 2],
+    ]);
+    expect(k1.keyValues).toEqual([[-30, 0, 30]]);
+    expect(model.bindings[1]!.keys.map((k) => k.coords[0])).toEqual([0, 30]);
+    expect(moveKeysAt(withKeys().model, 'FaceAngleX', 15, -20).bindings[0]!.keyValues).toEqual([[-30, -20, 0, 30]]);
+  });
+
+  it('デフォルト値のキーは動かさず、デフォルト値へも範囲の外へも動かさない', () => {
+    const model = withKeys().model;
+    expect(moveKeysAt(model, 'FaceAngleX', 0, 10)).toBe(model);
+    expect(moveKeysAt(model, 'FaceAngleX', 15, 0)).toBe(model);
+    expect(moveKeysAt(model, 'FaceAngleX', 15, 40)).toBe(model);
+  });
+
+  it('moveKeyAt は1回の Undo', () => {
+    const store = createProjectStore(withKeys());
+    const loaded = store.get();
+    moveKeyAt(store, 'FaceAngleX', 30, 20);
+    expect(store.get()).not.toBe(loaded);
+    store.undo();
+    expect(store.get()).toBe(loaded);
   });
 });

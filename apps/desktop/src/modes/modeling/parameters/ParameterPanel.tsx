@@ -1,15 +1,19 @@
 // パラメータパネル（モデリングの右）。グループごとに行を並べ、行を押すとそのパラメータを編集中にする。
-// [間を生成]・[奥行きで作り直す]・[すべて再補間]・生成方式・キーのロックは、操作ごとに1回の Undo にする
+// [間を生成]・[奥行きで作り直す]・[すべて再補間]・生成方式・キーのロック・キーを消す・動かすは、操作ごとに1回の Undo にする。
+// 間を生成・再補間・キーを消す・動かすは、パーツを選んでいればそのパーツ（子孫も）だけに掛ける（STEP3 のカード63）
 import { useEffect } from 'react';
 import { MAX_BINDING_PARAMETERS, PARAMETER_GROUPS, type Model, type Parameter, type ParameterGroup } from '@app/schema';
 import { PanelSections, useCanvas, useDialogs, useEditor, useProject, useServices } from '../../../shell/api';
 import {
   applyGeneration,
+  deleteKeyAt,
   generateBetween,
   GENERATION_CHOICES,
   generationOf,
   isDepthParameter,
+  keysAt,
   lockRange,
+  moveKeyAt,
   rebuildDepth,
   regenerateKeys,
   toggleLockAt,
@@ -99,16 +103,25 @@ export function ParameterPanel() {
   const previews = previewParameters(model, editor);
   const offDefault = model.parameters.some((p) => !near(valueOf(p, editor), p.default));
 
-  const generate = () => {
-    if (generateBetween(services.store, services.keyGenerator, activeIds) === 0) {
-      dialogs.notify('このパラメータのキーはまだ無い');
+  // 選んだパーツがあれば、そのパーツ（子孫も）のバインディングだけに掛ける（I-059）
+  const partIds = editor.selectedPartIds;
+  const scopeText = partIds.length > 0 ? `選んだパーツ（${partIds.length} 個）` : 'すべてのパーツ';
+  const reportScope = (label: string, count: number) => {
+    if (count === 0) {
+      dialogs.notify(
+        partIds.length > 0 ? '選んだパーツに、このパラメータのキーはまだ無い' : 'このパラメータのキーはまだ無い',
+      );
+      return;
     }
+    dialogs.notify(`${label}: ${scopeText}のバインディング ${count} 個に掛けた`);
+  };
+
+  const generate = () => {
+    reportScope('間を生成', generateBetween(services.store, services.keyGenerator, activeIds, partIds));
   };
 
   const regenerateAll = () => {
-    if (regenerateKeys(services.store, services.keyGenerator, activeIds) === 0) {
-      dialogs.notify('このパラメータのキーはまだ無い');
-    }
+    reportScope('すべて再補間', regenerateKeys(services.store, services.keyGenerator, activeIds, undefined, partIds));
   };
 
   // 生成方式は詳細モードで選ぶ。曲面は顔の向き（FaceAngleX・FaceAngleY）のときだけ
@@ -127,9 +140,63 @@ export function ParameterPanel() {
     toggleLock: (value) => toggleLockAt(services.store, p.id, value),
     lockRange: (range, locked) => lockRange(services.store, p.id, range, locked),
     regenerateRange: (range) => {
-      if (regenerateKeys(services.store, services.keyGenerator, [p.id], range) === 0) {
-        dialogs.notify('このパラメータのキーはまだ無い');
+      reportScope('選択範囲だけ再補間', regenerateKeys(services.store, services.keyGenerator, [p.id], range, partIds));
+    },
+    // 1つのキーを消す（I-058）。デフォルト値のキーは基準なので消さない。ロックしたキーは確かめてから
+    async deleteKey(value) {
+      if (near(value, p.default)) {
+        dialogs.notify('デフォルト値のキーは基準なので消せない');
+        return;
       }
+      const at = keysAt(services.store.get().model, p.id, value, partIds);
+      if (at.count === 0) {
+        dialogs.notify(`${scopeText}に、${resultLabel(p, value)} のキーは無い`);
+        return;
+      }
+      if (
+        at.locked > 0 &&
+        !(await dialogs.confirm(`ロックしたキー ${at.locked} 個を含む ${at.count} 個のキーを消しますか？`))
+      ) {
+        return;
+      }
+      deleteKeyAt(services.store, p.id, value, partIds);
+      dialogs.notify(`${scopeText}のキーを ${at.count} 個消した（${resultLabel(p, value)}）`);
+    },
+    // 1つのキーを別の値へ動かす（I-058）。動かす先は入力で聞く。デフォルト値とは入れ替えない
+    async moveKey(value) {
+      if (near(value, p.default)) {
+        dialogs.notify('デフォルト値のキーは基準なので動かせない');
+        return;
+      }
+      const model = services.store.get().model;
+      const at = keysAt(model, p.id, value, partIds);
+      if (at.count === 0) {
+        dialogs.notify(`${scopeText}に、${resultLabel(p, value)} のキーは無い`);
+        return;
+      }
+      const text = await dialogs.prompt(`動かす先の値（${p.min}〜${p.max}）`, String(value));
+      if (text === null) return;
+      const to = Number(text.trim());
+      if (!Number.isFinite(to) || to < p.min || to > p.max) {
+        dialogs.notify(`動かす先は ${p.min}〜${p.max} の数にする`);
+        return;
+      }
+      if (near(to, p.default)) {
+        dialogs.notify('デフォルト値へは動かせない（デフォルト値のキーは基準）');
+        return;
+      }
+      if (near(to, value)) return;
+      const there = keysAt(model, p.id, to, partIds);
+      if (
+        there.count > 0 &&
+        !(await dialogs.confirm(`${resultLabel(p, to)} にもキーが ${there.count} 個ある。置き換えますか？`))
+      ) {
+        return;
+      }
+      moveKeyAt(services.store, p.id, value, to, partIds);
+      dialogs.notify(
+        `${scopeText}のキーを ${at.count} 個、${resultLabel(p, value)} から ${resultLabel(p, to)} へ動かした`,
+      );
     },
   });
 
