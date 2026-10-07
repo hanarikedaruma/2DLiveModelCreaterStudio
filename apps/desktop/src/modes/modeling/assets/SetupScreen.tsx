@@ -1,31 +1,20 @@
 // セットアップ画面（素材が1つも無いとき中央に出る）。PSD・PNG を複数ドラッグ&ドロップして取り込む
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useDialogs, useServices } from '../../../shell/api';
 import { importFromFiles } from './actions';
 import { FilePickButton } from './FilePickButton';
+import { ImportProgress } from './ImportProgress';
+import { useImportState } from './importSession';
 import './assets.css';
 
 export function SetupScreen() {
   const services = useServices();
   const { notify } = useDialogs();
   const [over, setOver] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const mounted = useRef(true);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
+  const { busy } = useImportState(services);
 
   const run = async (files: File[]) => {
-    setBusy(true);
-    try {
-      await importFromFiles(services, notify, files);
-    } finally {
-      // 取り込めたら素材が増えてこの画面は消える
-      if (mounted.current) setBusy(false);
-    }
+    if (!busy) await importFromFiles(services, notify, files);
   };
 
   return (
@@ -48,7 +37,7 @@ export function SetupScreen() {
         <h2>素材を読み込む</h2>
         <p>PSD・PNG をここにドラッグ&ドロップ（複数可）</p>
         <FilePickButton label="ファイルを選ぶ" className="primary" disabled={busy} onFiles={(f) => void run(f)} />
-        {busy && <p className="am-dim">読み込み中…</p>}
+        <ImportProgress />
         <p className="am-dim am-hint">読み込んだら、左の素材トレイから右の標準パーツの枠へドラッグして割り当てる</p>
       </div>
     </div>

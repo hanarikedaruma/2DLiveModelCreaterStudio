@@ -254,3 +254,12 @@ body.dnd-dragging * {
   margin: 0 0 8px;
   font-size: 18px;
 }
+/* 取り込み中もほかのパネルを操作できる。進み具合と取り消しは同じ枠に置く。 */
+.import-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}

@@ -40,9 +40,37 @@ describe('ストレステスト', () => {
       const t0 = performance.now();
       const data = await services.fs.readBinary(path);
       const t1 = performance.now();
-      await modeling.importAssetFiles(services, [{ name: 'stress-4000x6000-100.psd', data }]);
-      const t2 = performance.now();
-      return { readSeconds: (t1 - t0) / 1000, importSeconds: (t2 - t1) / 1000, bytes: data.length };
+      const longTasks: PerformanceEntry[] = [];
+      const supported = PerformanceObserver.supportedEntryTypes.includes('longtask');
+      const observer = supported ? new PerformanceObserver((list) => longTasks.push(...list.getEntries())) : null;
+      observer?.observe({ type: 'longtask' });
+      let lastBeat = t1;
+      let maxHeartbeatGapMs = 0;
+      const heartbeat = setInterval(() => {
+        const now = performance.now();
+        maxHeartbeatGapMs = Math.max(maxHeartbeatGapMs, now - lastBeat);
+        lastBeat = now;
+      }, 16);
+      try {
+        await modeling.importAssetFiles(services, [{ name: 'stress-4000x6000-100.psd', data }]);
+        const t2 = performance.now();
+        // 確定直後の素材一覧の描画も監視し、Observer の最後の通知を回収する。
+        await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+        longTasks.push(...(observer?.takeRecords() ?? []));
+        return {
+          readSeconds: (t1 - t0) / 1000,
+          importSeconds: (t2 - t1) / 1000,
+          bytes: data.length,
+          mainThread: {
+            maxLongTaskMs: supported ? Math.max(0, ...longTasks.map((task) => task.duration)) : null,
+            maxHeartbeatGapMs,
+            longTaskCount: supported ? longTasks.length : null,
+          },
+        };
+      } finally {
+        clearInterval(heartbeat);
+        observer?.disconnect();
+      }
     }, slash(PSD));
     expect(await page.evaluate(() => window.__studio.services.store.get().assets.length)).toBe(100);
     const importSeconds = timing.importSeconds;
@@ -77,6 +105,7 @@ describe('ストレステスト', () => {
       gpuRequest: GPU ?? null,
       readSeconds: timing.readSeconds,
       importSeconds,
+      mainThread: timing.mainThread,
       assignSeconds,
       model,
       memoryMb: {
@@ -96,6 +125,7 @@ describe('ストレステスト', () => {
     writeFileSync(file, JSON.stringify(result, null, 2));
     console.log(
       `[ストレス] 読み込み ${timing.readSeconds.toFixed(1)} 秒 / 取り込み ${importSeconds.toFixed(1)} 秒 / 割り当て（メッシュ）${assignSeconds.toFixed(1)} 秒（パーツ ${model.parts}・頂点 ${model.vertices}）` +
+        ` / 最長のメインスレッド処理 ${timing.mainThread.maxLongTaskMs ?? '未対応'} ms（心拍の最大間隔 ${timing.mainThread.maxHeartbeatGapMs.toFixed(1)} ms）` +
         ` / メモリ ${memBefore}→${memAfterImport}→${memAfterAssign}→${memAfterStudio} MB` +
         ` / スタジオ ${record?.summary.render.avg.toFixed(1)} fps（1%最低 ${record?.summary.render.low1.toFixed(1)}） / GPU ${String(record?.environment.gpu)}\n  → ${file}`,
     );

@@ -61,4 +61,15 @@
 
 ## 記録
 
-（作業中に書く）
+- 2026-10-07 CL（テストの担当）: カード57 のテストを書いた（作業フォルダにあり、まだコミットしていない。CO の実装のコミットの後に CL がコミットする）。CO の書きかけの実装で全部通っている。
+  - `packages/io/src/import/importer.c57.test.ts` 4件: Worker の経路と前の経路で同じ素材・警告（警告の出る PSD・大きさの違う PNG）、呼び出し元のバイト列を変えない、進み具合（ファイル・レイヤー）と終わったら消える、取り消しで ImportCancelledError・Worker を止める・次の取り込みができる。
+  - `packages/contracts/src/assets.c57.test.ts` 2件: put では ImageData を取り出さない、既定の decodePng は画素を要求されるまで OffscreenCanvas を使わない。
+  - `apps/desktop/src/modes/modeling/assets/import.c57.test.tsx` 2件: 取り込み中の進み具合の表示とモードの切り替え、「取り込みを取り消す」。
+  - 残り: stress の計測の最長の止まり（CO が計測を足したあと照合する）、CH・UC-CH。
+
+- 2026-10-07 CO: PNG・PSD の解析、トリミング、符号化を import.worker.ts へ移した。Node のテストは同じ解析部を直接呼ぶ。Importer の契約は維持し、io の任意の操作口（importControlsOf）で進捗と取り消しを扱う。
+- ファイルとレイヤー、画像の準備の進捗をセットアップ・素材トレイに表示。取り消しと別のプロジェクトへ切り替えた場合は、素材追加のコマンドを確定しない。入力は4 MiB ごとに画面へ制御を返してコピーし、元のバイト列を保つ。Worker は成功・失敗・取り消しで終了する。
+- 素材の既定の decodePng は ImageData を getter で都度作る。put は ImageBitmap と PNG を持ち、ImageData を作らない。公開の型を変えていない。
+- 自分の回帰テスト: メモリの1件と画像準備中の取り消しの1件が変更前に失敗することを確認し、変更後に成功。Worker の転送・取り消し・再試行・実行時/起動時エラー4件、進捗UI1件も確認。CL の importer.c57.test.ts 4件も通った。既存の io 全142件と全体の型検査も通った（後から追加したテストは最終検査で再確認する）。
+- stress.measure.ts に Long Tasks API の最長処理と16ms のタイマーの最大間隔を追加した。未対応の API は null として、0ms の成功を報告しない。
+- 未確認: 本物の Worker（Tauri/WebView2）の e2e、1440×1000・800×600 の画面、stress の時間・最長停止・割り当て後のメモリ、CL の全受け入れテストと全体の最終検査。数値未取得なので I-003・I-004 はまだ対応済みにしていない。

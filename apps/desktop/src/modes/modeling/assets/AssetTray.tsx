@@ -4,6 +4,8 @@ import { PanelSections, useDialogs, useProject, useServices } from '../../../she
 import { importFromFiles } from './actions';
 import { AssetList } from './AssetList';
 import { FilePickButton } from './FilePickButton';
+import { ImportProgress } from './ImportProgress';
+import { useImportState } from './importSession';
 import { groupWarnings, importWarningsOf, useImportWarnings } from './warnings';
 import './assets.css';
 
@@ -48,7 +50,7 @@ export function AssetTray() {
   const project = useProject();
   const { notify } = useDialogs();
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
-  const [busy, setBusy] = useState(false);
+  const { busy } = useImportState(services);
 
   const pick = (assetId: string, e: MouseEvent) => {
     setSelected((prev) => {
@@ -64,12 +66,7 @@ export function AssetTray() {
     selected.has(assetId) ? project.assets.filter((a) => selected.has(a.id)).map((a) => a.id) : [assetId];
 
   const add = async (files: File[]) => {
-    setBusy(true);
-    try {
-      await importFromFiles(services, notify, files);
-    } finally {
-      setBusy(false);
-    }
+    if (!busy) await importFromFiles(services, notify, files);
   };
 
   return (
@@ -79,6 +76,7 @@ export function AssetTray() {
         <span className="am-dim">{project.assets.length} 個</span>
       </div>
       <PanelSections panelId="assets.tray" />
+      {project.assets.length > 0 && <ImportProgress />}
       <ImportWarnings />
       {project.assets.length === 0 ? (
         <p className="am-dim">素材はまだ無い</p>

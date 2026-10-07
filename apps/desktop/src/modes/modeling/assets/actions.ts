@@ -1,6 +1,8 @@
 // services を使う操作（取り込み・割り当て・かんたんセットアップ）。コマンドは store を通すので、どれも Undo できる
 import type { Asset } from '@app/schema';
 import type { ImportWarning, Services } from '@app/contracts';
+import type { ImportProgress } from '@app/io';
+import { importSessionOf } from './importSession';
 import { addAssets, assign, findAssignment, findSlotPart, type MeshData, type SlotTarget } from './commands';
 import { importWarningsOf } from './warnings';
 
@@ -22,8 +24,32 @@ export async function importAssetFiles(
   services: Services,
   files: { name: string; data: Uint8Array }[],
 ): Promise<{ added: Asset[]; warnings: ImportWarning[] }> {
+  return importSessionOf(services).run((check, report) => importPrepared(services, files, check, report));
+}
+
+async function importPrepared(
+  services: Services,
+  files: { name: string; data: Uint8Array }[],
+  check: () => void,
+  report: (progress: ImportProgress) => void,
+): Promise<{ added: Asset[]; warnings: ImportWarning[] }> {
+  check();
   const { assets, warnings } = await services.importer.importFiles(files);
-  await Promise.all(assets.map((a) => services.assets.put(a.asset.id, a.png)));
+  check();
+  for (const [index, imported] of assets.entries()) {
+    check();
+    report({
+      phase: 'images',
+      fileName: imported.asset.source.file,
+      fileIndex: files.findIndex((file) => file.name === imported.asset.source.file) + 1,
+      fileCount: files.length,
+      layerName: imported.asset.source.layerName,
+      layerIndex: index + 1,
+      layerCount: assets.length,
+    });
+    await services.assets.put(imported.asset.id, imported.png);
+  }
+  check();
   const added = assets.map((a) => a.asset);
   if (added.length > 0) services.store.dispatch(addAssets(added));
   importWarningsOf(services).set(warnings);
@@ -38,12 +64,30 @@ export async function importFromFiles(
 ): Promise<void> {
   if (files.length === 0) return;
   try {
-    const read = await Promise.all(files.map(async (f) => ({ name: f.name, data: await readFileBytes(f) })));
-    const { added, warnings } = await importAssetFiles(services, read);
+    const { added, warnings } = await importSessionOf(services).run(async (check, report) => {
+      const read: { name: string; data: Uint8Array }[] = [];
+      for (const [index, file] of files.entries()) {
+        check();
+        report({
+          phase: 'reading',
+          fileName: file.name,
+          fileIndex: index + 1,
+          fileCount: files.length,
+          layerIndex: 0,
+          layerCount: 0,
+        });
+        read.push({ name: file.name, data: await readFileBytes(file) });
+      }
+      return importPrepared(services, read, check, report);
+    });
     if (added.length === 0) notify('取り込める素材が無かった');
     else notify(`素材を ${added.length} 個取り込んだ`);
     if (warnings.length > 0) notify('取り込みの警告がある。素材トレイの一覧を確認してください');
   } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      notify('取り込みを取り消した');
+      return;
+    }
     notify(`取り込めない: ${e instanceof Error ? e.message : String(e)}`);
   }
 }
