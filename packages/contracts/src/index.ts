@@ -147,7 +147,11 @@ export interface FrameContext {
   mixedSoFar: ParamValues; // それまでのレイヤーを合成した値
   // それまでのレイヤーそのもの（合成する前の値と重み。順に並ぶ）。実行部は必ず渡す。省いたら空として扱う（CC-010）
   layersSoFar?: readonly Layer[];
-  flags: { lipSyncWeight: number; physicsActive: boolean }; // 前のレイヤーが後のレイヤーへ伝える値（初期値 1・true）
+  flags: {
+    lipSyncWeight: number;
+    physicsActive: boolean;
+    manualPhysicsParameterIds?: readonly string[]; // 実際に再生する手動トラック。該当する胸の2出力を物理で上書きしない
+  }; // 前のレイヤーが後のレイヤーへ伝える値（毎フレームの初期値 1・true・省略）
 }
 export interface LayerProducer {
   id: LayerId;

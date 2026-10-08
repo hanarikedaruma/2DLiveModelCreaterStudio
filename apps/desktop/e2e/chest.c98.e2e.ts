@@ -181,4 +181,60 @@ describe('カード98: 胸の実画面', () => {
         JSON.stringify({ size, repairs: roundtrip.repairs, errors, physics: roundtrip.physics }, null, 2) + '\n',
       );
     });
+  it('スタジオの実再生でも手動の胸キーを保ち、空トラックでは自動の重力を残す', async () => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const project = validateProject(JSON.parse(readFileSync(join(ROOT, 'fixtures/chest-model/project.json'), 'utf8')));
+    const pngs = Object.fromEntries(
+      project.assets.map((a) => [a.id, Array.from(readFileSync(join(ROOT, 'fixtures/chest-model', a.path)))]),
+    );
+    project.animations[0]!.tracks = [
+      { parameterId: 'BodyAngleZ', keyframes: [{ time: 0, value: 45, curve: 'linear' }] },
+      { parameterId: 'BustY', keyframes: [{ time: 0, value: -0.7, curve: 'linear' }] },
+    ];
+    project.animations[0]!.transition = {
+      ...project.animations[0]!.transition,
+      blendIn: 0,
+      blendOut: 0,
+      keepPhysics: true,
+    };
+    await page.evaluate(
+      async ({ project, pngs }) => {
+        const s = window.__studio.services;
+        for (const [id, png] of Object.entries(pngs)) await s.assets.put(id, new Uint8Array(png));
+        s.store.load(project);
+        s.editor.set({ mode: 'studio' });
+      },
+      { project, pngs },
+    );
+    const panel = page.locator('[data-panel-id="studioAnimations"]');
+    const toggle = panel.locator('.panel-title .panel-toggle');
+    if ((await toggle.getAttribute('aria-expanded')) === 'false') await toggle.click();
+    const play = panel.getByRole('button', { name: /体を動かして胸揺れを試す/ });
+    await play.click();
+    await page.waitForFunction(() => {
+      const frame = window.__studio.studio.runtime.lastFrame();
+      return frame?.params.BodyAngleZ === 45 && frame.params.BustY === -0.7;
+    });
+    const manual = await page.evaluate(() => {
+      const frame = window.__studio.studio.runtime.lastFrame()!;
+      return { values: frame.params, physics: frame.layers.find((l) => l.id === 'physics')?.values ?? {} };
+    });
+    expect(manual.values.BustX).toBe(0);
+    expect(manual.physics).not.toHaveProperty('BustY');
+    await page.screenshot({ path: join(OUT, 'audit-studio.png') });
+    await play.click();
+    project.animations[0]!.tracks[1]!.keyframes = [];
+    await page.evaluate((p) => window.__studio.services.store.load(p), project);
+    await play.click();
+    await page.waitForFunction(() => {
+      const frame = window.__studio.studio.runtime.lastFrame();
+      return frame?.params.BodyAngleZ === 45 && (frame.params.BustY ?? 0) > 0.05;
+    });
+    const automatic = await page.evaluate(() => window.__studio.studio.runtime.lastFrame()!.params);
+    expect(automatic.BustX).toBeGreaterThan(0);
+    expect(errors).toEqual([]);
+    writeFileSync(join(OUT, 'audit-result.json'), JSON.stringify({ manual, automatic, errors }, null, 2) + '\n');
+    await play.click();
+    await page.evaluate(() => window.__studio.services.editor.set({ mode: 'modeling' }));
+  });
 });

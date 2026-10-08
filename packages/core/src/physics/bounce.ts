@@ -179,6 +179,34 @@ export interface BounceFrame {
   positions: Float32Array;
   mesh: Mesh;
 }
+// 基準点を含む三角形で、頂点キーの場の勾配を求める。細い三角形を避けて数値誤差を抑える。
+function vertexGradients(mesh: Mesh, index: number, field?: Float32Array): [Vec2, Vec2] | null {
+  if (!field)
+    return [
+      { x: 0, y: 0 },
+      { x: 0, y: 0 },
+    ];
+  if (field.length !== mesh.vertices.length * 2) return null;
+  const triangles = mesh.triangles.filter((t) => t.includes(index));
+  triangles.sort(
+    (a, b) =>
+      Math.abs(cross(...(b.map((i) => mesh.vertices[i]!) as [Vec2, Vec2, Vec2]))) -
+      Math.abs(cross(...(a.map((i) => mesh.vertices[i]!) as [Vec2, Vec2, Vec2]))),
+  );
+  const t = triangles[0];
+  if (!t) return null;
+  const [a, b, c] = t,
+    u = { x: mesh.vertices[b]!.x - mesh.vertices[a]!.x, y: mesh.vertices[b]!.y - mesh.vertices[a]!.y },
+    v = { x: mesh.vertices[c]!.x - mesh.vertices[a]!.x, y: mesh.vertices[c]!.y - mesh.vertices[a]!.y };
+  const det = u.x * v.y - u.y * v.x;
+  if (Math.abs(det) < 1e-8) return null;
+  const du = { x: field[b * 2]! - field[a * 2]!, y: field[b * 2 + 1]! - field[a * 2 + 1]! },
+    dv = { x: field[c * 2]! - field[a * 2]!, y: field[c * 2 + 1]! - field[a * 2 + 1]! };
+  return [
+    { x: (du.x * v.y - dv.x * u.y) / det, y: (du.y * v.y - dv.y * u.y) / det },
+    { x: (dv.x * u.x - du.x * v.x) / det, y: (dv.y * u.x - du.y * v.x) / det },
+  ];
+}
 export function chestDeformBindingIds(
   project: Project,
   items = project.physics.filter((p) => p.deform === 'bounce'),
@@ -262,16 +290,20 @@ export function bounceFrame(project: Project, item: Physics, deltas: TargetDelta
   });
   const local = mesh.vertices[centerIndex]!;
   const own = deltas.vertices[mesh.id];
+  const global = deltas.modelVertices?.[mesh.id];
+  const localGradient = vertexGradients(mesh, centerIndex, own),
+    modelGradient = vertexGradients(mesh, centerIndex, global);
+  if (!localGradient || !modelGradient) return null;
   const p = { x: local.x + (own?.[centerIndex * 2] ?? 0), y: local.y + (own?.[centerIndex * 2 + 1] ?? 0) };
   const h = 0.01;
   const [center, dx, dy] = pointsToModelSpace(project.model, deltas, part.id, [
     p,
-    { x: p.x + h, y: p.y },
-    { x: p.x, y: p.y + h },
+    { x: p.x + h * (1 + localGradient[0].x), y: p.y + h * localGradient[0].y },
+    { x: p.x + h * localGradient[1].x, y: p.y + h * (1 + localGradient[1].y) },
   ]);
   const basis: [Vec2, Vec2] = [
-    { x: (dx!.x - center!.x) / h, y: (dx!.y - center!.y) / h },
-    { x: (dy!.x - center!.x) / h, y: (dy!.y - center!.y) / h },
+    { x: (dx!.x - center!.x) / h + modelGradient[0].x, y: (dx!.y - center!.y) / h + modelGradient[0].y },
+    { x: (dy!.x - center!.x) / h + modelGradient[1].x, y: (dy!.y - center!.y) / h + modelGradient[1].y },
   ];
   if (
     ![center!.x, center!.y, ...basis.flatMap((v) => [v.x, v.y])].every(Number.isFinite) ||
@@ -284,7 +316,6 @@ export function bounceFrame(project: Project, item: Physics, deltas: TargetDelta
     part.id,
     mesh.vertices.map((v, i) => ({ x: v.x + (own?.[i * 2] ?? 0), y: v.y + (own?.[i * 2 + 1] ?? 0) })),
   );
-  const global = deltas.modelVertices?.[mesh.id];
   const positions = Float32Array.from(
     points.flatMap((v, i) => [v.x + (global?.[i * 2] ?? 0), v.y + (global?.[i * 2 + 1] ?? 0)]),
   );
@@ -371,6 +402,27 @@ export function bounceReason(project: Project, item: Physics): string | undefine
   const torso = project.model.parts.find((p) => ancestors.has(p.id) && p.standardType === 'torso');
   if (torso?.meshId && project.model.bindings.some((v) => v.channel === 'vertices' && v.target.id === torso.meshId))
     return '胴体の頂点キーへの取付けは未対応です。';
+  const owned = chestDeformBindingIds(project);
+  const defaults = Object.fromEntries(project.model.parameters.map((p) => [p.id, p.default]));
+  const reference = bounceFrame(
+    project,
+    item,
+    createBindingEvaluator().evaluate(
+      { ...project.model, bindings: project.model.bindings.filter((binding) => !owned.has(binding.id)) },
+      defaults,
+    ),
+  );
+  if (
+    !reference ||
+    reference.basis.some((v, i) =>
+      (['x', 'y'] as const).some(
+        (axis) =>
+          Math.abs(v[axis] - b.referenceBasis[i]![axis]) >
+          1e-5 * Math.max(1, Math.abs(v[axis]), Math.abs(b.referenceBasis[i]![axis])),
+      ),
+    )
+  )
+    return '胸の基準姿勢が変わりました。胸のキーを作り直してください。';
   return undefined;
 }
 

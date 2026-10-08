@@ -267,6 +267,11 @@ export function createAnimationPlayer(): AnimationPlayer {
       current = playbacks.filter((p) => !p.fade).map((p) => p.animationId);
 
       const { parameters } = project.model;
+      const chestOutputs = new Set(
+        project.physics
+          .filter((p) => p.deform === 'bounce')
+          .flatMap((p) => [p.outputParameterId, p.verticalOutputParameterId]),
+      );
       const layers: Layer[] = [];
       for (const playback of playbacks) {
         const animation = findAnimation(project, playback.animationId)!;
@@ -277,7 +282,21 @@ export function createAnimationPlayer(): AnimationPlayer {
         if (!animation.transition.keepPhysics) ctx.flags.physicsActive = false;
         if (weight <= 0) continue;
         const layer = layerAt(animation, parameters, localTime(animation, playback, now), weight);
-        if (layer) layers.push(layer);
+        if (layer) {
+          layers.push(layer);
+          const explicit = animation.tracks
+            .filter(
+              (track) =>
+                chestOutputs.has(track.parameterId) &&
+                track.keyframes.length > 0 &&
+                Object.hasOwn(layer.values, track.parameterId),
+            )
+            .map((track) => track.parameterId);
+          if (explicit.length)
+            ctx.flags.manualPhysicsParameterIds = [
+              ...new Set([...(ctx.flags.manualPhysicsParameterIds ?? []), ...explicit]),
+            ];
+        }
       }
       return layers.length > 0 ? layers : null;
     },

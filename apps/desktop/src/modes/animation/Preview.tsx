@@ -107,7 +107,10 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
     if (!playing || discontinuous) session.current.reset();
     if (!playing || discontinuous || (previous && animationState.time < previous.time)) chestEngine.current.reset();
     const physical = animation?.transition.keepPhysics ?? true;
-    const explicit = animation?.tracks.map((t) => t.parameterId) ?? [];
+    const explicit =
+      animation?.tracks
+        .filter((t) => t.keyframes.length > 0 && Object.hasOwn(values, t.parameterId))
+        .map((t) => t.parameterId) ?? [];
     const chestProject = {
       ...project,
       physics: project.physics.filter(

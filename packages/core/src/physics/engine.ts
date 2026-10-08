@@ -295,7 +295,11 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
         }
       }
       for (const id of [...states.keys()]) if (!seen.has(id)) states.delete(id);
-      const bouncing = ctx.project.physics.filter((p) => p.deform === 'bounce');
+      const manual = new Set(ctx.flags.manualPhysicsParameterIds ?? []);
+      const bouncing = ctx.project.physics.filter(
+        (p) =>
+          p.deform === 'bounce' && !manual.has(p.outputParameterId) && !manual.has(p.verticalOutputParameterId ?? ''),
+      );
       chest.retain(bouncing.map((p) => p.id));
       if (bouncing.length) {
         const owned = chestDeformBindingIds(ctx.project, bouncing);

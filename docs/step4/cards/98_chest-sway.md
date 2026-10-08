@@ -97,6 +97,7 @@
 - `packages/core/src/eval/`・`packages/core/src/deform/` のモデル座標の頂点差分を合成・適用する部分と、その互換テスト（胸の先行契約として直列）
 - 胸のmodelキーを表示・編集する既存のモデリングのメッシュ/キー編集経路（新しい座標の契約への対応のみ）
 - `packages/core/src/hairDynamics/frame.ts` の軸の判定と、胸の再生に必要なstudio/animationの接続部分（既存の流れ揺れを保つ）
+- `packages/core/src/anim/player.ts` の胸の手動トラック優先を後段へ伝える部分（2026-10-09追加監査）。空のトラック・影響範囲外のトラックは自動胸揺れを止めない。
 
 ## 触らないもの
 

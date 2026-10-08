@@ -89,5 +89,14 @@ describe('胸のアニメーション評価', () => {
         services.pipeline.deform(manual.model, services.evaluator.evaluate(manual.model, { BustX: 0.2, BustY: 0.7 })),
       ),
     );
+    // 空のトラックは手動の胸キーではない。再生中も停止中も重力を残す。
+    const empty = structuredClone(project);
+    empty.animations[0]!.tracks.push({ parameterId: 'BustY', keyframes: [] });
+    screen.unmount();
+    act(() => services.store.load(empty));
+    render(view({ BodyAngleZ: 30, MoveY: 0 }));
+    expect(positions(rendered.at(-1)!)).toEqual(positions(staticFrame({ BodyAngleZ: 30, MoveY: 0 })));
+    act(() => animationEditor.set({ playback: 'stopped' }));
+    expect(positions(rendered.at(-1)!)).toEqual(positions(staticFrame({ BodyAngleZ: 30, MoveY: 0 })));
   });
 });

@@ -40,6 +40,17 @@ describe('物理の画面', () => {
     expect((screen.getByRole('spinbutton', { name: '胸の重力の強さ' }) as HTMLInputElement).value).toBe('0.3');
     fireEvent.click(screen.getByRole('button', { name: '胸の固定範囲' }));
     expect(screen.getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' })).toBeTruthy();
+    const fixedBefore = p.physics[0]!.bounce!.weights.filter((w) => w === 0).length;
+    const topBand = screen.getByRole('spinbutton', { name: '固定する上端の帯' });
+    fireEvent.change(topBand, { target: { value: '0.3' } });
+    fireEvent.blur(topBand);
+    expect(services.store.get().physics[0]!.bounce!.pinning.topBand).toBe(0.3);
+    expect(services.store.get().physics[0]!.bounce!.weights.filter((w) => w === 0).length).toBeGreaterThan(fixedBefore);
+    act(() => services.store.undo());
+    expect(services.store.get()).toEqual(p);
+    act(() => services.store.redo());
+    expect(services.store.get().physics[0]!.bounce!.pinning.topBand).toBe(0.3);
+    act(() => services.store.undo());
     const saved = { BodyAngleZ: 30 };
     act(() => services.editor.set({ editorParamValues: saved }));
     fireEvent.click(screen.getByRole('button', { name: '上下を試す' }));
