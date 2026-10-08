@@ -226,12 +226,28 @@ describe('カード98: 胸の実画面', () => {
     project.animations[0]!.tracks[1]!.keyframes = [];
     await page.evaluate((p) => window.__studio.services.store.load(p), project);
     await play.click();
-    await page.waitForFunction(() => {
-      const frame = window.__studio.studio.runtime.lastFrame();
-      return frame?.params.BodyAngleZ === 45 && (frame.params.BustY ?? 0) > 0.05;
-    });
+    const started = await page.evaluate(() => performance.now());
+    const b = project.physics[0]!.bounce!;
+    const equilibrium = {
+      x: (Math.sin(Math.PI / 4) * b.gravityStrength * b.amplitudes.y) / b.amplitudes.x,
+      y: (1 - Math.cos(Math.PI / 4)) * b.gravityStrength,
+    };
+    // 0°→45°の回転直後は実際の慣性で逆方向にも振れる。静止の釣り合いは余韻が収まってから検査する。
+    await page.waitForFunction(
+      ({ started, equilibrium }) => {
+        const frame = window.__studio.studio.runtime.lastFrame();
+        return (
+          frame &&
+          frame.now > started + 2500 &&
+          frame.params.BodyAngleZ === 45 &&
+          Math.abs((frame.params.BustX ?? 0) - equilibrium.x) < 0.02 &&
+          Math.abs((frame.params.BustY ?? 0) - equilibrium.y) < 0.02
+        );
+      },
+      { started, equilibrium },
+    );
     const automatic = await page.evaluate(() => window.__studio.studio.runtime.lastFrame()!.params);
-    expect(automatic.BustX).toBeGreaterThan(0);
+    expect(automatic.BustX).toBeGreaterThan(0.1);
     expect(errors).toEqual([]);
     writeFileSync(join(OUT, 'audit-result.json'), JSON.stringify({ manual, automatic, errors }, null, 2) + '\n');
     await play.click();
