@@ -13,6 +13,19 @@ export { DetailDisclosure } from './DetailDisclosure';
 
 // ---- パネル・セクション・中央・セットアップ画面・メニュー ----
 
+// オブジェクトパレットを出すかを決めるときに渡すもの
+export interface PanelContext {
+  project: Project;
+  editor: EditorState;
+  activeToolId: string;
+}
+
+// 見出しの ⓘ で出す説明。何のためのものか（purpose）と、使う流れ（steps）
+export interface PanelInfo {
+  purpose: string;
+  steps: string[];
+}
+
 export interface PanelDef {
   id: string;
   mode: ModeId;
@@ -21,6 +34,10 @@ export interface PanelDef {
   order?: number;
   level?: 'easy' | 'detail' | 'both';
   component: React.FC;
+  // 指定すると「オブジェクトパレット」になり、when が true の間だけ列のいちばん上に色付きで出す。
+  // kind は札（ツール / パーツ）。省略は常に出す「共通パレット」。when は描き直しのたびに呼ぶので軽くする
+  object?: { kind: 'tool' | 'part'; when(context: PanelContext): boolean };
+  info?: PanelInfo;
 }
 export function registerPanel(def: PanelDef): void {
   registry.addPanel(def);
@@ -86,16 +103,29 @@ export interface CanvasPointerEvent {
   altKey: boolean;
   ctrlKey: boolean;
 }
+export interface CanvasToolTarget {
+  prompt: string; // 対象が無いときにキャンバスに出す案内
+  has(project: Project, editor: EditorState): boolean; // 対象を選んでいるか
+  // キャンバスの点（キャンバス座標）を押したときに選ぶパーツ。その点の画像パーツから決める。null は選べない
+  pick(project: Project, deformed: DeformedModel, point: Vec2): string | null;
+}
 export interface CanvasTool {
   id: string;
   label: string;
   cursor?: string;
   // かんたん/詳細のどちらでツールのボタンを出すか（パネル・セクションの level と同じ。省略は both）
   level?: 'easy' | 'detail' | 'both';
+  // false ならツールバーにボタンを出さない（パーツ専用のツールなど、パレットのボタンから切り替えるもの）
+  toolbar?: boolean;
+  // 対象の要るツール。対象が無い間は、枠が案内の帯・選べるものの点線の囲み・クリックでの選択を受け持ち、
+  // ツールへは押した操作を渡さない
+  target?: CanvasToolTarget;
   onPointerDown?(e: CanvasPointerEvent): void;
   onPointerMove?(e: CanvasPointerEvent): void;
   onPointerUp?(e: CanvasPointerEvent): void;
   onKeyDown?(e: KeyboardEvent): void;
+  // 右クリック（動かさずに離したとき）。省略するとパーツの選択を外す
+  onContextClick?(e: CanvasPointerEvent): void;
   drawOverlay?(ctx: CanvasRenderingContext2D, view: ViewTransform): void;
 }
 // 最初に登録したものが既定のツール

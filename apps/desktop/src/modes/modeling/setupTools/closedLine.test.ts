@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { createEmptyProject, type Project } from '@app/schema';
-import { CLEAR_CLOSED_LINE_LABEL, CLOSED_LINE_LABEL, closedLineOf, setClosedLine, strokeToLine } from './closedLine';
+import { createEmptyProject, type Model, type Part, type Project, type StandardPartType } from '@app/schema';
+import {
+  CLEAR_CLOSED_LINE_LABEL,
+  CLOSED_LINE_LABEL,
+  closedLineOf,
+  eyeSideOfPart,
+  selectedEyeSides,
+  setClosedLine,
+  strokeToLine,
+} from './closedLine';
 
 const project = (): Project => createEmptyProject('閉じた目の線のテスト');
 
@@ -63,5 +71,39 @@ describe('setClosedLine', () => {
     const cleared = clear.apply(once);
     expect(closedLineOf(cleared.model, 'R')).toBeNull();
     expect(clear.apply(cleared)).toBe(cleared);
+  });
+});
+
+describe('目のパーツの見分け', () => {
+  const part = (id: string, standardType: StandardPartType | null, parentId: string | null = null) =>
+    ({ id, standardType, parentId }) as Part;
+  const model = {
+    parts: [
+      part('white', 'eyeWhiteR'),
+      part('lid', 'upperLidL'),
+      part('group', 'eyeGroupL'),
+      part('lash', null, 'group'), // 目のグループの中の自由パーツ
+      part('face', 'face'),
+      part('free', null),
+      part('loopA', null, 'loopB'),
+      part('loopB', null, 'loopA'),
+    ],
+  } as Model;
+
+  it('自身か祖先の標準パーツの種類から、目の側を決める。目でなければ null', () => {
+    expect(eyeSideOfPart(model, 'white')).toBe('R');
+    expect(eyeSideOfPart(model, 'lid')).toBe('L');
+    expect(eyeSideOfPart(model, 'group')).toBe('L');
+    expect(eyeSideOfPart(model, 'lash')).toBe('L');
+    expect(eyeSideOfPart(model, 'face')).toBeNull();
+    expect(eyeSideOfPart(model, 'free')).toBeNull();
+    expect(eyeSideOfPart(model, 'missing')).toBeNull();
+    // 親が輪になっていても止まる
+    expect(eyeSideOfPart(model, 'loopA')).toBeNull();
+  });
+
+  it('選んでいるパーツの目の側を L → R の順に重ねずに返す', () => {
+    expect(selectedEyeSides(model, ['white', 'face', 'lash', 'lid'])).toEqual(['L', 'R']);
+    expect(selectedEyeSides(model, ['face'])).toEqual([]);
   });
 });

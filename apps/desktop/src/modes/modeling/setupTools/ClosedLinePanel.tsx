@@ -1,27 +1,48 @@
-// 「閉じた目の線」のパネル（カード42）。目ごとに線の有無を出し、[なぞる] でキャンバスのツールに切り替え、[消す] で消す。
-// 表示中のあいだ、ツールに services とダイアログを渡す
-import { useSyncExternalStore, type FC } from 'react';
-import { useCanvas, useDispatch, useProject } from '../../../shell/api';
+// 「閉じた目の線」のパレット（カード42）。目のパーツを選んでいる間（となぞっている間）だけ出るパーツのパレット。
+// 選んだ目の側の線の有無を出し、[閉じた目の線をなぞる] でなぞるツールに切り替え、[消す] で消す。
+// なぞり終えたら元のツールに戻す。表示中のあいだ、ツールに services とダイアログを渡す
+import { useEffect, useRef, useSyncExternalStore, type FC } from 'react';
+import { useCanvas, useDialogs, useDispatch, useEditor, useProject, useServices } from '../../../shell/api';
+import { runAutoSetup } from '../assets/actions';
 import { useBindEnv, type EnvSlot } from '../canvas/env';
-import { EYE_SIDES, closedLineOf, setClosedLine, type EyeSide } from './closedLine';
-import { CLOSED_LINE_TOOL_ID, type ClosedLineTool } from './closedLineTool';
+import { EYE_SIDES, SCREEN_SIDE, closedLineOf, selectedEyeSides, setClosedLine, type EyeSide } from './closedLine';
+import { CLOSED_LINE_TOOL_ID, tracingHint, type ClosedLineTool } from './closedLineTool';
 import './setupTools.css';
-
-// L / R はキャラクターから見た左右。画面では L が右側に描かれる
-const SCREEN_SIDE: Record<EyeSide, string> = { L: '右', R: '左' };
 
 export function makeClosedLinePanel(slot: EnvSlot, closedLine: ClosedLineTool): FC {
   return function ClosedLinePanel() {
     useBindEnv(slot);
+    const services = useServices();
     const project = useProject();
+    const [editor] = useEditor();
     const dispatch = useDispatch();
+    const { notify } = useDialogs();
     const { activeToolId, setActiveTool, requestRedraw } = useCanvas();
     const side = useSyncExternalStore(closedLine.side.subscribe, closedLine.side.get);
     const active = activeToolId === CLOSED_LINE_TOOL_ID;
+    // なぞる前のツール。なぞり終えたら・やめたらそこへ戻る（'' は既定のツール）
+    const previousTool = useRef('');
+
+    useEffect(() => {
+      closedLine.setFinish(() => {
+        setActiveTool(previousTool.current);
+        requestRedraw();
+      });
+      return () => closedLine.setFinish(null);
+    }, [setActiveTool, requestRedraw]);
+
+    // 選んでいる目の側。なぞっている間は、なぞる側も出す
+    const selected = selectedEyeSides(project.model, editor.selectedPartIds);
+    const sides = EYE_SIDES.filter((s) => selected.includes(s) || (active && s === side));
 
     const trace = (s: EyeSide) => {
+      if (!active) previousTool.current = activeToolId;
       closedLine.side.set(s);
       setActiveTool(CLOSED_LINE_TOOL_ID);
+      requestRedraw();
+    };
+    const stop = () => {
+      setActiveTool(previousTool.current);
       requestRedraw();
     };
     const clear = (s: EyeSide) => {
@@ -31,11 +52,8 @@ export function makeClosedLinePanel(slot: EnvSlot, closedLine: ClosedLineTool): 
 
     return (
       <div className="closed-line-panel">
-        <p className="closed-line-hint">
-          目を閉じたときのまつげの線を、左右の目それぞれ1本なぞる。まばたきで上まぶたと白目がこの線に沿って閉じる
-        </p>
         <ul className="closed-line-list">
-          {EYE_SIDES.map((s) => {
+          {sides.map((s) => {
             const line = closedLineOf(project.model, s);
             const tracing = active && side === s;
             return (
@@ -53,7 +71,7 @@ export function makeClosedLinePanel(slot: EnvSlot, closedLine: ClosedLineTool): 
                     aria-label={`目 ${s} の線をなぞる`}
                     onClick={() => trace(s)}
                   >
-                    {line ? 'なぞり直す' : 'なぞる'}
+                    {line ? 'なぞり直す' : '閉じた目の線をなぞる'}
                   </button>
                   <button type="button" aria-label={`目 ${s} の線を消す`} disabled={!line} onClick={() => clear(s)}>
                     消す
@@ -64,13 +82,19 @@ export function makeClosedLinePanel(slot: EnvSlot, closedLine: ClosedLineTool): 
           })}
         </ul>
         {active && (
-          <p className="closed-line-hint closed-line-now">
-            キャンバスで目 {side} の閉じた線を、目の端から端までドラッグでなぞる（Esc でやめる）
-          </p>
+          <div className="closed-line-now">
+            <p className="closed-line-hint">キャンバスで{tracingHint(side)}</p>
+            <button type="button" onClick={stop}>
+              やめる
+            </button>
+          </div>
         )}
-        <p className="closed-line-hint">
-          引いたあと「標準パーツの割り当て」の [かんたんセットアップ] をもう一度押すと反映される（上まぶたと白目が要る）
-        </p>
+        <div className="closed-line-apply">
+          <button type="button" onClick={() => runAutoSetup(services, notify)}>
+            かんたんセットアップで反映
+          </button>
+          <p className="closed-line-hint">標準パーツの割り当ての［かんたんセットアップ］と同じ。上まぶたと白目が要る</p>
+        </div>
       </div>
     );
   };

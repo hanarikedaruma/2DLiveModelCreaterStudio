@@ -24,18 +24,9 @@ const sampleJson = Object.values(
 // たたんだパネルの id を覚える localStorage のキー（Layout.tsx）
 const COLLAPSED_KEY = 'live2d-studio.collapsedPanels';
 
-// かんたんのモデリングで右の列に出るパネル（各モードの登録の order 順）
-const RIGHT_PANELS = [
-  'パラメータ',
-  'Transform',
-  'パーツの設定',
-  'メッシュ',
-  '流れ線', // 2026-10-08 CO / カード99: 新パネルも既存の小画面検査の対象にする。
-  '標準パーツの割り当て',
-  '閉じた目の線',
-  '表情',
-  '母音',
-];
+// かんたんのモデリングで、選択・変形ツールで目以外を選んでいるときに右の列に出るパネル（共通パレット、order 順）。
+// メッシュ・流れ線・閉じた目の線は、ツールや選んだパーツに合わせて出るオブジェクトパレット（下の別のテストで確かめる）
+const RIGHT_PANELS = ['パラメータ', 'Transform', 'パーツの設定', '標準パーツの割り当て', '表情', '母音'];
 
 type Viewport = { width: number; height: number };
 const SMALL: Viewport = { width: 800, height: 600 };
@@ -248,7 +239,7 @@ describe('カード61: 小さいウィンドウの右の列', () => {
       expect({ name, shrink: shrink(b, SMALL) }).toEqual({ name, shrink: { property: 'flex-shrink', value: '0' } });
       expect(cascaded(b, ['display'], SMALL)).toBeNull();
     }
-    // 最低の高さの合計（8 × 180 = 1440px）はウィンドウの高さより大きいので、パネルは潰れずに列がスクロールする。
+    // 最低の高さの合計（6 × 180 = 1080px）はウィンドウの高さより大きいので、パネルは潰れずに列がスクロールする。
     // すべてのパネルが同じスクロールの入れ物（右の列）の直下にあるので、列をスクロールすれば全部に届く
     expect(panels().length * 180).toBeGreaterThan(SMALL.height);
     expect(panels().every((p) => p.parentElement === right)).toBe(true);
@@ -266,24 +257,51 @@ describe('カード61: 小さいウィンドウの右の列', () => {
 
   it('たたんだパネルは最低の高さを持たず題だけになり、開き直すと最低 180px に戻る', () => {
     const { panel, body } = setup();
-    const mesh = panel('メッシュ');
-    const toggle = within(mesh).getByRole('button', { name: 'メッシュ' });
+    const expressions = panel('表情');
+    const toggle = within(expressions).getByRole('button', { name: '表情' });
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(mesh.classList.contains('collapsed')).toBe(true);
-    expect(body(mesh).hidden).toBe(true);
-    expect(minHeight(mesh, SMALL)).toBe('0');
-    expect(shrink(mesh, SMALL)).toEqual({ property: 'flex', value: 'none' });
-    expect(cascaded(body(mesh), ['display'], SMALL)?.value).toBe('none');
+    expect(expressions.classList.contains('collapsed')).toBe(true);
+    expect(body(expressions).hidden).toBe(true);
+    expect(minHeight(expressions, SMALL)).toBe('0');
+    expect(shrink(expressions, SMALL)).toEqual({ property: 'flex', value: 'none' });
+    expect(cascaded(body(expressions), ['display'], SMALL)?.value).toBe('none');
     // ほかの開いたパネルはそのまま
     expect(minHeight(panel('パーツの設定'), SMALL)).toBe('180px');
-    expect(JSON.parse(localStorage.getItem(COLLAPSED_KEY)!)).toEqual(['mesh']);
+    expect(JSON.parse(localStorage.getItem(COLLAPSED_KEY)!)).toEqual(['expressions']);
 
     fireEvent.click(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(body(mesh).hidden).toBe(false);
-    expect(minHeight(mesh, SMALL)).toBe('180px');
-    expect(shrink(mesh, SMALL)).toEqual({ property: 'flex-shrink', value: '0' });
+    expect(body(expressions).hidden).toBe(false);
+    expect(minHeight(expressions, SMALL)).toBe('180px');
+    expect(shrink(expressions, SMALL)).toEqual({ property: 'flex-shrink', value: '0' });
+  });
+
+  it('オブジェクトパレット（メッシュ・流れ線・閉じた目の線）は列のいちばん上に出て、どの窓の大きさでも縮まない', () => {
+    const { services, panels, titleOf, body } = setup();
+    // メッシュ編集ツールで目を選ぶと、ツールのパレット → パーツのパレット → 共通パレットの順
+    fireEvent.click(screen.getByRole('button', { name: 'メッシュ編集' }));
+    act(() => services.editor.set({ selectedPartIds: ['part-eyeWhiteL'] }));
+    expect(panels().map(titleOf)).toEqual(['メッシュ', '閉じた目の線', ...RIGHT_PANELS]);
+    // 2026-10-08 CO / カード99: 流れ線も小画面検査の対象にする（線で曲げるツールのときに出る）
+    fireEvent.click(screen.getByRole('button', { name: '線で曲げる' }));
+    expect(panels().map(titleOf)).toEqual(['流れ線', '閉じた目の線', ...RIGHT_PANELS]);
+    for (const p of panels().slice(0, 2)) {
+      const name = titleOf(p);
+      expect(p.classList.contains('object')).toBe(true);
+      // 小さい窓: 最低 180px で縮めない。大きい窓: 最低の高さは掛けないが縮めない（中身をすべて出す）
+      expect({ name, minHeight: minHeight(p, SMALL) }).toEqual({ name, minHeight: '180px' });
+      expect({ name, shrink: shrink(p, SMALL) }).toEqual({ name, shrink: { property: 'flex-shrink', value: '0' } });
+      expect({ name, minHeight: minHeight(p, LARGE) }).toEqual({ name, minHeight: '0' });
+      expect({ name, shrink: shrink(p, LARGE) }).toEqual({ name, shrink: { property: 'flex-shrink', value: '0' } });
+      expect(body(p).hidden).toBe(false);
+    }
+    // 共通パレットは今までどおり、大きい窓では高さを分け合う
+    for (const p of panels().slice(2)) expect(shrink(p, LARGE)).toBeNull();
+    // 選択・変形ツールで目以外を選ぶと、オブジェクトパレットは無くなる
+    fireEvent.click(screen.getByRole('button', { name: '選択・変形' }));
+    act(() => services.editor.set({ selectedPartIds: ['part-torso'] }));
+    expect(panels().map(titleOf)).toEqual(RIGHT_PANELS);
   });
 
   it('保存した開閉の設定はそのまま使う（たたんだものだけたたみ、ほかは開く）', () => {

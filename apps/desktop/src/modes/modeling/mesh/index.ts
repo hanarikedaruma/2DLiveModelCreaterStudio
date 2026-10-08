@@ -4,7 +4,7 @@ import { registerCanvasTool, registerPanel, registerPanelSection } from '../../.
 import { createEnvSlot } from '../canvas/env';
 import { PART_SETTINGS_PANEL_ID } from '../structure';
 import { makeDensitySection } from './DensitySection';
-import { createMeshEditor } from './meshTool';
+import { MESH_TOOL_ID, createMeshEditor } from './meshTool';
 import { makeMeshPanel } from './MeshPanel';
 
 export { MESH_TOOL_ID } from './meshTool';
@@ -27,6 +27,19 @@ export function register(): void {
     title: 'メッシュ',
     order: 40,
     component: MeshPanel,
+    // メッシュ編集ツールの設定なので、そのツールのときだけ出す（ツールのパレット）
+    object: { kind: 'tool', when: ({ activeToolId }) => activeToolId === MESH_TOOL_ID },
+    info: {
+      purpose:
+        '画像パーツに網（メッシュ）を張り、頂点を動かして形を細かく曲げる。パラメータを編集中なら、その値のキーに記録する',
+      steps: [
+        'キャンバスで画像パーツをクリックして選ぶ',
+        'メッシュが無ければ［自動生成］',
+        '頂点をドラッグして動かす。何も無い所からのドラッグで囲んで選ぶ（Shift で追加）',
+        'ダブルクリックで頂点を追加、Delete で削除',
+        '右クリックで選択を外し、別のパーツを選ぶ',
+      ],
+    },
   });
   registerPanelSection({
     id: MESH_DENSITY_SECTION_ID,

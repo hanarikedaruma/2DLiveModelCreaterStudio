@@ -211,16 +211,19 @@ kbd {
   border-bottom: 1px solid var(--border);
 }
 .panel-title {
+  display: flex;
+  align-items: center;
   margin: 0;
   font-size: 12px;
   font-weight: 600;
   border-bottom: 1px solid var(--border);
 }
-.panel-title button {
+.panel-toggle {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  min-width: 0;
   padding: 6px 10px;
   border: none;
   border-radius: 0;
@@ -229,9 +232,62 @@ kbd {
   font-weight: 600;
   text-align: left;
 }
-.panel-title button:hover {
+.panel-toggle:hover {
   background: var(--bg-hover);
   color: var(--text);
+}
+/* オブジェクトパレット（選んだパーツ・使っているツールに合わせて出るもの）。見出しに薄い色と左の線を付け、
+   右端に「ツール」「パーツ」の札を出す。中身は縮めず、足りない高さは共通パレットと列のスクロールで受ける */
+.panel.object > .panel-title {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg-panel));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.panel.object > .panel-title .panel-toggle {
+  color: var(--text);
+}
+.shell-area > .panel.object:not(.collapsed) {
+  flex-shrink: 0;
+}
+.panel-tag {
+  flex: none;
+  padding: 0 4px;
+  color: var(--accent);
+  font-size: 10px;
+}
+/* 見出しの ⓘ と、その説明（目的と流れ） */
+.panel-info-button {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1;
+}
+.panel-info-button:hover,
+.panel-info-button[aria-expanded='true'] {
+  background: var(--bg-hover);
+  color: var(--accent);
+}
+.panel-info {
+  flex: none;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.panel-info-purpose {
+  margin: 0 0 4px;
+}
+.panel-info-steps {
+  margin: 0;
+  padding-left: 1.4em;
+  color: var(--text-dim);
 }
 .panel-caret {
   width: 10px;

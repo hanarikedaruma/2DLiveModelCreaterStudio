@@ -28,10 +28,6 @@
   color: var(--text-dim);
   font-size: 12px;
 }
-.mesh-activate {
-  align-self: flex-start;
-}
-
 /* 「パーツの設定」の変形の細かさ（カード28） */
 .mesh-density {
   display: flex;

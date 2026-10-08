@@ -93,7 +93,8 @@ beforeEach(() => {
 });
 afterEach(() => restoreSize());
 
-async function open(project: Project, options: { detail?: boolean; select?: string[] } = {}) {
+// 詳細モードでワープ編集ツールにして開く（ワープのパレットは、そのツールのときだけ出るツールのパレット）
+async function open(project: Project, options: { detail?: boolean; select?: string[]; tool?: boolean } = {}) {
   const shell = renderShell(() => ({
     pipeline: createDeformPipeline(),
     evaluator: createBindingEvaluator(),
@@ -109,6 +110,8 @@ async function open(project: Project, options: { detail?: boolean; select?: stri
       ...(options.detail === false ? {} : { uiLevel: DETAIL }),
     }),
   );
+  if (options.detail !== false && options.tool !== false)
+    fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
   const store = shell.services.store as ProjectStoreWithHistory;
   const sectionEl = () => document.querySelector<HTMLElement>('[data-section-id="modeling.warp"]');
   const section = () => within(sectionEl()!);
@@ -157,18 +160,29 @@ describe('ワープのセクション', () => {
 
   it('ツールだけを選んでもキャンバスに次の手順が出る', async () => {
     const shell = await open(testProject(), { select: [] });
-    fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
     const ctx = new RecordingContext();
     warpEditor.tool.drawOverlay!(ctx.asContext(), shell.canvas.getState().view);
     expect(ctx.texts.join('')).toContain('グループを選ぶ');
   });
 
-  it('詳細モードの「パーツの設定」にだけ出る', async () => {
+  it('パーツの設定には無く、詳細モードでワープ編集ツールのときだけ、色付きのツールのパレットとして上に出る', async () => {
     const shell = await open(testProject(), { detail: false });
     expect(shell.sectionEl()).toBeNull();
+    expect(screen.queryByRole('button', { name: 'ワープ編集' })).toBeNull();
     act(() => shell.services.editor.set({ uiLevel: DETAIL }));
-    const settings = within(document.querySelector<HTMLElement>('[data-panel-id="partSettings"]')!);
-    expect(settings.getByRole('button', { name: 'ワープを追加' })).toBeTruthy();
+    // 選択・変形ツールの間は出ない。パーツの設定にも無い
+    expect(shell.sectionEl()).toBeNull();
+    const settings = document.querySelector<HTMLElement>('[data-panel-id="partSettings"]')!;
+    expect(within(settings).queryByRole('button', { name: 'ワープを追加' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
+    const palette = document.querySelector<HTMLElement>('[data-panel-id="warp"]')!;
+    expect(palette.classList.contains('object')).toBe(true);
+    expect(palette.getAttribute('data-object')).toBe('tool');
+    expect(palette.parentElement!.firstElementChild).toBe(palette);
+    expect(within(palette).getByRole('button', { name: 'ワープを追加' })).toBeTruthy();
+    // ほかのツールにすると消える
+    fireEvent.click(screen.getByRole('button', { name: '選択・変形' }));
+    expect(document.querySelector('[data-panel-id="warp"]')).toBeNull();
   });
 
   it('グループでなければ案内、画像パーツの無いグループでは追加できない', async () => {
@@ -295,7 +309,6 @@ describe('ワープの追加・削除と Undo', () => {
 describe('ワープ編集ツール', () => {
   async function openWithWarp(group: Partial<Part> = {}, patch: Partial<Project['model']> = {}) {
     const shell = await open(testProject(group, { warps: [regularWarp()], ...patch }));
-    fireEvent.click(shell.section().getByRole('button', { name: 'ワープ編集ツールにする' }));
     expect(activeTool()).toBe('ワープ編集');
     return shell;
   }
@@ -431,15 +444,19 @@ describe('ワープ編集ツール', () => {
     expect(shell.store.get()).toBe(keyed);
   });
 
-  it('ワープの無いグループや画像パーツを選んでいるときは何も描かず、何も動かさない', async () => {
+  it('画像パーツを選んでいるときは格子を描かず、ドラッグしても制御点を動かさない（押した所のグループを選ぶ）', async () => {
     const shell = await openWithWarp();
     act(() => shell.services.editor.set({ selectedPartIds: ['a'] }));
     const ctx = new RecordingContext();
     warpEditor.tool.drawOverlay!(ctx.asContext(), shell.canvas.getState().view);
-    expect(ctx.calls).toEqual([]);
+    expect(ctx.named('arc')).toEqual([]);
+    expect(ctx.named('moveTo')).toEqual([]);
+    expect(ctx.texts.join('')).toMatch(/画像を含むグループを選ぶ/);
     const before = shell.store.get();
-    shell.ptr.drag({ x: 500, y: 500 }, { x: 540, y: 520 });
+    // a の中（300,400）から押してドラッグする
+    shell.ptr.drag({ x: 300, y: 400 }, { x: 340, y: 420 });
     expect(shell.store.get()).toBe(before);
+    expect(shell.services.editor.get().selectedPartIds).toEqual(['g']);
     expect(WARP_TOOL_ID).toBe('modeling.warp');
   });
 });

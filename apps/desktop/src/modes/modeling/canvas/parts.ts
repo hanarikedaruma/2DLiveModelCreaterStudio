@@ -5,6 +5,7 @@ import {
   IDENTITY,
   applyAffine,
   boxFrame,
+  hitTestItems,
   itemPoints,
   multiply,
   poseMatrix,
@@ -47,6 +48,11 @@ export function isLockedDeep(model: Model, partId: string): boolean {
   const part = partById(model, partId);
   if (!part) return true;
   return part.locked || ancestorsOf(model, partId).some((p) => p.locked);
+}
+
+// キャンバスの点にある、ロックしていない画像パーツ（手前から最初に当たるもの）
+export function imagePartAt(model: Model, deformed: DeformedModel, p: Vec2): string | null {
+  return hitTestItems(deformed, p, (id) => !isLockedDeep(model, id));
 }
 
 // 自身と子孫のうち画像パーツの id

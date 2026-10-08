@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createEmptyProject, type Binding, type Part, type Project, type Vec2, type Warp } from '@app/schema';
 import { emptyDeltas } from '@app/contracts';
@@ -83,8 +83,7 @@ async function open(project = projectWithWarp()) {
   await waitFor(() => expect(shell.canvas.lastDeformed()?.items).toHaveLength(1));
   await waitFor(() => expect(shell.canvas.getState().view.scale).toBeCloseTo(0.54));
   act(() => shell.services.editor.set({ selectedPartIds: ['a'] }));
-  const panel = within(document.querySelector<HTMLElement>('[data-panel-id="mesh"]')!);
-  fireEvent.click(panel.getByRole('button', { name: 'メッシュ編集ツールにする' }));
+  fireEvent.click(screen.getByRole('button', { name: 'メッシュ編集' }));
   const store = shell.services.store as ProjectStoreWithHistory;
   const mesh = () => store.get().model.meshes[0]!;
   const positions = () => {

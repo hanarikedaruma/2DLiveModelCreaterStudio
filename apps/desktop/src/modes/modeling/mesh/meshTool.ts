@@ -8,12 +8,13 @@ import type { EnvSlot, ToolEnv } from '../canvas/env';
 import { applyAffine, distance, hitTestItems, invert, itemPoints, pointInTriangle } from '../canvas/geometry';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
-import { isLockedDeep, paramValuesOf, partById, partMatrix } from '../canvas/parts';
+import { imagePartAt, isLockedDeep, paramValuesOf, partById, partMatrix } from '../canvas/parts';
 import { addVertex, markEditedIfChanged, remeshCommand, removeVertices } from './meshOps';
 import { densityOf, generateShape, regenerateOutcome, reshapeWithTransfer, type ReshapeOutcome } from './remesh';
 import { createMeshDragMapper, meshLocalPositions, type MeshMove } from './meshDrag';
 
 export const MESH_TOOL_ID = 'modeling.mesh';
+export const MESH_PICK_PROMPT = 'メッシュを編集する画像パーツを、キャンバスでクリックして選ぶ';
 
 export const VERTEX_RADIUS = 7; // 画面のピクセル
 export const DOUBLE_CLICK_MS = 400;
@@ -288,10 +289,22 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
     };
   };
 
+  // 頂点とパーツの選択を外し、対象を選ぶ段に戻る
+  const deselectPart = (env: ToolEnv) => {
+    select(null, []);
+    if (env.services.editor.get().selectedPartIds.length > 0) env.services.editor.set({ selectedPartIds: [] });
+  };
+
   const tool: CanvasTool = {
     id: MESH_TOOL_ID,
     label: 'メッシュ編集',
     cursor: 'crosshair',
+    // 画像パーツを選ぶまでは、枠が案内とクリックでの選択を受け持つ
+    target: {
+      prompt: MESH_PICK_PROMPT,
+      has: (project, editor) => meshTarget(project.model, editor.selectedPartIds) !== null,
+      pick: (project, deformed, p) => imagePartAt(project.model, deformed, p),
+    },
 
     onPointerDown(e) {
       if (e.button !== 0) return;
@@ -385,6 +398,7 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
         return;
       }
       // クリック: 選択を外す。メッシュの外で別のパーツを押したら、そのパーツに切り替える
+      const hadVertices = selectedOf(mesh).length > 0;
       if (!current.shift) select(mesh?.id ?? null, []);
       if (mesh && points && meshContains(points, mesh, e.canvasPoint)) return;
       const deformed = env.lastDeformed();
@@ -394,7 +408,21 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
         env.services.editor.set({ selectedPartIds: [other] });
         select(null, []);
         lastClick = null;
+        return;
       }
+      // 何も無い所: 1回目は頂点の選択だけを外し、頂点を選んでいなければパーツの選択も外す
+      if (!other && !current.shift && !hadVertices) {
+        deselectPart(env);
+        lastClick = null;
+      }
+    },
+
+    onContextClick() {
+      const env = slot.get();
+      if (!env || (drag?.kind === 'vertices' && drag.keyed.active())) return;
+      drag = null;
+      lastClick = null;
+      deselectPart(env);
     },
 
     onKeyDown(e) {
@@ -404,8 +432,10 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
         e.preventDefault();
         void deleteSelected();
       } else if (e.key === 'Escape') {
+        // 1回目は頂点の選択を外し、頂点を選んでいなければパーツの選択を外す
         if (drag?.kind === 'vertices' && drag.keyed.active()) drag.keyed.cancel();
-        else select(selection.get().meshId, []);
+        else if (selectedOf(snapshot(env).mesh).length > 0) select(selection.get().meshId, []);
+        else deselectPart(env);
         drag = null;
       }
     },

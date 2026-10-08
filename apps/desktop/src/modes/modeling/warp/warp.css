@@ -1,14 +1,9 @@
-/* ワープのセクション（カード29） */
+/* ワープのパレット（カード29） */
 
 .warp-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.warp-heading {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
 }
 .warp-divisions {
   display: flex;
@@ -34,6 +29,43 @@
   color: var(--text-dim);
   font-size: 12px;
 }
-.warp-activate {
-  align-self: flex-start;
+/* 手順 ①②③（ワープのパレット）。いまの段を強調し、済んだ段に ✓ */
+.warp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.warp-step {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  border-left: 3px solid var(--border);
+  border-radius: 2px;
+}
+.warp-step.current {
+  border-left-color: var(--accent);
+  background: var(--bg-raised);
+}
+.warp-step.todo .warp-step-title {
+  color: var(--text-dim);
+}
+.warp-step-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+.warp-step-done {
+  color: var(--accent);
+}
+.warp-guide {
+  color: var(--text);
+}
+.warp-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
 }

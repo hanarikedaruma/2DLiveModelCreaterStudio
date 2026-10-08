@@ -77,7 +77,7 @@ export async function redrawn(canvas: CanvasController, check: (m: DeformedModel
   });
 }
 
-type Extra = { shiftKey?: boolean; altKey?: boolean; ctrlKey?: boolean };
+type Extra = { shiftKey?: boolean; altKey?: boolean; ctrlKey?: boolean; button?: number };
 
 // キャンバス座標で pointer を操作する
 export function pointer(canvas: CanvasController) {
@@ -98,6 +98,15 @@ export function pointer(canvas: CanvasController) {
     click(p: Vec2, extra?: Extra) {
       fire('down', p, extra);
       fire('up', p, extra);
+    },
+    // 右クリック（動かさずに離す）
+    rightClick(p: Vec2, extra?: Extra) {
+      fire('down', p, { ...extra, button: 2 });
+      fire('up', p, { ...extra, button: 2 });
+    },
+    // マウスのボタンを押さずに動かす（対象を選ぶ段の点線の囲み）
+    hover(p: Vec2) {
+      fire('move', p);
     },
     // from から to へ、steps 回に分けて動かす。points を渡すとその点を通る
     drag(from: Vec2, to: Vec2, extra?: Extra, steps = 4, through: Vec2[] = []) {

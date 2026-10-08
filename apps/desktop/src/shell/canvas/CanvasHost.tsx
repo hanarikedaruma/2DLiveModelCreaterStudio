@@ -1,13 +1,21 @@
 // モデリングの中央のキャンバス。services の evaluator → pipeline → renderer で
 // EditorState.editorParamValues の状態を描き、拡大縮小・移動・ツールへの pointer の受け渡しをする
 import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
-import type { Model, Vec2 } from '@app/schema';
-import type { DeformedModel, ParamValues, Renderer } from '@app/contracts';
-import { useCanvas, useEditor, useProject, type CanvasPointerEvent, type CanvasTool } from '../api';
+import type { Model, Project, Vec2 } from '@app/schema';
+import type { DeformedModel, EditorState, ParamValues, Renderer, ViewTransform } from '@app/contracts';
+import {
+  useCanvas,
+  useEditor,
+  useProject,
+  type CanvasPointerEvent,
+  type CanvasTool,
+  type CanvasToolTarget,
+} from '../api';
 import { useShell } from '../context';
 import { isTypingTarget } from '../keys';
 import { registry, visibleAt } from '../registry';
-import { boundsOf, fitRect, pan, zoomAt, type Rect } from './view';
+import { drawCanvasBanner, drawPickOutline } from './banner';
+import { boundsOf, canvasToScreen, fitRect, pan, zoomAt, type Rect } from './view';
 
 // 無いパラメータはデフォルト値
 export function paramValuesFor(model: Model, editorValues: ParamValues): ParamValues {
@@ -17,6 +25,45 @@ export function paramValuesFor(model: Model, editorValues: ParamValues): ParamVa
 }
 
 const WHEEL_ZOOM = 0.0015;
+const CONTEXT_CLICK_SLOP = 4; // 右ボタンをこれより動かして離したら、右クリックとみなさない（画面のピクセル）
+
+// 対象の要るツールで、まだ対象を選んでいない（枠が「対象を選ぶ段」を受け持つ）
+export function pickingTarget(
+  tool: CanvasTool | undefined,
+  project: Project,
+  editor: EditorState,
+): CanvasToolTarget | null {
+  return tool?.target && !tool.target.has(project, editor) ? tool.target : null;
+}
+
+// パーツ自身と子孫の、変形後の頂点の外接矩形（画面座標）
+function outlineOf(
+  model: Model,
+  deformed: DeformedModel,
+  view: ViewTransform,
+  partId: string,
+): { min: Vec2; max: Vec2 } | null {
+  const parentOf = new Map(model.parts.map((p) => [p.id, p.parentId]));
+  const inside = (id: string) => {
+    let at: string | null | undefined = id;
+    for (let n = 0; at && n < 64; n++) {
+      if (at === partId) return true;
+      at = parentOf.get(at);
+    }
+    return false;
+  };
+  let min = { x: Infinity, y: Infinity };
+  let max = { x: -Infinity, y: -Infinity };
+  for (const item of deformed.items) {
+    if (!inside(item.partId)) continue;
+    for (let k = 0; k + 1 < item.positions.length; k += 2) {
+      const p = canvasToScreen(view, { x: item.positions[k]!, y: item.positions[k + 1]! });
+      min = { x: Math.min(min.x, p.x), y: Math.min(min.y, p.y) };
+      max = { x: Math.max(max.x, p.x), y: Math.max(max.y, p.y) };
+    }
+  }
+  return min.x <= max.x && min.y <= max.y ? { min, max } : null;
+}
 
 // 押されていない pointer の id だと例外になる（合成したイベントなど）。取れなくても続ける
 function capture(el: Element, pointerId: number, on: boolean) {
@@ -47,12 +94,18 @@ export function CanvasHost() {
   const scheduledRef = useRef(false);
   const spaceRef = useRef(false);
   const panRef = useRef<{ pointerId: number; start: Vec2; view: typeof view } | null>(null);
+  const rightRef = useRef<{ pointerId: number; start: Vec2; moved: boolean } | null>(null);
+  const pickRef = useRef<number | null>(null); // 対象を選ぶ段で押している pointer（ツールへは渡さない）
+  const hoverRef = useRef<Vec2 | null>(null); // 最後のマウスの位置（キャンバス座標）
   const fittedRef = useRef<string | null>(null);
 
   const activeTool: CanvasTool | undefined = snapshot.tools.find((t) => t.id === activeToolId);
   // 今のかんたん/詳細で出すツール（I-008）
   const uiLevel = editor.uiLevel[editor.mode];
   const tools = snapshot.tools.filter((t) => visibleAt(t.level, uiLevel));
+  // パーツ専用のツール（toolbar: false）はパレットのボタンから切り替えるので、ツールバーには出さない
+  const toolbarTools = tools.filter((t) => t.toolbar !== false);
+  const picking = pickingTarget(activeTool, project, editor) !== null;
 
   // 描くときは最新の値を使う
   const latest = useRef({ project, editor, snapshot, activeTool });
@@ -90,7 +143,16 @@ export function CanvasHost() {
       o.draw(ctx, currentView);
       ctx.restore();
     }
-    if (activeTool?.drawOverlay) {
+    const target = pickingTarget(activeTool, project, editor);
+    if (target) {
+      // 対象を選ぶ段: マウスの下で選べるものを点線で囲み、次の手順の帯を出す。ツールの重ね描きはしない
+      const hover = hoverRef.current;
+      const picked = hover ? target.pick(project, cache.deformed, hover) : null;
+      const outline = picked ? outlineOf(project.model, cache.deformed, currentView, picked) : null;
+      const name = picked ? project.model.parts.find((p) => p.id === picked)?.name : undefined;
+      if (outline && name !== undefined) drawPickOutline(ctx, outline.min, outline.max, name);
+      drawCanvasBanner(ctx, target.prompt);
+    } else if (activeTool?.drawOverlay) {
       ctx.save();
       activeTool.drawOverlay(ctx, currentView);
       ctx.restore();
@@ -244,6 +306,12 @@ export function CanvasHost() {
     };
   };
 
+  // 右クリック: ツールに任せる。任せる先が無ければパーツの選択を外す
+  const contextClick = (e: CanvasPointerEvent) => {
+    if (activeTool?.onContextClick) activeTool.onContextClick(e);
+    else if (services.editor.get().selectedPartIds.length > 0) services.editor.set({ selectedPartIds: [] });
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     containerRef.current?.focus({ preventScroll: true });
     capture(e.currentTarget, e.pointerId, true);
@@ -256,7 +324,23 @@ export function CanvasHost() {
       };
       return;
     }
-    activeTool?.onPointerDown?.(toCanvasEvent(e));
+    if (e.button === 2) {
+      rightRef.current = { pointerId: e.pointerId, start: { x: e.clientX, y: e.clientY }, moved: false };
+      return;
+    }
+    const event = toCanvasEvent(e);
+    hoverRef.current = event.canvasPoint;
+    const target = pickingTarget(activeTool, services.store.get(), services.editor.get());
+    if (target) {
+      // 対象を選ぶ段: 押した所の選べるものを選ぶ。離すまでの操作はツールへ渡さない
+      pickRef.current = e.pointerId;
+      const deformed = controller.lastDeformed();
+      const picked = e.button === 0 && deformed ? target.pick(services.store.get(), deformed, event.canvasPoint) : null;
+      if (picked) services.editor.set({ selectedPartIds: [picked] });
+      requestDraw();
+      return;
+    }
+    activeTool?.onPointerDown?.(event);
     requestDraw(); // ツールのオーバーレイが変わったかもしれない
   };
 
@@ -266,8 +350,20 @@ export function CanvasHost() {
       controller.setView(pan(p.view, { x: e.clientX - p.start.x, y: e.clientY - p.start.y }));
       return;
     }
+    const r = rightRef.current;
+    if (r && r.pointerId === e.pointerId) {
+      if (Math.hypot(e.clientX - r.start.x, e.clientY - r.start.y) >= CONTEXT_CLICK_SLOP) r.moved = true;
+      return;
+    }
+    const event = toCanvasEvent(e);
+    hoverRef.current = event.canvasPoint;
+    if (pickRef.current === e.pointerId) return;
+    if (pickingTarget(activeTool, services.store.get(), services.editor.get())) {
+      requestDraw(); // 点線の囲みを、マウスの下のものに合わせる
+      return;
+    }
     if (!activeTool?.onPointerMove) return;
-    activeTool.onPointerMove(toCanvasEvent(e));
+    activeTool.onPointerMove(event);
     requestDraw();
   };
 
@@ -277,6 +373,18 @@ export function CanvasHost() {
       panRef.current = null;
       return;
     }
+    const r = rightRef.current;
+    if (r && r.pointerId === e.pointerId) {
+      rightRef.current = null;
+      if (!r.moved && e.type !== 'pointercancel') contextClick(toCanvasEvent(e));
+      requestDraw();
+      return;
+    }
+    if (pickRef.current === e.pointerId) {
+      pickRef.current = null;
+      requestDraw();
+      return;
+    }
     activeTool?.onPointerUp?.(toCanvasEvent(e));
     requestDraw();
   };
@@ -284,7 +392,7 @@ export function CanvasHost() {
   return (
     <div className="canvas-host">
       <div className="canvas-toolbar" role="toolbar" aria-label="キャンバスのツール">
-        {tools.map((tool) => (
+        {toolbarTools.map((tool) => (
           <button
             key={tool.id}
             type="button"
@@ -319,7 +427,7 @@ export function CanvasHost() {
           ref={overlayRef}
           className="canvas-overlay"
           data-testid="canvas-overlay"
-          style={{ cursor: activeTool?.cursor }}
+          style={{ cursor: picking ? 'pointer' : activeTool?.cursor }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}

@@ -213,7 +213,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function open(initial: Project, select: string[]) {
+// 詳細モードで開き、tool なら（既定）ワープ編集ツールにする。ワープのパレットはそのツールのときだけ出る
+async function open(initial: Project, select: string[], tool = true) {
   const spy = generatorSpy();
   const shell = renderShell(() => ({
     pipeline: createDeformPipeline(),
@@ -225,6 +226,7 @@ async function open(initial: Project, select: string[]) {
   await waitFor(() => expect(shell.canvas.lastDeformed()?.items.length).toBe(4));
   await waitFor(() => expect(shell.canvas.getState().view.scale).toBeCloseTo(0.54));
   act(() => shell.services.editor.set({ selectedPartIds: select, uiLevel: DETAIL }));
+  if (tool) fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
   const store = shell.services.store as ProjectStoreWithHistory;
   const section = () => within(document.querySelector<HTMLElement>('[data-section-id="modeling.warp"]')!);
   const notes = () =>
@@ -350,7 +352,7 @@ describe('カード60: ワープのツールを選んだときの案内', () => 
     const ctx = new OverlayContext();
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(((type: string) =>
       type === '2d' ? ctx.asContext() : null) as unknown as HTMLCanvasElement['getContext']);
-    const shell = await open(project(), ['a', 'b']);
+    const shell = await open(project(), ['a', 'b'], false);
     // 選択・変形ツールの間はワープの案内を描かない
     expect(activeTool()).not.toBe('ワープ編集');
     await waitFor(() => expect(ctx.frames).toBeGreaterThan(0));
@@ -396,7 +398,6 @@ describe('カード60: ワープのツールを選んだときの案内', () => 
     // 体の格子は腕のまわりだけ（袖は範囲の外）
     const small = editedWarp('w', 'g', { x: 190, y: 290, width: 220, height: 220 }, 4, 4, 0);
     const shell = await open(project({ warps: [headWarp(), small], bindings: [headBinding()] }), ['g']);
-    fireEvent.click(shell.section().getByRole('button', { name: 'ワープ編集ツールにする' }));
     expect(activeTool()).toBe('ワープ編集');
     // 範囲の外を知らせる注意だけで、ツールの案内は無い
     expect(shell.notes()).toHaveLength(1);
@@ -427,9 +428,8 @@ describe('カード60: ワープのツールを選んだときの案内', () => 
 // ---- 追加から制御点の編集・キー・Undo ----
 
 describe('カード60: 「ワープを追加」からそのまま制御点の編集に入る', () => {
-  it('選択ツールのまま追加すると、ワープ編集ツールになり、対象・格子の大きさ・選んだ制御点の数を出し、そのまま制御点を動かせる', async () => {
+  it('ワープ編集ツールで追加すると、ツールのまま対象・格子の大きさ・選んだ制御点の数を出し、そのまま制御点を動かせる', async () => {
     const shell = await open(project(), ['g']);
-    expect(activeTool()).not.toBe('ワープ編集');
     fireEvent.change(shell.section().getByRole('combobox', { name: '横の分割' }), { target: { value: '5' } });
     fireEvent.change(shell.section().getByRole('combobox', { name: '縦の分割' }), { target: { value: '3' } });
     fireEvent.click(shell.section().getByRole('button', { name: 'ワープを追加' }));
@@ -543,7 +543,6 @@ describe('カード60: 既存のワープのキーを作り直さない', () => 
     // キーのあるワープを選んでツールにしても何も変えない
     expect(shell.section().getByTestId('warp-info').textContent).toBe('格子 2×2（制御点 9）');
     expect(shell.section().queryByRole('button', { name: 'ワープを追加' })).toBeNull();
-    fireEvent.click(shell.section().getByRole('button', { name: 'ワープ編集ツールにする' }));
     expect(shell.store.get()).toBe(initial);
 
     act(() => shell.services.editor.set({ selectedPartIds: ['g'] }));

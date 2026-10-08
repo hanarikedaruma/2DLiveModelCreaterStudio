@@ -1,8 +1,8 @@
 // ワープの追加・削除のコマンドと、追加するときの格子の計算（カード29）。計算は純粋関数
 import { newId, type Model, type Part, type Project, type Vec2, type Warp } from '@app/schema';
 import type { Command, TargetDeltas } from '@app/contracts';
-import { pointsToAncestorSpace, refitWarp, regularWarpPoints } from '@app/core';
-import { imageDescendants, partById } from '../canvas/parts';
+import { isUsableWarp, pointsToAncestorSpace, refitWarp, regularWarpPoints } from '@app/core';
+import { ancestorsOf, imageDescendants, partById } from '../canvas/parts';
 
 export const WARP_DIVISIONS = { min: 2, max: 8, initial: 4 } as const;
 export const WARP_MARGIN = 0.05; // 子の外接矩形のまわりに足す余白（幅・高さに対する割合、各辺）
@@ -29,6 +29,41 @@ export function warpOfPart(model: Model, partId: string): Warp | undefined {
 export function groupPart(model: Model, partId: string | undefined): Part | null {
   const part = partId === undefined ? undefined : partById(model, partId);
   return part?.kind === 'group' ? part : null;
+}
+
+const hasUsableWarp = (model: Model, partId: string) => {
+  const warp = warpOfPart(model, partId);
+  return !!warp && isUsableWarp(warp);
+};
+
+// キャンバスで押した画像パーツから、ワープの対象に選ぶもの。格子の付いたいちばん近い祖先のグループ、
+// どの祖先にも格子が無ければいちばん近いグループ、グループに入っていなければその画像（グループを作る道を出す）
+export function pickWarpGroup(model: Model, imageId: string): string {
+  const groups = ancestorsOf(model, imageId).filter((p) => p.kind === 'group');
+  return (groups.find((g) => hasUsableWarp(model, g.id)) ?? groups[0])?.id ?? imageId;
+}
+
+export interface GroupChoice {
+  part: Part;
+  depth: number; // 字下げ（いちばん上の祖先が 0）
+  warp: boolean; // 格子が付いている
+}
+
+// 「対象を変える」の候補: 選んだグループの祖先（上から）、そのグループ、画像を含む一段下の子のグループ
+export function warpGroupChoices(project: Project, groupId: string): GroupChoice[] {
+  const model = project.model;
+  const group = groupPart(model, groupId);
+  if (!group) return [];
+  const chain = [...ancestorsOf(model, group.id).filter((p) => p.kind === 'group')].reverse();
+  const children = model.parts.filter(
+    (p) => p.parentId === group.id && p.kind === 'group' && imageDescendants(model, p.id).length > 0,
+  );
+  const choice = (part: Part, depth: number) => ({ part, depth, warp: hasUsableWarp(model, part.id) });
+  return [
+    ...chain.map((p, i) => choice(p, i)),
+    choice(group, chain.length),
+    ...children.map((p) => choice(p, chain.length + 1)),
+  ];
 }
 
 // 画像パーツの基準の形（メッシュがあれば頂点、無ければ素材の矩形の四隅）。どちらも無ければ空

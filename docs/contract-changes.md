@@ -21,6 +21,21 @@
 
 ## 記録
 
+### CC-012 オブジェクトパレット・見出しの説明・ツールの対象を選ぶ段（2026-10-08 CL、I-065）
+
+- 決めた日 / ステップ: 2026-10-08 / ユーザーの要望によるモデリングのツールとパレットの整理（[設計](modeling-palette-design.md)の D1〜D5 をユーザーが承認。CO は設計書を読む）
+- 対象の契約: アプリの枠の差し込み口（apps/desktop/src/shell/api.ts）の PanelDef と CanvasTool（カード05。CanvasTool は CC-001 の後）
+- 変更前: `PanelDef { id; mode; area; title; order?; level?; component }`、`CanvasTool { id; label; cursor?; level?; onPointerDown?; onPointerMove?; onPointerUp?; onKeyDown?; drawOverlay? }`
+- 変更後（どれも省略できる項目の追加）:
+  - `PanelDef.object?: { kind: 'tool' | 'part'; when(context: PanelContext): boolean }`（`PanelContext = { project; editor; activeToolId }`）。指定したパネルはオブジェクトパレットになり、when が true の間だけ列のいちばん上（ツール → パーツの順）に、色付きの見出しと札で出る。省略は今までどおりの共通パレット
+  - `PanelDef.info?: { purpose: string; steps: string[] }`。見出しの ⓘ で目的と流れを出す
+  - `CanvasTool.toolbar?: boolean`。false ならツールバーにボタンを出さない（パレットのボタンから切り替えるツール）
+  - `CanvasTool.target?: { prompt; has(project, editor); pick(project, deformed, point) }`。対象が無い間は枠が案内の帯・選べるものの点線の囲み・クリックでの選択を受け持ち、ツールへは押す操作も重ね描きも渡さない
+  - `CanvasTool.onContextClick?(e)`。右クリック（動かさずに離したとき）。省略するとパーツの選択を外す
+- 理由: 使っていないツールの設定のパネルが常に出て列が窮屈になり、目専用のツールが共通のツールバーにあって何にでも使えるように見えた。ワープ・流れ線はツールを選んでもキャンバスで対象を選べず、メッシュは誤って押したパーツから戻りにくかった（I-065）
+- 影響するカード: PanelDef・CanvasTool を前提に載せるカード。省略できる項目の追加なので、今の登録はそのまま動く。カード99 の後続（[髪の慣性・肩との接触](step4/hair-dynamics-design.md)）は、この差し込み口を使う
+- 移行: 枠（Layout.tsx・CanvasHost.tsx・shell.css・canvas/banner.ts）。登録を変えたもの: メッシュ（ツールのパレット）、流れ線（ツールのパレット、カード99 の登録だけ）、ワープ（パーツの設定の節から、ツールのときだけ出る「ワープ」のパレットへ）、閉じた目の線（目のパーツのパレット、ツールバーから外す）。テスト: objectPalette.test.tsx・toolTarget.test.tsx ほか（docs/status.md）
+
 ### CC-011 流れ線と重力追従の保存・変形結果（カード99、2026-10-08 CO）
 
 - ユーザーの実装指示による先行実装。ほかの契約カードと同時には進めない。

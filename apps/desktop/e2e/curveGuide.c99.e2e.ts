@@ -109,8 +109,10 @@ describe('カード99: 一本の流れ線で髪を曲げる', () => {
         s.store.load(project);
         s.editor.set({ mode: 'modeling', selectedPartIds: ['hair'], activeParameterIds: [], editorParamValues: {} });
       }, hairProject());
+      // 流れ線のパレットは、線で曲げるツールのときだけ出る（ツールのパレット。docs/modeling-palette-design.md）
+      await page.getByRole('button', { name: '線で曲げる', exact: true }).click();
       const panel = page.locator('[data-panel-id="curveGuide"]');
-      const toggle = panel.locator('.panel-title button');
+      const toggle = panel.locator('.panel-title .panel-toggle');
       if ((await toggle.getAttribute('aria-expanded')) === 'false') await toggle.click();
       await page.getByRole('button', { name: '全体を表示', exact: true }).click();
       await panel.getByRole('button', { name: '流れ線を描く', exact: true }).click();

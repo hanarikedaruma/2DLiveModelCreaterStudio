@@ -10,7 +10,14 @@
   color: var(--text-dim);
   font-size: 12px;
 }
-.closed-line-now {
+.closed-line-now,
+.closed-line-apply {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.closed-line-now .closed-line-hint {
   color: var(--accent);
 }
 .closed-line-list {

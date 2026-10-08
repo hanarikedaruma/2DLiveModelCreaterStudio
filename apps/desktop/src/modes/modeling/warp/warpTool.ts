@@ -1,18 +1,20 @@
 // ワープ編集ツール（カード29）。選択中のグループのワープの格子を変形後の位置に描き、
-// 制御点のドラッグを KeyEditor の pointsEdit（{kind: 'warp'}）で基準状態かキーに記録する
+// 制御点のドラッグを KeyEditor の pointsEdit（{kind: 'warp'}）で基準状態かキーに記録する。
+// グループを選ぶまでは、枠が案内の帯とクリックでの選択を受け持つ（target）
 import type { Model, Part, Vec2, Warp } from '@app/schema';
-import type { TargetDeltas } from '@app/contracts';
+import type { DeformedModel, TargetDeltas, ViewTransform } from '@app/contracts';
 import { isUsableWarp, pointsToModelSpace } from '@app/core';
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
+import { drawCanvasBanner, drawPickOutline } from '../../../shell/canvas/banner';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
 import { applyLinear, distance, invert, type Affine } from '../canvas/geometry';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
-import { paramValuesOf, partById } from '../canvas/parts';
+import { ancestorsOf, imagePartAt, paramValuesOf, partById } from '../canvas/parts';
 import { nearestVertex, verticesInRect } from '../mesh/meshTool';
-import { warpOfPart } from './warpOps';
-import { warpGuide } from './warpGuide';
+import { groupPart, pickWarpGroup, warpOfPart } from './warpOps';
+import { WARP_PICK_PROMPT, warpGuide } from './warpGuide';
 
 export const WARP_TOOL_ID = 'modeling.warp';
 
@@ -104,6 +106,34 @@ export function canvasToWarpLinear(
     const ey = mapped[n * 3 + 2]!;
     return invert({ a: (ex.x - o.x) / h, b: (ex.y - o.y) / h, c: (ey.x - o.x) / h, d: (ey.y - o.y) / h, e: 0, f: 0 });
   });
+}
+
+// グループを選んでいる（1つだけ）、または格子の付いたグループを選んでいる。対象を選ぶ段かを決める
+export function hasWarpGroup(model: Model, selectedIds: string[]): boolean {
+  return (
+    warpTarget(model, selectedIds) !== null || (selectedIds.length === 1 && groupPart(model, selectedIds[0]) !== null)
+  );
+}
+
+// 選んでいるグループの子孫の画像の、変形後の外接矩形（画面座標）
+function groupOutline(
+  model: Model,
+  deformed: DeformedModel | null,
+  view: ViewTransform,
+  groupId: string,
+): { min: Vec2; max: Vec2 } | null {
+  if (!deformed) return null;
+  let min = { x: Infinity, y: Infinity };
+  let max = { x: -Infinity, y: -Infinity };
+  for (const item of deformed.items) {
+    if (item.partId !== groupId && !ancestorsOf(model, item.partId).some((p) => p.id === groupId)) continue;
+    for (let k = 0; k + 1 < item.positions.length; k += 2) {
+      const p = canvasToScreen(view, { x: item.positions[k]!, y: item.positions[k + 1]! });
+      min = { x: Math.min(min.x, p.x), y: Math.min(min.y, p.y) };
+      max = { x: Math.max(max.x, p.x), y: Math.max(max.y, p.y) };
+    }
+  }
+  return min.x <= max.x ? { min, max } : null;
 }
 
 // ---- 制御点の選択 ----
@@ -216,11 +246,25 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
     };
   };
 
+  // 制御点とグループの選択を外し、グループを選ぶ段に戻る
+  const deselectGroup = (env: ToolEnv) => {
+    select(null, []);
+    if (env.services.editor.get().selectedPartIds.length > 0) env.services.editor.set({ selectedPartIds: [] });
+  };
+
   const tool: CanvasTool = {
     id: WARP_TOOL_ID,
     label: 'ワープ編集',
-    level: 'detail', // ワープのセクションと同じく詳細でだけ出す（I-008）
+    level: 'detail', // ワープのパレットと同じく詳細でだけ出す（I-008）
     cursor: 'crosshair',
+    target: {
+      prompt: WARP_PICK_PROMPT,
+      has: (project, editor) => hasWarpGroup(project.model, editor.selectedPartIds),
+      pick: (project, deformed, p) => {
+        const hit = imagePartAt(project.model, deformed, p);
+        return hit ? pickWarpGroup(project.model, hit) : null;
+      },
+    },
 
     onPointerDown(e) {
       if (e.button !== 0) return;
@@ -290,22 +334,49 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       }
       drag = null;
       if (!env) return;
-      const { target, points } = snapshot(env);
-      if (!target || !points) return;
+      const { project, editor, target, points } = snapshot(env);
       if (current.moved) {
+        if (!target || !points) return;
         const inside = verticesInRect(points, current.start, e.canvasPoint);
         const base = current.shift ? selectedOf(target.warp) : [];
         select(target.warp.id, [...new Set([...base, ...inside])]);
         return;
       }
-      // クリック: 選択を外す
-      if (!current.shift) select(target.warp.id, []);
+      if (current.shift) return;
+      // クリック: 制御点の選択を外す。選んでいるグループの外のパーツを押したら、そのグループに切り替える
+      const hadPoints = target ? selectedOf(target.warp).length > 0 : false;
+      select(target?.warp.id ?? null, []);
+      const model = project.model;
+      const deformed = env.lastDeformed();
+      const hit = deformed ? imagePartAt(model, deformed, e.canvasPoint) : null;
+      const groupId = target?.part.id ?? (editor.selectedPartIds.length === 1 ? editor.selectedPartIds[0] : undefined);
+      if (hit) {
+        const inside = groupId !== undefined && ancestorsOf(model, hit).some((p) => p.id === groupId);
+        const next = pickWarpGroup(model, hit);
+        if (!inside && next !== groupId) {
+          env.services.editor.set({ selectedPartIds: [next] });
+          select(null, []);
+        }
+        return;
+      }
+      // 何も無い所: 1回目は制御点の選択だけを外し、制御点を選んでいなければグループの選択も外す
+      if (!hadPoints) deselectGroup(env);
+    },
+
+    onContextClick() {
+      const env = slot.get();
+      if (!env || (drag?.kind === 'points' && drag.keyed.active())) return;
+      drag = null;
+      deselectGroup(env);
     },
 
     onKeyDown(e) {
       if (e.key !== 'Escape') return;
+      const env = slot.get();
+      // 1回目は制御点の選択を外し、制御点を選んでいなければグループの選択を外す
       if (drag?.kind === 'points' && drag.keyed.active()) drag.keyed.cancel();
-      else select(selection.get().warpId, []);
+      else if (selection.get().indices.length > 0) select(selection.get().warpId, []);
+      else if (env) deselectGroup(env);
       drag = null;
     },
 
@@ -316,25 +387,12 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       const { target, points } = snap;
       const accent = cssVar('--accent', '#5b8def');
       const guide = warpGuide(snap.project, snap.editor);
-      if (guide) {
-        ctx.save();
-        ctx.font = '12px sans-serif';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = cssVar('--text', '#eeeeee');
-        const width = Math.max(80, (ctx.canvas?.clientWidth || ctx.canvas?.width || 800) - 24);
-        let line = '';
-        let y = 12;
-        for (const char of guide) {
-          if (line && ctx.measureText(line + char).width > width) {
-            ctx.fillText(line, 12, y);
-            line = '';
-            y += 18;
-          }
-          line += char;
-        }
-        if (line) ctx.fillText(line, 12, y);
-        ctx.restore();
-      }
+      // 格子がまだ無いグループは、どのグループかが分かるように範囲を点線で囲む
+      const ids = snap.editor.selectedPartIds;
+      const group = !target && ids.length === 1 ? groupPart(snap.project.model, ids[0]) : null;
+      const outline = group ? groupOutline(snap.project.model, env.lastDeformed(), view, group.id) : null;
+      if (outline) drawPickOutline(ctx, outline.min, outline.max);
+      if (guide) drawCanvasBanner(ctx, guide);
       if (target && points) {
         const toScreen = (p: Vec2) => canvasToScreen(view, p);
         ctx.strokeStyle = accent;

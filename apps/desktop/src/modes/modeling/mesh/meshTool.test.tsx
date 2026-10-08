@@ -144,7 +144,8 @@ async function open(
   const torso = () => store.get().model.parts.find((p) => p.id === 'part-torso')!;
   const panel = () => within(document.querySelector<HTMLElement>('[data-panel-id="mesh"]')!);
   act(() => shell.services.editor.set({ selectedPartIds: ['part-torso'] }));
-  fireEvent.click(panel().getByRole('button', { name: 'メッシュ編集ツールにする' }));
+  // メッシュのパレットはメッシュ編集ツールのときだけ出る
+  fireEvent.click(screen.getByRole('button', { name: 'メッシュ編集' }));
   return { ...shell, store, mesh, torso, panel, ptr: pointer(shell.canvas) };
 }
 

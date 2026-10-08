@@ -836,3 +836,13 @@
 - 追加したNative/Edgeの確認は実PSDの再読込・左右反転の実コピー、Nativeの構文破損/スキーマ不正JSONの拒否/元モデル保持/保存。追加テストの不備（生成前の見本にはメッシュが無い、消した通知の位置が変わる）はテスト準備を直して再実行した。製品コードの追加修正は不要だった。
 - 生成物はprojects/とfixtures/scripts/build-desktop-character.tsだけをgit/整形/lint/型から除外。内容は保持し、既存fixturesの検査は維持した。
 - 17条件の結果と未確認の行き先: [acceptance-step3.md](acceptance-step3.md)。STEP3全体は未受け入れ。長時間（2時間）の耐久/メモリは対象外（今回）・未実施。起動中のインストール版を閉じず、本番ビルドはsrc-tauri/target/release/live2d-studio.exeに準備済み（差し替えは未実施）。
+
+### モデリングのツールとパレットの整理（I-065・2026-10-08・CL）
+
+ユーザーの要望を[設計](modeling-palette-design.md)にまとめ、D1〜D5 の承認（推奨案）の後に実装した。契約の変更は CC-012、課題は I-065、確認点は CH-179〜183・UC-CH-37。
+
+- 枠: パネルの `object`（ツール / パーツのオブジェクトパレット。条件に合う間だけ右の列の上に色付き・札付きで出す）と `info`（見出しの ⓘ）、ツールの `toolbar: false`・`target`（対象を選ぶ段の帯・点線の囲み・クリックでの選択）・`onContextClick`（右クリック。既定は選択を外す）。列は増やさず、キャンバスの寸法は変えない。
+- モデリング: 閉じた目の線は目のパーツを選んだときのパレット（ツールバーから外し「閉じた目の線をなぞる」に改名。選んだ側だけ・なぞり終えたら元のツール・［かんたんセットアップで反映］）。メッシュ・流れ線・ワープの設定はツールのときだけ出る。ワープは「パーツの設定」の節から「ワープ」のパレットへ移し、手順 ①②③ と［対象を変える］を出す。メッシュ・ワープは何も無い所のクリックと Esc で2段に外す。流れ線（カード99）はツールの処理を変えず、登録で条件・ⓘ・対象を選ぶ段を足した。
+- テスト: 追加は objectPalette.test.tsx・toolTarget.test.tsx・meshPalette.test.tsx・warpPalette.test.tsx・curvePalette.test.tsx・closedLine.test.ts（目の見分け）。表示の条件が変わったため、setupTools・meshTool・meshWarpEditing・warp・warp.c60（カード60）・Layout.c61（カード61）のテストと e2e の curveGuide.c99（先にツールを選ぶ）を直した。
+- 確認: `pnpm test`（10 パッケージ・2,422 件）、`pnpm typecheck`・`pnpm lint`・`pnpm format:check` が成功。Edge の開発サーバー（1440×1000・800×600）で操作し、オブジェクトパレットの有無でキャンバスの寸法が変わらない（880×921・240×506）ことを測った。Native の e2e と本番のアプリの入れ直しはしていない（e2e の curveGuide.c99 は型だけ確認）。
+- 未決定: パレットの子ウィンドウ化（設計書の「子ウィンドウ化の検討」）。パネルの高さ・幅の変更は I-064（別のセッション）。
