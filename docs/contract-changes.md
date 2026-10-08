@@ -27,6 +27,7 @@
 - `CurveGuide.dynamics?: { enabled; preset: 'soft' | 'normal' | 'firm'; strength: 0..1; damping: 0..1 }`。省略はOFF。schemaVersion 5、4→5は設定と既存の軸揺れ・キーをそのまま保ち、省略をOFFと解釈する。
 - ユーザーの追加指定に従い、`CurveGuide.collision?: { enabled; colliderIds: Id[]; thickness: 0.5..2 }`と`Model.shoulderColliders?: { id; name; partId; meshId; meshSignature; points: Vec2[2..8]; radius>0; enabled }[]`を追加。省略は衝突OFF、肩なし。衝突と慣性は独立。取付先が無い肩・指定は読込時に修復し、対応失効は描き直しのため保持する。
 - `HairContact/HairContacts`はフレームの取付済み肩と半幅。`HairDynamicsSession.advance`に省略できるcontactsを追加、連続判定の上限を`collisionUnresolved`で返す。`accept`で検査済みの線を履歴へ戻し、却下した線の速度は破棄する。`CurveGuideResult.collision`は`disabled / ok / limited / unresolved`、理由と肩ごとの診断を別に返す。
+- `HairContacts.margin?`は刻みの座標へ正規化した安全余白（通常0.25px）。`previousContacts`で前の検査済み49点と肩を参照し、メッシュの補正後も通過を検査する。`epoch`はセッションのresetで変わり、完成したフレームの再利用を失効する。未解決のフレームも同じframeIdで同じ完成形を返す。
 - `HairFrameEvaluator.evaluate(project, params, context?, session?)`は通常の変形と軸出力だけ0にした参照を準備し、重力→軸の対応→流れ揺れ→最終メッシュを評価する。`DeformPipeline.deform(model,deltas)`は履歴なしの既存互換として残す。新しい履歴は再生ごとの`HairDynamicsSession`に持ち、同一frameIdで二重更新しない。
 - `CurveGuideResult.dynamics?`は慣性の状態と停止理由を返す。毎刻みの線/速度はProjectStore・Undo・保存へ入れない。
 - 出力ウィンドウの`FrameMessage.positions?`へ完成した頂点（partId→number[]）を配送する。遅れた出力で物理を再計算せず、スタジオの同じ完成フレームを描く。省略時は従来の静止評価。

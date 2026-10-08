@@ -81,11 +81,13 @@ export interface HairContacts {
   margin?: number;
 }
 export interface HairDynamicsSession {
+  readonly epoch: number;
   reset(): void;
   retain(projectId: string, ids: string[]): void;
   discard(id: string): void;
   reject(id: string): void;
   accept(id: string, curve: Vec2[], along: number[]): void;
+  previousContacts(id: string): { curve: Vec2[]; contacts: HairContacts } | undefined;
   advance(
     id: string,
     rest: Vec2[],

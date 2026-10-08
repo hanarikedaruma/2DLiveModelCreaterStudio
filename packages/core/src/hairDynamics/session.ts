@@ -21,6 +21,7 @@ type State = {
   status: 'running' | 'settled';
   contacts?: HairContacts;
   collisionUnresolved: boolean;
+  previousContactFrame?: { curve: Point[]; contacts: HairContacts };
 };
 const H = 1 / 120;
 const copy = (p: Point): Point => ({ ...p });
@@ -38,9 +39,11 @@ function rotate(p: Point, angle: number): Point {
 
 // Histories belong to one playback, never to ProjectStore or a palette component.
 export class HairDynamicsSession implements SessionContract {
+  epoch = 0;
   private states = new Map<string, State>();
   private projectId: string | null = null;
   reset(): void {
+    this.epoch++;
     this.states.clear();
     this.projectId = null;
   }
@@ -125,6 +128,7 @@ export class HairDynamicsSession implements SessionContract {
       y: (p.y - current.origin.y) / current.scale,
     }));
     if (!frame.active) {
+      current.previousContactFrame = undefined;
       current.frozen = true;
       current.frameId = frame.frameId;
       return { curve: rest, status: 'frozen' };
@@ -143,7 +147,8 @@ export class HairDynamicsSession implements SessionContract {
       current.frameId = frame.frameId;
       return { curve: current.curve, status: 'running' };
     }
-    if (current.axisKey !== axisKey) {
+    const axisChanged = current.axisKey !== axisKey;
+    if (axisChanged) {
       for (let i = 0; i < q.length; i++) {
         const k = Math.min(i, q.length - 2);
         const oldAngle = Math.atan2(current.q[k + 1]!.y - current.q[k]!.y, current.q[k + 1]!.x - current.q[k]!.x);
@@ -178,6 +183,8 @@ export class HairDynamicsSession implements SessionContract {
       y: (p.y - current.origin.y) / current.scale,
     }));
     let steps = 0;
+    current.previousContactFrame =
+      !axisChanged && current.contacts ? { curve: current.curve.map(copy), contacts: current.contacts } : undefined;
     current.collisionUnresolved = false;
     while (current.simNow + H * 1000 <= frame.now + 1e-6 && steps++ < 8) {
       current.simNow += H * 1000;
@@ -235,6 +242,9 @@ export class HairDynamicsSession implements SessionContract {
   // A rejected mesh candidate must not leave velocity from the rejected line.
   reject(id: string): void {
     this.discard(id);
+  }
+  previousContacts(id: string) {
+    return this.states.get(id)?.previousContactFrame;
   }
   accept(id: string, curve: Point[], along: number[]): void {
     const state = this.states.get(id);

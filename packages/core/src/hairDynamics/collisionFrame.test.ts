@@ -214,6 +214,18 @@ describe('肩を含む共通フレーム', () => {
     expect(result.collision!.diagnostics![0]!.colliderId).toBe('s');
     expect(result.collision!.diagnostics![0]!.reason).toMatch(/描き直/);
   });
+  it('未解決のフレームも各出力へ同じ完成形を返し、セッションをリセットしたら再評価する', () => {
+    const { p, guide, frames } = fixture();
+    guide.radius = 3;
+    guide.dynamics = { enabled: true, preset: 'normal', strength: 0.5, damping: 0.2 };
+    const session = new HairDynamicsSession(),
+      context = { now: 0, dt: 0, frameId: 'shared', active: true };
+    const out = frames.evaluate(p, {}, context, session);
+    expect(out.curveGuides!.g!.collision!.status).toBe('unresolved');
+    expect(frames.evaluate(p, {}, { ...context, now: 2 }, session)).toBe(out);
+    session.reset();
+    expect(frames.evaluate(p, {}, context, session)).not.toBe(out);
+  });
   it('動く肩で慣性のフレームを進めても有限な完成形を共有し、重力OFFで接触だけを停止する', () => {
     const { p, guide, frames } = fixture(46);
     guide.dynamics = { enabled: true, preset: 'normal', strength: 0.5, damping: 0.2 };

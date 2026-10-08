@@ -4,6 +4,8 @@ import type {
   CurveGuideResult,
   DeformPipeline,
   HairFrameEvaluator,
+  HairDynamicsSession,
+  DeformedModel,
   ParamValues,
   TargetDeltas,
 } from '@app/contracts';
@@ -13,7 +15,7 @@ import {
   evaluateCurveGuide,
   transportCurveGuide,
 } from '../deform/curveGuide';
-import { contactsFit, solveStaticContacts } from './contact';
+import { contactsFit, projectContacts, solveStaticContacts } from './contact';
 import { evaluateShoulders, guideContacts, meshContactPenetration, meshContactsFit } from './colliders';
 
 // Producers have already advanced once. Reference evaluation never advances physics.
@@ -39,8 +41,32 @@ export function flowSwayReason(project: Pick<Project, 'model'>, guide: CurveGuid
   return undefined;
 }
 export function createHairFrameEvaluator(evaluator: BindingEvaluator, pipeline: DeformPipeline): HairFrameEvaluator {
+  const completed = new WeakMap<
+    HairDynamicsSession,
+    {
+      project: Project;
+      params: ParamValues;
+      frameId: string | number;
+      active: boolean;
+      epoch: number;
+      model: DeformedModel;
+    }
+  >();
   return {
     evaluate(project, params, context, session) {
+      if (session && context) {
+        const cached = completed.get(session);
+        if (
+          cached &&
+          cached.project === project &&
+          cached.frameId === context.frameId &&
+          cached.active === context.active &&
+          cached.epoch === session.epoch &&
+          Object.keys(cached.params).length === Object.keys(params).length &&
+          Object.entries(params).every(([id, value]) => cached.params[id] === value)
+        )
+          return cached.model;
+      }
       const guides = project.model.curveGuides ?? [];
       if (!guides.length) {
         session?.retain(project.id, []);
@@ -181,6 +207,20 @@ export function createHairFrameEvaluator(evaluator: BindingEvaluator, pipeline: 
           firstCandidate = true;
           evaluated = run();
         }
+        if (collisionActive && contacts && session && context?.active) {
+          const previous = session.previousContacts(guide.id);
+          if (previous) {
+            // Length/mesh feedback can also move the 49-point line. Recheck that
+            // completed line against the moving shoulder, beyond the 12-node sweep.
+            const projected = projectContacts(
+              evaluated.result.curve.map((p) => ({ ...p })),
+              fixed,
+              { ...contacts, margin: 0 },
+              previous,
+            );
+            if (projected.changed || projected.exhausted) contactSolved = false;
+          }
+        }
         if (
           guide.dynamics?.enabled &&
           (evaluated.result.status === 'stale' || evaluated.result.status === 'disabled' || failure)
@@ -238,7 +278,17 @@ export function createHairFrameEvaluator(evaluator: BindingEvaluator, pipeline: 
         item.positions = evaluated.positions;
         results[guide.id] = result;
       }
-      return { ...actual, curveGuides: results };
+      const model = { ...actual, curveGuides: results };
+      if (session && context)
+        completed.set(session, {
+          project,
+          params: { ...params },
+          frameId: context.frameId,
+          active: context.active,
+          epoch: session.epoch,
+          model,
+        });
+      return model;
     },
   };
 }
