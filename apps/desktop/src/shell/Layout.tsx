@@ -269,10 +269,17 @@ function Panel({
   );
 }
 
-function Area({ area }: { area: PanelDef['area'] }) {
+function Area({
+  area,
+  collapsed,
+  toggle,
+}: {
+  area: PanelDef['area'];
+  collapsed: ReadonlySet<string>;
+  toggle(id: string): void;
+}) {
   const snapshot = useRegistry();
   const [editor] = useEditor();
-  const [collapsed, toggle] = useCollapsedPanels();
   const [heights, setHeight] = usePanelHeights();
   const panels = panelsFor(snapshot, editor.mode, area, editor.uiLevel[editor.mode]);
   const shown = useShownObjectPanels(panels);
@@ -324,18 +331,20 @@ function Center() {
 
 export function Layout() {
   const [editor] = useEditor();
+  // 全列で1つの一覧を持つ。列ごとに保存すると他の列の変更を上書きしてしまう（I-066）。
+  const [collapsed, toggle] = useCollapsedPanels();
   return (
     <div className="shell" data-mode={editor.mode}>
       <Header />
       <div className="shell-body">
-        <Area area="left" />
+        <Area area="left" collapsed={collapsed} toggle={toggle} />
         <div className="shell-center-column">
           <main className="shell-center">
             <Center />
           </main>
-          <Area area="bottom" />
+          <Area area="bottom" collapsed={collapsed} toggle={toggle} />
         </div>
-        <Area area="right" />
+        <Area area="right" collapsed={collapsed} toggle={toggle} />
       </div>
     </div>
   );
