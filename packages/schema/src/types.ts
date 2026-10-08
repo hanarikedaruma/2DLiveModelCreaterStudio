@@ -82,6 +82,7 @@ export type StandardPartType =
   | 'backHair'
   | 'neck'
   | 'torso'
+  | 'chest'
   | 'armL'
   | 'armR'
   // 変形グループ（かんたんセットアップが作る）
@@ -195,6 +196,7 @@ export interface Binding {
   // Part.opacity と同じ値にする。パーツ自身の不透明度 = Part.opacity + Σ（このバインディングのいまの値 − デフォルト値での値）
   // （0..1 に収める）。不透明度のバインディングが1つなら、いまの値がそのままパーツの不透明度になる
   controlsOpacity?: boolean;
+  vertexSpace?: 'part' | 'model'; // verticesのみ。省略は変換前、modelは祖先の変換・ワープ後
 }
 export interface ParameterKey {
   coords: number[]; // parameterIds と同じ順の値
@@ -219,7 +221,7 @@ export interface Model {
   setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
 }
 export interface Project {
-  schemaVersion: number; // 現在は5（4 → 5で流れ揺れ。旧版は開くときに移行）
+  schemaVersion: number; // 現在は6（胸のモデル座標の弾み。旧版は開くときに移行）
   id: Id;
   name: string;
   assets: Asset[];
@@ -277,10 +279,23 @@ export interface Animation {
 
 // ---- Physics ----
 
+export interface BounceSettings {
+  gravityStrength: number; // 0..1
+  referenceCenter: Vec2; // 対象メッシュの基準座標
+  referenceBasis: [Vec2, Vec2]; // 基準姿勢のローカル→モデル座標
+  amplitudes: Vec2; // モデル座標のpx
+  meshId: Id;
+  meshSignature: string;
+  weights: number[]; // 固定点は厳密に0
+  bindingIds: [Id, Id]; // 左右・上下の所有するキー
+  pinning: { topBand: number; bottomBand: number; freeWidth: number };
+}
 export interface Physics {
   id: Id;
   partId: Id; // 根元の位置はこのパーツの pivot
-  preset: 'hair' | 'cloth' | 'ribbon' | 'accessory';
+  preset: 'hair' | 'cloth' | 'ribbon' | 'accessory' | 'chest';
+  deform?: 'swing' | 'bounce'; // 省略は従来の軸揺れ
+  bounce?: BounceSettings;
   strength: number; // 0..1（かんたん設定の「揺れ方」）
   direction: 'horizontal' | 'vertical' | 'both';
   length: number; // px
@@ -289,8 +304,9 @@ export interface Physics {
   gravity: number;
   inertia: number;
   range: number;
-  inputs: { parameterId: Id; weight: number }[];
+  inputs: { parameterId: Id; weight: number; axis?: 'horizontal' | 'vertical' }[];
   outputParameterId: Id;
+  verticalOutputParameterId?: Id | null;
 }
 
 // ---- TrackingMapping ----

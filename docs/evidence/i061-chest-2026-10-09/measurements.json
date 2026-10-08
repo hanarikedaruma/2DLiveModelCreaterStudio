@@ -1,0 +1,82 @@
+{
+  "gravity": [
+    {
+      "angle": -90,
+      "params": {
+        "BodyAngleZ": -90,
+        "BustX": -0.3068181818181817,
+        "BustY": 0.3
+      },
+      "areaBase": 19310.158081054688,
+      "areaA": 19074.428161621094,
+      "areaB": 19085.720789193176,
+      "bAlpha": -0.12
+    },
+    {
+      "angle": -45,
+      "params": {
+        "BodyAngleZ": -45,
+        "BustX": -0.21695321695338352,
+        "BustY": 0.08786796564387524
+      },
+      "areaBase": 19310.157311573974,
+      "areaA": 19241.114871808444,
+      "areaB": 19244.421882312396,
+      "bAlpha": -0.12
+    },
+    {
+      "angle": 0,
+      "params": {
+        "BodyAngleZ": 0,
+        "BustX": 0,
+        "BustY": 6.167905692361981e-17
+      },
+      "areaBase": 19310.15853881836,
+      "areaA": 19310.15853881836,
+      "areaB": 19310.15853881836,
+      "bAlpha": 0
+    },
+    {
+      "angle": 45,
+      "params": {
+        "BodyAngleZ": 45,
+        "BustX": 0.21695321695512756,
+        "BustY": 0.08786796564387524
+      },
+      "areaBase": 19310.15756387124,
+      "areaA": 19241.115114452317,
+      "areaB": 19244.42194769974,
+      "bAlpha": -0.12
+    },
+    {
+      "angle": 90,
+      "params": {
+        "BodyAngleZ": 90,
+        "BustX": 0.3068181818181817,
+        "BustY": 0.3
+      },
+      "areaBase": 19310.158081054688,
+      "areaA": 19074.428161621094,
+      "areaB": 19085.720789193176,
+      "bAlpha": -0.12
+    }
+  ],
+  "dynamics": [
+    {
+      "fps": 30,
+      "settledAfterStop": 1.5666666666666669,
+      "peakRelative": 0.3625576456217062
+    },
+    {
+      "fps": 60,
+      "settledAfterStop": 1.5666666666666669,
+      "peakRelative": 0.36799838018662057
+    },
+    {
+      "fps": 120,
+      "settledAfterStop": 1.5750000000000002,
+      "peakRelative": 0.368593276625631
+    }
+  ],
+  "prototypeB": "w * alpha * (baseVertex - center), alpha=-0.12..0.12; total area error minimized subject to signed triangle ratio >=0.1; not a volume guarantee"
+}

@@ -25,7 +25,13 @@ export function axisOutputsFor(project: Project, partId: string): string[] {
     ancestors.add(id);
     id = project.model.parts.find((p) => p.id === id)?.parentId ?? null;
   }
-  return [...new Set(project.physics.filter((p) => ancestors.has(p.partId)).map((p) => p.outputParameterId))].sort();
+  return [
+    ...new Set(
+      project.physics
+        .filter((p) => p.deform !== 'bounce' && ancestors.has(p.partId))
+        .flatMap((p) => [p.outputParameterId, ...(p.verticalOutputParameterId ? [p.verticalOutputParameterId] : [])]),
+    ),
+  ].sort();
 }
 export function axisNeutralParams(project: Project, partId: string, params: ParamValues): ParamValues {
   return { ...params, ...Object.fromEntries(axisOutputsFor(project, partId).map((id) => [id, 0])) };

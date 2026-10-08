@@ -169,18 +169,22 @@ export function createStudioRuntime(
     const s = services;
     if (!s) return null;
     const project = s.store.get();
-    if (hairProject !== project && !s.store.canUndo()) hairSession.reset();
+    if (hairProject !== project && !s.store.canUndo()) {
+      hairSession.reset();
+      s.physics.reset();
+    }
     hairProject = project;
     const dt = lastNow === null ? 0 : Math.max(0, now - lastNow);
     lastNow = now;
     const { parameters } = project.model;
     const flags = { lipSyncWeight: 1, physicsActive: true }; // 前のレイヤーが書き換えて後のレイヤーへ伝える
+    const frameId = ++hairFrameId;
     const layers: Layer[] = [];
     let mixedSoFar = s.mixer.mix(parameters, []);
     for (const p of ordered()) {
       let produced: Layer | Layer[] | null;
       try {
-        produced = p.produce({ now, dt, project, mixedSoFar, flags, layersSoFar: [...layers] });
+        produced = p.produce({ now, dt, frameId, project, mixedSoFar, flags, layersSoFar: [...layers] });
       } catch (e) {
         report(p, `レイヤー（${p.id}）`, e);
         continue;
@@ -195,7 +199,7 @@ export function createStudioRuntime(
     const model = hairFrames(s).evaluate(
       project,
       params,
-      { now, dt, frameId: ++hairFrameId, active: flags.physicsActive },
+      { now, dt, frameId, active: flags.physicsActive },
       hairSession,
     );
     const view = outputView(modelRect(project), override ?? sceneModelTransform(project), outputSize);

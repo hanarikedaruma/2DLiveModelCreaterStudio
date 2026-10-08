@@ -276,8 +276,12 @@ const binding: z.ZodType<Binding> = z
     generation: z.enum(['linear', 'depth', 'rotate', 'surface', 'ease']),
     divisions: num.int().min(1).nullable(),
     controlsOpacity: z.boolean().optional(),
+    vertexSpace: z.enum(['part', 'model']).optional(),
   })
   .superRefine((b, ctx) => {
+    if (b.vertexSpace !== undefined && b.channel !== 'vertices') {
+      ctx.addIssue({ code: 'custom', path: ['vertexSpace'], message: 'vertices のバインディングでだけ使える' });
+    }
     if (b.target.type !== TARGET_TYPE_OF_CHANNEL[b.channel]) {
       ctx.addIssue({
         code: 'custom',
@@ -430,21 +434,56 @@ const animation: z.ZodType<Animation> = z.object({
   }),
 });
 
-const physics: z.ZodType<Physics> = z.object({
-  id,
-  partId: id,
-  preset: z.enum(['hair', 'cloth', 'ribbon', 'accessory']),
-  strength: unit,
-  direction: z.enum(['horizontal', 'vertical', 'both']),
-  length: nonNegative,
-  spring: num,
-  damping: num,
-  gravity: num,
-  inertia: num,
-  range: num,
-  inputs: z.array(z.object({ parameterId: id, weight: num })),
-  outputParameterId: id,
-});
+const physics: z.ZodType<Physics> = z
+  .object({
+    id,
+    partId: id,
+    preset: z.enum(['hair', 'cloth', 'ribbon', 'accessory', 'chest']),
+    deform: z.enum(['swing', 'bounce']).optional(),
+    bounce: z
+      .object({
+        gravityStrength: unit,
+        referenceCenter: vec2,
+        referenceBasis: z.tuple([vec2, vec2]),
+        amplitudes: z.object({ x: num.positive(), y: num.positive() }),
+        meshId: id,
+        meshSignature: z.string().min(1),
+        weights: z.array(unit),
+        bindingIds: z.tuple([id, id]),
+        pinning: z.object({ topBand: unit, bottomBand: unit, freeWidth: unit }),
+      })
+      .optional(),
+    strength: unit,
+    direction: z.enum(['horizontal', 'vertical', 'both']),
+    length: nonNegative,
+    spring: num,
+    damping: num,
+    gravity: num,
+    inertia: num,
+    range: num,
+    inputs: z.array(z.object({ parameterId: id, weight: num, axis: z.enum(['horizontal', 'vertical']).optional() })),
+    outputParameterId: id,
+    verticalOutputParameterId: id.nullable().optional(),
+  })
+  .superRefine((p, ctx) => {
+    if (p.verticalOutputParameterId === p.outputParameterId)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['verticalOutputParameterId'],
+        message: '左右と上下には別の出力を指定する',
+      });
+    if (p.deform !== 'bounce') return;
+    if (!p.bounce) ctx.addIssue({ code: 'custom', path: ['bounce'], message: '胸の弾みには基準姿勢が必要' });
+    if (p.spring <= 0 || p.damping < 0)
+      ctx.addIssue({ code: 'custom', path: ['spring'], message: '胸のばねは正、減衰は0以上であるべき' });
+    if (p.bounce) {
+      const [x, y] = p.bounce.referenceBasis;
+      if (Math.abs(x.x * y.y - x.y * y.x) < 1e-8)
+        ctx.addIssue({ code: 'custom', path: ['bounce', 'referenceBasis'], message: '基準姿勢が潰れている' });
+      if (p.bounce.bindingIds[0] === p.bounce.bindingIds[1])
+        ctx.addIssue({ code: 'custom', path: ['bounce', 'bindingIds'], message: '左右と上下は別のキーにする' });
+    }
+  });
 
 const trackingMapping: z.ZodType<TrackingMapping> = z.object({
   input: z.enum(TRACKING_INPUTS),

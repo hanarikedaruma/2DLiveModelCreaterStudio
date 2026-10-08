@@ -45,6 +45,27 @@ export function AxisSwayBadge({ name }: { name: string }) {
   );
 }
 
+export function ChestSwayBadge({ name }: { name: string }) {
+  const label = `${name}：胸揺れ：ON`;
+  return (
+    <span className="part-sway-badge" role="img" aria-label={label} title={label}>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 16 16"
+        aria-hidden
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 4v8M1 6l2-2 2 2M1 10l2 2 2-2M8 3h5M8 13h5M10 3l2 2-3 2 3 2-3 2 1 2" />
+      </svg>
+    </span>
+  );
+}
+
 export function FlowSwayBadge({ name, reason }: { name: string; reason?: string }) {
   const label = `${name}：流れ揺れ：ON${reason ? `（停止中：${reason}）` : ''}`;
   return (

@@ -244,7 +244,11 @@ export function createBindingEvaluator(): BindingEvaluator {
           );
           continue;
         }
-        const record = isMesh ? out.vertices : out.warpPoints;
+        const record = isMesh
+          ? binding.vertexSpace === 'model'
+            ? (out.modelVertices ??= {})
+            : out.vertices
+          : out.warpPoints;
         const acc = Object.hasOwn(record, targetId)
           ? record[targetId]!
           : (record[targetId] = new Float32Array(expected * 2));

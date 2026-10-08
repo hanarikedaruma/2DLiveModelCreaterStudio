@@ -21,7 +21,16 @@ import { runMirrorCopy } from './mirrorCopy';
 import { childrenOf } from './modelOps';
 import { replaceAsset } from './replaceAsset';
 import { clickSelection, contextTargets, pruneSelection } from './selection';
-import { AxisSwayBadge, FlowSwayBadge, ContextMenu, EyeIcon, LockIcon, PickerDialog, type MenuEntry } from './ui';
+import {
+  AxisSwayBadge,
+  ChestSwayBadge,
+  FlowSwayBadge,
+  ContextMenu,
+  EyeIcon,
+  LockIcon,
+  PickerDialog,
+  type MenuEntry,
+} from './ui';
 import { flowSwayReason } from '@app/core';
 
 interface Row {
@@ -38,7 +47,7 @@ export function treeRows(model: Model, collapsed: ReadonlySet<string>): Row[] {
       if (seen.has(part.id)) continue;
       seen.add(part.id);
       rows.push({ part, depth });
-      if (part.kind === 'group' && !collapsed.has(part.id)) walk(part.id, depth + 1);
+      if (!collapsed.has(part.id)) walk(part.id, depth + 1);
     }
   };
   walk(null, 0);
@@ -92,7 +101,7 @@ function TreeRow({
   row: Row;
   model: Model;
   selected: boolean;
-  axisSway: boolean;
+  axisSway: boolean | 'chest';
   flowSway?: true | string;
   open: boolean;
   renaming: boolean;
@@ -122,9 +131,10 @@ function TreeRow({
         : '表示中（押すと隠す）'
   }`;
   const isGroup = part.kind === 'group';
+  const hasChildren = isGroup || model.parts.some((p) => p.parentId === part.id);
   const drop = useDropTarget<RowZone>({
     accepts: acceptsParts,
-    zone: (e) => rowZone(e, isGroup),
+    zone: (e) => rowZone(e, isGroup || part.standardType === 'torso'),
     onDrop: (p, zone) => {
       if (p.kind !== 'parts') return;
       const target = treeTargetFor(model, p.partIds, part.id, zone);
@@ -144,7 +154,7 @@ function TreeRow({
       role="treeitem"
       aria-level={depth + 1}
       aria-selected={selected}
-      aria-expanded={isGroup ? open : undefined}
+      aria-expanded={hasChildren ? open : undefined}
       data-part-id={part.id}
       className={classes}
       style={{ paddingLeft: 4 + depth * 14 }}
@@ -165,11 +175,13 @@ function TreeRow({
       }
       {...drop.handlers}
     >
-      {isGroup ? (
+      {hasChildren ? (
         <button
           type="button"
           className="tree-caret"
-          aria-label={open ? 'グループを閉じる' : 'グループを開く'}
+          aria-label={
+            isGroup ? (open ? 'グループを閉じる' : 'グループを開く') : open ? '子パーツを閉じる' : '子パーツを開く'
+          }
           onClick={(e) => {
             e.stopPropagation();
             onToggle();
@@ -187,7 +199,7 @@ function TreeRow({
           {part.name}
         </span>
       )}
-      {axisSway && <AxisSwayBadge name={part.name} />}
+      {axisSway && (axisSway === 'chest' ? <ChestSwayBadge name={part.name} /> : <AxisSwayBadge name={part.name} />)}
       {flowSway && <FlowSwayBadge name={part.name} reason={typeof flowSway === 'string' ? flowSway : undefined} />}
       <button
         type="button"
@@ -235,7 +247,9 @@ export function StructureTab() {
   const closeMenu = useCallback(() => setMenu(null), []);
 
   const rows = treeRows(model, collapsed);
-  const axisSwayPartIds = new Set(project.physics.map((item) => item.partId));
+  const axisSwayPartIds = new Map(
+    project.physics.map((item) => [item.partId, item.deform === 'bounce' ? 'chest' : true] as const),
+  );
   const flowSwayParts = new Map(
     (model.curveGuides ?? [])
       .filter((g) => g.dynamics?.enabled)
@@ -304,7 +318,7 @@ export function StructureTab() {
             row={row}
             model={model}
             selected={selected.includes(row.part.id)}
-            axisSway={axisSwayPartIds.has(row.part.id)}
+            axisSway={axisSwayPartIds.get(row.part.id) ?? false}
             flowSway={flowSwayParts.get(row.part.id)}
             open={!collapsed.has(row.part.id)}
             renaming={renaming === row.part.id}
@@ -347,22 +361,20 @@ export function StructureTab() {
       {picker?.kind === 'parent' && (
         <PickerDialog title="親を変更" onClose={() => setPicker(null)}>
           <ul className="picker-list">
-            {[null, ...model.parts.filter((p) => p.kind === 'group' && canMoveTo(model, picker.ids, p.id))].map(
-              (parent) => (
-                <li key={parent?.id ?? '(root)'}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const ids = picker.ids;
-                      setPicker(null);
-                      dispatch(moveParts(ids, { parentId: parent?.id ?? null, beforeId: null }));
-                    }}
-                  >
-                    {parent ? parent.name : '（いちばん上）'}
-                  </button>
-                </li>
-              ),
-            )}
+            {[null, ...model.parts.filter((p) => canMoveTo(model, picker.ids, p.id))].map((parent) => (
+              <li key={parent?.id ?? '(root)'}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const ids = picker.ids;
+                    setPicker(null);
+                    dispatch(moveParts(ids, { parentId: parent?.id ?? null, beforeId: null }));
+                  }}
+                >
+                  {parent ? parent.name : '（いちばん上）'}
+                </button>
+              </li>
+            ))}
           </ul>
         </PickerDialog>
       )}

@@ -4,6 +4,9 @@
 // 固定の PHYSICS_STEP 秒で積分し、フレームの時間に合わせて回数を変える（1フレームの最大は PHYSICS_MAX_STEPS 回）
 import type { FrameContext, Layer, ParamValues, PhysicsEngine } from '@app/contracts';
 import type { BlendOp, Parameter, Physics } from '@app/schema';
+import { createBindingEvaluator } from '../eval/evaluator';
+import { bounceFrame, bounceReason, chestDeformBindingIds, limitChestOutput } from './bounce';
+import { ChestDynamicsSession } from './chestSession';
 
 export const PHYSICS_STEP = 1 / 120; // 積分の刻み（秒）
 export const PHYSICS_MAX_STEPS = 8; // 1フレームで積分する回数の上限。超えた分の時間は捨てる
@@ -16,6 +19,7 @@ export type PhysicsAxis = 'horizontal' | 'vertical';
 export interface PhysicsInput {
   parameterId: string;
   weight: number;
+  axis?: PhysicsAxis;
 }
 
 // 入力が無い項目の既定（振り子の向きごと）
@@ -185,6 +189,8 @@ function outputOf(p: Pendulum, range: number, pending: number): number {
 // 出力パラメータがプロジェクトに無い項目は計算しない
 export function createPhysicsEngine(): PhysicsEngineWithState {
   const states = new Map<string, ItemState>();
+  const chest = new ChestDynamicsSession();
+  const evaluator = createBindingEvaluator();
   let pending = 0; // まだ積分していない時間（秒。PHYSICS_STEP 未満）
   let resync = false;
   let paramIndex: { list: Parameter[]; byId: Map<string, Parameter> } | null = null;
@@ -203,6 +209,7 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
 
     reset() {
       states.clear();
+      chest.reset();
       pending = 0;
       resync = false;
     },
@@ -217,6 +224,7 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
     produce(ctx): Layer | null {
       if (!ctx.flags.physicsActive) {
         resync = true;
+        chest.reset();
         return null;
       }
       const params = parametersById(ctx.project.model.parameters);
@@ -245,6 +253,7 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
       const blend: Record<string, BlendOp> = {};
       const seen = new Set<string>();
       for (const item of ctx.project.physics) {
+        if (item.deform === 'bounce') continue;
         if (!params.has(item.outputParameterId)) continue;
         seen.add(item.id);
         let state = states.get(item.id);
@@ -259,14 +268,72 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
             state[axis] = null;
             continue;
           }
-          const inputs = item.inputs.length > 0 ? item.inputs : PHYSICS_DEFAULT_INPUTS[axis];
+          const inputs =
+            item.inputs.length > 0
+              ? item.inputs.filter((x) => !x.axis || x.axis === axis)
+              : PHYSICS_DEFAULT_INPUTS[axis];
           state[axis] = advance(state[axis], readInput(inputs, ctx.mixedSoFar, params), c, steps, at, resync);
         }
+        const vertical =
+          item.verticalOutputParameterId && params.has(item.verticalOutputParameterId)
+            ? item.verticalOutputParameterId
+            : null;
+        const primary = vertical && item.direction === 'vertical' ? vertical : item.outputParameterId;
         const out = state[axes[0]!];
-        values[item.outputParameterId] = out ? outputOf(out, c.range, pending) : 0;
-        blend[item.outputParameterId] = 'override';
+        values[primary] = out ? outputOf(out, c.range, pending) : 0;
+        blend[primary] = 'override';
+        if (vertical) {
+          const unused = item.direction === 'vertical' ? item.outputParameterId : vertical;
+          if (item.direction !== 'both') {
+            values[unused] = 0;
+            blend[unused] = 'override';
+          }
+        }
+        if (vertical && item.direction === 'both') {
+          values[vertical] = state.vertical ? outputOf(state.vertical, c.range, pending) : 0;
+          blend[vertical] = 'override';
+        }
       }
       for (const id of [...states.keys()]) if (!seen.has(id)) states.delete(id);
+      const bouncing = ctx.project.physics.filter((p) => p.deform === 'bounce');
+      chest.retain(bouncing.map((p) => p.id));
+      if (bouncing.length) {
+        const owned = chestDeformBindingIds(ctx.project, bouncing);
+        const model = { ...ctx.project.model, bindings: ctx.project.model.bindings.filter((b) => !owned.has(b.id)) };
+        const deltas = evaluator.evaluate(model, { ...ctx.mixedSoFar, ...values });
+        for (const item of bouncing) {
+          if (!params.has(item.outputParameterId)) continue;
+          seen.add(item.id);
+          const frame = bounceReason(ctx.project, item) ? null : bounceFrame(ctx.project, item, deltas);
+          if (frame && item.inputs.length) {
+            for (const [axis, coordinate] of [
+              ['horizontal', 'x'],
+              ['vertical', 'y'],
+            ] as const) {
+              frame.center[coordinate] +=
+                item.bounce!.amplitudes[coordinate] *
+                readInput(
+                  item.inputs.filter((i) => !i.axis || i.axis === axis),
+                  ctx.mixedSoFar,
+                  params,
+                ).x;
+            }
+          }
+          if (!frame) chest.discard(item.id);
+          const advanced = frame ? chest.advance(item, frame, ctx) : { x: 0, y: 0 };
+          const q = frame
+            ? limitChestOutput(ctx.project, item, frame, { ...ctx.mixedSoFar, ...values }, advanced)
+            : advanced;
+          if (q !== advanced) chest.accept(item.id, q);
+          const a = item.bounce?.amplitudes;
+          values[item.outputParameterId] = a ? q.x / a.x : 0;
+          blend[item.outputParameterId] = 'override';
+          if (item.verticalOutputParameterId && params.has(item.verticalOutputParameterId)) {
+            values[item.verticalOutputParameterId] = a ? q.y / a.y : 0;
+            blend[item.verticalOutputParameterId] = 'override';
+          }
+        }
+      }
       resync = false;
       return seen.size > 0 ? { id: 'physics', weight: 1, values, blend } : null;
     },

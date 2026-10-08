@@ -2,7 +2,7 @@
 // 渡された値（時刻 t でトラックを補間した値）の状態を描く。モデルのキャンバス全体を領域に収めて表示する
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ParamValues, Renderer } from '@app/contracts';
-import { HairDynamicsSession } from '@app/core';
+import { HairDynamicsSession, createPhysicsEngine, chestStaticParams } from '@app/core';
 import { hairFrames, hairFrameWarning } from '../../services/hairFrame';
 import { HairWarning } from '../../shell/canvas/HairWarning';
 import { useAnimationEditor } from './state';
@@ -18,6 +18,7 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
   const project = useProject();
   const [animationState] = useAnimationEditor();
   const session = useRef(new HairDynamicsSession());
+  const chestEngine = useRef(createPhysicsEngine());
   const lastMotion = useRef<{
     id: string | null;
     time: number;
@@ -104,9 +105,32 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
       previous.id !== animationState.animationId ||
       (!continuousLoop && (animationState.time < previous.time || Math.abs(animationState.time - previous.time) > 0.1));
     if (!playing || discontinuous) session.current.reset();
+    if (!playing || discontinuous || (previous && animationState.time < previous.time)) chestEngine.current.reset();
+    const physical = animation?.transition.keepPhysics ?? true;
+    const explicit = animation?.tracks.map((t) => t.parameterId) ?? [];
+    const chestProject = {
+      ...project,
+      physics: project.physics.filter(
+        (p) =>
+          p.deform === 'bounce' &&
+          !explicit.includes(p.outputParameterId) &&
+          !explicit.includes(p.verticalOutputParameterId ?? ''),
+      ),
+    };
+    const chestLayer = playing
+      ? chestEngine.current.produce({
+          project: chestProject,
+          mixedSoFar: values,
+          now,
+          dt: discontinuous ? 0 : now - previous!.now,
+          frameId: animationState.time,
+          flags: { lipSyncWeight: 1, physicsActive: physical },
+        })
+      : null;
+    const composed = playing ? { ...values, ...chestLayer?.values } : chestStaticParams(project, values, explicit);
     const deformed = hairFrames(services).evaluate(
       project,
-      values,
+      composed,
       playing
         ? { now, dt: discontinuous ? 0 : now - previous!.now, frameId: animationState.time, active: true }
         : undefined,

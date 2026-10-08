@@ -44,9 +44,11 @@ const TABLE: [string, string, number, number, number, string][] = [
 
 describe('STANDARD_PARAMETERS', () => {
   it('表と一致する（id・範囲・デフォルト値・グループ）', () => {
-    expect(STANDARD_PARAMETERS.map((p) => [p.id, p.groupId, p.min, p.max, p.default])).toEqual(
-      TABLE.map(([id, group, min, max, def]) => [id, group, min, max, def]),
-    );
+    expect(STANDARD_PARAMETERS.map((p) => [p.id, p.groupId, p.min, p.max, p.default])).toEqual([
+      ...TABLE.map(([id, group, min, max, def]) => [id, group, min, max, def]),
+      ['BustX', 'sway', -1, 1, 0],
+      ['BustY', 'sway', -1, 1, 0],
+    ]);
     expect(STANDARD_PARAMETERS.every((p) => p.standard && p.name.length > 0)).toBe(true);
   });
 
@@ -84,7 +86,8 @@ describe('PARAMETER_GROUPS', () => {
 describe('標準パーツ', () => {
   it('表示名の例: eyeWhiteL → 白目 L', () => {
     expect(STANDARD_PART_NAMES.eyeWhiteL).toBe('白目 L');
-    expect(STANDARD_PART_TYPES).toHaveLength(41);
+    expect(STANDARD_PART_TYPES).toHaveLength(42);
+    expect(STANDARD_PART_NAMES.chest).toBe('胸');
   });
 
   it('描画順は変形グループ以外の標準パーツをちょうど1回ずつ含む', () => {

@@ -176,6 +176,7 @@ export function mirrorCopy(
       const withAssets = added.length > 0 ? { ...project, assets: [...project.assets, ...added] } : project;
       const { model } = withAssets;
       const next = duplicateParts(withAssets, ids, seq(), {
+        mirror: true,
         part: (original, copy, isRoot) => ({
           ...copy,
           standardType: mirrorStandardType(original.standardType),

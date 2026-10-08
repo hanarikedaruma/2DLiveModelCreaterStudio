@@ -2,6 +2,7 @@
 // 終わったら（止めたとき・セクションが消えたときも）元の値に戻す。プロジェクトと Undo の履歴には触れない
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ParamValues } from '@app/contracts';
+import type { Physics } from '@app/schema';
 import { useServices } from '../../../shell/api';
 import { simulateSwayPreview } from './preview';
 
@@ -13,7 +14,11 @@ const cancelFrame = (h: Handle) => {
   else clearTimeout(h);
 };
 
-export function useSwayPreview(): { playing: boolean; start(physicsId: string): void; stop(): void } {
+export function useSwayPreview(): {
+  playing: boolean;
+  start(physicsId: string, direction?: Physics['direction']): void;
+  stop(): void;
+} {
   const services = useServices();
   const running = useRef<{ handle: Handle | null; saved: ParamValues; projectId: string } | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -50,9 +55,15 @@ export function useSwayPreview(): { playing: boolean; start(physicsId: string): 
   }, [services, stop]);
 
   const start = useCallback(
-    (physicsId: string) => {
+    (physicsId: string, direction?: Physics['direction']) => {
       stop();
-      const preview = simulateSwayPreview(services.store.get(), physicsId);
+      const preview = simulateSwayPreview(
+        services.store.get(),
+        physicsId,
+        undefined,
+        direction,
+        services.editor.get().editorParamValues,
+      );
       if (!preview) return;
       const run = {
         handle: null as Handle | null,

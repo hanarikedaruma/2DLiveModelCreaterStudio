@@ -96,6 +96,7 @@ export interface BindingTarget {
   type: Binding['target']['type'];
   id: string;
   channel: Channel;
+  vertexSpace?: Binding['vertexSpace'];
 }
 
 function sameParameterSet(binding: Binding, ids: string[]): boolean {
@@ -110,6 +111,7 @@ export function findBinding(model: Model, target: BindingTarget, params: ActiveP
       b.channel === target.channel &&
       b.target.type === target.type &&
       b.target.id === target.id &&
+      (b.vertexSpace ?? 'part') === (target.vertexSpace ?? 'part') &&
       sameParameterSet(b, ids),
   );
 }
@@ -167,6 +169,7 @@ function createBinding<D extends Delta>(
     id,
     target: { type: target.type, id: target.id },
     channel: target.channel,
+    ...(target.vertexSpace ? { vertexSpace: target.vertexSpace } : {}),
     parameterIds: params.map((p) => p.id),
     keyValues: params.map((p) => withKeyValue([p.default], p.value)),
     keys: [{ coords: params.map((p) => p.default), delta: ops.identity(), source: 'auto', locked: false }, current],

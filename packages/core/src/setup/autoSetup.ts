@@ -13,6 +13,7 @@ import { computePivots, type BoundsOf } from './pivots';
 import { applyPointPlans, planStep1 } from './step1';
 import { planStep2 } from './step2';
 import { setupWarnings } from './warnings';
+import { setupChest } from './chest';
 
 export const AUTO_SETUP_LABEL = 'かんたんセットアップ';
 
@@ -27,19 +28,22 @@ export function createAutoSetup(options: AutoSetupOptions = {}): AutoSetup {
     plan(project) {
       // 新しい id は plan ごとに覚えておき、同じ入力には同じ id を使う（apply を純粋にする）
       const pool: string[] = [];
+      const chestWarnings: string[] = [];
+      runAutoSetup(project, pooledIds(pool, project), options, chestWarnings);
       return {
         command: { label: AUTO_SETUP_LABEL, apply: (p) => runAutoSetup(p, pooledIds(pool, p), options) },
         warnings:
           options.faceTurn === 'head-surface' || options.faceTurn === 'head-pose'
             ? [
                 ...setupWarnings(project.model, true),
+                ...chestWarnings,
                 ...[
                   options.faceTurn === 'head-pose'
                     ? headPoseBlockReason(project.model)
                     : headTurnBlockReason(project.model),
                 ].filter((w): w is string => w !== null),
               ]
-            : setupWarnings(project.model, options.faceTurn !== 'depth'),
+            : [...setupWarnings(project.model, options.faceTurn !== 'depth'), ...chestWarnings],
       };
     },
   };
@@ -48,7 +52,14 @@ export function createAutoSetup(options: AutoSetupOptions = {}): AutoSetup {
 // pool の id を順に使う（足りなければ作って pool に足す）。プロジェクトで使っている id は飛ばす
 function pooledIds(pool: string[], project: Project): () => string {
   const taken = new Set<string>();
-  for (const list of [project.model.parts, project.model.bindings, project.model.meshes, project.model.warps]) {
+  for (const list of [
+    project.model.parts,
+    project.model.bindings,
+    project.model.meshes,
+    project.model.warps,
+    project.model.parameters,
+    project.physics,
+  ]) {
     for (const item of list) taken.add(item.id);
   }
   let i = 0;
@@ -65,7 +76,12 @@ function pooledIds(pool: string[], project: Project): () => string {
 }
 
 // かんたんセットアップの本体。何も変わらなければ同じ参照を返す
-export function runAutoSetup(project: Project, nextId: () => string, options: AutoSetupOptions = {}): Project {
+export function runAutoSetup(
+  project: Project,
+  nextId: () => string,
+  options: AutoSetupOptions = {},
+  warnings?: string[],
+): Project {
   const assets = new Map(project.assets.map((a) => [a.id, a]));
   // 画像パーツの外接矩形 = 素材の offset と幅・高さ
   const boundsOf: BoundsOf = (part: Part) => {
@@ -122,5 +138,6 @@ export function runAutoSetup(project: Project, nextId: () => string, options: Au
     (b) => (plan.owns(b) && !preservedFace.has(b.id)) || oldTurns.has(b.id) || isHeadPoseBinding(model, poseMeshes, b),
     nextId,
   );
-  return deepEqual(model, project.model) ? project : { ...project, model };
+  const next = deepEqual(model, project.model) ? project : { ...project, model };
+  return setupChest(next, nextId, warnings);
 }

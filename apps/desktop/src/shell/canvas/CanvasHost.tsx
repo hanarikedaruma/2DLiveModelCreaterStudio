@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import type { Model, Project, Vec2 } from '@app/schema';
 import type { DeformedModel, EditorState, ParamValues, Renderer, ViewTransform } from '@app/contracts';
-import { HairDynamicsSession } from '@app/core';
+import { HairDynamicsSession, chestStaticParams } from '@app/core';
 import { hairFrames } from '../../services/hairFrame';
 import {
   useCanvas,
@@ -92,7 +92,12 @@ export function CanvasHost() {
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<Renderer | null>(null);
   const sizeRef = useRef({ width: 0, height: 0 });
-  const cacheRef = useRef<{ model: Model; values: ParamValues; deformed: DeformedModel } | null>(null);
+  const cacheRef = useRef<{
+    model: Model;
+    physics: Project['physics'];
+    values: ParamValues;
+    deformed: DeformedModel;
+  } | null>(null);
   const hairSession = useRef(new HairDynamicsSession());
   const scheduledRef = useRef(false);
   const spaceRef = useRef(false);
@@ -123,11 +128,15 @@ export function CanvasHost() {
     let cache = cacheRef.current;
     const motion = controller.getState().motionPreview;
     const values = motion?.params ?? editor.editorParamValues;
-    if (!cache || cache.model !== project.model || cache.values !== values) {
-      const params = paramValuesFor(project.model, values);
+    if (!cache || cache.model !== project.model || cache.physics !== project.physics || cache.values !== values) {
+      const raw = paramValuesFor(project.model, values);
+      const params = motion
+        ? raw
+        : chestStaticParams(project, raw, [...editor.activeParameterIds, ...Object.keys(values)]);
       if (!motion) hairSession.current.reset();
       cache = {
         model: project.model,
+        physics: project.physics,
         values,
         deformed: hairFrames(services).evaluate(
           project,

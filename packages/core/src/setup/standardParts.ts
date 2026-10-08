@@ -36,6 +36,7 @@ export function groupTypeOf(part: Part): GroupType | null {
 // 階層の木での親（bodyRoot は根）
 export const TREE_PARENT: Record<Exclude<StandardPartType, 'bodyRoot'>, GroupType> = {
   torso: 'bodyRoot',
+  chest: 'bodyRoot', // 実際の胴体への接続は胸のセットアップで姿勢を保って行う
   armRootL: 'bodyRoot',
   armL: 'armRootL',
   armRootR: 'bodyRoot',

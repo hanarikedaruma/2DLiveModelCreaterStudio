@@ -4,7 +4,7 @@
 | ---- | ---- | -------------------------------------- | ----------- | ----------------------------- | ---------------- |
 | 先行 | CO   | 胸の契約・専用見本（本カード内で直列） | ○（胸だけ） | ○（ユーザーの目視。カード97） | CO（CL引き継ぎ） |
 
-候補: #16（I-061）。完成条件: M9。状態: 設計再確認済み・製品実装は未着手（2026-10-08・CO）。ユーザーの先行実装方針により、カード79の胸に必要な契約だけをこのカード内で先行して扱い、74の代わりに専用の見本を用意する。他のSTEP4カードの待ちは維持する。
+候補: #16（I-061）。完成条件: M9。状態: 実装済み・画面検証中（2026-10-09・CO）。ユーザーの実装開始指示により、重力の修正設計に沿って方式A・分割パーツを実装した。カード79の胸に必要な契約だけをこのカード内で先行して扱い、74の代わりに専用の見本を用意した。他のSTEP4カードの待ちは維持する。制作モデルの自然さと方式A/Bの選択はカード97で残す。
 
 最新の補足・修正方針は [先行実装前の設計再確認](../chest-sway-design-review.md)と [重力と慣性の座標](../chest-gravity-design.md)。下記と違う場合は重力の修正設計、再確認の順で優先する。特に体への接続、モデル座標の下向きの重力、実位置の慣性、輪郭の固定、出力の所有、方式切替、既存の軸・流れとの接続を実装条件にする。
 
@@ -18,8 +18,8 @@
 - 物理演算（`packages/core/src/physics/engine.ts`）: 項目ごとに振り子を持ち、θ / range（−1..1）を出力パラメータに出す。方向が「左右と上下」（both）でも、出すのは左右だけ（上下の振り子は計算するが使っていない）。入力の一覧は両方の向きに共通。
 - 評価: 同じメッシュへの vertices のバインディングが複数あれば、差分を足し合わせる（`packages/core/src/eval/evaluator.ts`）。
 - メッシュ: 自動のメッシュは輪郭と内側の格子点（標準で 48px、なめらかで 28px ごと）を持つ（`packages/core/src/mesh/generator.ts`）。
-- カード79で追加を計画した型（未実装）: `Physics['preset']` の 'chest'、`Physics.deform`、`Physics.verticalOutputParameterId`、`inputs[].axis`、標準パーツ 'chest'、標準パラメータ BustX・BustY、（範囲のモードを行うなら）`Physics.region`。先行契約は胸だけを直列に行い、現在のschemaVersion 5から6への扱いも確かめる。
-- 重力の修正で足す先行契約（未実装）: `Physics.bounce` の重力の強さ・保存した基準姿勢・振れ幅、`Binding.vertexSpace`、`TargetDeltas.modelVertices`、体の基礎の姿勢を胸のセッションへ渡すフレーム契約。従来のpartのキー・振り子のgravityとは分ける。
+- カード79で追加を計画した型（胸の先行分はCC-014で実装）: `Physics['preset']` の 'chest'、`Physics.deform`、`Physics.verticalOutputParameterId`、`inputs[].axis`、標準パーツ 'chest'、標準パラメータ BustX・BustY、（範囲のモードを行うなら）`Physics.region`。先行契約は胸だけを直列に行い、schemaVersion 5から6の恒等移行を確認する。
+- 重力の修正で足す先行契約（CC-014で実装）: `Physics.bounce` の重力の強さ・保存した基準姿勢・振れ幅、`Binding.vertexSpace`、`TargetDeltas.modelVertices`、体の基礎の姿勢を胸のセッションへ渡すフレーム契約。従来のpartのキー・振り子のgravityとは分ける。
 - 見本: このカードで作る小さな胸の見本を先に使う。カード74の複雑なモデルでの確認は後で行う。
 
 ## 設計（I-061 の検討の結果）
@@ -37,7 +37,7 @@
 - **試作で比べる案**（最初に行い、ユーザーに選んでもらう）:
   - A: 平行移動の場（上の式）。
   - B: A に、面積の変化を抑える伸び縮みを足す（下へ動くとき縦に伸び、横に少し縮む）。2Dの式で体積が保てるとは扱わず、固定点・反転の条件と式を別に確かめる。
-  - 比較画像（上下 ±1・左右 ±1・斜め、物理のなし・あり）を、カード56 と同じ流儀の道具（開発用。`tools/dev/` に足す）で作る。既定は A。
+  - 比較画像（上下 ±1・左右 ±1・斜め、物理のなし・あり）を、開発用の `fixtures/scripts/chest-evidence.ts` で作る。見本生成と同じfixturesの道具を使い、製品には同梱しない。既定は A。
 - 作り直しの規則: 自分が所有し、キーがすべてauto/generatedかつ未lockedのバインディングだけを置き換える。manual/lockedを保ち、方式の移行を途中まで行わない。現行 `isAutoSwayBinding` だけではlockedの保護が不足する。
 
 ### 2. 物理の種類と値
@@ -78,7 +78,7 @@
 3. **弾みのキーと適用段階**（`packages/core/src/physics/bounce.ts`、新）: 重み・モデル座標の差分・バインディングの純粋な生成。評価器と変形器でpart/modelの差分を別に合成・適用する。胸の既定係数もcoreとdesktopで同じ定義を使う。desktopのコマンドとcoreの自動セットアップから共用し、coreからdesktopを参照しない。
 4. **物理の画面とコマンド**: 種類「胸」を選ぶと BustX・BustY・バインディング・物理の項目を作る（1回の Undo）。出力の2つ（左右・上下）を表示する。物理のプレビュー（`preview.ts`・`useSwayPreview.ts`）で2つの出力を動かす。
 5. **かんたんセットアップ**（`packages/core/src/setup/chest.ts`、新。setup の登録の行）。
-6. **見本**: 胸のパーツのある小さな見本（`fixtures/chest-sample/` と、その生成スクリプト）。
+6. **見本**: 胸のパーツのある小さな見本（`fixtures/chest-model/` と、その生成スクリプト）。
 7. **試作の比較画像**（設計の1の A・B）を `docs/evidence/i061-chest-<日付>/` に置き、ユーザーに選んでもらう。
 8. **プロンプト**: docs/part-image-prompts.md に「胸」。
 9. （条件付き）範囲のモード（設計の6）。
@@ -89,8 +89,8 @@
 - `packages/core/src/physics/`（実装とそのテスト）
 - `packages/core/src/setup/chest.ts`（新）と、`packages/core/src/setup/` の登録の行
 - `apps/desktop/src/modes/modeling/physics/`
-- `fixtures/chest-sample/`（新）、`fixtures/scripts/generate-chest-sample.ts`（新）、`fixtures/package.json` の scripts の行
-- `tools/dev/` の比較画像の道具（新しいファイル）、`docs/evidence/i061-chest-<日付>/`
+- `fixtures/chest-model/`（新）、`fixtures/scripts/generate-chest-model.ts`（新）、`.prettierignore` の生成見本の行
+- `fixtures/scripts/chest-evidence.ts`（比較画像の道具。新）、`docs/evidence/i061-chest-<日付>/`
 - docs/part-image-prompts.md（「胸」の節）
 - 胸の契約だけの `packages/schema/`・`packages/contracts/`・`packages/io/src/project/repair.ts`・`docs/contract-changes.md`（先行作業で直列）
 - 胸の接続のためのsetupの階層・描画順・登録、出力2つの `modeling/userParams/`、胸の複製/反転・目印の `modeling/structure/`
@@ -129,5 +129,7 @@
 
 ## 記録
 
+- 2026-10-09 CO（実装・検証中）: 重力の修正設計に従い、方式A・分割パーツの製品コードを追加した。保存契約はCC-014、5→6は既存モデルに胸を足さない恒等移行。胸の静止/動的セッション、固定輪郭、2出力と所有、設定/方向別お試し/Undo、手編集とlockedの保護、メッシュ失効、複製/反転、再生/出力を実装した。全体単体2,549件と型チェックが成功。回転/呼吸15条件で固定点の差0px、肩が胸の完成形へ追従し、流れの中立評価に胸の出力を残す回帰も成功。画面と実IOは引き続き検証する。
+- 同日の見本/比較: `fixtures/chest-model/` と生成スクリプト、[比較画像と数値](../../evidence/i061-chest-2026-10-09/README.md)を追加した。既存のfixturesの実行環境で再現するため、当初のtools/dev案を `fixtures/scripts/chest-evidence.ts` に変更。製品には同梱しない。方式Bは面積の補助場の試作だけ。指定波形の30/60/120fpsで停止後約1.57秒で釣り合いの±0.02以内へ収束した。自然さ/方式のユーザー判断（カード97）と条件付きの範囲指定は残す。
 - 2026-10-08 CO（先行実装前の設計再確認）: 現在のコードと照合し、体への接続・曲がった輪郭の固定・出力の所有・lockedを含む方式切替・保存と対象の寿命・流れ揺れとの判定を補足した。現行エンジンの係数応答と、標準の呼吸の実評価を数値で確認。製品コード・契約はまだ実装していない。詳細と証跡は [設計再確認](../chest-sway-design-review.md)。
 - 2026-10-08 CO（重力方向の修正）: ユーザーの指摘を受け、gravity=0・体と回るローカルキー・パラメータ差分だけの入力を胸の既定とする案を撤回。モデル座標の重力・慣性・基準姿勢の釣り合いと、体の変換後に足すmodelキーへ修正し、先行契約・評価器・変形器の範囲と必須テストを更新した。既存の変形器と数式の数値検討42条件は成功。製品実装の合格とは扱わない。詳細は [重力の修正設計](../chest-gravity-design.md)。

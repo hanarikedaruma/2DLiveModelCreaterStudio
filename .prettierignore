@@ -10,6 +10,7 @@ apps/desktop/src-tauri/icons/
 fixtures/sample-model/
 docs/measurements/
 fixtures/reference-model/
+fixtures/chest-model/
 docs/evidence/
 /projects/
 /fixtures/scripts/build-desktop-character.ts

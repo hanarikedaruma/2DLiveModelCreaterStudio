@@ -27,7 +27,8 @@ function swingAt(t: number): number {
 }
 
 // 物理の項目が実際に使う入力（空なら物理演算の既定の入力。振り子の最初の向きのもの）
-export function effectiveInputs(item: Physics): readonly { parameterId: string; weight: number }[] {
+export function effectiveInputs(item: Physics): readonly Physics['inputs'][number][] {
+  if (item.deform === 'bounce') return item.inputs;
   return item.inputs.length > 0 ? item.inputs : PHYSICS_DEFAULT_INPUTS[physicsAxesOf(item.direction)[0]!];
 }
 
@@ -37,6 +38,8 @@ export function simulateSwayPreview(
   project: Project,
   physicsId: string,
   duration = PREVIEW_DURATION,
+  direction: Physics['direction'] = 'both',
+  initialValues: ParamValues = {},
 ): SwayPreview | null {
   const item = project.physics.find((ph) => ph.id === physicsId);
   if (!item) return null;
@@ -57,16 +60,45 @@ export function simulateSwayPreview(
   const frames: ParamValues[] = [];
   for (let i = 0; i < count; i++) {
     const s = swingAt(i / PREVIEW_FPS);
-    const values: ParamValues = {};
+    const values: ParamValues = item.deform === 'bounce' ? { ...initialValues } : {};
     for (const d of driven) values[d.id] = d.valueAt(s);
+    let animated = only;
+    if (item.deform === 'bounce') {
+      let id = '__chest-preview-body';
+      while (project.model.parts.some((p) => p.id === id)) id += '_';
+      const root = {
+        ...project.model.parts.find((p) => p.id === item.partId)!,
+        id,
+        name: '胸のお試し',
+        kind: 'group' as const,
+        standardType: null,
+        assetId: null,
+        meshId: null,
+        parentId: null,
+        pivot: { x: 0, y: 0 },
+        scale: { x: 1, y: 1 },
+        rotation: 0,
+        physicsId: null,
+        position: { x: direction === 'vertical' ? 0 : s * 24, y: direction === 'horizontal' ? 0 : s * 16 },
+      };
+      animated = {
+        ...only,
+        model: {
+          ...only.model,
+          parts: [...only.model.parts.map((p) => (p.parentId === null ? { ...p, parentId: id } : p)), root],
+        },
+      };
+    }
     const layer = engine.produce({
       now: i * dt,
       dt: i === 0 ? 0 : dt,
-      project: only,
+      project: animated,
       mixedSoFar: values,
       flags: { lipSyncWeight: 1, physicsActive: true },
     });
     values[item.outputParameterId] = layer?.values[item.outputParameterId] ?? 0;
+    if (item.verticalOutputParameterId)
+      values[item.verticalOutputParameterId] = layer?.values[item.verticalOutputParameterId] ?? 0;
     frames.push(values);
   }
   return { fps: PREVIEW_FPS, frames };

@@ -1,5 +1,6 @@
 // 物理のかんたん設定（カード50）の種類ごとのプリセットと、選んだ値がどのプリセットに当たるかの判定
 import type { Physics } from '@app/schema';
+import { CHEST_PRESET } from '@app/core';
 import { presetOf } from '../../../shell/api';
 
 export type PhysicsKind = Physics['preset'];
@@ -11,6 +12,7 @@ export const PHYSICS_PRESETS: Record<PhysicsKind, PhysicsPresetValues> = {
   cloth: { spring: 20, damping: 3, gravity: 0.8, inertia: 0.8, range: 0.8 },
   ribbon: { spring: 15, damping: 2, gravity: 0.6, inertia: 1.2, range: 1.2 },
   accessory: { spring: 40, damping: 5, gravity: 1.0, inertia: 0.6, range: 0.6 },
+  chest: CHEST_PRESET,
 };
 
 export const PHYSICS_KINDS: readonly { id: PhysicsKind; label: string }[] = [
@@ -18,6 +20,7 @@ export const PHYSICS_KINDS: readonly { id: PhysicsKind; label: string }[] = [
   { id: 'cloth', label: '布' },
   { id: 'ribbon', label: 'リボン' },
   { id: 'accessory', label: 'アクセサリ' },
+  { id: 'chest', label: '胸' },
 ];
 
 export const PHYSICS_DIRECTIONS: readonly { id: Physics['direction']; label: string }[] = [

@@ -29,6 +29,7 @@ describe('プリセット', () => {
       cloth: { spring: 20, damping: 3, gravity: 0.8, inertia: 0.8, range: 0.8 },
       ribbon: { spring: 15, damping: 2, gravity: 0.6, inertia: 1.2, range: 1.2 },
       accessory: { spring: 40, damping: 5, gravity: 1.0, inertia: 0.6, range: 0.6 },
+      chest: { spring: 120, damping: 5, gravity: 0, inertia: 1.5, range: 1 },
     });
   });
 });

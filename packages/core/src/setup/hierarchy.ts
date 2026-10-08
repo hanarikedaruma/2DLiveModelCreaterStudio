@@ -63,6 +63,7 @@ export function buildHierarchy(model: Model, newId: () => string): Model {
 
   const parentOf = (part: Part): string | null => {
     const image = imageTypeOf(part);
+    if (image === 'chest' && part.parentId && model.parts.some((p) => p.id === part.parentId)) return part.parentId;
     if (image) return nearestGroup(TREE_PARENT[image]);
     const group = groupTypeOf(part);
     if (group) return group === 'bodyRoot' ? null : nearestGroup(TREE_PARENT[group]);

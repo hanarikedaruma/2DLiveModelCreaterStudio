@@ -122,7 +122,7 @@ export function isAutoSwayBinding(binding: Binding, part: Part, parameterId: str
       binding.target.type === 'mesh' &&
       part.meshId !== null &&
       binding.target.id === part.meshId);
-  return own && binding.keys.every((k) => k.source === 'auto' || k.source === 'generated');
+  return own && binding.keys.every((k) => !k.locked && (k.source === 'auto' || k.source === 'generated'));
 }
 
 export interface SwayBindingIds {

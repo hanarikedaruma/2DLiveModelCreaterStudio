@@ -21,6 +21,16 @@
 
 ## 記録
 
+### CC-014 胸の重力・慣性・2出力とモデル座標の頂点キー（カード98、2026-10-09 CO）
+
+- ユーザーの先行実装指示により、[重力の修正設計](step4/chest-gravity-design.md)に必要な胸の契約だけを直列に実装。schemaVersionは6、5→6は保存済みのモデル・物理を保ち、胸を自動追加しない。
+- 標準パーツに`chest`、種類に`Physics.preset: 'chest'`、`deform?: 'swing' | 'bounce'`、`verticalOutputParameterId?: Id | null`、`inputs[].axis?: 'horizontal' | 'vertical'`を追加。省略した旧データは従来どおり。BustX/BustYは−1..1の任意の標準出力で、胸を設定したときだけ追加する。異なる物理で出力を共有しない。
+- `Physics.bounce?: BounceSettings`は`gravityStrength: 0..1; referenceCenter: Vec2; referenceBasis: [Vec2, Vec2]; amplitudes: Vec2; meshId: Id; meshSignature: string; weights: number[]; bindingIds: [Id, Id]; pinning: { topBand; bottomBand; freeWidth }`を保存。基準行列は有限・逆変換可能、振れ幅・springは正、dampingは非負、重み・固定範囲は0..1。参照切れはIOで修復し、対応が失効した胸は理由を表示して自動適用を止める。
+- `Binding.vertexSpace?: 'part' | 'model'`はverticesだけに有効。省略・partは従来のローカル差分。`TargetDeltas.modelVertices?: Record<Id, Float32Array>`を別に合成し、パーツ・祖先の変換とワープの後、流れ線の評価前に1回だけ足す。キー編集もモデル座標を保ち、胸の固定点への差分は0にする。
+- `FrameContext.frameId?: string | number`を追加。胸の基礎姿勢は所有するmodelキーを除いた評価から作り、位置・基底・実時間を胸専用セッションへ渡す。重力はモデルの下向き、慣性は実位置の加速度。状態・速度はUndoや保存に入れず、同一フレームでは再積分しない。
+- 既存の軸揺れの省略時の出力・入力・係数は維持する。流れ揺れの軸中立評価はswingだけを対象にする。スタジオは胸を含む完成形を全出力へ共有し、アニメーションは胸用のセッションを持つ。Bustを明示したトラックは手動キーを優先する。
+- 影響: カード79の胸部分を98で先行、98の設定・複製・反転・削除・保存・セットアップ・プレビューを接続。他のSTEP4契約、範囲指定の胸、関節、頭の補助素材はこの変更に含めない。
+
 ### CC-013 流れ揺れの保存と共通フレーム評価（カード100、2026-10-08 CO）
 
 - ユーザーの流れ揺れの実装指示による先行実装。契約は本カードで直列に行う。

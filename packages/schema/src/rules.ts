@@ -93,7 +93,14 @@ const STANDARD_PARAMETER_TABLE = [
 ];
 
 // 標準パラメータの表（standard: true）
-export const STANDARD_PARAMETERS: Parameter[] = STANDARD_PARAMETER_TABLE.map(({ phase: _phase, ...p }) => p);
+export const CHEST_PARAMETERS: Parameter[] = [
+  { id: 'BustX', name: '胸揺れ 左右', groupId: 'sway', min: -1, max: 1, default: 0, standard: true },
+  { id: 'BustY', name: '胸揺れ 上下', groupId: 'sway', min: -1, max: 1, default: 0, standard: true },
+];
+export const STANDARD_PARAMETERS: Parameter[] = [
+  ...STANDARD_PARAMETER_TABLE.map(({ phase: _phase, ...p }) => p),
+  ...CHEST_PARAMETERS,
+];
 
 // 標準パラメータの id → 使い始めるフェーズ
 export const STANDARD_PARAMETER_PHASES: Record<string, StandardPhase> = Object.fromEntries(
@@ -104,7 +111,11 @@ const PHASE_RANK: Record<StandardPhase, number> = { mvp: 0, step1: 1, step2: 2 }
 
 // そのフェーズまでに使う標準パラメータ（表の順）
 export function standardParametersFor(phase: StandardPhase): Parameter[] {
-  return STANDARD_PARAMETERS.filter((p) => PHASE_RANK[STANDARD_PARAMETER_PHASES[p.id]!] <= PHASE_RANK[phase]);
+  return STANDARD_PARAMETERS.filter(
+    (p) =>
+      STANDARD_PARAMETER_PHASES[p.id] !== undefined &&
+      PHASE_RANK[STANDARD_PARAMETER_PHASES[p.id]!] <= PHASE_RANK[phase],
+  );
 }
 
 // 日本語の表示名
@@ -139,6 +150,7 @@ export const STANDARD_PART_NAMES: Record<StandardPartType, string> = {
   backHair: '後ろ髪',
   neck: '首',
   torso: '胴体',
+  chest: '胸',
   armL: '腕 L',
   armR: '腕 R',
   bodyRoot: '体の変形',
@@ -157,6 +169,7 @@ export const STANDARD_PART_TYPES = Object.keys(STANDARD_PART_NAMES) as [Standard
 export const STANDARD_DRAW_ORDER: StandardPartType[] = [
   'backHair',
   'torso',
+  'chest',
   'armL',
   'armR',
   'neck',

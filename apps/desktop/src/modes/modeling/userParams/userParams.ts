@@ -143,7 +143,7 @@ export function parameterUsage(project: Project, id: string): ParameterUsage {
     hotkeys: count(project.studio.hotkeys, (h) => h.action === 'parameter' && h.targetId === id),
     animationTracks: project.animations.reduce((n, a) => n + count(a.tracks, (t) => t.parameterId === id), 0),
     physicsInputs: project.physics.reduce((n, ph) => n + count(ph.inputs, (x) => x.parameterId === id), 0),
-    physicsOutputs: count(project.physics, (ph) => ph.outputParameterId === id),
+    physicsOutputs: count(project.physics, (ph) => ph.outputParameterId === id || ph.verticalOutputParameterId === id),
   };
 }
 
@@ -175,7 +175,11 @@ export function removeParameterCommand(id: string): Command {
       if (!model.parameters.some((p) => p.id === id && !p.standard)) return project;
       const keep = <T extends { parameterId: string }>(list: T[]) => list.filter((x) => x.parameterId !== id);
       // 出力先が無くなる物理は物理ごと消す（I-027）
-      const removedPhysics = new Set(project.physics.filter((ph) => ph.outputParameterId === id).map((ph) => ph.id));
+      const removedPhysics = new Set(
+        project.physics
+          .filter((ph) => ph.outputParameterId === id || ph.verticalOutputParameterId === id)
+          .map((ph) => ph.id),
+      );
       return {
         ...project,
         model: {

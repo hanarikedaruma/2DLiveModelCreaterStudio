@@ -7,6 +7,7 @@ import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
 import { applyAffine, distance, hitTestItems, invert, itemPoints, pointInTriangle } from '../canvas/geometry';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
+import { meshKeySpace } from '../../../services/keyEditor/points';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
 import { imagePartAt, isLockedDeep, paramValuesOf, partById, partMatrix } from '../canvas/parts';
 import { addVertex, markEditedIfChanged, remeshCommand, removeVertices } from './meshOps';
@@ -51,7 +52,11 @@ export function displayPositions(
 ): Vec2[] {
   const item = deformed?.byPartId[part.id];
   if (item && item.positions.length === mesh.vertices.length * 2) return itemPoints(item);
-  return pointsToModelSpace(model, deltas, part.id, meshLocalPositions(mesh, deltas));
+  const global = deltas.modelVertices?.[mesh.id];
+  return pointsToModelSpace(model, deltas, part.id, meshLocalPositions(mesh, deltas)).map((p, i) => ({
+    x: p.x + (global?.[i * 2] ?? 0),
+    y: p.y + (global?.[i * 2 + 1] ?? 0),
+  }));
 }
 
 // 画面上でいちばん近い頂点（radius の内側だけ）
@@ -271,7 +276,10 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
       start: e.canvasPoint,
       screenStart: e.screenPoint,
       started: false,
-      moves: createMeshDragMapper(project.model, deltas, target.part.id, mesh, indices),
+      moves:
+        meshKeySpace(project, editor, mesh.id) === 'model'
+          ? (d) => indices.map((index) => ({ index, d }))
+          : createMeshDragMapper(project.model, deltas, target.part.id, mesh, indices),
       inverseErrorNotified: false,
       keyed: startKeyedDrag<Move[]>({
         store,

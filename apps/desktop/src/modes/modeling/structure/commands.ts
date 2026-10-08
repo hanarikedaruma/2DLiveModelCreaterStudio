@@ -1,6 +1,13 @@
 // パーツ構造・描画順・マスクのコマンド（純粋関数）。親子（parentId と兄弟の順）と描画順（drawOrder）は別々に変える
-import { curveMeshSignature, modelCommand, patchPart } from '@app/core';
-import type { Binding, CurveGuide, Mesh, Model, Part, Project, ShoulderCollider } from '@app/schema';
+import {
+  curveMeshSignature,
+  modelCommand,
+  patchPart,
+  bounceBinding,
+  bounceFrame,
+  createBindingEvaluator,
+} from '@app/core';
+import type { Binding, CurveGuide, Mesh, Model, Part, Physics, Project, ShoulderCollider, Vec2 } from '@app/schema';
 import type { Command } from '@app/contracts';
 import { basePart, childrenOf, idSequence, isInside, partsCenter, removeParts, subtreeIds, topMost } from './modelOps';
 
@@ -12,11 +19,25 @@ export interface TreeTarget {
   beforeId: string | null;
 }
 
-// 親にできるのはグループだけ。自身や子孫の下には動かせない
+// 胸は呼吸の変換も引き継ぐため、胴体の画像を親にできる。自身や子孫の下には動かせない。
 export function canMoveTo(model: Model, ids: readonly string[], parentId: string | null): boolean {
   if (parentId === null) return true;
   const parent = model.parts.find((p) => p.id === parentId);
-  if (!parent || parent.kind !== 'group') return false;
+  if (!parent) return false;
+  if (
+    parent.kind !== 'group' &&
+    !(
+      parent.standardType === 'torso' &&
+      topMost(model, ids).every((id) => {
+        const part = model.parts.find((p) => p.id === id);
+        return (
+          part?.standardType === 'chest' ||
+          model.bindings.some((b) => b.target.id === part?.meshId && b.vertexSpace === 'model')
+        );
+      })
+    )
+  )
+    return false;
   return !topMost(model, ids).some((id) => isInside(model, parentId, id));
 }
 
@@ -164,6 +185,7 @@ export function setMask(partId: string, sourceId: string | null): Command {
 // ---- 複製（コピーと左右反転コピーで使う） ----
 
 export interface DuplicateVariant {
+  mirror?: boolean;
   part(original: Part, copy: Part, isRoot: boolean): Part;
   mesh(original: Mesh, copy: Mesh): Mesh;
   binding(copy: Binding): Binding; // target は差し替え済み
@@ -217,7 +239,8 @@ export function duplicateParts(
     newMeshes.push(variant.mesh(original, { ...original, id: newId }));
   }
 
-  const newBindings: Binding[] = [];
+  let newBindings: Binding[] = [];
+  const bindingIds = new Map<string, string>();
   for (const b of model.bindings) {
     const mapped =
       b.target.type === 'part'
@@ -226,7 +249,9 @@ export function duplicateParts(
           ? meshIds.get(b.target.id)
           : undefined;
     if (mapped === undefined) continue;
-    newBindings.push(variant.binding({ ...b, id: next(), target: { ...b.target, id: mapped } }));
+    const id = next();
+    bindingIds.set(b.id, id);
+    newBindings.push(variant.binding({ ...b, id, target: { ...b.target, id: mapped } }));
   }
 
   const originals = model.drawOrder.filter((id) => partIds.has(id));
@@ -282,11 +307,90 @@ export function duplicateParts(
     drawOrder = [...model.drawOrder.slice(0, last + 1), ...copies, ...model.drawOrder.slice(last + 1)];
   }
 
-  return {
+  const newPhysics: Physics[] = [];
+  const newParameters: Model['parameters'] = [];
+  for (const old of project.physics.filter((p) => p.deform === 'bounce' && partIds.has(p.partId) && p.bounce)) {
+    if (
+      variant.mirror &&
+      model.bindings.some(
+        (b) =>
+          old.bounce!.bindingIds.includes(b.id) &&
+          b.keys.some((k) => k.locked || (k.source !== 'auto' && k.source !== 'generated')),
+      )
+    )
+      throw new Error('手編集・ロックした胸のキーは左右反転で作り直せません。');
+    const partId = partIds.get(old.partId)!,
+      meshId = meshIds.get(old.bounce!.meshId),
+      mesh = newMeshes.find((m) => m.id === meshId);
+    if (!mesh || !meshId) continue;
+    const outputs = [old.outputParameterId, old.verticalOutputParameterId].map((id, axis) => {
+      const parameter = model.parameters.find((p) => p.id === id);
+      if (!parameter) return null;
+      const newId = next();
+      newParameters.push({
+        ...parameter,
+        id: newId,
+        standard: false,
+        name: `胸 ${parts.find((p) => p.id === partId)!.name} ${axis === 0 ? '左右' : '上下'}`,
+      });
+      return newId;
+    });
+    if (!outputs[0] || !outputs[1]) continue;
+    const outputMap = new Map([
+      [old.outputParameterId, outputs[0]],
+      [old.verticalOutputParameterId!, outputs[1]],
+    ]);
+    newBindings = newBindings.map((b) => ({ ...b, parameterIds: b.parameterIds.map((id) => outputMap.get(id) ?? id) }));
+    const original = meshes.get(old.bounce!.meshId)!;
+    const centerIndex = original.vertices.findIndex(
+      (p) => p.x === old.bounce!.referenceCenter.x && p.y === old.bounce!.referenceCenter.y,
+    );
+    const b = {
+      ...old.bounce!,
+      weights: [...old.bounce!.weights],
+      bindingIds: old.bounce!.bindingIds.map((id) => bindingIds.get(id) ?? next()) as [string, string],
+      meshId,
+      referenceCenter: { ...(mesh.vertices[centerIndex] ?? old.bounce!.referenceCenter) },
+      referenceBasis: old.bounce!.referenceBasis.map((p) => ({ ...p })) as [Vec2, Vec2],
+      meshSignature:
+        old.bounce!.meshSignature === curveMeshSignature(original)
+          ? curveMeshSignature(mesh)
+          : old.bounce!.meshSignature,
+    };
+    const physics: Physics = {
+      ...old,
+      id: next(),
+      partId,
+      outputParameterId: outputs[0],
+      verticalOutputParameterId: outputs[1],
+      inputs: old.inputs.map((i) => ({ ...i })),
+      bounce: b,
+    };
+    newPhysics.push(physics);
+    if (variant.mirror && old.bounce!.meshSignature === curveMeshSignature(original))
+      newBindings = newBindings.map((binding) => {
+        const axis = b.bindingIds.indexOf(binding.id);
+        if (axis < 0) return binding;
+        return bounceBinding(
+          binding.id,
+          meshId,
+          outputs[axis]!,
+          b.weights,
+          b.amplitudes[axis === 0 ? 'x' : 'y'],
+          axis === 0 ? 'x' : 'y',
+        );
+      });
+  }
+  const result: Project = {
     ...project,
+    physics: newPhysics.length ? [...project.physics, ...newPhysics] : project.physics,
     model: {
       ...model,
-      parts,
+      parts: parts.map((p) => {
+        const item = newPhysics.find((item) => item.partId === p.id);
+        return item ? { ...p, physicsId: item.id } : p;
+      }),
+      parameters: newParameters.length ? [...model.parameters, ...newParameters] : model.parameters,
       meshes: [...model.meshes, ...newMeshes],
       bindings: [...model.bindings, ...newBindings],
       ...(model.curveGuides ? { curveGuides: [...model.curveGuides, ...newGuides] } : {}),
@@ -294,6 +398,17 @@ export function duplicateParts(
       drawOrder,
     },
   };
+  const evaluator = createBindingEvaluator();
+  const excluded = new Set(newPhysics.flatMap((p) => p.bounce!.bindingIds));
+  const deltas = evaluator.evaluate(
+    { ...result.model, bindings: result.model.bindings.filter((b) => !excluded.has(b.id)) },
+    {},
+  );
+  for (const item of newPhysics) {
+    const frame = bounceFrame(result, item, deltas);
+    if (frame) item.bounce!.referenceBasis = frame.basis;
+  }
+  return result;
 }
 
 // コピー。複製は standardType を持たない（標準パーツの枠を重ねない）

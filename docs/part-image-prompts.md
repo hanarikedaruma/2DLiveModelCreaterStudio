@@ -841,6 +841,22 @@ Do not draw: the other arm, the torso and its clothes, hair, or anything else.
 Complete hidden areas: paint the parts of the arm hidden behind hair, and make the top of the arm (shoulder joint / top of the sleeve) a complete rounded shape that overlaps slightly onto the torso's shoulder, because the arm rotates around the shoulder.
 ```
 
+#### 33. 胸 — `chest.png`（胸揺れを使うときだけ）
+
+- 衣装を含む胸の前面を1つの別レイヤーにする。上端と脇は胴体に留め、中ほどから下だけを弾ませる。
+- 基準画像の位置・角度・衣装・模様を保つ。胴体の素材には、この胸のレイヤーの下も同じ衣装・色で塗り足し、動いても透明な穴が出ないようにする。
+- アプリでは標準パーツ「胸」に割り当て、内部の頂点があるメッシュを作る。胴体の画像パーツへ接続するため、胴体も標準パーツとして割り当てる。
+
+```text
+Task: create ONE separate layer image for a layered 2D animation model.
+Use the attached whole character as the reference. Keep the exact canvas size, position, scale, angle, clothes, colors and drawing style.
+
+Draw ONLY the front chest panel, including its clothing and existing details. Keep the upper edge and both side edges aligned with the torso. The center and lower portion will move slightly during animation.
+Everything else must be fully transparent with a real alpha channel. Do not add background, labels, arms, hair, neck, or other body parts. Do not crop or re-center the image.
+Complete any small hidden areas under overlapping parts. Do not invent a different costume or expose areas covered in the reference.
+For the separate torso layer, also paint the clothing beneath this panel so that moving the panel never reveals transparent gaps.
+```
+
 ## 5. うまくいかないとき
 
 - **パーツが拡大されたり、中央に描き直されたりする。** プロンプトの先頭を `Edit the attached image: erase everything except the <パーツ名>, keep it exactly where it is, then` に変える。インペイント（範囲を塗って編集）ができるAIなら、基準画像からほかの部分を消させる。

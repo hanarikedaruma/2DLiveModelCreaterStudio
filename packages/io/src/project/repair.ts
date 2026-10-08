@@ -40,6 +40,12 @@ export function repairProject(project: Project): RepairResult {
     project = { ...project, model: { ...project.model, curveGuides: validGuides } };
   }
   const parameterIds = new Set(project.model.parameters.map((p) => p.id));
+  const repairedPhysics = project.physics.map((ph) => {
+    if (!ph.verticalOutputParameterId || parameterIds.has(ph.verticalOutputParameterId)) return ph;
+    repairs.push(`上下の出力先が無い物理の指定を外した（${ph.id}）`);
+    return { ...ph, verticalOutputParameterId: null };
+  });
+  if (repairedPhysics.some((ph, i) => ph !== project.physics[i])) project = { ...project, physics: repairedPhysics };
   const dangling = project.physics.filter((ph) => !parameterIds.has(ph.outputParameterId));
   if (dangling.length === 0) return { project, repairs };
 

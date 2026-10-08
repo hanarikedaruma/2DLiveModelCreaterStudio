@@ -14,8 +14,8 @@ describe('@app/schema の公開', () => {
     ] as const) {
       expect(schema[name], name).toBeTypeOf('function');
     }
-    expect(schema.SCHEMA_VERSION).toBe(5); // カード99の流れ線
+    expect(schema.SCHEMA_VERSION).toBe(6); // カード98の胸揺れ
     expect(schema.PARALLAX_RATIO).toBe(0.08);
-    expect(schema.STANDARD_PARAMETERS).toHaveLength(26);
+    expect(schema.STANDARD_PARAMETERS).toHaveLength(28);
   });
 });

@@ -41,6 +41,18 @@ export function pointsOps(n: number): DeltaOps<Vec2[]> {
 
 type Move = { index: number; d: Vec2 };
 
+// モデル座標で保存するキーのドラッグは、表示中のキャンバス座標の差分をそのまま使う。
+export function meshKeySpace(project: Project, editor: EditorState, meshId: string): 'part' | 'model' {
+  const params = activeParams(project.model, editor);
+  if (isBaseState(params)) return 'part';
+  const ids = params.map((p) => p.id);
+  return project.model.bindings.some(
+    (b) => b.target.id === meshId && b.vertexSpace === 'model' && b.parameterIds.some((id) => ids.includes(id)),
+  )
+    ? 'model'
+    : 'part';
+}
+
 const labelOf = (target: PointsTarget) => (target.kind === 'mesh' ? '頂点の移動' : '制御点の移動');
 const noop = (label: string): Command => ({ label, apply: (p) => p });
 
@@ -91,13 +103,20 @@ export function pointsEdit(
 ): Command | 'needsKey' {
   const model = project.model;
   const resolved = resolve(model, target);
-  const valid = resolved
+  let valid = resolved
     ? moves.filter((m) => Number.isInteger(m.index) && m.index >= 0 && m.index < resolved.count)
     : [];
   if (!resolved || valid.length === 0) return noop(labelOf(target));
 
   const params = activeParams(model, editor);
   if (isBaseState(params)) return baseCommand(target, valid);
+
+  if (target.kind === 'mesh' && meshKeySpace(project, editor, target.meshId) === 'model') {
+    resolved.binding.vertexSpace = 'model';
+    const item = project.physics.find((p) => p.deform === 'bounce' && p.bounce?.meshId === target.meshId);
+    if (item?.bounce) valid = valid.filter((m) => item.bounce!.weights[m.index]! > 0);
+    if (!valid.length) return noop(labelOf(target));
+  }
 
   const spec = {
     target: resolved.binding,
@@ -119,6 +138,8 @@ export function addPointsKey(project: Project, editor: EditorState, target: Poin
   const resolved = resolve(model, target);
   const params = activeParams(model, editor);
   if (!resolved || isBaseState(params)) return noop('キーの追加');
+  if (target.kind === 'mesh' && meshKeySpace(project, editor, target.meshId) === 'model')
+    resolved.binding.vertexSpace = 'model';
   const spec = {
     target: resolved.binding,
     params,

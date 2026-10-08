@@ -190,6 +190,11 @@ export function createDeformPipeline(): DeformPipeline {
         }
         flush();
 
+        const worldDelta = own(deltas.modelVertices ?? {}, mesh.id);
+        if (worldDelta && worldDelta.length === positions.length) {
+          for (let i = 0; i < positions.length; i++) positions[i]! += worldDelta[i]!;
+        }
+
         const guide = guides.get(part.id);
         if (guide && guide.meshId === mesh.id) {
           const evaluated = evaluateCurveGuide(model, deltas, guide, mesh, positions);

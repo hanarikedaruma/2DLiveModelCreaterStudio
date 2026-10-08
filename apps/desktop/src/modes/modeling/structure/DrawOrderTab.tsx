@@ -5,7 +5,7 @@ import { beginDrag, rowZone, useDropTarget } from '../assets/dnd';
 import { reorderDrawOrder } from './commands';
 import { drawOrderBlock } from './modelOps';
 import { clickSelection } from './selection';
-import { AxisSwayBadge, FlowSwayBadge } from './ui';
+import { AxisSwayBadge, ChestSwayBadge, FlowSwayBadge } from './ui';
 import { flowSwayReason } from '@app/core';
 import './structure.css';
 
@@ -19,7 +19,7 @@ function DrawOrderRow({
 }: {
   part: Part;
   parentName: string | null;
-  axisSway: boolean;
+  axisSway: boolean | 'chest';
   flowSway?: true | string;
   inBlock: boolean;
   block: readonly string[];
@@ -67,7 +67,7 @@ function DrawOrderRow({
       <span className="part-name" title={part.name}>
         {part.name}
       </span>
-      {axisSway && <AxisSwayBadge name={part.name} />}
+      {axisSway && (axisSway === 'chest' ? <ChestSwayBadge name={part.name} /> : <AxisSwayBadge name={part.name} />)}
       {flowSway && <FlowSwayBadge name={part.name} reason={typeof flowSway === 'string' ? flowSway : undefined} />}
       {parentName && <span className="am-dim parent-name">{parentName}</span>}
     </li>
@@ -79,7 +79,9 @@ export function DrawOrderTab() {
   const { model } = project;
   const [editor, setEditor] = useEditor();
   const byId = new Map(model.parts.map((p) => [p.id, p]));
-  const axisSwayPartIds = new Set(project.physics.map((item) => item.partId));
+  const axisSwayPartIds = new Map(
+    project.physics.map((item) => [item.partId, item.deform === 'bounce' ? 'chest' : true] as const),
+  );
   const flowSwayParts = new Map(
     (model.curveGuides ?? [])
       .filter((g) => g.dynamics?.enabled)
@@ -123,7 +125,7 @@ export function DrawOrderTab() {
                 key={part.id}
                 part={part}
                 parentName={part.parentId ? (byId.get(part.parentId)?.name ?? null) : null}
-                axisSway={axisSwayPartIds.has(part.id)}
+                axisSway={axisSwayPartIds.get(part.id) ?? false}
                 flowSway={flowSwayParts.get(part.id)}
                 inBlock={blockSet.has(part.id)}
                 block={block}

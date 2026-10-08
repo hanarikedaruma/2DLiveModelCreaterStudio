@@ -11,11 +11,72 @@ import {
   type StandardPartType,
 } from '@app/schema';
 import type { Command } from '@app/contracts';
+import { withChestPhysics, chestSetupReason, type ChestIds, type CHEST_PINNING } from '@app/core';
 import { DEFAULT_STRENGTH, PHYSICS_PRESETS } from './presets';
 import { isAutoSwayBinding, withSwayBindings, type SwayBindingIds } from './sway';
 
 export const SWAY_PARAMETER_PREFIX = 'Sway_';
 export const SWAY_GROUP_ID = 'sway';
+
+export function enableChestCommand(partId: string, ids: ChestIds, pinning?: typeof CHEST_PINNING): Command {
+  return { label: '胸を揺らす', apply: (project) => withChestPhysics(project, partId, ids, pinning) };
+}
+export function changePhysicsKindCommand(partId: string, kind: Physics['preset'], ids: EnablePhysicsIds): Command {
+  return {
+    label: '揺れの種類を変える',
+    apply(project) {
+      const part = project.model.parts.find((p) => p.id === partId),
+        item = physicsOfPart(project, partId);
+      if (!part || !item) return project;
+      if (kind === 'chest') {
+        if (item.deform === 'bounce')
+          return updatePhysicsCommand('胸のプリセットを選ぶ', item.id, (it) => ({
+            ...it,
+            preset: 'chest',
+            ...PHYSICS_PRESETS.chest,
+          })).apply(project);
+        const next = withChestPhysics(project, partId, {
+          physics: item.id,
+          horizontal: ids.transform,
+          vertical: ids.vertices,
+        });
+        return {
+          ...next,
+          physics: next.physics.map((p) =>
+            p.id === item.id ? { ...p, preset: 'chest', ...PHYSICS_PRESETS.chest } : p,
+          ),
+        };
+      }
+      if (item.deform !== 'bounce')
+        return updatePhysicsCommand('揺れの種類を変える', item.id, (it) => ({
+          ...it,
+          preset: kind,
+          ...PHYSICS_PRESETS[kind],
+        })).apply(project);
+      const reason = chestSetupReason(project, part);
+      if (reason) throw new Error(reason);
+      const owned = new Set(item.bounce?.bindingIds ?? []);
+      const disabled = {
+        ...project,
+        model: { ...project.model, bindings: project.model.bindings.filter((b) => !owned.has(b.id)) },
+      };
+      const parameterId = swayParameterIdFor(part);
+      let model = withSwayParameter(disabled.model, part, parameterId);
+      model = withSwayBindings(model, part, parameterId, ids);
+      const { bounce: _bounce, verticalOutputParameterId: _vertical, ...rest } = item;
+      const next: Physics = {
+        ...rest,
+        deform: 'swing',
+        preset: kind,
+        direction: 'horizontal',
+        inputs: [],
+        outputParameterId: parameterId,
+        ...PHYSICS_PRESETS[kind],
+      };
+      return { ...disabled, model, physics: project.physics.map((p) => (p === item ? next : p)) };
+    },
+  };
+}
 
 // 標準の髪の部位が使う揺れパラメータ（標準パラメータ）
 export const HAIR_SWAY_PARAMETERS: Partial<Record<StandardPartType, string>> = {
@@ -156,6 +217,13 @@ export function rebuildSwayCommand(partId: string, ids: SwayBindingIds): Command
       const part = project.model.parts.find((p) => p.id === partId);
       const item = physicsOfPart(project, partId);
       if (!part || !item) return project;
+      if (item.deform === 'bounce')
+        return withChestPhysics(
+          project,
+          partId,
+          { physics: item.id, horizontal: ids.transform, vertical: ids.vertices },
+          item.bounce?.pinning,
+        );
       const model = withSwayBindings(project.model, part, item.outputParameterId, ids);
       return model === project.model ? project : { ...project, model };
     },
@@ -168,7 +236,12 @@ export function isParameterUsed(project: Project, id: string): boolean {
   const { model } = project;
   return (
     model.bindings.some((b) => b.parameterIds.includes(id)) ||
-    project.physics.some((ph) => ph.outputParameterId === id || ph.inputs.some((x) => x.parameterId === id)) ||
+    project.physics.some(
+      (ph) =>
+        ph.outputParameterId === id ||
+        ph.verticalOutputParameterId === id ||
+        ph.inputs.some((x) => x.parameterId === id),
+    ) ||
     project.trackingMappings.some((m) => m.parameterId === id) ||
     project.expressions.some((e) => e.entries.some((x) => x.parameterId === id)) ||
     project.animations.some((a) => a.tracks.some((t) => t.parameterId === id)) ||
@@ -187,7 +260,12 @@ export function disablePhysicsCommand(partId: string): Command {
       if (!part) return project;
       const items = project.physics.filter((ph) => ph.partId === partId || ph.id === part.physicsId);
       if (items.length === 0 && part.physicsId === null) return project;
-      const outputs = new Set(items.map((ph) => ph.outputParameterId));
+      const outputs = new Set(
+        items.flatMap((ph) => [
+          ph.outputParameterId,
+          ...(ph.verticalOutputParameterId ? [ph.verticalOutputParameterId] : []),
+        ]),
+      );
       const removing = new Set(items.map((ph) => ph.id));
       let model: Model = {
         ...project.model,
@@ -200,6 +278,15 @@ export function disablePhysicsCommand(partId: string): Command {
       if (sway && !isParameterUsed(next, swayId)) {
         next = { ...next, model: { ...next.model, parameters: next.model.parameters.filter((p) => p !== sway) } };
       }
+      next = {
+        ...next,
+        model: {
+          ...next.model,
+          parameters: next.model.parameters.filter(
+            (p) => p.standard || !outputs.has(p.id) || isParameterUsed(next, p.id),
+          ),
+        },
+      };
       return next;
     },
   };

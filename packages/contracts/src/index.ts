@@ -23,6 +23,7 @@ export type ParamValues = Record<string, number>;
 export interface TargetDeltas {
   transforms: Record<string, TransformDelta>; // partId → 合成済みの差分（opacity は使わない。1 のまま）
   vertices: Record<string, Float32Array>; // meshId → [dx0, dy0, dx1, dy1, ...]
+  modelVertices?: Record<string, Float32Array>; // meshId → 祖先の変換後に足すモデル座標の差分
   warpPoints: Record<string, Float32Array>; // warpId → 制御点の差分（同じ並び）
   // partId → パーツ自身の不透明度（0..1。親は掛けていない）。不透明度のバインディング（controlsOpacity）があるパーツだけ。
   // 無いパーツは Part.opacity（I-026）
@@ -140,6 +141,7 @@ export interface ParameterMixer {
 // スタジオの1フレームの文脈。producer は LAYER_ORDER の順に呼ばれる
 export interface FrameContext {
   now: number;
+  frameId?: string | number; // 胸の同一フレームの再評価を積分しない
   dt: number; // ミリ秒
   project: Project;
   mixedSoFar: ParamValues; // それまでのレイヤーを合成した値
