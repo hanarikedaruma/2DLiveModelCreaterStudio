@@ -82,11 +82,11 @@ describe('I-066: 列をまたぐ折りたたみの保存', () => {
       expect(await saved()).toEqual([left]);
       await toggle(right);
       expect(await saved()).toEqual([left, right].sort());
-      await page.getByRole('button', { name: 'スタジオ', exact: true }).click();
+      await page.getByRole('tab', { name: 'スタジオ', exact: true }).click();
       await toggle(bottom);
       await toggle(studioRight);
       expect(await saved()).toEqual([left, right, bottom, studioRight].sort());
-      await page.getByRole('button', { name: 'モデリング', exact: true }).click();
+      await page.getByRole('tab', { name: 'モデリング', exact: true }).click();
       await closed(left);
       await closed(right);
       await toggle(right);
@@ -97,7 +97,7 @@ describe('I-066: 列をまたぐ折りたたみの保存', () => {
       await load();
       await closed(left);
       expect(await panel(right).getAttribute('aria-expanded')).toBe('true');
-      await page.getByRole('button', { name: 'スタジオ', exact: true }).click();
+      await page.getByRole('tab', { name: 'スタジオ', exact: true }).click();
       await closed(bottom);
       await closed(studioRight);
       expect(await saved()).toEqual(expected);
