@@ -130,13 +130,18 @@ function fromAttachment(a: Attachment, positions: Float32Array): Vec2 {
   );
 }
 
-const pointAttachments = new WeakMap<Mesh, WeakMap<Vec2[], Attachment[]>>();
+const pointAttachments = new WeakMap<Mesh, WeakMap<Vec2[], { coordinates: number[]; attachments: Attachment[] }>>();
 function attachmentsOf(mesh: Mesh, points: Vec2[]): Attachment[] {
   let cache = pointAttachments.get(mesh);
   if (!cache) pointAttachments.set(mesh, (cache = new WeakMap()));
-  let attachments = cache.get(points);
-  if (!attachments) cache.set(points, (attachments = points.map((p) => attachmentAt(mesh, p))));
-  return attachments;
+  let entry = cache.get(points);
+  // Editing inverses reuse a working array while changing its points. Cache only
+  // unchanged coordinates; saved shoulder arrays still reuse fixed attachments.
+  if (!entry || points.some((p, i) => entry!.coordinates[i * 2] !== p.x || entry!.coordinates[i * 2 + 1] !== p.y)) {
+    entry = { coordinates: points.flatMap((p) => [p.x, p.y]), attachments: points.map((p) => attachmentAt(mesh, p)) };
+    cache.set(points, entry);
+  }
+  return entry.attachments;
 }
 
 export function meshPointsToDisplay(mesh: Mesh, positions: Float32Array, points: Vec2[]): Vec2[] {

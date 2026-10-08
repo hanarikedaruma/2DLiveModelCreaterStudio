@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createEmptyProject, type CurveGuide, type Mesh, type ShoulderCollider } from '@app/schema';
 import type { BindingEvaluator } from '@app/contracts';
 import { imagePart } from '../deform/testParts';
-import { curveMeshSignature } from '../deform/curveGuide';
+import { curveMeshSignature, meshPointsToDisplay } from '../deform/curveGuide';
 import { createDeformPipeline } from '../deform/pipeline';
 import { createHairFrameEvaluator } from './frame';
 import { evaluateShoulders, meshContactsFit } from './colliders';
@@ -106,6 +106,16 @@ function fixture(x = 44, width = 6) {
   return { p, guide, collider, hair, body, evaluator, pipeline, frames };
 }
 describe('肩を含む共通フレーム', () => {
+  it('編集の逆算で同じ作業配列の座標を変えても、肩の対応のキャッシュは古い点を返さない', () => {
+    const { body } = fixture();
+    const positions = new Float32Array(body.vertices.flatMap((p) => [p.x * 2 + 10, p.y + 5]));
+    const points = [{ x: 0.125, y: 100.375 }];
+    expect(meshPointsToDisplay(body, positions, points)[0]!.x).toBeCloseTo(10.25);
+    points[0] = { x: 2.625, y: 101.25 };
+    const moved = meshPointsToDisplay(body, positions, points)[0]!;
+    expect(moved.x).toBeCloseTo(15.25);
+    expect(moved.y).toBeCloseTo(106.25);
+  });
   it.each([2, 4])('%s本の揺れと肩接触を同じフレームで有限に評価する', (count) => {
     const { p, guide, frames } = fixture(46);
     guide.dynamics = { enabled: true, preset: 'normal', strength: 0.5, damping: 0.2 };
