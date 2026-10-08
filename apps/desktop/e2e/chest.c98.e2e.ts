@@ -106,8 +106,30 @@ describe('カード98: 胸の実画面', () => {
       expect(await page.evaluate(() => window.__studio.services.editor.get().editorParamValues)).toEqual({
         BodyAngleZ: 45,
       });
+      await page.evaluate(async () => {
+        window.__studio.canvas.requestFit();
+        await new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done())));
+      });
+      const geometry = await page.evaluate(() =>
+        Array.from(window.__studio.canvas.lastDeformed()!.byPartId.chest!.positions),
+      );
+      const originalView = await page.evaluate(() => window.__studio.canvas.getState().view);
+      await page.evaluate(async (view) => {
+        window.__studio.canvas.setView({
+          scale: view.scale * 0.5,
+          offset: { x: view.offset.x + 27, y: view.offset.y - 19 },
+        });
+        await new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done())));
+      }, originalView);
+      expect(
+        await page.evaluate(() => Array.from(window.__studio.canvas.lastDeformed()!.byPartId.chest!.positions)),
+      ).toEqual(geometry);
+      await page.evaluate((view) => window.__studio.canvas.setView(view), originalView);
+      await settings.getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' }).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: join(OUT, `pinning-${size.width}.png`) });
       await settings.getByRole('button', { name: '胸の固定範囲', exact: true }).click();
       await settings.getByRole('button', { name: '物理の数値', exact: true }).click();
+      await settings.getByLabel('胸を揺らす', { exact: true }).scrollIntoViewIfNeeded();
       await page.screenshot({ path: join(OUT, `settings-${size.width}.png`) });
       await settings.getByRole('button', { name: '布', exact: true }).click();
       expect(await page.evaluate(() => window.__studio.services.store.get().physics[0]!.deform)).toBe('swing');
