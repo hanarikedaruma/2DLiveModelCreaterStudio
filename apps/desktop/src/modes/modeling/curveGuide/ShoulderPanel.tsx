@@ -23,7 +23,7 @@ export function ShoulderPanel({
 }) {
   const project = useProject(),
     { store } = useServices();
-  const { motionPreview } = useCanvas();
+  const { motionPreview, lastDeformed } = useCanvas();
   const [host, setHost] = useState(''),
     [selected, setSelected] = useState('');
   const [draft, setDraft] = useState<{ radius?: number; thickness?: number; name?: string }>({});
@@ -59,7 +59,9 @@ export function ShoulderPanel({
       setDraft({});
     }
   };
-  const result = curveEditor.snapshot()?.evaluated?.result.collision;
+  const result = motionPreview
+    ? lastDeformed()?.curveGuides?.[guide.id]?.collision
+    : curveEditor.snapshot()?.evaluated?.result.collision;
   return (
     <fieldset className="curve-shoulders">
       <legend>肩との接触</legend>

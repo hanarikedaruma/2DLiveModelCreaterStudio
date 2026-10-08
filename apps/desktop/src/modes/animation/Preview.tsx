@@ -3,7 +3,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ParamValues, Renderer } from '@app/contracts';
 import { HairDynamicsSession } from '@app/core';
-import { hairFrames } from '../../services/hairFrame';
+import { hairFrames, hairFrameWarning } from '../../services/hairFrame';
+import { HairWarning } from '../../shell/canvas/HairWarning';
 import { useAnimationEditor } from './state';
 import { selectedAnimation } from './state';
 import { sampleAnimation } from './keyframes';
@@ -29,6 +30,7 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
   const rendererRef = useRef<Renderer | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [textures, setTextures] = useState(0); // 素材の画像が変わったら描き直す
+  const [warning, setWarning] = useState('');
 
   // レンダラー
   useLayoutEffect(() => {
@@ -117,6 +119,7 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
       seek: animationState.seekRevision ?? 0,
       project,
     };
+    setWarning(hairFrameWarning(project, deformed));
     const rect = canvasSize
       ? { x: 0, y: 0, width: canvasSize.width, height: canvasSize.height }
       : (boundsOf(deformed) ?? FALLBACK_RECT);
@@ -126,6 +129,7 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
   return (
     <div ref={stageRef} className="anim-stage" data-testid="animation-preview">
       <canvas ref={canvasRef} className="anim-preview" />
+      <HairWarning message={warning} />
     </div>
   );
 }

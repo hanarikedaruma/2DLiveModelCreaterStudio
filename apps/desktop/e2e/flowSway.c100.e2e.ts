@@ -248,11 +248,16 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
           window.__studio.canvas.getState().motionPreview !== null && !!window.__studio.canvas.getState().motionPreview,
       );
       const samples = await page.evaluate(async () => {
-        const values: { tip: { x: number; y: number }; status: string }[] = [];
+        const values: { tip: { x: number; y: number }; status: string; collision: string }[] = [];
         for (let i = 0; i < 65; i++) {
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
           const g = window.__studio.canvas.lastDeformed()?.curveGuides?.g;
-          if (g) values.push({ tip: g.curve.at(-1)!, status: g.dynamics?.status ?? '' });
+          if (g)
+            values.push({
+              tip: g.curve.at(-1)!,
+              status: g.dynamics?.status ?? '',
+              collision: g.collision?.status ?? '',
+            });
         }
         return values;
       });

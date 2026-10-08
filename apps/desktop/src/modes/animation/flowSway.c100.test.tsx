@@ -17,7 +17,7 @@ afterEach(() => {
   animationEditor.reset();
 });
 describe('アニメーションの流れ揺れ', () => {
-  it('連続再生で慣性を進め、同じ時刻の再描画は進めず、小さい手動シーク/停止/同じIDの再読込は静止形に戻す', () => {
+  it('連続再生・同じ時刻・シーク・停止・再読込を扱い、失効した線の理由を表示して復旧時に消す', () => {
     const project = hairProject();
     const points: CurveGuide['points'] = [
       { x: 300, y: 200 },
@@ -90,5 +90,12 @@ describe('アニメーションの流れ揺れ', () => {
     expect(rendered.at(-1)!.byPartId.hair!.positions).toEqual(staticFrame.byPartId.hair!.positions);
     act(() => services.store.load(JSON.parse(JSON.stringify(project))));
     expect(rendered.at(-1)!.curveGuides!.g!.dynamics!.status).toBe('settled');
+    const stale = structuredClone(project);
+    stale.model.curveGuides![0]!.meshSignature = 'stale';
+    act(() => services.store.load(stale));
+    expect(screen.getByRole('status').textContent).toContain('流れ線を描き直してください');
+    expect(Array.from(rendered.at(-1)!.byPartId.hair!.positions).every(Number.isFinite)).toBe(true);
+    act(() => services.store.load(structuredClone(project)));
+    expect(screen.queryByRole('status')).toBeNull();
   });
 });

@@ -1,0 +1,17 @@
+.hair-frame-warning {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  padding: 6px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-line;
+  max-height: 33%;
+  overflow: hidden;
+  pointer-events: none;
+}

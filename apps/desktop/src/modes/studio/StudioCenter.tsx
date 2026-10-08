@@ -3,6 +3,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import type { Vec2 } from '@app/schema';
 import type { Renderer } from '@app/contracts';
 import { useDispatch, useServices } from '../../shell/api';
+import { hairFrameWarning } from '../../services/hairFrame';
+import { HairWarning } from '../../shell/canvas/HairWarning';
 import { useStudioBinding } from './binding';
 import {
   DEFAULT_MODEL_TRANSFORM,
@@ -38,6 +40,8 @@ export function StudioCenter() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<Renderer | null>(null);
   const [stage, setStage] = useState({ width: 0, height: 0 });
+  const [warning, setWarning] = useState('');
+  const warningRef = useRef('');
   const frame = fitFrame(outputSize, stage.width, stage.height);
   const scaleRef = useRef(frame.scale);
   scaleRef.current = frame.scale;
@@ -100,12 +104,17 @@ export function StudioCenter() {
   useEffect(
     () =>
       studioRuntime.setPreview((f) => {
+        const message = hairFrameWarning(services.store.get(), f.model);
+        if (warningRef.current !== message) {
+          warningRef.current = message;
+          setWarning(message);
+        }
         const renderer = rendererRef.current;
         const k = scaleRef.current;
         if (!renderer || k <= 0) return;
         renderer.render(f.model, scaleView(f.view, k), f.background);
       }),
-    [],
+    [services],
   );
 
   // 領域の大きさ
@@ -212,6 +221,7 @@ export function StudioCenter() {
             顔が外れている
           </div>
         )}
+        <HairWarning message={warning} />
       </div>
     </div>
   );
