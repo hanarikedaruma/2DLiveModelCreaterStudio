@@ -11,6 +11,17 @@
 
 追加の回帰は`packages/core/src/physics/audit.c98.test.ts`、`apps/desktop/src/modes/studio/audit.c98.test.ts`と既存のanimation/PhysicsSectionのカード98テスト。5475893のソースではcoreの3件とdesktopの2件が失敗し、修正後は成功した。固定範囲の数値を実際に変更し、固定点数の増加とUndo/Redoも確認した。
 
-修正前のログ: `.cache/c98-audit-core-before-final.log`・`.cache/c98-audit-desktop-before-final.log`。修正後の全体検証と実画面の結果は検証終了後に追記する。
+修正前のログ: `.cache/c98-audit-core-before-final.log`・`.cache/c98-audit-desktop-before-final.log`。
+
+修正後の検証:
+
+- 全体の単体2,556件が成功。追加のスタジオ3件は、終了後も体を45°に保ち、微小な丸め誤差を合格にしない閾値で再確認した。全体の型・lint・整形も成功。
+- Nativeの全体実行は28件成功・1件失敗（16ファイル）。残った新規の胸テストは「回転直後の左右出力は必ず正」という前提が誤っていた。0°から45°への取付け中心の移動には慣性が働くため、静止の釣り合いは2.5秒以降に左右/上下の数式から正規化出力±0.02で判定するよう補強した。その後、胸のNative3件を再実行して成功。製品コードは全体実行から変更していない。
+- Edgeも胸の3件が成功。Native/Edgeの両画面サイズ、手動BustY=−0.7の実再生と、空トラックでの静止釣り合いを確認した。
+- [Nativeの手動胸キーの再生画面](native-audit-studio.png)・[Edgeの再生画面](edge-audit-studio.png)。実画面ログは`.cache/c98-audit-native-all.log`・`.cache/c98-audit-native-final.log`・`.cache/c98-audit-edge-final.log`。
+
+製品の修正は36f2057、実画面の判定の補強は997bbbc。同コミットから本番ビルドを作り、配置先とのSHA256一致を確認した（`E96B658FF4BB671C9AD495BB62F940866BBD55990C233234F1D75987F70D673B`、2026-10-09 04:49 JST）。配置先の旧exeが別プロセスに保持されていたため、同じインストールフォルダに`live2d-studio.before-chest-audit-68CBF630.exe`として残し、既存の`pnpm app:install -NoBuild`で更新した。記録は`.cache/c98-audit-install-verified.json`。
+
+本番版の手動起動確認は、Computer Useの`launch_app`が再度タイムアウトし、アプリのウィンドウもプロセスも得られなかったため未確認。Nativeテスト版の起動と実再生の成功、本番ビルド/配置の成功と区別する。
 
 重力方向、固定点、手編集/ロックの保護、保存と再読込、同一フレーム、指定波形の30/60/120fps、既存の軸揺れと流れ揺れの接続も再確認する。制作モデルの自然さ、方式A/Bの選択、条件付きの範囲指定は別の判断として残す。
