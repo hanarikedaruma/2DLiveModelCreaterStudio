@@ -262,6 +262,7 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
         return values;
       });
       expect(samples.some((s) => s.status === 'running')).toBe(true);
+      expect(samples.every((s) => ['ok', 'limited'].includes(s.collision))).toBe(true);
       await page.screenshot({ path: join(EVIDENCE, `playing-${size.width}.png`) });
       await page.getByRole('button', { name: '選択・変形', exact: true }).click();
       expect(await panel.count()).toBe(0);
