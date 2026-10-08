@@ -248,7 +248,7 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
           window.__studio.canvas.getState().motionPreview !== null && !!window.__studio.canvas.getState().motionPreview,
       );
       const samples = await page.evaluate(async () => {
-        const values: { tip: { x: number; y: number }; status: string; collision: string }[] = [];
+        const values = [];
         for (let i = 0; i < 65; i++) {
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
           const g = window.__studio.canvas.lastDeformed()?.curveGuides?.g;
@@ -257,13 +257,17 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
               tip: g.curve.at(-1)!,
               status: g.dynamics?.status ?? '',
               collision: g.collision?.status ?? '',
+              reason: g.collision?.reason,
+              motion: window.__studio.canvas.getState().motionPreview,
+              curve: g.curve,
             });
         }
         return values;
       });
+      writeFileSync(join(EVIDENCE, `motion-${size.width}.json`), JSON.stringify({ project: saved, samples }, null, 2));
+      await page.screenshot({ path: join(EVIDENCE, `playing-${size.width}.png`) });
       expect(samples.some((s) => s.status === 'running')).toBe(true);
       expect(samples.every((s) => ['ok', 'limited'].includes(s.collision))).toBe(true);
-      await page.screenshot({ path: join(EVIDENCE, `playing-${size.width}.png`) });
       await page.getByRole('button', { name: '選択・変形', exact: true }).click();
       expect(await panel.count()).toBe(0);
       expect(await page.evaluate(() => !!window.__studio.canvas.getState().motionPreview)).toBe(true);

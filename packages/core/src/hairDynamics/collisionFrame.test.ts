@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createEmptyProject, type CurveGuide, type Mesh, type ShoulderCollider } from '@app/schema';
+import { createEmptyProject, type CurveGuide, type Mesh, type ShoulderCollider, type Physics } from '@app/schema';
 import type { BindingEvaluator } from '@app/contracts';
 import { imagePart } from '../deform/testParts';
 import { curveMeshSignature, meshPointsToDisplay } from '../deform/curveGuide';
@@ -153,6 +153,48 @@ describe('肩を含む共通フレーム', () => {
       );
     }
   });
+  it.each([0, 0.00003617])(
+    '固定刻みより短い描画間隔でも、肩に触れた静止毛束の接触は成立し続ける（座標の端数 %s）',
+    (offset) => {
+      const { p, guide, collider, frames } = fixture(0, 20);
+      for (const mesh of p.model.meshes)
+        for (const v of mesh.vertices) {
+          v.x += 300;
+          v.y += 200;
+        }
+      guide.reference = [
+        { x: 300, y: 200 },
+        { x: 300, y: 300 },
+        { x: 300, y: 400 },
+      ];
+      guide.points = [...guide.reference];
+      guide.meshSignature = curveMeshSignature(p.model.meshes[0]!);
+      collider.meshSignature = curveMeshSignature(p.model.meshes[1]!);
+      guide.radius = 70;
+      guide.dynamics = { enabled: true, preset: 'normal', strength: 0.5, damping: 0.2 };
+      collider.points = [
+        { x: 240, y: 350 + offset },
+        { x: 288 + offset, y: 350 + offset },
+      ];
+      collider.radius = 5;
+      p.model.parameters.push({
+        id: 'axis',
+        name: '軸',
+        groupId: 'sway',
+        min: -1,
+        max: 1,
+        default: 0,
+        standard: false,
+      });
+      p.physics = [{ partId: 'hair', outputParameterId: 'axis' } as Physics];
+      const session = new HairDynamicsSession();
+      for (let i = 0; i < 80; i++) {
+        const out = frames.evaluate(p, {}, { now: i * 5, dt: i ? 5 : 0, frameId: i, active: true }, session);
+        expect(['ok', 'limited'], `frame ${i}`).toContain(out.curveGuides!.g!.collision!.status);
+        expect(out.items.every((item) => item.positions.every(Number.isFinite))).toBe(true);
+      }
+    },
+  );
   it('揺れOFFでも接触を解く。衝突OFFにすると設定を残して元の形へ戻る', () => {
     const { p, guide, hair, frames } = fixture();
     const before = JSON.stringify(p);

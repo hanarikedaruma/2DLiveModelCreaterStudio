@@ -73,6 +73,45 @@ export function contactsFit(curve: Vec2[], fixed: number, contacts: HairContacts
   );
 }
 
+// Both moving segments stay in these convex hulls. Disjoint expanded hulls
+// prove that the remaining sweep is empty, including near-tangential motion.
+function hull(points: Vec2[]): Vec2[] {
+  const sorted = points.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  const half = (items: Vec2[]) => {
+    const result: Vec2[] = [];
+    for (const p of items) {
+      while (result.length >= 2) {
+        const a = result.at(-2)!,
+          b = result.at(-1)!;
+        if ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x) > 0) break;
+        result.pop();
+      }
+      result.push(p);
+    }
+    return result;
+  };
+  const lower = half(sorted),
+    upper = half(sorted.slice().reverse());
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+function hullDistance(a: Vec2[], b: Vec2[]): number {
+  const contains = (polygon: Vec2[], p: Vec2) =>
+    polygon.length >= 3 &&
+    polygon.every((q, i) => {
+      const r = polygon[(i + 1) % polygon.length]!;
+      return (r.x - q.x) * (p.y - q.y) - (r.y - q.y) * (p.x - q.x) >= -1e-12;
+    });
+  if (a.some((p) => contains(b, p)) || b.some((p) => contains(a, p))) return 0;
+  let distance = Infinity;
+  for (let i = 0; i < a.length; i++)
+    for (let j = 0; j < b.length; j++)
+      distance = Math.min(
+        distance,
+        closestSegments(a[i]!, a[(i + 1) % a.length]!, b[j]!, b[(j + 1) % b.length]!).distance,
+      );
+  return distance;
+}
+
 // Conservative advancement. The sum of endpoint speed bounds also bounds separation speed.
 // An exhausted budget is an unresolved contact, never a claim of an empty sweep.
 function sweep(a0: Vec2, b0: Vec2, c0: Vec2, d0: Vec2, a: Vec2, b: Vec2, c: Vec2, d: Vec2, radius: number) {
@@ -92,6 +131,14 @@ function sweep(a0: Vec2, b0: Vec2, c0: Vec2, d0: Vec2, a: Vec2, b: Vec2, c: Vec2
     if (next - time < 1e-7) return { ...hit, time, exhausted: false };
     time = next;
   }
+  if (
+    hullDistance(
+      hull([mixPoint(a0, a, time), mixPoint(b0, b, time), a, b]),
+      hull([mixPoint(c0, c, time), mixPoint(d0, d, time), c, d]),
+    ) >
+    radius + 1e-5
+  )
+    return null;
   return {
     ...closestSegments(mixPoint(a0, a, time), mixPoint(b0, b, time), mixPoint(c0, c, time), mixPoint(d0, d, time)),
     time,
@@ -116,11 +163,24 @@ export function projectContacts(
           b = curve[i]!,
           c = collider.points[k - 1]!,
           d = collider.points[k]!;
-        const radius = contacts.radius + collider.radius + (contacts.margin ?? 0.25);
+        const physicalRadius = contacts.radius + collider.radius;
+        const radius = physicalRadius + (contacts.margin ?? 0.25);
         const near = closestSegments(a, b, c, d);
         const old = previous?.contacts.colliders[ci];
+        // Clearance belongs to projection. Sweeping it as physical thickness
+        // produces false unresolved contacts while sliding along its boundary.
         const hit = old
-          ? sweep(previous!.curve[i - 1]!, previous!.curve[i]!, old.points[k - 1]!, old.points[k]!, a, b, c, d, radius)
+          ? sweep(
+              previous!.curve[i - 1]!,
+              previous!.curve[i]!,
+              old.points[k - 1]!,
+              old.points[k]!,
+              a,
+              b,
+              c,
+              d,
+              physicalRadius,
+            )
           : null;
         if (hit?.exhausted) exhausted = true;
         if (near.distance >= radius && !hit) continue;

@@ -118,6 +118,55 @@ describe('肩の接触', () => {
       }),
     ).toBe(true);
   });
+  it('余裕幅のすぐ外を接線方向に滑る毛束を、物理的な通過の未解決としない', () => {
+    const before = [
+      { x: 15.2501, y: -2 },
+      { x: 15.2501, y: 2 },
+    ];
+    const curve = before.map((p) => ({ x: p.x, y: p.y + 0.5 }));
+    const contacts: HairContacts = {
+      radius: 10,
+      colliders: [
+        {
+          id: 's',
+          radius: 5,
+          points: [
+            { x: -48, y: 0 },
+            { x: 0, y: 0 },
+          ],
+        },
+      ],
+    };
+    const result = projectContacts(curve, 1, contacts, { curve: before, contacts });
+    expect(result).toEqual({ changed: false, exhausted: false });
+    expect(contactsFit(curve, 1, contacts)).toBe(true);
+  });
+  it('物理的な厚みのすぐ外を滑る毛束も、移動全体が帯の外にあると証明できる', () => {
+    const before = [
+      { x: 15.0001, y: -2 },
+      { x: 15.0001, y: 2 },
+    ];
+    const curve = before.map((p) => ({ x: p.x, y: p.y + 0.5 }));
+    const contacts: HairContacts = {
+      radius: 10,
+      margin: 0,
+      colliders: [
+        {
+          id: 's',
+          radius: 5,
+          points: [
+            { x: -48, y: 0 },
+            { x: 0, y: 0 },
+          ],
+        },
+      ],
+    };
+    expect(projectContacts(curve, 1, contacts, { curve: before, contacts })).toEqual({
+      changed: false,
+      exhausted: false,
+    });
+    expect(contactsFit(curve, 1, contacts)).toBe(true);
+  });
   it('固定区間と帯が矛盾しても有限値を保ち、未解決を返す', () => {
     const curve = [
       { x: 0, y: 0 },
