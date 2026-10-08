@@ -1,4 +1,5 @@
-// カード61（小さいウィンドウの右の列・I-010）のテスト。テストの担当は CL（実装の担当は CO）
+// カード61（小さいウィンドウの右の列・I-010）のテスト。テストの担当は CL（実装の担当は CO）。
+// I-064（大きい窓でも開いたパネルを縮めない・境目で高さを決める）で、大きい窓と高さを決めたパネルの決まりを足した
 // jsdom はレイアウト（高さ・スクロール）を計算せず、CSS も読み込まない。そこで shell.css を文書に入れて、
 // ウィンドウの大きさごとに当てはまる規則（@media の条件と詳細度・順番）をこのテストで決め、
 // 右の列の各パネルに効く min-height・flex-shrink・overflow を確かめる。実際の見た目（800×600 で全パネルへ
@@ -295,9 +296,11 @@ describe('カード61: 小さいウィンドウの右の列', () => {
       expect({ name, minHeight: minHeight(p, LARGE) }).toEqual({ name, minHeight: '0' });
       expect({ name, shrink: shrink(p, LARGE) }).toEqual({ name, shrink: { property: 'flex-shrink', value: '0' } });
       expect(body(p).hidden).toBe(false);
+      // オブジェクトパレットの中身は、共通パレットの高さの上限（I-064）を受けない
+      expect({ name, maxHeight: cascaded(body(p), ['max-height'], LARGE) }).toEqual({ name, maxHeight: null });
     }
-    // 共通パレットは今までどおり、大きい窓では高さを分け合う
-    for (const p of panels().slice(2)) expect(shrink(p, LARGE)).toBeNull();
+    // 共通パレットも、大きい窓で縮まない（I-064。高さを分け合って題だけに潰れない）
+    for (const p of panels().slice(2)) expect(shrink(p, LARGE)).toEqual({ property: 'flex-shrink', value: '0' });
     // 選択・変形ツールで目以外を選ぶと、オブジェクトパレットは無くなる
     fireEvent.click(screen.getByRole('button', { name: '選択・変形' }));
     act(() => services.editor.set({ selectedPartIds: ['part-torso'] }));
@@ -327,18 +330,43 @@ describe('カード61: 小さいウィンドウの右の列', () => {
     expect(screen.getAllByRole('complementary', { name: '右のパネル' })).toHaveLength(1);
   });
 
-  it('1440×1000 では、右の列のパネルの高さの決まりは今までと同じ（最低 0 で、高さを分け合う）', () => {
+  it('1440×1000 では、右の列の開いたパネルは最低の高さを持たないが縮まず、列全体がスクロールする（I-064）', () => {
     const { right, panels, titleOf, body } = setup();
     for (const p of panels()) {
       const name = titleOf(p);
-      // .panel の min-height: 0 が効き、flex-shrink の指定は無い（初期値の 1 で縮む）
+      // .panel の min-height: 0 が効き、縮めない（中身の多いパネルを開いても、ほかが題だけに潰れない）
       expect({ name, minHeight: minHeight(p, LARGE) }).toEqual({ name, minHeight: '0' });
-      expect({ name, shrink: shrink(p, LARGE) }).toEqual({ name, shrink: null });
+      expect({ name, shrink: shrink(p, LARGE) }).toEqual({ name, shrink: { property: 'flex-shrink', value: '0' } });
       expect(minHeight(body(p), LARGE)).toBeNull();
       expect(shrink(body(p), LARGE)).toBeNull();
+      // 中身は窓の高さの半分まで（超えた分は中でスクロール）。中身のとても多いパネルがほかを列の下へ押し出さない
+      expect({ name, maxHeight: cascaded(body(p), ['max-height'], LARGE)?.value }).toEqual({ name, maxHeight: '50vh' });
+      expect({ name, maxHeight: cascaded(body(p), ['max-height'], SMALL)?.value }).toEqual({ name, maxHeight: '50vh' });
+      expect(cascaded(body(p), ['overflow', 'overflow-y'], LARGE)?.value).toBe('auto');
     }
     expect(cascaded(right, ['overflow', 'overflow-y'], LARGE)?.value).toBe('auto');
+    // 列の幅は変えない（キャンバスの大きさを変えない）
     expect(cascaded(right, ['width'], LARGE)?.value).toBe('280px');
+  });
+
+  it('境目で高さを決めたパネルは、どの窓でも最低の高さを掛けずにその高さになり、中でスクロールする（I-064）', () => {
+    localStorage.setItem('live2d-studio.panelHeights', JSON.stringify({ partSettings: 120 }));
+    const { panel, body } = setup();
+    const settings = panel('パーツの設定');
+    expect(settings.classList.contains('sized')).toBe(true);
+    expect(body(settings).style.height).toBe('120px');
+    for (const v of [SMALL, LARGE]) {
+      expect(minHeight(settings, v)).toBe('0');
+      expect(shrink(settings, v)).toEqual({ property: 'flex-shrink', value: '0' });
+      expect(minHeight(body(settings), v)).toBeNull();
+      expect(shrink(body(settings), v)).toEqual({ property: 'flex', value: 'none' });
+      expect(cascaded(body(settings), ['max-height'], v)).toBeNull();
+      expect(cascaded(body(settings), ['overflow', 'overflow-y'], v)?.value).toBe('auto');
+    }
+    // 決めていないパネルは今までどおり
+    expect(panel('パラメータ').classList.contains('sized')).toBe(false);
+    expect(minHeight(panel('パラメータ'), SMALL)).toBe('180px');
+    expect(minHeight(body(panel('パラメータ')), SMALL)).toBe('140px');
   });
 
   it('800×600 でも左の列のパネルには最低の高さを掛けない（右の列だけを変える）', () => {

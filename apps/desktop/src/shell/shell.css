@@ -178,16 +178,44 @@ kbd {
 .shell-area-right {
   border-left: 1px solid var(--border);
 }
-/* 小さいウィンドウでは右のパネルを潰さず、列全体をスクロールして使う。 */
+/* 右の列の開いたパネルは、どの窓の大きさでも縮めず中身をすべて出し、足りない高さは列全体のスクロールで受ける。
+   中身の多いパネルを開いても、ほかの開いたパネルが題だけに潰れない（I-064） */
+.shell-area-right > .panel:not(.collapsed) {
+  flex-shrink: 0;
+}
+/* ただし高さを決めていない共通パレットの中身は窓の高さの半分までにし、超えた分は中でスクロールする。
+   中身のとても多いパネル（パラメータなど）が列を占めて、ほかのパネルを列の下へ押し出さないように */
+.shell-area-right > .panel:not(.collapsed):not(.sized):not(.object) > .panel-body {
+  max-height: 50vh;
+}
+/* 小さいウィンドウでは、中身の少ないパネルにも最低の高さを持たせる（I-010）。境目で高さを決めたパネルはその高さにする */
 @media (max-height: 700px) {
-  .shell-area-right > .panel:not(.collapsed) {
+  .shell-area-right > .panel:not(.collapsed):not(.sized) {
     min-height: 180px;
     flex-shrink: 0;
   }
-  .shell-area-right > .panel:not(.collapsed) > .panel-body {
+  .shell-area-right > .panel:not(.collapsed):not(.sized) > .panel-body {
     min-height: 140px;
     flex-shrink: 0;
   }
+}
+/* 境目のドラッグで高さを決めたパネル。中身は決めた高さ（style の height）で、はみ出した分は中でスクロールする */
+.panel.sized > .panel-body {
+  flex: none;
+}
+/* パネルの下の境目（高さを変えるつまみ） */
+.panel-resize {
+  flex: none;
+  height: 6px;
+  margin-bottom: -1px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+.panel-resize:hover,
+.panel-resize:focus-visible,
+.panel-resize.dragging {
+  outline: none;
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 .shell-area-bottom {
   flex-direction: row;
