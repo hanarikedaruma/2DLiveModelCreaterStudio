@@ -89,15 +89,32 @@ describe('カード98: 胸の実画面', () => {
       expect(await parts.getByRole('img', { name: '胸：胸揺れ：ON', exact: true }).count()).toBe(1);
       expect(await parts.getByRole('img', { name: '胸：軸揺れ：ON', exact: true }).count()).toBe(0);
       expect(await settings.getByLabel('胸を揺らす', { exact: true }).isChecked()).toBe(true);
-      await settings.getByRole('button', { name: '物理の数値', exact: true }).click();
+      const numbers = settings.getByRole('button', { name: '物理の数値', exact: true });
+      if ((await numbers.getAttribute('aria-expanded')) === 'false') await numbers.click();
       const gravity = settings.getByRole('spinbutton', { name: '胸の重力の強さ', exact: true });
       await gravity.fill('0.5');
       await gravity.press('Tab');
       expect(await page.evaluate(() => window.__studio.services.store.get().physics[0]!.bounce!.gravityStrength)).toBe(
         0.5,
       );
-      await settings.getByRole('button', { name: '胸の固定範囲', exact: true }).click();
+      const pinning = settings.getByRole('button', { name: '胸の固定範囲', exact: true });
+      if ((await pinning.getAttribute('aria-expanded')) === 'false') await pinning.click();
       expect(await settings.getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' }).count()).toBe(1);
+      const brightness = await settings
+        .getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' })
+        .locator('circle')
+        .evaluateAll((dots) =>
+          dots.map((dot) => {
+            const rgb = getComputedStyle(dot).fill.match(/\d+/g)!.slice(0, 3).map(Number);
+            return rgb.reduce((a, b) => a + b, 0) / 3;
+          }),
+        );
+      const weights = project.physics[0]!.bounce!.weights;
+      expect(brightness).toHaveLength(weights.length);
+      weights.forEach((weight, i) => {
+        if (weight === 0) expect(brightness[i]).toBeGreaterThan(192);
+        else expect(brightness[i]).toBeLessThan(64);
+      });
       await page.evaluate(() => window.__studio.services.editor.set({ editorParamValues: { BodyAngleZ: 45 } }));
       await settings.getByRole('button', { name: '上下を試す', exact: true }).click();
       await page.waitForTimeout(350);

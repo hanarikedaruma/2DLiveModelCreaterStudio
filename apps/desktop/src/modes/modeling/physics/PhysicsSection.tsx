@@ -464,7 +464,7 @@ function ChestPinning({
             r={width / 80}
             stroke="currentColor"
             strokeWidth={width / 200}
-            fill={b.weights[i] === 0 ? 'var(--panel-bg, white)' : 'currentColor'}
+            fill={b.weights[i] === 0 ? '#fff' : '#111'}
           />
         ))}
       </svg>
