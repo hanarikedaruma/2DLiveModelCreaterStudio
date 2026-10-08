@@ -1,6 +1,14 @@
 import { newId, type CurveGuide, type Vec2 } from '@app/schema';
 import type { CurveGuideResult } from '@app/contracts';
-import { createDeformPipeline, curveMeshSignature, evaluateCurveGuide, meshPointsToDisplay } from '@app/core';
+import {
+  axisNeutralParams,
+  axisOutputsFor,
+  createDeformPipeline,
+  curveMeshSignature,
+  evaluateCurveGuide,
+  meshPointsToDisplay,
+} from '@app/core';
+import { hairFrames } from '../../../services/hairFrame';
 import type { CanvasTool } from '../../../shell/api';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
@@ -17,13 +25,15 @@ import {
   isPreviewOffBase,
   keyIndexAt,
 } from '../../../services/keyEditor/common';
-import { editableGuide, guideOfPart, patchGuideCommand, setGuideCommand } from './commands';
+import { curveBakeEditor, editableGuide, guideOfPart, patchGuideCommand, setGuideCommand } from './commands';
+import { createShoulderEditor } from './shoulderTool';
 
 export const CURVE_TOOL_ID = 'modeling.curveGuide';
 const INVERSE_ERROR = 'この位置へは滑らかに変形できません。影響幅を広げるか、曲げる量を小さくしてください。';
 const labels = ['根元', '中間', '毛先'];
 
 export function createCurveEditor(slot: EnvSlot) {
+  const shoulder = createShoulderEditor(slot);
   const pipeline = createDeformPipeline();
   let drawing = false;
   let clickStart: Vec2 | null = null;
@@ -53,14 +63,19 @@ export function createCurveEditor(slot: EnvSlot) {
     const raw = target?.mesh
       ? pipeline.deform({ ...project.model, curveGuides: [] }, deltas).byPartId[target.part.id]
       : undefined;
-    const evaluated =
-      guide && target?.mesh && raw
-        ? evaluateCurveGuide(project.model, deltas, guide, target.mesh, raw.positions)
+    const frame =
+      guide && raw
+        ? hairFrames(env.services).evaluate(project, paramValuesOf(project.model, editor.editorParamValues))
         : null;
+    const shape = guide ? frame?.byPartId[guide.partId] : undefined;
+    const result = guide ? frame?.curveGuides?.[guide.id] : undefined;
+    const evaluated = shape && result ? { positions: shape.positions, result } : null;
     return { project, editor, deltas, target, guide, raw, evaluated };
   }
 
   function clear() {
+    drawing = false;
+    shoulder.clear();
     drag?.live.cancel();
     options?.live.cancel();
     cancelBake?.();
@@ -144,6 +159,10 @@ export function createCurveEditor(slot: EnvSlot) {
       rootFraction: 0.15,
       gravity: false,
       enabled: true,
+      ...(snap.guide?.dynamics ? { dynamics: { ...snap.guide.dynamics } } : {}),
+      ...(snap.guide?.collision
+        ? { collision: { ...snap.guide.collision, colliderIds: [...snap.guide.collision.colliderIds] } }
+        : {}),
     };
     env.services.store.dispatch(setGuideCommand(guide));
     drawing = false;
@@ -156,6 +175,10 @@ export function createCurveEditor(slot: EnvSlot) {
     label: '線で曲げる',
     cursor: 'crosshair',
     onPointerDown(e) {
+      if (shoulder.active()) {
+        shoulder.tool.onPointerDown?.(e);
+        return;
+      }
       const env = slot.get();
       if (!env || e.button !== 0) return;
       const snap = snapshot(env);
@@ -179,13 +202,19 @@ export function createCurveEditor(slot: EnvSlot) {
             points.map((point) => {
               const edited = guide.points.map((p) => ({ ...p })) as CurveGuide['points'];
               edited[handle] = point;
-              return evaluateCurveGuide(
-                snap.project.model,
-                snap.deltas,
-                { ...guide, points: edited, enabled: true },
-                snap.target!.mesh!,
-                snap.raw!.positions,
-              ).result.handles[handle]!;
+              const project = {
+                ...snap.project,
+                model: {
+                  ...snap.project.model,
+                  curveGuides: snap.project.model.curveGuides!.map((g) =>
+                    g.id === guide.id ? { ...guide, points: edited, enabled: true } : g,
+                  ),
+                },
+              };
+              return hairFrames(env.services).evaluate(
+                project,
+                paramValuesOf(project.model, snap.editor.editorParamValues),
+              ).curveGuides![guide.id]!.handles[handle]!;
             });
           drag = {
             live: beginLiveEdit(env.services.store, '流れ線を曲げる'),
@@ -207,6 +236,10 @@ export function createCurveEditor(slot: EnvSlot) {
       env.requestRedraw();
     },
     onPointerMove(e) {
+      if (shoulder.active()) {
+        shoulder.tool.onPointerMove?.(e);
+        return;
+      }
       const env = slot.get();
       if (!env) return;
       if (drag) {
@@ -237,6 +270,10 @@ export function createCurveEditor(slot: EnvSlot) {
       }
     },
     onPointerUp(e) {
+      if (shoulder.active()) {
+        shoulder.tool.onPointerUp?.(e);
+        return;
+      }
       const env = slot.get();
       if (!env) return;
       if (drag) {
@@ -264,6 +301,10 @@ export function createCurveEditor(slot: EnvSlot) {
       finishStroke(env, points);
     },
     onKeyDown(e) {
+      if (shoulder.active()) {
+        shoulder.tool.onKeyDown?.(e);
+        return;
+      }
       if (e.key === 'Escape') {
         clear();
         drawing = false;
@@ -271,6 +312,10 @@ export function createCurveEditor(slot: EnvSlot) {
       }
     },
     drawOverlay(ctx, view) {
+      if (shoulder.active()) {
+        shoulder.tool.drawOverlay?.(ctx, view);
+        return;
+      }
       const env = slot.get();
       if (!env) return;
       const snap = snapshot(env);
@@ -355,7 +400,13 @@ export function createCurveEditor(slot: EnvSlot) {
     )
       return Promise.resolve();
     const params = activeParams(snap.project.model, snap.editor);
-    if (isBaseState(params) || isPreviewOffBase(snap.project.model, snap.editor)) {
+    const bakeEditor = curveBakeEditor(snap.project, snap.editor, guide.partId);
+    const axisIds = axisOutputsFor(snap.project, guide.partId);
+    if (params.some((p) => axisIds.includes(p.id))) {
+      env.dialogs.notify('軸揺れの出力以外の姿勢パラメータを選んでください。軸の動きと流れ揺れはキーへ記録しません。');
+      return Promise.resolve();
+    }
+    if (isBaseState(params) || isPreviewOffBase(snap.project.model, bakeEditor)) {
       env.dialogs.notify(
         '編集するパラメータを選んで基準値以外の姿勢にしてください。プレビュー中の別の値は戻すか、編集対象に加えてください。',
       );
@@ -376,10 +427,27 @@ export function createCurveEditor(slot: EnvSlot) {
       env.services.editor.get().activeParameterIds === snap.editor.activeParameterIds &&
       env.services.editor.get().selectedPartIds[0] === guide.partId;
     const mesh = snap.target.mesh;
-    const targets = itemPoints({ ...snap.raw, positions: snap.evaluated.positions });
+    const bakeDeltas = axisIds.length
+      ? env.services.evaluator.evaluate(
+          snap.project.model,
+          axisNeutralParams(
+            snap.project,
+            guide.partId,
+            paramValuesOf(snap.project.model, snap.editor.editorParamValues),
+          ),
+        )
+      : snap.deltas;
+    const bakeRaw = axisIds.length
+      ? pipeline.deform({ ...snap.project.model, curveGuides: [] }, bakeDeltas).byPartId[guide.partId]
+      : snap.raw;
+    if (!bakeRaw) return Promise.resolve();
+    const bakeShape = axisIds.length
+      ? evaluateCurveGuide(snap.project.model, bakeDeltas, guide, mesh, bakeRaw.positions)
+      : snap.evaluated;
+    const targets = itemPoints({ ...bakeRaw, positions: bakeShape.positions });
     const moves = createMeshTargetMapper(
       snap.project.model,
-      snap.deltas,
+      bakeDeltas,
       guide.partId,
       mesh,
       mesh.vertices.map((_, i) => i),
@@ -403,7 +471,7 @@ export function createCurveEditor(slot: EnvSlot) {
       label: '流れ線の形をキーに記録',
       edit(project, changes: typeof moves) {
         if (!changes || project.id !== snap.project.id || !editableGuide(project.model, guide)) return null;
-        const edit = env.services.keyEditor.pointsEdit(project, snap.editor, pointsTarget, changes);
+        const edit = env.services.keyEditor.pointsEdit(project, bakeEditor, pointsTarget, changes);
         if (edit === 'needsKey') return edit;
         return {
           label: '流れ線の形をキーに記録',
@@ -419,7 +487,7 @@ export function createCurveEditor(slot: EnvSlot) {
           },
         };
       },
-      addKeys: (p) => env.services.keyEditor.addKeyAtCurrentValue(p, snap.editor, pointsTarget),
+      addKeys: (p) => env.services.keyEditor.addKeyAtCurrentValue(p, bakeEditor, pointsTarget),
       onChange: () => env.requestRedraw(),
     });
     cancelBake = keyed.cancel;
@@ -432,6 +500,7 @@ export function createCurveEditor(slot: EnvSlot) {
   }
 
   return {
+    shoulder,
     tool,
     clear,
     snapshot: () => {

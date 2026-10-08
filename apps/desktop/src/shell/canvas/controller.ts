@@ -1,12 +1,13 @@
 // モデリングのキャンバスの状態（表示の変換・アクティブなツール・直前の変形結果）。
 // キャンバスの外のパネルからも useCanvas で触れるように、キャンバスとは別に持つ
 import type { Vec2 } from '@app/schema';
-import type { DeformedModel, ViewTransform } from '@app/contracts';
+import type { DeformedModel, HairFrameContext, ParamValues, ViewTransform } from '@app/contracts';
 import { screenToCanvas } from './view';
 
 export interface CanvasState {
   view: ViewTransform;
   activeToolId: string; // '' なら既定のツール（最初に登録したもの）
+  motionPreview?: { params: ParamValues; context: HairFrameContext } | null;
 }
 
 export interface CanvasController {
@@ -14,6 +15,7 @@ export interface CanvasController {
   subscribe(listener: () => void): () => void;
   setView(view: ViewTransform): void;
   setActiveTool(id: string): void;
+  setMotionPreview(value: CanvasState['motionPreview']): void;
   requestRedraw(): void;
   onRedrawRequest(listener: () => void): () => void;
   requestFit(): void;
@@ -64,6 +66,9 @@ export function createCanvasController(): CanvasController {
     },
     setActiveTool(id) {
       if (id !== state.activeToolId) set({ ...state, activeToolId: id });
+    },
+    setMotionPreview(motionPreview) {
+      if (state.motionPreview !== motionPreview) set({ ...state, motionPreview });
     },
     requestRedraw: redraw.emit,
     onRedrawRequest: redraw.on,

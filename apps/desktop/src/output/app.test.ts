@@ -138,6 +138,20 @@ function setup() {
 }
 
 describe('出力ウィンドウ', () => {
+  it('流れ揺れの完成した頂点を受け取り、再描画や出力の倍率で再計算しない', async () => {
+    stubRootSize(960, 540);
+    const { app, deliver, renderer } = setup();
+    await app.ready;
+    deliver({ type: 'project', project: projectWithPart(), assets: {}, backgrounds: {} });
+    deliver(frame());
+    const item = renderer.renders.at(-1)!.model.items[0]!;
+    const positions = Array.from(item.positions, (v) => v + 7);
+    deliver(frame({ positions: { [item.partId]: positions } }));
+    expect(Array.from(renderer.renders.at(-1)!.model.items[0]!.positions)).toEqual(positions);
+    window.dispatchEvent(new Event('resize'));
+    expect(Array.from(renderer.renders.at(-1)!.model.items[0]!.positions)).toEqual(positions);
+    app.dispose();
+  });
   it('受け取りを始めてから ready を送る。UI は出さずキャンバスだけ', async () => {
     const { app, sent, listening, root, renderer } = setup();
     await app.ready;

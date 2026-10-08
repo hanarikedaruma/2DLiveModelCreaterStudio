@@ -91,6 +91,16 @@ export function createOutputController(options: {
       background: sceneBackground(s.services.store.get()),
       size: runtime.getOutputSize(),
       now: frame.now,
+      ...(s.services.store
+        .get()
+        .model.curveGuides?.some(
+          (g) =>
+            g.dynamics?.enabled ||
+            g.collision?.enabled ||
+            (g.enabled && g.gravity && s.services.store.get().physics.length > 0),
+        )
+        ? { positions: Object.fromEntries(frame.model.items.map((item) => [item.partId, Array.from(item.positions)])) }
+        : {}),
     };
   }
 

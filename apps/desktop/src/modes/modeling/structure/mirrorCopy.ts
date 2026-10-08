@@ -197,6 +197,7 @@ export function mirrorCopy(
           reference: copy.reference.map((p) => ({ x: mx(p.x), y: p.y })) as typeof copy.reference,
           points: copy.points.map((p) => ({ x: mx(p.x), y: p.y })) as typeof copy.points,
         }),
+        collider: (copy) => ({ ...copy, points: copy.points.map((p) => ({ x: mx(p.x), y: p.y })) }),
         assetId: (id) => (id !== null ? (prepared.assetMap[id] ?? id) : null),
       });
       return next === withAssets ? project : next;

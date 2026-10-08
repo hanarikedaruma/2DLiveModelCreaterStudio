@@ -5,6 +5,7 @@ import type {
   BlendMode,
   BlendOp,
   Binding,
+  CurveGuideDynamics,
   Environment,
   Hotkey,
   ModeId,
@@ -53,9 +54,57 @@ export interface CurveGuideResult {
   handles: Vec2[]; // 根元・中間・毛先の表示位置
   status: 'ok' | 'limited' | 'stale' | 'disabled';
   strength: number; // 三角形の破綻を避けて適用した割合
+  dynamics?: { status: 'disabled' | 'settled' | 'running' | 'frozen'; reason?: string };
+  collision?: {
+    status: 'disabled' | 'ok' | 'limited' | 'unresolved';
+    reason?: string;
+    diagnostics?: { colliderId: string; reason: string }[];
+  };
 }
 export interface DeformPipeline {
   deform(model: Model, deltas: TargetDeltas): DeformedModel;
+}
+export interface HairFrameContext {
+  now: number;
+  dt: number;
+  frameId: string | number;
+  active: boolean;
+}
+export interface HairContact {
+  id: string;
+  points: Vec2[];
+  radius: number;
+}
+export interface HairContacts {
+  colliders: HairContact[];
+  radius: number;
+  margin?: number;
+}
+export interface HairDynamicsSession {
+  reset(): void;
+  retain(projectId: string, ids: string[]): void;
+  discard(id: string): void;
+  reject(id: string): void;
+  accept(id: string, curve: Vec2[], along: number[]): void;
+  advance(
+    id: string,
+    rest: Vec2[],
+    along: number[],
+    rootFraction: number,
+    settings: CurveGuideDynamics,
+    fingerprint: string,
+    axisKey: string,
+    frame: HairFrameContext,
+    contacts?: HairContacts,
+  ): { curve: Vec2[]; status: 'running' | 'settled' | 'frozen'; reason?: string; collisionUnresolved?: boolean };
+}
+export interface HairFrameEvaluator {
+  evaluate(
+    project: Project,
+    params: ParamValues,
+    context?: HairFrameContext,
+    session?: HairDynamicsSession,
+  ): DeformedModel;
 }
 
 // ---- 合成の契約 ----

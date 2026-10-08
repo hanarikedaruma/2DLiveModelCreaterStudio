@@ -140,6 +140,7 @@ export function registerCanvasOverlay(
 }
 
 export function useCanvas(): {
+  motionPreview: ReturnType<import('./canvas/controller').CanvasController['getState']>['motionPreview'];
   view: ViewTransform;
   activeToolId: string;
   setActiveTool(id: string): void;
@@ -153,6 +154,7 @@ export function useCanvas(): {
   const activeToolId = tools.some((t) => t.id === state.activeToolId) ? state.activeToolId : (tools[0]?.id ?? '');
   return useMemo(
     () => ({
+      motionPreview: state.motionPreview,
       view: state.view,
       activeToolId,
       setActiveTool: canvas.setActiveTool,
@@ -160,7 +162,7 @@ export function useCanvas(): {
       lastDeformed: canvas.lastDeformed,
       screenToCanvas: canvas.screenToCanvas,
     }),
-    [state.view, activeToolId, canvas],
+    [state.view, state.motionPreview, activeToolId, canvas],
   );
 }
 

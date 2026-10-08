@@ -47,7 +47,7 @@ describe('自動保存', () => {
     // 書いたのは最初から 3000 + 5000 ミリ秒後
     expect(await autosaves(fs)).toEqual(['autosave-2026-10-03T01-00-08-000Z.json']);
     const text = await fs.readText(`${DIR}/backups/autosave-2026-10-03T01-00-08-000Z.json`);
-    expect(text.startsWith('{\n  "schemaVersion": 4,')).toBe(true);
+    expect(text.startsWith('{\n  "schemaVersion": 5,')).toBe(true);
     // そのままプロジェクトとして読める（足した情報は検証で捨てられる）
     expect(loadProjectJson(text)).toEqual(store.get());
     expect(store.get().name).toBe('2回目');

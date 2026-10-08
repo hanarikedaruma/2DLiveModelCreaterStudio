@@ -7,7 +7,7 @@ import { createEnvSlot } from '../canvas/env';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import { copyParts, deleteParts } from '../structure/commands';
 import { mirrorCopy } from '../structure/mirrorCopy';
-import { gravityGuideCommand, patchGuideCommand } from './commands';
+import { dynamicsGuideCommand, gravityGuideCommand, patchGuideCommand } from './commands';
 import { createCurveEditor } from './curveTool';
 import { hairProject } from './testing';
 import { enablePhysicsCommand } from '../physics/commands';
@@ -57,6 +57,45 @@ function setup() {
 }
 
 describe('カード99: 流れ線の操作・保護・履歴', () => {
+  it('併用中のキー記録は軸の中立姿勢だけを記録し、軸の自動/手動キーと設定を保持する', async () => {
+    const s = setup();
+    s.draw();
+    s.services.store.dispatch(enablePhysicsCommand('hair', { physics: 'ph', transform: 't', vertices: 'v' }));
+    s.services.store.dispatch(gravityGuideCommand(s.services.store.get().model.curveGuides![0]!.id, true));
+    const guide = s.services.store.get().model.curveGuides![0]!;
+    s.services.store.dispatch(dynamicsGuideCommand(guide.id, { enabled: true }));
+    const axis = s.services.store.get().physics[0]!.outputParameterId;
+    s.services.editor.set({ activeParameterIds: ['FaceAngleZ'], editorParamValues: { FaceAngleZ: 30 } });
+    const neutral = s.editor.snapshot()!.evaluated!.positions;
+    s.services.editor.set({ editorParamValues: { FaceAngleZ: 30, [axis]: 0.7 } });
+    const before = s.services.store.get();
+    const bindings = before.model.bindings.filter((b) => b.parameterIds.includes(axis));
+    await s.editor.bake();
+    const after = s.services.store.get();
+    expect(after.physics).toBe(before.physics);
+    expect(after.model.bindings.filter((b) => b.parameterIds.includes(axis))).toEqual(bindings);
+    expect(after.model.curveGuides![0]!.enabled).toBe(false);
+    expect(after.model.curveGuides![0]!.dynamics).toEqual(before.model.curveGuides![0]!.dynamics);
+    const baked = s.services.pipeline.deform(
+      after.model,
+      s.services.evaluator.evaluate(after.model, { FaceAngleZ: 30, [axis]: 0 }),
+    ).byPartId.hair!.positions;
+    neutral.forEach((v, i) => expect(baked[i]).toBeCloseTo(v, 3));
+    s.services.store.undo();
+    expect(s.services.store.get()).toBe(before);
+  });
+  it('軸の出力キーへの流れ線の記録を拒否する', async () => {
+    const s = setup();
+    s.draw();
+    s.drag();
+    s.services.store.dispatch(enablePhysicsCommand('hair', { physics: 'ph', transform: 't', vertices: 'v' }));
+    const before = s.services.store.get(),
+      axis = before.physics[0]!.outputParameterId;
+    s.services.editor.set({ activeParameterIds: [axis], editorParamValues: { [axis]: 0.5 } });
+    await s.editor.bake();
+    expect(s.services.store.get()).toBe(before);
+    expect(s.notify).toHaveBeenCalledWith(expect.stringContaining('軸揺れの出力以外'));
+  });
   it('一本なぞって作り、中間を曲げ、各操作を1回のUndo/Redoで戻せる', () => {
     const s = setup();
     const initial = s.services.store.get();
@@ -115,21 +154,21 @@ describe('カード99: 流れ線の操作・保護・履歴', () => {
     s.editor.tool.onPointerUp!(s.event({ x: 320, y: 300 }));
     expect(s.services.store.get()).toBe(other);
   });
-  it('重力へ切り替えると対象の既存物理を外し、Undoで戻す。再び物理を重ねない', () => {
+  it('重力をONにしても対象の軸揺れを保ち、Undoで流れ線だけ戻す。軸を重複作成しない', () => {
     const s = setup();
     s.draw();
     s.services.store.dispatch(enablePhysicsCommand('hair', { physics: 'ph', transform: 't', vertices: 'v' }));
     const before = s.services.store.get();
     const guide = before.model.curveGuides![0]!;
     s.services.store.dispatch(gravityGuideCommand(guide.id, true));
-    expect(s.services.store.get().physics).toHaveLength(0);
+    expect(s.services.store.get().physics).toBe(before.physics);
     const gravity = s.services.store.get();
     s.services.store.dispatch(enablePhysicsCommand('hair', { physics: 'ph2', transform: 't2', vertices: 'v2' }));
     expect(s.services.store.get()).toBe(gravity);
     s.services.store.undo();
     expect(s.services.store.get()).toBe(before);
   });
-  it('無効にした重力線を再び使う場合も既存物理を重ねない', () => {
+  it('無効にした重力線を再び使っても既存の軸揺れを保つ', () => {
     const s = setup();
     s.draw();
     const id = s.services.store.get().model.curveGuides![0]!.id;
@@ -138,7 +177,7 @@ describe('カード99: 流れ線の操作・保護・履歴', () => {
     s.services.store.dispatch(enablePhysicsCommand('hair', { physics: 'ph', transform: 't', vertices: 'v' }));
     expect(s.services.store.get().physics).toHaveLength(1);
     s.services.store.dispatch(patchGuideCommand(id, { enabled: true }));
-    expect(s.services.store.get().physics).toHaveLength(0);
+    expect(s.services.store.get().physics).toHaveLength(1);
   });
   it('描画の途中で同じIDのプロジェクトを再読込しても古い線を入れない', () => {
     const s = setup();

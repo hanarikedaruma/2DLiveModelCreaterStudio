@@ -1,6 +1,7 @@
 // 出力ウィンドウの中身（UI なし）。受け取ったプロジェクトと毎フレームの ParamValues を、
 // メインと同じ evaluator・pipeline・renderer（createServices の実装）で描く
 import type { Renderer, Services } from '@app/contracts';
+import { hairFrames } from '../services/hairFrame';
 import { createBackgroundImages, type BackgroundImages } from '../modes/studio/backgrounds';
 import { fitFrame, scaleView } from '../modes/studio/placement';
 import type { FrameMessage, ToOutput } from './protocol';
@@ -63,7 +64,14 @@ export function createOutputApp(root: HTMLElement, options: OutputAppOptions): O
     const k = layout(f);
     if (k <= 0) return;
     const project = services.store.get();
-    const deformed = services.pipeline.deform(project.model, services.evaluator.evaluate(project.model, f.params));
+    const deformed = hairFrames(services).evaluate(project, f.params);
+    if (f.positions) {
+      for (const item of deformed.items) {
+        const positions = f.positions[item.partId];
+        if (positions?.length === item.positions.length && positions.every(Number.isFinite))
+          item.positions = new Float32Array(positions);
+      }
+    }
     renderer.render(deformed, scaleView(f.view, k), images.resolve(f.background));
   }
 

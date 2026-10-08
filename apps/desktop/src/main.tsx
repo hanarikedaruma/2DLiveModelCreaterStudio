@@ -11,6 +11,7 @@ import { bindSpoutOutput } from './output/spout/controller';
 import { registerProject } from './project';
 import { createEnvironment, createServices } from './services';
 import { createDialogController } from './shell/dialogs';
+import { createCanvasController } from './shell/canvas/controller';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root が見つからない');
@@ -22,6 +23,7 @@ if (window.location.pathname.startsWith('/output')) {
   const services = createServices();
   const environment = createEnvironment(services);
   const dialogs = createDialogController();
+  const canvas = createCanvasController();
   registerModes();
   const project = registerProject(services, environment, dialogs);
   const diagnostics = registerDiagnostics(services);
@@ -29,7 +31,7 @@ if (window.location.pathname.startsWith('/output')) {
 
   createRoot(root).render(
     <StrictMode>
-      <App services={services} environment={environment} dialogs={dialogs} />
+      <App services={services} environment={environment} dialogs={dialogs} canvas={canvas} />
     </StrictMode>,
   );
 
@@ -50,6 +52,7 @@ if (window.location.pathname.startsWith('/output')) {
         environment,
         project,
         diagnostics,
+        canvas,
         startup,
         modeling: { importAssetFiles, assignAssets },
         studio: { runtime: studioRuntime }, // 実際に描いたフレームのパラメータを読む（STEP2 の通しのテスト）

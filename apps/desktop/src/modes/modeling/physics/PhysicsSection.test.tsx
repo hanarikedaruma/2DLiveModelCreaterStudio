@@ -23,7 +23,7 @@ describe('物理の画面', () => {
     services.store.load(physicsProject());
     services.editor.set({ selectedPartIds: ['hair'] });
     render(<Shell services={services} environment={createEnvironmentStore(memoryEnvironmentStorage(null))} />);
-    fireEvent.click(await screen.findByRole('checkbox', { name: '揺らす' }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: '軸で揺らす' }));
     const enabled = services.store.get();
     expect(enabled.physics).toHaveLength(1);
     expect(enabled.model.parameters.some((p) => p.id === 'Sway_hair')).toBe(true);
@@ -53,7 +53,7 @@ describe('物理の画面', () => {
     act(() => services.editor.set({ selectedPartIds: ['plain'] }));
     expect(services.editor.get().editorParamValues).toBe(saved);
     act(() => services.editor.set({ selectedPartIds: ['hair'] }));
-    fireEvent.click(screen.getByRole('checkbox', { name: '揺らす' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '軸で揺らす' }));
     expect(services.store.get().physics).toEqual([]);
     act(() => services.store.undo());
     expect(services.store.get().physics).toHaveLength(1);

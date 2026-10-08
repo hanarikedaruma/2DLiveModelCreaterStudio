@@ -10,6 +10,26 @@ export interface RepairResult {
 // 外した物理を指すパーツの physicsId も外す
 export function repairProject(project: Project): RepairResult {
   const repairs: string[] = [];
+  const colliders = project.model.shoulderColliders?.filter(
+    (c) =>
+      project.model.parts.some((p) => p.id === c.partId && p.kind === 'image' && p.meshId === c.meshId) &&
+      project.model.meshes.some((m) => m.id === c.meshId),
+  );
+  if (colliders && colliders.length !== project.model.shoulderColliders!.length) {
+    repairs.push(`取付先が無い肩の線 ${project.model.shoulderColliders!.length - colliders.length} 本を外した`);
+    project = { ...project, model: { ...project.model, shoulderColliders: colliders } };
+  }
+  const colliderIds = new Set((colliders ?? []).map((c) => c.id));
+  const repairedGuides = project.model.curveGuides?.map((g) => {
+    if (!g.collision || g.collision.colliderIds.every((id) => colliderIds.has(id))) return g;
+    repairs.push(`流れ線の肩の指定から、存在しない線を外した（${g.id}）`);
+    return {
+      ...g,
+      collision: { ...g.collision, colliderIds: g.collision.colliderIds.filter((id) => colliderIds.has(id)) },
+    };
+  });
+  if (repairedGuides?.some((g, i) => g !== project.model.curveGuides![i]))
+    project = { ...project, model: { ...project.model, curveGuides: repairedGuides } };
   const validGuides = project.model.curveGuides?.filter(
     (g) =>
       project.model.parts.some((p) => p.id === g.partId && p.kind === 'image' && p.meshId === g.meshId) &&

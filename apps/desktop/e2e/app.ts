@@ -11,6 +11,7 @@ import type { Diagnostics } from '../src/diagnostics';
 import type { StudioRuntime } from '../src/modes/studio/runtime';
 
 export interface StudioHook {
+  canvas: import('../src/shell/canvas/controller').CanvasController;
   startup: Promise<unknown>;
   services: Services;
   environment: EnvironmentStore;

@@ -107,6 +107,11 @@ export function removeParts(project: Project, ids: readonly string[]): Project {
   );
   const removedWarps = new Set(model.warps.filter((w) => removed.has(w.partId)).map((w) => w.id));
   const removedPhysics = new Set(project.physics.filter((ph) => removed.has(ph.partId)).map((ph) => ph.id));
+  const removedColliders = new Set(
+    (model.shoulderColliders ?? [])
+      .filter((c) => removed.has(c.partId) || removedMeshes.has(c.meshId))
+      .map((c) => c.id),
+  );
 
   const parts = model.parts
     .filter((p) => !removed.has(p.id))
@@ -134,7 +139,24 @@ export function removeParts(project: Project, ids: readonly string[]): Project {
     drawOrder: model.drawOrder.filter((id) => !removed.has(id)),
     bindings,
     ...(model.curveGuides
-      ? { curveGuides: model.curveGuides.filter((g) => !removed.has(g.partId) && !removedMeshes.has(g.meshId)) }
+      ? {
+          curveGuides: model.curveGuides
+            .filter((g) => !removed.has(g.partId) && !removedMeshes.has(g.meshId))
+            .map((g) =>
+              g.collision?.colliderIds.some((id) => removedColliders.has(id))
+                ? {
+                    ...g,
+                    collision: {
+                      ...g.collision,
+                      colliderIds: g.collision.colliderIds.filter((id) => !removedColliders.has(id)),
+                    },
+                  }
+                : g,
+            ),
+        }
+      : {}),
+    ...(model.shoulderColliders
+      ? { shoulderColliders: model.shoulderColliders.filter((c) => !removedColliders.has(c.id)) }
       : {}),
   };
   return {

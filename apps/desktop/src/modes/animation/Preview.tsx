@@ -2,6 +2,11 @@
 // 渡された値（時刻 t でトラックを補間した値）の状態を描く。モデルのキャンバス全体を領域に収めて表示する
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ParamValues, Renderer } from '@app/contracts';
+import { HairDynamicsSession } from '@app/core';
+import { hairFrames } from '../../services/hairFrame';
+import { useAnimationEditor } from './state';
+import { selectedAnimation } from './state';
+import { sampleAnimation } from './keyframes';
 import { useProject, useServices } from '../../shell/api';
 import { boundsOf, fitRect } from '../../shell/canvas/view';
 
@@ -10,6 +15,15 @@ const FALLBACK_RECT = { x: 0, y: 0, width: 1000, height: 1000 };
 export function AnimationPreview({ values }: { values: ParamValues }) {
   const services = useServices();
   const project = useProject();
+  const [animationState] = useAnimationEditor();
+  const session = useRef(new HairDynamicsSession());
+  const lastMotion = useRef<{
+    id: string | null;
+    time: number;
+    now: number;
+    seek: number;
+    project: typeof project;
+  } | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<Renderer | null>(null);
@@ -70,12 +84,44 @@ export function AnimationPreview({ values }: { values: ParamValues }) {
   const model = project.model;
   const canvasSize = project.assets[0]?.canvasSize;
   useEffect(() => {
-    const deformed = services.pipeline.deform(model, services.evaluator.evaluate(model, values));
+    const now = performance.now();
+    const previous = lastMotion.current;
+    const playing = animationState.playback !== 'stopped';
+    const animation = selectedAnimation(project, animationState);
+    const continuousLoop =
+      animationState.playback === 'loop' &&
+      !!animation &&
+      previous &&
+      animationState.time < previous.time &&
+      JSON.stringify(sampleAnimation(animation, model.parameters, 0)) ===
+        JSON.stringify(sampleAnimation(animation, model.parameters, animation.duration));
+    const discontinuous =
+      !previous ||
+      previous.project !== project ||
+      previous.seek !== (animationState.seekRevision ?? 0) ||
+      previous.id !== animationState.animationId ||
+      (!continuousLoop && (animationState.time < previous.time || Math.abs(animationState.time - previous.time) > 0.1));
+    if (!playing || discontinuous) session.current.reset();
+    const deformed = hairFrames(services).evaluate(
+      project,
+      values,
+      playing
+        ? { now, dt: discontinuous ? 0 : now - previous!.now, frameId: animationState.time, active: true }
+        : undefined,
+      playing ? session.current : undefined,
+    );
+    lastMotion.current = {
+      id: animationState.animationId,
+      time: animationState.time,
+      now,
+      seek: animationState.seekRevision ?? 0,
+      project,
+    };
     const rect = canvasSize
       ? { x: 0, y: 0, width: canvasSize.width, height: canvasSize.height }
       : (boundsOf(deformed) ?? FALLBACK_RECT);
     rendererRef.current?.render(deformed, fitRect(rect, size.width, size.height), { type: 'transparent' });
-  }, [services, model, values, canvasSize, size, textures]);
+  }, [services, project, model, values, canvasSize, size, textures, animationState]);
 
   return (
     <div ref={stageRef} className="anim-stage" data-testid="animation-preview">

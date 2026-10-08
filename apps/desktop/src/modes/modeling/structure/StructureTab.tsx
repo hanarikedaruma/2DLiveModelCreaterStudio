@@ -21,7 +21,8 @@ import { runMirrorCopy } from './mirrorCopy';
 import { childrenOf } from './modelOps';
 import { replaceAsset } from './replaceAsset';
 import { clickSelection, contextTargets, pruneSelection } from './selection';
-import { AxisSwayBadge, ContextMenu, EyeIcon, LockIcon, PickerDialog, type MenuEntry } from './ui';
+import { AxisSwayBadge, FlowSwayBadge, ContextMenu, EyeIcon, LockIcon, PickerDialog, type MenuEntry } from './ui';
+import { flowSwayReason } from '@app/core';
 
 interface Row {
   part: Part;
@@ -78,6 +79,7 @@ function TreeRow({
   model,
   selected,
   axisSway,
+  flowSway,
   open,
   renaming,
   onSelect,
@@ -91,6 +93,7 @@ function TreeRow({
   model: Model;
   selected: boolean;
   axisSway: boolean;
+  flowSway?: true | string;
   open: boolean;
   renaming: boolean;
   onSelect(e: MouseEvent): void;
@@ -185,6 +188,7 @@ function TreeRow({
         </span>
       )}
       {axisSway && <AxisSwayBadge name={part.name} />}
+      {flowSway && <FlowSwayBadge name={part.name} reason={typeof flowSway === 'string' ? flowSway : undefined} />}
       <button
         type="button"
         className="part-toggle part-visibility"
@@ -232,6 +236,11 @@ export function StructureTab() {
 
   const rows = treeRows(model, collapsed);
   const axisSwayPartIds = new Set(project.physics.map((item) => item.partId));
+  const flowSwayParts = new Map(
+    (model.curveGuides ?? [])
+      .filter((g) => g.dynamics?.enabled)
+      .map((g) => [g.partId, flowSwayReason(project, g) ?? true] as const),
+  );
   const rootDrop = useDropTarget({
     accepts: acceptsParts,
     zone: (e) => (e.target === e.currentTarget ? true : null),
@@ -296,6 +305,7 @@ export function StructureTab() {
             model={model}
             selected={selected.includes(row.part.id)}
             axisSway={axisSwayPartIds.has(row.part.id)}
+            flowSway={flowSwayParts.get(row.part.id)}
             open={!collapsed.has(row.part.id)}
             renaming={renaming === row.part.id}
             onSelect={(e) =>

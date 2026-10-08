@@ -45,6 +45,28 @@ export function AxisSwayBadge({ name }: { name: string }) {
   );
 }
 
+export function FlowSwayBadge({ name, reason }: { name: string; reason?: string }) {
+  const label = `${name}：流れ揺れ：ON${reason ? `（停止中：${reason}）` : ''}`;
+  return (
+    <span className={`part-sway-badge${reason ? ' is-paused' : ''}`} role="img" aria-label={label} title={label}>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 16 16"
+        aria-hidden
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M8 1v2M3 8a5 5 0 0 1 10 0H3zM8 8v3" />
+        <path d="M6.5 11h3v4h-3z" />
+      </svg>
+    </span>
+  );
+}
+
 export interface MenuEntry {
   label: string;
   disabled?: boolean;

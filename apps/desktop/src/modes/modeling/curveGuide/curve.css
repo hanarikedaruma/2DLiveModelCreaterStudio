@@ -52,3 +52,16 @@
 .curve-panel button {
   white-space: normal;
 }
+.curve-shoulders {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  padding: 8px;
+}
+.curve-shoulders select {
+  width: 100%;
+  min-width: 0;
+}

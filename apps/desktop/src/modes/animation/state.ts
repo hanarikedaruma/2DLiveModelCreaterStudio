@@ -7,6 +7,7 @@ import { sameTime } from './keyframes';
 export type Playback = 'stopped' | 'once' | 'loop';
 
 export interface AnimationEditorState {
+  seekRevision?: number; // 手動シーク。連続再生の刻みでは増やさない
   animationId: string | null; // 選んでいるアニメーション（無ければ一覧の先頭）
   time: number; // 秒
   playback: Playback; // プレビューの再生
@@ -16,6 +17,7 @@ export interface AnimationEditorState {
 export interface AnimationEditorStore {
   get(): AnimationEditorState;
   set(patch: Partial<AnimationEditorState>): void;
+  advance(time: number): void;
   subscribe(listener: () => void): () => void;
   reset(): void;
 }
@@ -35,7 +37,12 @@ export function createAnimationEditorStore(): AnimationEditorStore {
     set(patch) {
       const keys = Object.keys(patch) as (keyof AnimationEditorState)[];
       if (keys.every((k) => Object.is(state[k], patch[k]))) return;
-      state = { ...state, ...patch };
+      state = { ...state, ...patch, ...('time' in patch ? { seekRevision: (state.seekRevision ?? 0) + 1 } : {}) };
+      emit();
+    },
+    advance(time) {
+      if (time === state.time) return;
+      state = { ...state, time };
       emit();
     },
     subscribe(listener) {

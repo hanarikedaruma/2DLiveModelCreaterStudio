@@ -59,7 +59,7 @@ export function AnimationCenter() {
         animationEditor.set({ time: next.time, playback: 'stopped' });
         return;
       }
-      animationEditor.set({ time: next.time });
+      animationEditor.advance(next.time);
       handle = schedule(tick);
     };
     handle = schedule(tick);

@@ -20,6 +20,7 @@ export interface FrameMessage {
   background: SceneBackground;
   size: Size;
   now: number;
+  positions?: Record<string, number[]>; // 完成した頂点。出力側で慣性を進め直さない
 }
 export type ToOutput = ProjectMessage | FrameMessage;
 

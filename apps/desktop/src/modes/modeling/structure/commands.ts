@@ -1,6 +1,6 @@
 // パーツ構造・描画順・マスクのコマンド（純粋関数）。親子（parentId と兄弟の順）と描画順（drawOrder）は別々に変える
 import { curveMeshSignature, modelCommand, patchPart } from '@app/core';
-import type { Binding, CurveGuide, Mesh, Model, Part, Project } from '@app/schema';
+import type { Binding, CurveGuide, Mesh, Model, Part, Project, ShoulderCollider } from '@app/schema';
 import type { Command } from '@app/contracts';
 import { basePart, childrenOf, idSequence, isInside, partsCenter, removeParts, subtreeIds, topMost } from './modelOps';
 
@@ -169,6 +169,7 @@ export interface DuplicateVariant {
   binding(copy: Binding): Binding; // target は差し替え済み
   assetId(id: string | null): string | null;
   guide?(copy: CurveGuide): CurveGuide;
+  collider?(copy: ShoulderCollider): ShoulderCollider;
 }
 
 // パーツ（グループなら子孫ごと）を複製する。複製は元のすぐ後ろの兄弟に入れ、描画順は元のいちばん前面のすぐ前に足す。
@@ -229,6 +230,28 @@ export function duplicateParts(
   }
 
   const originals = model.drawOrder.filter((id) => partIds.has(id));
+  const colliderIds = new Map<string, string>();
+  const newColliders: ShoulderCollider[] = [];
+  for (const c of model.shoulderColliders ?? []) {
+    const partId = partIds.get(c.partId),
+      meshId = meshIds.get(c.meshId);
+    if (!partId || !meshId) continue;
+    const id = next();
+    colliderIds.set(c.id, id);
+    let copy: ShoulderCollider = {
+      ...c,
+      id,
+      partId,
+      meshId,
+      points: c.points.map((p) => ({ ...p })),
+      meshSignature:
+        c.meshSignature === curveMeshSignature(meshes.get(c.meshId)!)
+          ? curveMeshSignature(newMeshes.find((m) => m.id === meshId)!)
+          : c.meshSignature,
+    };
+    if (variant.collider) copy = variant.collider(copy);
+    newColliders.push(copy);
+  }
   const newGuides: CurveGuide[] = [];
   for (const g of model.curveGuides ?? []) {
     const partId = partIds.get(g.partId),
@@ -243,6 +266,10 @@ export function duplicateParts(
       meshId,
       reference: g.reference.map((p) => ({ ...p })) as CurveGuide['reference'],
       points: g.points.map((p) => ({ ...p })) as CurveGuide['points'],
+      ...(g.dynamics ? { dynamics: { ...g.dynamics } } : {}),
+      ...(g.collision
+        ? { collision: { ...g.collision, colliderIds: g.collision.colliderIds.map((id) => colliderIds.get(id) ?? id) } }
+        : {}),
       meshSignature: g.meshSignature === curveMeshSignature(originalMesh) ? curveMeshSignature(mesh) : g.meshSignature,
     };
     if (variant.guide) copy = variant.guide(copy);
@@ -263,6 +290,7 @@ export function duplicateParts(
       meshes: [...model.meshes, ...newMeshes],
       bindings: [...model.bindings, ...newBindings],
       ...(model.curveGuides ? { curveGuides: [...model.curveGuides, ...newGuides] } : {}),
+      ...(model.shoulderColliders ? { shoulderColliders: [...model.shoulderColliders, ...newColliders] } : {}),
       drawOrder,
     },
   };

@@ -1,13 +1,24 @@
-import { useEffect, type FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { curveMeshSignature } from '@app/core';
 import { useCanvas, useDialogs, useEditor, useProject, useServices } from '../../../shell/api';
+import { useShell } from '../../../shell/context';
 import { useBindEnv, type EnvSlot } from '../canvas/env';
 import { isLockedDeep } from '../canvas/parts';
 import { meshTarget } from '../mesh/meshTool';
 import { activeParams, isBaseState, isPreviewOffBase } from '../../../services/keyEditor/common';
-import { physicsOfPart } from '../physics/commands';
-import { editableGuide, gravityGuideCommand, guideOfPart, patchGuideCommand, removeGuideCommand } from './commands';
+import {
+  DEFAULT_FLOW_DYNAMICS,
+  curveBakeEditor,
+  dynamicsGuideCommand,
+  editableGuide,
+  gravityGuideCommand,
+  guideOfPart,
+  patchGuideCommand,
+  removeGuideCommand,
+} from './commands';
+import { startFlowPreview, stopFlowPreview } from './preview';
 import { CURVE_TOOL_ID, type CurveEditor } from './curveTool';
+import { ShoulderPanel } from './ShoulderPanel';
 import './curve.css';
 
 export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
@@ -16,16 +27,20 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
     const project = useProject();
     const [editor] = useEditor();
     const { store } = useServices();
+    const { canvas } = useShell();
+    const services = useServices();
     const dialogs = useDialogs();
-    const { activeToolId, setActiveTool } = useCanvas();
+    const { activeToolId, setActiveTool, motionPreview } = useCanvas();
+    const [draft, setDraft] = useState<{ strength?: number; damping?: number }>({});
     const target = meshTarget(project.model, editor.selectedPartIds);
     const guide = target ? guideOfPart(project.model, target.part.id) : undefined;
     const canDraw =
       !!target?.mesh &&
+      !motionPreview &&
       !!curveEditor.snapshot()?.raw &&
       !isLockedDeep(project.model, target.part.id) &&
       !project.model.parts.some((p) => p.parentId === target.part.id);
-    const editable = !!guide && editableGuide(project.model, guide);
+    const editable = !!guide && !motionPreview && editableGuide(project.model, guide);
     const stale = !!guide && !!target?.mesh && guide.meshSignature !== curveMeshSignature(target.mesh);
     const limited = curveEditor.snapshot()?.evaluated?.result.status === 'limited';
     useEffect(() => {
@@ -39,27 +54,19 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
       setActiveTool(CURVE_TOOL_ID);
       curveEditor.drawNew();
     };
-    const gravity = async (on: boolean) => {
+    useEffect(() => setDraft({}), [project, target?.part.id]);
+    const gravity = (on: boolean) => {
       if (!guide || !editable) return;
-      const before = store.get();
-      if (on && physicsOfPart(before, guide.partId)) {
-        const ok = await dialogs.confirm(
-          'この髪の既存の揺れを解除し、流れ線の重力に切り替えますか？（Undoで戻せます）',
-        );
-        if (!ok || store.get() !== before) return;
-      }
       store.dispatch(gravityGuideCommand(guide.id, on));
     };
-    const enabled = async (on: boolean) => {
+    const enabled = (on: boolean) => {
       if (!guide || !editable) return;
-      const before = store.get();
-      if (on && guide.gravity && physicsOfPart(before, guide.partId)) {
-        const ok = await dialogs.confirm(
-          'この髪の既存の揺れを解除し、流れ線の重力に切り替えますか？（Undoで戻せます）',
-        );
-        if (!ok || store.get() !== before) return;
-      }
       store.dispatch(patchGuideCommand(guide.id, { enabled: on }));
+    };
+    const dynamics = guide?.dynamics ?? DEFAULT_FLOW_DYNAMICS;
+    const commit = () => {
+      if (guide && Object.keys(draft).length) store.dispatch(dynamicsGuideCommand(guide.id, draft));
+      setDraft({});
     };
     return (
       <div className="curve-panel">
@@ -105,6 +112,91 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
                   />
                   重力に沿わせる
                 </label>
+                <label className="curve-check">
+                  <input
+                    type="checkbox"
+                    checked={dynamics.enabled}
+                    disabled={(!editable && !dynamics.enabled) || isLockedDeep(project.model, guide.partId)}
+                    onChange={(e) =>
+                      store.dispatch(dynamicsGuideCommand(guide.id, { enabled: e.currentTarget.checked }))
+                    }
+                  />
+                  流れ線で揺らす
+                </label>
+                {dynamics.enabled && (!guide.enabled || !guide.gravity || stale) && (
+                  <p className="curve-warning" role="status">
+                    {stale
+                      ? 'メッシュの形が変わりました。流れ線を描き直してください。'
+                      : !guide.enabled
+                        ? '流れ線の変形がOFFのため、流れ揺れは停止しています。'
+                        : '「重力に沿わせる」をONにすると、流れ揺れが動きます。'}
+                  </p>
+                )}
+                <label className="curve-field">
+                  揺れの形
+                  <select
+                    aria-label="流れ揺れのプリセット"
+                    value={dynamics.preset}
+                    disabled={!editable}
+                    onChange={(e) =>
+                      store.dispatch(
+                        dynamicsGuideCommand(guide.id, { preset: e.currentTarget.value as typeof dynamics.preset }),
+                      )
+                    }
+                  >
+                    <option value="soft">柔らかめ</option>
+                    <option value="normal">標準</option>
+                    <option value="firm">硬め</option>
+                  </select>
+                </label>
+                {(['strength', 'damping'] as const).map((key) => (
+                  <label className="curve-field" key={key}>
+                    {key === 'strength' ? '揺れの大きさ' : '収まりの速さ'}{' '}
+                    <output>{Math.round((draft[key] ?? dynamics[key]) * 100)}%</output>
+                    <input
+                      type="range"
+                      aria-label={key === 'strength' ? '流れ揺れの大きさ' : '流れ揺れの収まりの速さ'}
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={Math.round((draft[key] ?? dynamics[key]) * 100)}
+                      disabled={!editable}
+                      onChange={(e) => {
+                        const value = Number(e.currentTarget.value) / 100;
+                        setDraft((old) => ({ ...old, [key]: value }));
+                      }}
+                      onPointerUp={commit}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          e.stopPropagation();
+                          setDraft({});
+                        }
+                      }}
+                      onKeyUp={commit}
+                      onBlur={commit}
+                    />
+                  </label>
+                ))}
+                <button
+                  type="button"
+                  disabled={
+                    !motionPreview &&
+                    (!editable || !guide.enabled || !guide.gravity || (!dynamics.enabled && !guide.collision?.enabled))
+                  }
+                  onClick={() => {
+                    if (motionPreview) stopFlowPreview(canvas);
+                    else if (!startFlowPreview(services, canvas, guide.partId))
+                      dialogs.notify(
+                        '頭や体の姿勢キーを作ってから試してください。パラメータを手動で動かして形を確認することもできます。',
+                      );
+                  }}
+                >
+                  {motionPreview ? '動きを止める' : '動きを試す'}
+                </button>
+                <p className="curve-hint">
+                  線を作っただけでは揺れません。軸揺れと併用できます。試す間は頭の姿勢キーを動かし、止めると編集用の形に戻ります。
+                </p>
+                <ShoulderPanel guide={guide} curveEditor={curveEditor} editable={editable} />
                 <label className="curve-field">
                   頭について回る区間 <output>{Math.round(guide.rootFraction * 100)}%</output>
                   <input
@@ -157,7 +249,7 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
                       !editable ||
                       !guide.enabled ||
                       isBaseState(activeParams(project.model, editor)) ||
-                      isPreviewOffBase(project.model, editor)
+                      isPreviewOffBase(project.model, curveBakeEditor(project, editor, guide.partId))
                     }
                     onClick={() => void curveEditor.bake()}
                   >

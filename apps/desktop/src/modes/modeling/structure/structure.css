@@ -84,6 +84,12 @@
   height: 14px;
   color: var(--text);
 }
+.part-sway-badge.is-paused {
+  opacity: 0.45;
+}
+.part-sway-badge + .part-sway-badge {
+  margin-left: -2px;
+}
 .parent-name {
   flex: none;
   max-width: 90px;

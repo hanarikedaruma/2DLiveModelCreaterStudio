@@ -107,6 +107,27 @@ export interface Mesh {
 }
 
 // 一本の流れ線。座標はメッシュの局所座標。reference は作成時、points は編集後。
+export interface CurveGuideDynamics {
+  enabled: boolean;
+  preset: 'soft' | 'normal' | 'firm';
+  strength: number; // 0..1
+  damping: number; // 0..1
+}
+export interface HairCollisionSettings {
+  enabled: boolean;
+  colliderIds: Id[];
+  thickness: number; // メッシュから求めた太さの倍率（0.5..2）
+}
+export interface ShoulderCollider {
+  id: Id;
+  name: string;
+  partId: Id;
+  meshId: Id;
+  meshSignature: string;
+  points: Vec2[]; // 取付先メッシュの局所座標、2..8点
+  radius: number;
+  enabled: boolean;
+}
 export interface CurveGuide {
   id: Id;
   partId: Id;
@@ -118,6 +139,8 @@ export interface CurveGuide {
   rootFraction: number; // 頭に追従する根元の区間（0..0.5）
   gravity: boolean;
   enabled: boolean;
+  dynamics?: CurveGuideDynamics; // 省略はOFF。線/重力の作成では揺れを有効にしない
+  collision?: HairCollisionSettings; // 揺れとは独立。省略はOFF
 }
 
 // ---- Warp ----
@@ -191,11 +214,12 @@ export interface Model {
   parameterGroups: ParameterGroup[];
   bindings: Binding[];
   curveGuides?: CurveGuide[]; // 省略は空。カード99 / schemaVersion 4
+  shoulderColliders?: ShoulderCollider[];
   lipSync: LipSync;
   setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
 }
 export interface Project {
-  schemaVersion: number; // 現在は4（3 → 4で流れ線。旧版は開くときに移行）
+  schemaVersion: number; // 現在は5（4 → 5で流れ揺れ。旧版は開くときに移行）
   id: Id;
   name: string;
   assets: Asset[];

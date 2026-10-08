@@ -44,7 +44,7 @@ describe('流れ線のパレット', () => {
     fireEvent.click(within(el).getByRole('button', { name: '「流れ線」の説明' }));
     const note = screen.getByRole('note', { name: '「流れ線」の説明' });
     expect(note.textContent).toMatch(/一本の線で滑らかに曲げる/);
-    expect(within(note).getAllByRole('listitem')).toHaveLength(5);
+    expect(within(note).getAllByRole('listitem')).toHaveLength(6);
     fireEvent.click(screen.getByRole('button', { name: '選択・変形' }));
     expect(shell.panelEl()).toBeNull();
   });

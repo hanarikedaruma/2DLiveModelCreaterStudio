@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import type { Model, Project, Vec2 } from '@app/schema';
 import type { DeformedModel, EditorState, ParamValues, Renderer, ViewTransform } from '@app/contracts';
+import { HairDynamicsSession } from '@app/core';
+import { hairFrames } from '../../services/hairFrame';
 import {
   useCanvas,
   useEditor,
@@ -83,7 +85,7 @@ export function CanvasHost() {
   const project = useProject();
   const [editor] = useEditor();
   const snapshot = useSyncExternalStore(registry.subscribe, registry.get);
-  const { view, activeToolId, setActiveTool } = useCanvas();
+  const { view, activeToolId, setActiveTool, motionPreview } = useCanvas();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -91,6 +93,7 @@ export function CanvasHost() {
   const rendererRef = useRef<Renderer | null>(null);
   const sizeRef = useRef({ width: 0, height: 0 });
   const cacheRef = useRef<{ model: Model; values: ParamValues; deformed: DeformedModel } | null>(null);
+  const hairSession = useRef(new HairDynamicsSession());
   const scheduledRef = useRef(false);
   const spaceRef = useRef(false);
   const panRef = useRef<{ pointerId: number; start: Vec2; view: typeof view } | null>(null);
@@ -118,13 +121,20 @@ export function CanvasHost() {
     const { project, editor, snapshot, activeTool } = latest.current;
     const currentView = controller.getState().view;
     let cache = cacheRef.current;
-    if (!cache || cache.model !== project.model || cache.values !== editor.editorParamValues) {
-      const params = paramValuesFor(project.model, editor.editorParamValues);
-      const deltas = services.evaluator.evaluate(project.model, params);
+    const motion = controller.getState().motionPreview;
+    const values = motion?.params ?? editor.editorParamValues;
+    if (!cache || cache.model !== project.model || cache.values !== values) {
+      const params = paramValuesFor(project.model, values);
+      if (!motion) hairSession.current.reset();
       cache = {
         model: project.model,
-        values: editor.editorParamValues,
-        deformed: services.pipeline.deform(project.model, deltas),
+        values,
+        deformed: hairFrames(services).evaluate(
+          project,
+          params,
+          motion?.context,
+          motion ? hairSession.current : undefined,
+        ),
       };
       cacheRef.current = cache;
       controller.setLastDeformed(cache.deformed);
@@ -152,6 +162,8 @@ export function CanvasHost() {
       const name = picked ? project.model.parts.find((p) => p.id === picked)?.name : undefined;
       if (outline && name !== undefined) drawPickOutline(ctx, outline.min, outline.max, name);
       drawCanvasBanner(ctx, target.prompt);
+    } else if (motion) {
+      drawCanvasBanner(ctx, '動きを試しています。止めると編集用の形に戻ります。');
     } else if (activeTool?.drawOverlay) {
       ctx.save();
       activeTool.drawOverlay(ctx, currentView);
@@ -164,6 +176,7 @@ export function CanvasHost() {
     scheduledRef.current = true;
     schedule(drawNow);
   }, [drawNow]);
+  useEffect(requestDraw, [motionPreview, requestDraw]);
 
   // 描画の元になるものが変わったら描き直す
   useEffect(requestDraw, [requestDraw, project, editor, view, snapshot, activeTool]);
@@ -340,7 +353,7 @@ export function CanvasHost() {
       requestDraw();
       return;
     }
-    activeTool?.onPointerDown?.(event);
+    if (!controller.getState().motionPreview) activeTool?.onPointerDown?.(event);
     requestDraw(); // ツールのオーバーレイが変わったかもしれない
   };
 
@@ -362,7 +375,7 @@ export function CanvasHost() {
       requestDraw(); // 点線の囲みを、マウスの下のものに合わせる
       return;
     }
-    if (!activeTool?.onPointerMove) return;
+    if (controller.getState().motionPreview || !activeTool?.onPointerMove) return;
     activeTool.onPointerMove(event);
     requestDraw();
   };
@@ -385,7 +398,7 @@ export function CanvasHost() {
       requestDraw();
       return;
     }
-    activeTool?.onPointerUp?.(toCanvasEvent(e));
+    if (!controller.getState().motionPreview) activeTool?.onPointerUp?.(toCanvasEvent(e));
     requestDraw();
   };
 
@@ -417,7 +430,7 @@ export function CanvasHost() {
         tabIndex={0}
         data-testid="canvas-stage"
         onKeyDown={(e) => {
-          if (e.code === 'Space' || !activeTool?.onKeyDown) return;
+          if (e.code === 'Space' || controller.getState().motionPreview || !activeTool?.onKeyDown) return;
           activeTool.onKeyDown(e.nativeEvent);
           requestDraw();
         }}

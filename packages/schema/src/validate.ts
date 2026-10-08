@@ -208,6 +208,21 @@ const curveGuide: z.ZodType<CurveGuide> = z
     rootFraction: num.min(0).max(0.5),
     gravity: z.boolean(),
     enabled: z.boolean(),
+    dynamics: z
+      .object({
+        enabled: z.boolean(),
+        preset: z.enum(['soft', 'normal', 'firm']),
+        strength: num.min(0).max(1),
+        damping: num.min(0).max(1),
+      })
+      .optional(),
+    collision: z
+      .object({
+        enabled: z.boolean(),
+        colliderIds: z.array(id).refine((ids) => new Set(ids).size === ids.length, '肩の指定が重複している'),
+        thickness: num.min(0.5).max(2),
+      })
+      .optional(),
   })
   .superRefine((g, ctx) => {
     if (Math.hypot(g.reference[2].x - g.reference[0].x, g.reference[2].y - g.reference[0].y) < 1e-6) {
@@ -340,6 +355,27 @@ const model: z.ZodType<Model> = z
     parameterGroups: z.array(parameterGroup),
     bindings: z.array(binding),
     curveGuides: z.array(curveGuide).optional(),
+    shoulderColliders: z
+      .array(
+        z.object({
+          id,
+          name: z.string(),
+          partId: id,
+          meshId: id,
+          meshSignature: z.string().min(1),
+          points: z
+            .array(vec2)
+            .min(2)
+            .max(8)
+            .refine(
+              (points) => points.slice(1).every((p, i) => Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y) > 1e-6),
+              '肩の隣の点は別の位置にする',
+            ),
+          radius: num.positive(),
+          enabled: z.boolean(),
+        }),
+      )
+      .optional(),
     lipSync,
     setupHints: z.object({ closedLineL: z.array(vec2).nullable(), closedLineR: z.array(vec2).nullable() }),
   })
@@ -350,6 +386,7 @@ const model: z.ZodType<Model> = z
     uniqueIds(m.parameters, 'parameters', ctx);
     uniqueIds(m.bindings, 'bindings', ctx);
     uniqueIds(m.curveGuides ?? [], 'curveGuides', ctx);
+    uniqueIds(m.shoulderColliders ?? [], 'shoulderColliders', ctx);
     const targets = new Set<string>();
     (m.curveGuides ?? []).forEach((g, i) => {
       if (targets.has(g.partId))

@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Vec2 } from '@app/schema';
 import { hairProject } from '../src/modes/modeling/curveGuide/testing';
 import { enablePhysicsCommand } from '../src/modes/modeling/physics/commands';
-import { answerDialog, launchApp, waitForStartup, ROOT, slash, type RunningApp, type StudioHook } from './app';
+import { launchApp, waitForStartup, ROOT, slash, type RunningApp, type StudioHook } from './app';
 
 const EDGE = process.env.C99_BROWSER === 'edge';
 const EVIDENCE = join(ROOT, '.cache', 'verification', 'card99-2026-10-08', EDGE ? 'edge' : 'native');
@@ -136,12 +136,8 @@ describe('カード99: 一本の流れ線で髪を曲げる', () => {
       await page.evaluate((project) => window.__studio.services.store.load(project), withPhysics);
       const gravity = panel.getByLabel('重力に沿わせる', { exact: true });
       await gravity.click();
-      expect(await answerDialog(page, 'キャンセル')).toContain('既存の揺れを解除');
-      expect(await page.evaluate(() => window.__studio.services.store.get())).toEqual(withPhysics);
-      await gravity.click();
-      expect(await answerDialog(page, 'OK')).toContain('既存の揺れを解除');
       await page.waitForFunction(() => window.__studio.services.store.get().model.curveGuides?.[0]?.gravity === true);
-      expect(await page.evaluate(() => window.__studio.services.store.get().physics.length)).toBe(0);
+      expect(await page.evaluate(() => window.__studio.services.store.get().physics.length)).toBe(1);
       await page.evaluate(() =>
         window.__studio.services.editor.set({
           activeParameterIds: ['FaceAngleZ'],

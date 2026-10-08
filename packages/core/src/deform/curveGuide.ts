@@ -130,8 +130,102 @@ function fromAttachment(a: Attachment, positions: Float32Array): Vec2 {
   );
 }
 
+const pointAttachments = new WeakMap<Mesh, WeakMap<Vec2[], Attachment[]>>();
+function attachmentsOf(mesh: Mesh, points: Vec2[]): Attachment[] {
+  let cache = pointAttachments.get(mesh);
+  if (!cache) pointAttachments.set(mesh, (cache = new WeakMap()));
+  let attachments = cache.get(points);
+  if (!attachments) cache.set(points, (attachments = points.map((p) => attachmentAt(mesh, p))));
+  return attachments;
+}
+
 export function meshPointsToDisplay(mesh: Mesh, positions: Float32Array, points: Vec2[]): Vec2[] {
-  return points.map((p) => fromAttachment(attachmentAt(mesh, p), positions));
+  return attachmentsOf(mesh, points).map((a) => fromAttachment(a, positions));
+}
+
+export function curveContactGeometry(mesh: Mesh, guide: CurveGuide, positions: Float32Array) {
+  const data = prepare(mesh, guide);
+  const source = data.attachments.map((a) => fromAttachment(a, positions));
+  let width = 0,
+    complete = true;
+  const free = new Set<number>();
+  data.vertices.forEach((location, index) => {
+    if (location.component !== data.component) return;
+    if (location.distance >= guide.radius * 0.5) complete = false;
+    const s =
+      data.along[location.segment]! + (data.along[location.segment + 1]! - data.along[location.segment]!) * location.t;
+    if (s <= guide.rootFraction) return;
+    free.add(index);
+    width = Math.max(
+      width,
+      dist(
+        { x: positions[index * 2]!, y: positions[index * 2 + 1]! },
+        mix(source[location.segment]!, source[location.segment + 1]!, location.t),
+      ),
+    );
+  });
+  return { width, complete, along: data.along, triangles: mesh.triangles.filter((t) => t.some((i) => free.has(i))) };
+}
+
+// A conservative upper bound on local stretch, including shear and nonuniform scaling.
+export function meshPointStretch(mesh: Mesh, positions: Float32Array, points: Vec2[]): number | null {
+  let maximum = 0;
+  for (const attachment of attachmentsOf(mesh, points)) {
+    const [a, b, c] = attachment.indices;
+    const u = { x: mesh.vertices[b]!.x - mesh.vertices[a]!.x, y: mesh.vertices[b]!.y - mesh.vertices[a]!.y };
+    const v = { x: mesh.vertices[c]!.x - mesh.vertices[a]!.x, y: mesh.vertices[c]!.y - mesh.vertices[a]!.y };
+    const det = u.x * v.y - u.y * v.x;
+    if (Math.abs(det) < 1e-8) return null;
+    const x = { x: positions[b * 2]! - positions[a * 2]!, y: positions[b * 2 + 1]! - positions[a * 2 + 1]! };
+    const y = { x: positions[c * 2]! - positions[a * 2]!, y: positions[c * 2 + 1]! - positions[a * 2 + 1]! };
+    if (Math.abs(x.x * y.y - x.y * y.x) < 1e-8) return null;
+    const xx = (x.x * v.y - y.x * u.y) / det,
+      xy = (-x.x * v.x + y.x * u.x) / det;
+    const yx = (x.y * v.y - y.y * u.y) / det,
+      yy = (-x.y * v.x + y.y * u.x) / det;
+    const trace = xx * xx + xy * xy + yx * yx + yy * yy;
+    const determinant = (xx * yy - xy * yx) ** 2;
+    const stretch = Math.sqrt((trace + Math.sqrt(Math.max(0, trace * trace - 4 * determinant))) / 2);
+    if (!Number.isFinite(stretch) || stretch < 1e-8) return null;
+    maximum = Math.max(maximum, stretch);
+  }
+  return maximum;
+}
+
+// Transfer a gravity rest line from the neutral axis mesh to the actual axis mesh.
+export function transportCurveGuide(
+  mesh: Mesh,
+  guide: CurveGuide,
+  before: Float32Array,
+  after: Float32Array,
+  curve: Vec2[],
+): Vec2[] | null {
+  const data = prepare(mesh, guide);
+  const output: Vec2[] = [];
+  for (let i = 0; i < curve.length; i++) {
+    const attachment = data.attachments[i]!;
+    const [a, b, c] = attachment.indices;
+    const ex = before[b * 2]! - before[a * 2]!,
+      ey = before[b * 2 + 1]! - before[a * 2 + 1]!;
+    const fx = before[c * 2]! - before[a * 2]!,
+      fy = before[c * 2 + 1]! - before[a * 2 + 1]!;
+    const ax = after[b * 2]! - after[a * 2]!,
+      ay = after[b * 2 + 1]! - after[a * 2 + 1]!;
+    const bx = after[c * 2]! - after[a * 2]!,
+      by = after[c * 2 + 1]! - after[a * 2 + 1]!;
+    const det = ex * fy - ey * fx;
+    if (Math.abs(det) < 1e-8 || det * (ax * by - ay * bx) <= 0) return null;
+    const p0 = fromAttachment(attachment, before),
+      p1 = fromAttachment(attachment, after);
+    const dx = curve[i]!.x - p0.x,
+      dy = curve[i]!.y - p0.y;
+    const u = (fy * dx - fx * dy) / det,
+      v = (-ey * dx + ex * dy) / det;
+    const p = { x: p1.x + ax * u + bx * v, y: p1.y + ay * u + by * v };
+    if (!Number.isFinite(p.x + p.y)) return null;
+    output.push(p);
+  }
+  return output;
 }
 
 function angle(a: Vec2, b: Vec2): number {
@@ -163,6 +257,8 @@ export function evaluateCurveGuide(
   guide: CurveGuide,
   mesh: Mesh,
   positions: Float32Array,
+  adjust?: (target: Vec2[], source: Vec2[], along: number[]) => Vec2[],
+  accept?: (positions: Float32Array, curve: Vec2[]) => boolean,
 ): { positions: Float32Array; result: CurveGuideResult } {
   const fallback = pointsToModelSpace(model, deltas, guide.partId, guide.points);
   const unused = (status: CurveGuideResult['status']) => ({
@@ -222,38 +318,52 @@ export function evaluateCurveGuide(
     }
     target = hanging;
   }
+  if (adjust) target = adjust(target, source, data.along);
 
-  if (target.every((p, i) => dist(p, source[i]!) < 1e-8)) {
+  if (target.every((p, i) => dist(p, source[i]!) < 1e-8) && (!accept || accept(positions, target))) {
     return {
       positions,
       result: { curve: source, handles: [source[0]!, source[STEPS / 2]!, source[STEPS]!], status: 'ok', strength: 1 },
     };
   }
 
-  const candidate = positions.slice();
-  data.vertices.forEach((location, index) => {
-    if (location.component !== data.component || location.distance >= guide.radius) return;
-    const { segment, t } = location;
-    const sourcePoint = mix(source[segment]!, source[segment + 1]!, t);
-    const targetPoint = mix(target[segment]!, target[segment + 1]!, t);
-    const theta = wrap(angle(target[segment]!, target[segment + 1]!) - angle(source[segment]!, source[segment + 1]!));
-    const x = positions[index * 2]! - sourcePoint.x,
-      y = positions[index * 2 + 1]! - sourcePoint.y;
-    const moved = {
-      x: targetPoint.x + Math.cos(theta) * x - Math.sin(theta) * y,
-      y: targetPoint.y + Math.sin(theta) * x + Math.cos(theta) * y,
-    };
-    const weight = 1 - smooth(clamp((location.distance / guide.radius - 0.5) * 2));
-    candidate[index * 2] = positions[index * 2]! + (moved.x - positions[index * 2]!) * weight;
-    candidate[index * 2 + 1] = positions[index * 2 + 1]! + (moved.y - positions[index * 2 + 1]!) * weight;
-  });
+  const map = (line: Vec2[]) => {
+    const candidate = positions.slice();
+    data.vertices.forEach((location, index) => {
+      if (location.component !== data.component || location.distance >= guide.radius) return;
+      const { segment, t } = location;
+      const sourcePoint = mix(source[segment]!, source[segment + 1]!, t);
+      const targetPoint = mix(line[segment]!, line[segment + 1]!, t);
+      const theta = wrap(angle(line[segment]!, line[segment + 1]!) - angle(source[segment]!, source[segment + 1]!));
+      const x = positions[index * 2]! - sourcePoint.x,
+        y = positions[index * 2 + 1]! - sourcePoint.y;
+      const moved = {
+        x: targetPoint.x + Math.cos(theta) * x - Math.sin(theta) * y,
+        y: targetPoint.y + Math.sin(theta) * x + Math.cos(theta) * y,
+      };
+      const weight = 1 - smooth(clamp((location.distance / guide.radius - 0.5) * 2));
+      candidate[index * 2] = positions[index * 2]! + (moved.x - positions[index * 2]!) * weight;
+      candidate[index * 2 + 1] = positions[index * 2 + 1]! + (moved.y - positions[index * 2 + 1]!) * weight;
+    });
+    return candidate;
+  };
+  const candidate = map(target);
   let strength = 1,
     output = candidate;
-  for (let step = 0; !valid(mesh, positions, output) && step < 10; step++) {
+  const accepted = () =>
+    valid(mesh, positions, output) &&
+    (!accept ||
+      accept(
+        output,
+        target.map((p, i) => mix(source[i]!, p, strength)),
+      ));
+  for (let step = 0; !accepted() && step < 10; step++) {
     strength *= 0.5;
-    output = positions.map((v, i) => v + (candidate[i]! - v) * strength);
+    output = adjust
+      ? map(target.map((p, i) => mix(source[i]!, p, strength)))
+      : positions.map((v, i) => v + (candidate[i]! - v) * strength);
   }
-  if (!valid(mesh, positions, output)) {
+  if (!accepted()) {
     strength = 0;
     output = positions;
   }

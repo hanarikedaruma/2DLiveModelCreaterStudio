@@ -5,19 +5,22 @@ import { beginDrag, rowZone, useDropTarget } from '../assets/dnd';
 import { reorderDrawOrder } from './commands';
 import { drawOrderBlock } from './modelOps';
 import { clickSelection } from './selection';
-import { AxisSwayBadge } from './ui';
+import { AxisSwayBadge, FlowSwayBadge } from './ui';
+import { flowSwayReason } from '@app/core';
 import './structure.css';
 
 function DrawOrderRow({
   part,
   parentName,
   axisSway,
+  flowSway,
   inBlock,
   block,
 }: {
   part: Part;
   parentName: string | null;
   axisSway: boolean;
+  flowSway?: true | string;
   inBlock: boolean;
   block: readonly string[];
 }) {
@@ -65,6 +68,7 @@ function DrawOrderRow({
         {part.name}
       </span>
       {axisSway && <AxisSwayBadge name={part.name} />}
+      {flowSway && <FlowSwayBadge name={part.name} reason={typeof flowSway === 'string' ? flowSway : undefined} />}
       {parentName && <span className="am-dim parent-name">{parentName}</span>}
     </li>
   );
@@ -76,6 +80,11 @@ export function DrawOrderTab() {
   const [editor, setEditor] = useEditor();
   const byId = new Map(model.parts.map((p) => [p.id, p]));
   const axisSwayPartIds = new Set(project.physics.map((item) => item.partId));
+  const flowSwayParts = new Map(
+    (model.curveGuides ?? [])
+      .filter((g) => g.dynamics?.enabled)
+      .map((g) => [g.partId, flowSwayReason(project, g) ?? true] as const),
+  );
   const block = drawOrderBlock(model, editor.selectedPartIds);
   const blockSet = new Set(block);
   const rows = [...model.drawOrder]
@@ -115,6 +124,7 @@ export function DrawOrderTab() {
                 part={part}
                 parentName={part.parentId ? (byId.get(part.parentId)?.name ?? null) : null}
                 axisSway={axisSwayPartIds.has(part.id)}
+                flowSway={flowSwayParts.get(part.id)}
                 inBlock={blockSet.has(part.id)}
                 block={block}
               />

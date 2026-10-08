@@ -1,7 +1,7 @@
 import { validateProject } from './validate';
 import type { Project } from './types';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 // { [版]: その版の json を次の版に変換する関数 }
 export type Migrations = Record<number, (json: Record<string, unknown>) => Record<string, unknown>>;
@@ -10,6 +10,7 @@ export const MIGRATIONS: Migrations = {
   2: trackingSetupFromMappings,
   3: (json) =>
     isRecord(json.model) ? { ...json, model: { ...json.model, curveGuides: json.model.curveGuides ?? [] } } : json,
+  4: (json) => json, // dynamicsの省略はOFF。既存の軸/線/キーを変更しない
 };
 
 export class ProjectVersionError extends Error {

@@ -92,7 +92,7 @@ describe('カード99追補: 軸揺れの振り子', () => {
       const badge = hair.getByRole('img', { name: `${HAIR_NAME}：軸揺れ：ON`, exact: true });
       expect(await badge.count()).toBe(0);
       expect(await parts.getByRole('img', { name: '頭：軸揺れ：ON', exact: true }).count()).toBe(1);
-      const sway = settings.getByLabel('揺らす', { exact: true });
+      const sway = settings.getByLabel('軸で揺らす', { exact: true });
       await sway.check();
       await badge.waitFor({ state: 'visible' });
       expect(await parts.locator('[data-part-id="plain"]').getByRole('img').count()).toBe(0);

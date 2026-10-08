@@ -11,7 +11,8 @@ import {
   type Services,
   type ViewTransform,
 } from '@app/contracts';
-import { createAutoLayerProducer, type AutoLayerProducer } from '@app/core';
+import { createAutoLayerProducer, HairDynamicsSession, type AutoLayerProducer } from '@app/core';
+import { hairFrames } from '../../services/hairFrame';
 import {
   createBackgroundFiles,
   createBackgroundImages,
@@ -101,6 +102,9 @@ export function createStudioRuntime(
   let preview: ((frame: StudioFrame) => void) | null = null;
   let services: Services | null = null;
   let attachments = 0;
+  const hairSession = new HairDynamicsSession();
+  let hairFrameId = 0;
+  let hairProject: ReturnType<Services['store']['get']> | null = null;
   let cancelFrame: (() => void) | null = null;
   let tracking: { services: Services; off: () => void } | null = null;
   let outputSize: Size = DEFAULT_OUTPUT_SIZE;
@@ -165,6 +169,8 @@ export function createStudioRuntime(
     const s = services;
     if (!s) return null;
     const project = s.store.get();
+    if (hairProject !== project && !s.store.canUndo()) hairSession.reset();
+    hairProject = project;
     const dt = lastNow === null ? 0 : Math.max(0, now - lastNow);
     lastNow = now;
     const { parameters } = project.model;
@@ -186,7 +192,12 @@ export function createStudioRuntime(
       mixedSoFar = s.mixer.mix(parameters, [...layers]);
     }
     const params = mixedSoFar;
-    const model = s.pipeline.deform(project.model, s.evaluator.evaluate(project.model, params));
+    const model = hairFrames(s).evaluate(
+      project,
+      params,
+      { now, dt, frameId: ++hairFrameId, active: flags.physicsActive },
+      hairSession,
+    );
     const view = outputView(modelRect(project), override ?? sceneModelTransform(project), outputSize);
     const background = backgrounds.resolve(sceneBackground(project));
     const frame: StudioFrame = { model, view, background, params, now, layers: [...layers] };
@@ -249,6 +260,7 @@ export function createStudioRuntime(
       if (services !== next) {
         stopTracking();
         services = next;
+        hairSession.reset();
         override = null;
         last = null;
         lastNow = null;
@@ -262,6 +274,7 @@ export function createStudioRuntime(
         attached = false;
         attachments -= 1;
         if (attachments === 0) {
+          hairSession.reset();
           cancelFrame?.();
           cancelFrame = null;
           lastNow = null;
