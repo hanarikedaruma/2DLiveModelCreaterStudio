@@ -22,6 +22,29 @@ export function LockIcon({ locked }: { locked: boolean }) {
   );
 }
 
+// 設定の目印。値が0でも残し、押しただけでは物理のON/OFFを変更しない。
+export function AxisSwayBadge({ name }: { name: string }) {
+  const label = `${name}：軸揺れ：ON`;
+  return (
+    <span className="part-sway-badge" role="img" aria-label={label} title={label}>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 16 16"
+        aria-hidden
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 2h8M8 2v2l-3 6" />
+        <circle cx="4" cy="12" r="2" />
+      </svg>
+    </span>
+  );
+}
+
 export interface MenuEntry {
   label: string;
   disabled?: boolean;

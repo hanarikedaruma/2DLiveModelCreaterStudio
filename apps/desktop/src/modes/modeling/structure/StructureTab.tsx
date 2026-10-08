@@ -21,7 +21,7 @@ import { runMirrorCopy } from './mirrorCopy';
 import { childrenOf } from './modelOps';
 import { replaceAsset } from './replaceAsset';
 import { clickSelection, contextTargets, pruneSelection } from './selection';
-import { ContextMenu, EyeIcon, LockIcon, PickerDialog, type MenuEntry } from './ui';
+import { AxisSwayBadge, ContextMenu, EyeIcon, LockIcon, PickerDialog, type MenuEntry } from './ui';
 
 interface Row {
   part: Part;
@@ -77,6 +77,7 @@ function TreeRow({
   row,
   model,
   selected,
+  axisSway,
   open,
   renaming,
   onSelect,
@@ -89,6 +90,7 @@ function TreeRow({
   row: Row;
   model: Model;
   selected: boolean;
+  axisSway: boolean;
   open: boolean;
   renaming: boolean;
   onSelect(e: MouseEvent): void;
@@ -182,6 +184,7 @@ function TreeRow({
           {part.name}
         </span>
       )}
+      {axisSway && <AxisSwayBadge name={part.name} />}
       <button
         type="button"
         className="part-toggle part-visibility"
@@ -228,6 +231,7 @@ export function StructureTab() {
   const closeMenu = useCallback(() => setMenu(null), []);
 
   const rows = treeRows(model, collapsed);
+  const axisSwayPartIds = new Set(project.physics.map((item) => item.partId));
   const rootDrop = useDropTarget({
     accepts: acceptsParts,
     zone: (e) => (e.target === e.currentTarget ? true : null),
@@ -291,6 +295,7 @@ export function StructureTab() {
             row={row}
             model={model}
             selected={selected.includes(row.part.id)}
+            axisSway={axisSwayPartIds.has(row.part.id)}
             open={!collapsed.has(row.part.id)}
             renaming={renaming === row.part.id}
             onSelect={(e) =>

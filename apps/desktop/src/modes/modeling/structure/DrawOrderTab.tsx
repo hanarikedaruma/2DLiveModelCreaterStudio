@@ -5,16 +5,19 @@ import { beginDrag, rowZone, useDropTarget } from '../assets/dnd';
 import { reorderDrawOrder } from './commands';
 import { drawOrderBlock } from './modelOps';
 import { clickSelection } from './selection';
+import { AxisSwayBadge } from './ui';
 import './structure.css';
 
 function DrawOrderRow({
   part,
   parentName,
+  axisSway,
   inBlock,
   block,
 }: {
   part: Part;
   parentName: string | null;
+  axisSway: boolean;
   inBlock: boolean;
   block: readonly string[];
 }) {
@@ -61,15 +64,18 @@ function DrawOrderRow({
       <span className="part-name" title={part.name}>
         {part.name}
       </span>
+      {axisSway && <AxisSwayBadge name={part.name} />}
       {parentName && <span className="am-dim parent-name">{parentName}</span>}
     </li>
   );
 }
 
 export function DrawOrderTab() {
-  const { model } = useProject();
+  const project = useProject();
+  const { model } = project;
   const [editor, setEditor] = useEditor();
   const byId = new Map(model.parts.map((p) => [p.id, p]));
+  const axisSwayPartIds = new Set(project.physics.map((item) => item.partId));
   const block = drawOrderBlock(model, editor.selectedPartIds);
   const blockSet = new Set(block);
   const rows = [...model.drawOrder]
@@ -108,6 +114,7 @@ export function DrawOrderTab() {
                 key={part.id}
                 part={part}
                 parentName={part.parentId ? (byId.get(part.parentId)?.name ?? null) : null}
+                axisSway={axisSwayPartIds.has(part.id)}
                 inBlock={blockSet.has(part.id)}
                 block={block}
               />

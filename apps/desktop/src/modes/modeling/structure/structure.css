@@ -75,6 +75,15 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.part-sway-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  color: var(--text);
+}
 .parent-name {
   flex: none;
   max-width: 90px;
