@@ -76,7 +76,7 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
           <>
             <div className="curve-target">{target.part.name}</div>
             {!target.mesh && <p className="curve-hint">先にメッシュを自動生成してください。</p>}
-            {target.mesh && !canDraw && (
+            {target.mesh && !canDraw && !motionPreview && (
               <p className="curve-hint">表示とロックを確認してください。子パーツを持つ画像は対象にできません。</p>
             )}
             <button type="button" disabled={!canDraw} onClick={activate}>

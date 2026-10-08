@@ -247,6 +247,9 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
         () =>
           window.__studio.canvas.getState().motionPreview !== null && !!window.__studio.canvas.getState().motionPreview,
       );
+      expect(
+        await panel.getByText('表示とロックを確認してください。子パーツを持つ画像は対象にできません。').count(),
+      ).toBe(0);
       const samples = await page.evaluate(async () => {
         const values = [];
         for (let i = 0; i < 65; i++) {
