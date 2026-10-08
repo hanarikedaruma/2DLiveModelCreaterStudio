@@ -10,11 +10,17 @@
 
 ## 追補: 軸揺れの振り子の目印（2026-10-08）
 
-状態: コミット済み・全体検査待ち（CO、追補）。ユーザーの「実装してください」に従い、軸揺れを設定したパーツ名の横へ単色・模様なしの振り子を追加する。パーツ構造と描画順の両一覧を対象にする。保存済みの本人の物理設定だけを判定し、親から目印を継承しない。OFF・Undo/Redo・再読込・一覧の切替で表示を更新し、目印だけでは揺れ設定を切り替えない。長い名前でも目印・目・鍵の幅を保つ。
+状態: コミット済み・テスト確認待ち（CO、追補）。ユーザーの「実装してください」に従い、軸揺れを設定したパーツ名の横へ単色・模様なしの振り子を追加した。パーツ構造と描画順の両一覧を対象にする。保存済みの本人の物理設定だけを判定し、親から目印を継承しない。OFF・Undo/Redo・再読込・一覧の切替で表示を更新し、目印だけでは揺れ設定を切り替えない。長い名前でも目印・目・鍵の幅を保つ。
 
 対象ファイル: `modeling/structure/StructureTab.tsx`・`DrawOrderTab.tsx`・`ui.tsx`・`structure.css`、新規の `swayBadge.c99.test.tsx`、`e2e/swayBadge.c99.e2e.ts`、本カード・設計・計画・ユースケースの記録。既存のパレットの表示条件を維持する。schema/契約/物理の計算は変えない。流れ揺れ本体・風鈴の表示・両方式の合成は後続設計のままで、重力補正だけの線には揺れの目印を付けない。COが回帰テストを追加し、CLの独立確認とは区別する。
 
-実装と回帰: `Project.physics[].partId`の集合を一覧ごとに作り、本人の設定にだけ14pxの専用SVGを表示する。`currentColor`・線幅1.5・塗りなしで、支点/棒/丸い重りを表す。ツールチップと読み上げ名は「パーツ名：軸揺れ：ON」。COの追加5件は実装前に失敗し、実装後に既存の一覧18件と合わせて成功。全体単体・型・lint・整形と実画面の最終記録は確認後に追記する。
+実装と回帰: `bc7998f`。`Project.physics[].partId`の集合を一覧ごとに作り、本人の設定にだけ14pxの専用SVGを表示する。`currentColor`・線幅1.5・塗りなしで、支点/棒/丸い重りを表す。ツールチップと読み上げ名は「パーツ名：軸揺れ：ON」。COの追加5件は実装前に失敗し、実装後に既存の一覧18件と合わせて成功。全体の `pnpm test` は270ファイル・2,427件、skipなし。`pnpm typecheck`・`pnpm lint`・`pnpm format:check`も成功。Rustのソースは変更していない。
+
+実画面: `swayBadge.c99.e2e.ts` をEdge/Nativeの1440×1000と800×600で各2件実行し成功。実際の揺れスイッチ、OFF/Undo/Redo、一覧の切替、本人だけの表示、長い名前でも振り子/目/鍵の幅が保たれることを確認。振り子は14×14pxで、SVGの線色は文字色と一致し、一時的な文字色の変更にも追従。現製品は暗い配色が固定なので、未実装のライトテーマを確認済みとは扱わない。実行時エラーなし。証跡は `.cache/verification/card99-sway-badge-2026-10-08/{edge,native}/{parts,pendulum,draw-order}-{1440,800}.png` と `geometry-{1440,800}.json`。ユースケースは [UC-CH-38 / CH-184](../../../tests/usecase/changes.md#uc-ch-38-軸揺れの振り子の目印カード99追補)。利用者の手操作とCLの独立確認は未実施で、追補を全体カードの受け入れ完了には数えない。
+
+Native起動の切り分け: 初回はWebView2の `0x8007139F` で画面作成前に終了（`.cache/card99-sway-native.log`・`card99-sway-native-startup.log`）。[Microsoftの仕様](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/webview2-idl?view=webview2-1.0.3595.46#createcorewebview2environmentwithoptions)にある共有プロファイルの起動オプション競合が疑われたため、`WEBVIEW2_USER_DATA_FOLDER`を `.cache/verification/card99-sway-badge-2026-10-08/native-profile`へ指定して再実行し成功（`.cache/card99-sway-native-isolated.log`）。既存のWebView2プロファイル・利用者のアプリ・起動オプションは変更していない。
+
+本番アプリ: `pnpm app:install`のreleaseビルドは成功。起動中のインストール済みアプリがあるため、インストーラーの保護により配置前に停止（`.cache/card99-sway-install.log`・`card99-sway-install-retry.log`）。利用者のアプリは閉じていない。閉じた後は `pnpm app:install -NoBuild`で確認済みの実行ファイルを配置できる。配置と利用者による表示の確認は未完了。
 
 ## 触ってよいもの
 
