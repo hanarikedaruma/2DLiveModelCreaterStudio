@@ -18,6 +18,16 @@ pnpm --filter @app/fixtures exec tsx scripts/generate-chest-model.ts
 pnpm --filter @app/fixtures exec tsx scripts/chest-evidence.ts
 ```
 
+## 実画面の確認
+
+EdgeとNativeの1440×1000・800×600で、胸の目印・2出力・重力の変更・固定点・方向別のお試し・Undo・方式切替・保存/再読込を自動操作した。表示倍率とパンを変えてもモデル座標の完成形が同じこと、白丸/黒丸がテーマの文字色で同じ明るさにならないことも確認した。画面は重力を0.5へ変更した状態で、見本と比較画像の初期値は0.3。
+
+- Native: [1440×1000](native-settings-1440.png)・[800×600](native-settings-800.png)・[固定点の図](native-pinning-800.png)。
+- Edge: [1440×1000](edge-settings-1440.png)・[800×600](edge-settings-800.png)・[固定点の図](edge-pinning-800.png)。
+- 使い方と実装/確認の範囲: [カード98](../../step4/cards/98_chest-sway.md)。
+
+製品コードは9dc94e0。本番アプリを更新し、ビルド/配置先exeのSHA256一致を確認した。Nativeテスト版での実画面確認と分け、本番版の手動起動の目視はComputer Useの起動操作がタイムアウトしたため未確認。
+
 ## 残す目視確認
 
 - 制作モデルでの揺れ方・つなぎ目・自然さ（カード97）。

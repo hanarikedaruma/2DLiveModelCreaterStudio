@@ -6,6 +6,7 @@ import { bounceFrame, bounceWeights, safeBounceScale, limitChestOutput } from '.
 import { chestEquilibrium, ChestDynamicsSession } from './chestSession';
 import { createPhysicsEngine } from './engine';
 import { chestFixture } from './testChest.c98';
+import { chestStaticParams } from './chestFrame';
 
 describe('胸の重力・慣性と保存', () => {
   it('胸を使うときだけ2出力を追加し、固定した脇と上端を変形しない', () => {
@@ -62,6 +63,40 @@ describe('胸の重力・慣性と保存', () => {
     }
     expect(session.state(item.id)!.q.x).toBeLessThan(equilibrium.x);
     expect(session.state(item.id)!.q.y).toBeCloseTo(equilibrium.y, 5);
+  });
+  it('重力0は傾いた静止形を垂らさず、体の動きによる慣性は残す', () => {
+    const p = chestFixture(),
+      item = p.physics[0]!;
+    item.bounce!.gravityStrength = 0;
+    const loaded = loadProjectJson(JSON.stringify(p));
+    expect(loaded.physics[0]!.bounce!.gravityStrength).toBe(0);
+    for (const angle of [-90, -45, 0, 45, 90]) {
+      const staticValues = chestStaticParams(loaded, { BodyAngleZ: angle });
+      expect(staticValues.BustX).toBeCloseTo(0, 9);
+      expect(staticValues.BustY).toBeCloseTo(0, 9);
+      const values = createPhysicsEngine().produce({
+        project: loaded,
+        mixedSoFar: { BodyAngleZ: angle },
+        now: 0,
+        dt: 0,
+        flags: { lipSyncWeight: 1, physicsActive: true },
+      })!.values;
+      expect(values.BustX).toBeCloseTo(0, 9);
+      expect(values.BustY).toBeCloseTo(0, 9);
+    }
+    const frame = bounceFrame(p, item, createBindingEvaluator().evaluate(p.model, { BodyAngleZ: 45 }))!;
+    const session = new ChestDynamicsSession();
+    session.advance(item, frame, { now: 0, dt: 0 });
+    for (let i = 1; i <= 20; i++) {
+      const t = i / 120;
+      session.advance(
+        item,
+        { ...frame, center: { x: frame.center.x + 40 * t * t, y: frame.center.y } },
+        { now: (i * 1000) / 120, dt: 1000 / 120 },
+      );
+    }
+    expect(session.state(item.id)!.q.x).toBeLessThan(0);
+    expect(session.state(item.id)!.q.y).toBeCloseTo(0, 9);
   });
   it('同じフレームを再表示しても再積分せず、長い停止を移動の衝撃にしない', () => {
     const p = chestFixture(),
