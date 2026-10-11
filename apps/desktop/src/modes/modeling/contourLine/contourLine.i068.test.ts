@@ -13,7 +13,7 @@ import { copyParts, deleteParts } from '../structure/commands';
 import { mirrorCopy } from '../structure/mirrorCopy';
 import { makeAsset, makeBinding, makePart, makeProject } from '../structure/testing';
 import { addLineCommand } from './commands';
-import { LIMIT_MESSAGE, createContourEditor, fitStroke, lineView } from './contourTool';
+import { LIMIT_MESSAGE, SHARED_LINE_MESSAGE, createContourEditor, fitStroke, lineView } from './contourTool';
 import { verticesAlongLine } from './densify';
 
 // (100,100) から 200×200 の格子（20px のマス）。素材も同じ位置・大きさ
@@ -337,6 +337,19 @@ describe('I-068: 点の追加・削除・位置の直し', () => {
     expect(p.x).toBeCloseTo(0.3, 6);
     expect(p.y).toBeCloseTo(0.55, 6);
     expect(s.store.undoLabel()).toBe('輪郭線の点の位置');
+  });
+
+  it('キーの編集中に Alt+ドラッグすると、線の位置はすべてのキーで共通と一度だけ知らせる（I-074）', () => {
+    const s = setup();
+    const shared = () => s.notify.mock.calls.filter((c) => c[0] === SHARED_LINE_MESSAGE).length;
+    s.drag({ x: 150, y: 200 }, { x: 160, y: 200 }, { altKey: true });
+    expect(shared()).toBe(0); // 基準状態では出さない
+    s.services.editor.set({ activeParameterIds: ['FaceAngleX'], editorParamValues: { FaceAngleX: 30 } });
+    s.drag({ x: 160, y: 200 }, { x: 150, y: 200 }, { altKey: true });
+    expect(shared()).toBe(1);
+    s.drag({ x: 150, y: 200 }, { x: 155, y: 200 }, { altKey: true });
+    expect(shared()).toBe(1);
+    expect(s.line()!.points[2]!.x).toBeCloseTo(0.275, 6); // 線は直っている
   });
 
   it('線のダブルクリックで点を足し、Delete で消す。2点より少なくはできない', () => {

@@ -12,7 +12,7 @@ import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { meshKeySpace } from '../../../services/keyEditor/points';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
 import { imagePartAt, isLockedDeep, paramValuesOf, partById, partMatrix } from '../canvas/parts';
-import { addVertex, markEditedIfChanged, remeshCommand, removeVertices } from './meshOps';
+import { addVertex, basePointAt, markEditedIfChanged, remeshCommand, removeVertices } from './meshOps';
 import { densityOf, generateShape, regenerateOutcome, reshapeWithTransfer, type ReshapeOutcome } from './remesh';
 import { createMeshDragMapper, meshLocalPositions, type MeshMove } from './meshDrag';
 
@@ -260,10 +260,15 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
         const target = meshTarget(project.model, editor.selectedPartIds);
         const mesh = target?.mesh;
         if (!target || !mesh) return { ok: false, error: 'メッシュが無い。[自動生成] で作る' };
-        const deltas = snapshot(env).deltas;
-        const inv = invert(partMatrix(project.model, deltas.transforms, target.part.id));
-        if (!inv) return { ok: false, error: 'パーツの拡縮が 0 なので頂点を足せない' };
-        const result = addVertex(mesh, applyAffine(inv, p));
+        // 押した所の、基準の形での位置。キーの値では頂点が動いているので、見えている三角形から求める（I-073）
+        const snap = snapshot(env);
+        let at = snap.mesh === mesh && snap.points ? basePointAt(mesh, snap.points, p) : null;
+        if (!at) {
+          const inv = invert(partMatrix(project.model, snap.deltas.transforms, target.part.id));
+          if (!inv) return { ok: false, error: 'パーツの拡縮が 0 なので頂点を足せない' };
+          at = applyAffine(inv, p);
+        }
+        const result = addVertex(mesh, at);
         if (!result.ok) return result;
         const added = result.added ?? -1;
         return {

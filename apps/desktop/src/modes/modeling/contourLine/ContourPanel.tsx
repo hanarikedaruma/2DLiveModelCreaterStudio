@@ -145,7 +145,7 @@ export function makeContourPanel(slot: EnvSlot, editor: ContourEditor): FC {
         )}
         <p className="contour-hint">
           点をドラッグして形を整える（Shift で選び足す、Alt
-          で線の位置だけを直す）。線をつまむと、そこに点を足して動かす。線のダブルクリックで点を足し、Delete
+          で線の位置だけを直す。線の位置はすべてのキーで共通）。線をつまむと、そこに点を足して動かす。線のダブルクリックで点を足し、Delete
           で消す。右クリックで選択を外す
         </p>
       </div>

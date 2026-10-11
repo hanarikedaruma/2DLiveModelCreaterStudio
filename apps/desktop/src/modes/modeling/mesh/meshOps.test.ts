@@ -119,14 +119,15 @@ describe('三角形分割', () => {
 });
 
 describe('頂点の追加', () => {
-  it('内側に足すと、面積はそのままで三角形が作り直され、UV は周りから求める', () => {
+  it('内側に足すと、面積はそのままで、含む三角形だけを3つに分ける（I-073）。UV は周りから求める', () => {
     const r = ok(addVertex(square(), { x: 30, y: 60 }));
     expect(r.added).toBe(4);
     expect(r.shape.vertices).toHaveLength(5);
     expect(r.shape.uvs[4]!.x).toBeCloseTo(0.3);
     expect(r.shape.uvs[4]!.y).toBeCloseTo(0.6);
     expect(r.shape.triangles).toHaveLength(4);
-    expect(r.shape.triangles.filter((t) => t.includes(4))).toHaveLength(4);
+    expect(r.shape.triangles.filter((t) => t.includes(4))).toHaveLength(3);
+    expect(r.shape.triangles).toContainEqual([0, 1, 2]); // 含まない三角形はそのまま
     expect(area(r.shape)).toBeCloseTo(10000);
     expect(ccw(r.shape) && valid(r.shape)).toBe(true);
   });

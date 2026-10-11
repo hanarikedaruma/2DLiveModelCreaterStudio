@@ -55,6 +55,9 @@ export const DENSIFY_LABEL = '線に沿って頂点を足す';
 export const LIMIT_MESSAGE =
   'これ以上動かすと三角形が裏返るので、ここで止めました。影響幅を広げるか、線に点を足して少しずつ動かしてください。';
 const INVERSE_MESSAGE = '変形を逆算できないため、動かせません。ワープの潰れやパーツの拡縮を確認してください。';
+// 線は絵の上の位置で1本だけ持ち、すべてのキーで共通（I-074）
+export const SHARED_LINE_MESSAGE =
+  '線の位置（絵の上の位置）は、すべてのキーで共通です。ここで直すと、ほかのキーでも線の位置が変わります（メッシュは動きません）。';
 
 const LINE_COLOR = '#f08c2e'; // メッシュの線（アクセントの色）と見分ける
 const HANDLE_RADIUS = 8; // 画面のピクセル
@@ -201,6 +204,7 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
   let lastClick: { time: number; screen: Vec2 } | null = null;
   let radiusEdit: { live: LiveEdit; lineId: string } | null = null;
   let pending: Promise<unknown> = Promise.resolve();
+  let sharedNoticed = false; // SHARED_LINE_MESSAGE を出したか（キーの編集中に一度だけ出す）
 
   type Drag =
     | {
@@ -701,6 +705,10 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
       }
       if (drag.kind === 'reposition') {
         if (!drag.started && distance(e.screenPoint, drag.screenStart) < DRAG_THRESHOLD) return;
+        if (!drag.started && !sharedNoticed && env.services.editor.get().activeParameterIds.length > 0) {
+          sharedNoticed = true;
+          notify(SHARED_LINE_MESSAGE);
+        }
         drag.started = true;
         const snap = snapshot(env);
         if (!snap.mesh || !snap.positions) return;
