@@ -2,7 +2,7 @@
 // EditorState.editorParamValues の状態を描き、拡大縮小・移動・ツールへの pointer の受け渡しをする
 import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import type { Model, Project, Vec2 } from '@app/schema';
-import type { DeformedModel, EditorState, ParamValues, Renderer, ViewTransform } from '@app/contracts';
+import type { DeformedModel, EditorState, ParamValues, Renderer } from '@app/contracts';
 import { HairDynamicsSession, chestStaticParams } from '@app/core';
 import { hairFrames } from '../../services/hairFrame';
 import {
@@ -16,8 +16,8 @@ import {
 import { useShell } from '../context';
 import { isTypingTarget } from '../keys';
 import { registry, visibleAt } from '../registry';
-import { drawCanvasBanner, drawPickOutline } from './banner';
-import { boundsOf, canvasToScreen, fitRect, pan, zoomAt, type Rect } from './view';
+import { drawCanvasBanner, drawPickOutline, partOutline } from './banner';
+import { boundsOf, fitRect, pan, zoomAt, type Rect } from './view';
 
 // 無いパラメータはデフォルト値
 export function paramValuesFor(model: Model, editorValues: ParamValues): ParamValues {
@@ -36,35 +36,6 @@ export function pickingTarget(
   editor: EditorState,
 ): CanvasToolTarget | null {
   return tool?.target && !tool.target.has(project, editor) ? tool.target : null;
-}
-
-// パーツ自身と子孫の、変形後の頂点の外接矩形（画面座標）
-function outlineOf(
-  model: Model,
-  deformed: DeformedModel,
-  view: ViewTransform,
-  partId: string,
-): { min: Vec2; max: Vec2 } | null {
-  const parentOf = new Map(model.parts.map((p) => [p.id, p.parentId]));
-  const inside = (id: string) => {
-    let at: string | null | undefined = id;
-    for (let n = 0; at && n < 64; n++) {
-      if (at === partId) return true;
-      at = parentOf.get(at);
-    }
-    return false;
-  };
-  let min = { x: Infinity, y: Infinity };
-  let max = { x: -Infinity, y: -Infinity };
-  for (const item of deformed.items) {
-    if (!inside(item.partId)) continue;
-    for (let k = 0; k + 1 < item.positions.length; k += 2) {
-      const p = canvasToScreen(view, { x: item.positions[k]!, y: item.positions[k + 1]! });
-      min = { x: Math.min(min.x, p.x), y: Math.min(min.y, p.y) };
-      max = { x: Math.max(max.x, p.x), y: Math.max(max.y, p.y) };
-    }
-  }
-  return min.x <= max.x && min.y <= max.y ? { min, max } : null;
 }
 
 // 押されていない pointer の id だと例外になる（合成したイベントなど）。取れなくても続ける
@@ -167,7 +138,7 @@ export function CanvasHost() {
       // 対象を選ぶ段: マウスの下で選べるものを点線で囲み、次の手順の帯を出す。ツールの重ね描きはしない
       const hover = hoverRef.current;
       const picked = hover ? target.pick(project, cache.deformed, hover) : null;
-      const outline = picked ? outlineOf(project.model, cache.deformed, currentView, picked) : null;
+      const outline = picked ? partOutline(project.model, cache.deformed, currentView, picked) : null;
       const name = picked ? project.model.parts.find((p) => p.id === picked)?.name : undefined;
       if (outline && name !== undefined) drawPickOutline(ctx, outline.min, outline.max, name);
       drawCanvasBanner(ctx, target.prompt);
@@ -328,6 +299,12 @@ export function CanvasHost() {
     };
   };
 
+  // マウスの下の形（I-069・CC-016）。対象を選ぶ段は pointer、ツールが決めればその形、無ければツールの既定
+  const updateCursor = (el: HTMLElement, event: CanvasPointerEvent) => {
+    const picking = pickingTarget(activeTool, services.store.get(), services.editor.get()) !== null;
+    el.style.cursor = (picking ? 'pointer' : activeTool?.cursorAt?.(event)) ?? activeTool?.cursor ?? '';
+  };
+
   // 右クリック: ツールに任せる。任せる先が無ければパーツの選択を外す
   const contextClick = (e: CanvasPointerEvent) => {
     if (activeTool?.onContextClick) activeTool.onContextClick(e);
@@ -363,6 +340,7 @@ export function CanvasHost() {
       return;
     }
     if (!controller.getState().motionPreview) activeTool?.onPointerDown?.(event);
+    updateCursor(e.currentTarget, event);
     requestDraw(); // ツールのオーバーレイが変わったかもしれない
   };
 
@@ -384,9 +362,12 @@ export function CanvasHost() {
       requestDraw(); // 点線の囲みを、マウスの下のものに合わせる
       return;
     }
-    if (controller.getState().motionPreview || !activeTool?.onPointerMove) return;
-    activeTool.onPointerMove(event);
-    requestDraw();
+    if (controller.getState().motionPreview) return;
+    if (activeTool?.onPointerMove) {
+      activeTool.onPointerMove(event);
+      requestDraw();
+    }
+    updateCursor(e.currentTarget, event);
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -407,7 +388,11 @@ export function CanvasHost() {
       requestDraw();
       return;
     }
-    if (!controller.getState().motionPreview) activeTool?.onPointerUp?.(toCanvasEvent(e));
+    if (!controller.getState().motionPreview) {
+      const event = toCanvasEvent(e);
+      activeTool?.onPointerUp?.(event);
+      updateCursor(e.currentTarget, event);
+    }
     requestDraw();
   };
 

@@ -174,10 +174,10 @@ describe('カード59: ◎に乗せたときの説明', () => {
     expect(by! - at.y).toBeGreaterThan(0);
     expect(by! - at.y).toBeLessThan(40);
 
-    // ◎から画面で 5 ピクセルなら出し、10 ピクセル離れると出さない
-    ptr.move({ x: TORSO_PIVOT.x + 5 / scale, y: TORSO_PIVOT.y });
-    expect(hint(canvas)).toEqual([HINT_MOVABLE]);
+    // ◎から画面で 10 ピクセルなら出し、14 ピクセル離れると出さない（つかめる範囲は 11 ピクセル。I-069 で 7 から広げた）
     ptr.move({ x: TORSO_PIVOT.x + 10 / scale, y: TORSO_PIVOT.y });
+    expect(hint(canvas)).toEqual([HINT_MOVABLE]);
+    ptr.move({ x: TORSO_PIVOT.x + 14 / scale, y: TORSO_PIVOT.y });
     expect(hint(canvas)).toEqual([]);
 
     // 何も選んでいなければ◎も説明も描かない

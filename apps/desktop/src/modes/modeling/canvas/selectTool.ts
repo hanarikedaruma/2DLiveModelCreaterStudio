@@ -8,7 +8,6 @@ import type { EnvSlot, ToolEnv } from './env';
 import {
   angleBetween,
   applyAffine,
-  boxContains,
   boxCorners,
   determinant,
   distance,
@@ -27,6 +26,7 @@ import {
   type SelectionBox,
 } from './geometry';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from './liveEdit';
+import { RANGE_MARGIN, drawSwitchHint, nearPolygon } from './targetRange';
 import {
   ancestorsOf,
   isLockedDeep,
@@ -39,8 +39,9 @@ import {
 
 export const SELECT_TOOL_ID = 'modeling.select';
 
-export const HANDLE_RADIUS = 7; // 画面のピクセル。ピボットをつかめる範囲と、小さい枠の判定の基準
-export const HANDLE_GRAB_RADIUS = 11; // 回転・拡縮のハンドルをつかめる範囲（画面のピクセル）。描いた印より広くする（I-049）
+export const HANDLE_RADIUS = 7; // 画面のピクセル。小さい枠の判定の基準
+// 回転・拡縮のハンドルと◎をつかめる範囲（画面のピクセル）。描いた印より広くする（I-049。◎も I-069 で同じにした）
+export const HANDLE_GRAB_RADIUS = 11;
 export const ROTATE_HANDLE_DISTANCE = 24; // 画面のピクセル
 const DRAG_THRESHOLD = 3; // これより小さい動きはクリックとみなす
 
@@ -96,13 +97,37 @@ export type HandleHit = { kind: 'pivot' } | { kind: 'rotate' } | { kind: 'scale'
 export function hitHandle(h: Handles, screen: Vec2): HandleHit | null {
   if (h.rotate && distance(h.rotate, screen) <= HANDLE_GRAB_RADIUS) return { kind: 'rotate' };
   if (h.compact) return null;
-  if (h.pivotMovable && h.pivot && distance(h.pivot, screen) <= HANDLE_RADIUS) return { kind: 'pivot' };
+  if (h.pivotMovable && h.pivot && distance(h.pivot, screen) <= HANDLE_GRAB_RADIUS) return { kind: 'pivot' };
   let best: { handle: ScaleHandle; d: number } | null = null;
   for (const s of h.scale) {
     const d = distance(s.at, screen);
     if (d <= HANDLE_GRAB_RADIUS && (!best || d < best.d)) best = { handle: s.handle, d };
   }
   return best ? { kind: 'scale', handle: best.handle } : null;
+}
+
+// 選んでいるものの操作範囲（枠・◎・回転のハンドル）と、そのまわりの余白の中か（I-069）。
+// この中を押したときは、手前や後ろに別のパーツがあっても切り替えず、選んでいるものを操作する
+export function inOperationRange(h: Handles, screen: Vec2, margin = RANGE_MARGIN): boolean {
+  if (h.outline && nearPolygon(h.outline, screen, margin)) return true;
+  if (h.rotate && distance(h.rotate, screen) <= HANDLE_GRAB_RADIUS) return true;
+  if (h.pivot && distance(h.pivot, screen) <= margin) return true;
+  return h.otherPivots.some((p) => distance(p, screen) <= margin);
+}
+
+// 拡縮のハンドルの上のマウスの形。枠の中心からハンドルへの向き（画面）に合わせる
+export function scaleCursor(h: Handles, handle: ScaleHandle): string {
+  const at = h.scale.find((s) => s.handle === handle)?.at;
+  if (!at || !h.outline) return 'move';
+  const c = {
+    x: h.outline.reduce((sum, q) => sum + q.x, 0) / h.outline.length,
+    y: h.outline.reduce((sum, q) => sum + q.y, 0) / h.outline.length,
+  };
+  const angle = ((((Math.atan2(at.y - c.y, at.x - c.x) * 180) / Math.PI) % 180) + 180) % 180;
+  if (angle < 22.5 || angle >= 157.5) return 'ew-resize';
+  if (angle < 67.5) return 'nwse-resize';
+  if (angle < 112.5) return 'ns-resize';
+  return 'nesw-resize';
 }
 
 const sameHandle = (a: HandleHit | null, kind: HandleHit['kind'], handle?: ScaleHandle) =>
@@ -260,6 +285,7 @@ interface Drag {
   keyed: KeyedDrag<PartChange[]>;
   clickSelect: string[] | null; // 動かさずに離したら、この選択にする
   blocked: boolean; // 基準状態と見た目が違うので動かさない（I-029）。クリックでの選択はする
+  cursor: string; // ドラッグ中のマウスの形
 }
 
 export interface SelectTool {
@@ -307,6 +333,7 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
     e: CanvasPointerEvent,
     info: SelectionInfo,
     editor: EditorState,
+    cursor = kind === 'move' ? 'move' : 'grabbing',
   ): Drag | null => {
     if (info.targets.length === 0) return null;
     const { keyEditor, store } = env.services;
@@ -331,10 +358,15 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       }),
       clickSelect: null,
       blocked: isPreviewOffBase(store.get().model, editor),
+      cursor,
     };
     drag = next;
     return next;
   };
+
+  // 押した所が、選んでいるパーツか、選んでいるグループの中のパーツか
+  const inSelection = (model: Model, selected: readonly string[], id: string) =>
+    selected.includes(id) || ancestorsOf(model, id).some((p) => selected.includes(p.id));
 
   const tool: CanvasTool = {
     id: SELECT_TOOL_ID,
@@ -349,9 +381,10 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       drag = null;
       const { project, editor, info } = snapshot(env);
       const handles = computeHandles(info, env.view(), pivotMovable(project.model, editor, info));
-      const hit = handles ? hitHandle(handles, e.screenPoint) : null;
+      const hit = handles && !e.ctrlKey ? hitHandle(handles, e.screenPoint) : null;
       if (hit) {
-        startDrag(env, hit.kind, hit.kind === 'scale' ? hit.handle : null, e, info, editor);
+        const cursor = hit.kind === 'scale' && handles ? scaleCursor(handles, hit.handle) : 'grabbing';
+        startDrag(env, hit.kind, hit.kind === 'scale' ? hit.handle : null, e, info, editor, cursor);
         return;
       }
 
@@ -360,30 +393,54 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       const hitId = deformed ? hitTestItems(deformed, e.canvasPoint, (id) => !isLockedDeep(model, id)) : null;
       const selected = editor.selectedPartIds;
       const select = (ids: string[]) => env.services.editor.set({ selectedPartIds: ids });
+      // Ctrl+クリック: 操作範囲の中でも、押した所のパーツへ切り替える。選ぶだけで動かさない（I-069）
+      if (e.ctrlKey) {
+        select(hitId ? [hitId] : []);
+        return;
+      }
+      // 操作範囲（枠・◎・回転のハンドル）と余白の中は、選んでいるものの操作。
+      // 手前や後ろに別のパーツがあっても切り替えない（I-069）
+      const inRange = info.targets.length > 0 && handles !== null && inOperationRange(handles, e.screenPoint);
       if (hitId) {
         if (e.shiftKey && selected.includes(hitId)) {
           select(selected.filter((id) => id !== hitId));
           return;
         }
-        // 選んでいるグループの中を押したときは、そのグループを動かす
-        const inSelection = selected.includes(hitId) || ancestorsOf(model, hitId).some((p) => selected.includes(p.id));
-        if (!inSelection) {
+        // 余白より外の別のパーツは、そのパーツへ切り替える（Shift は範囲の中でも足す）
+        if (!inSelection(model, selected, hitId) && (e.shiftKey || !inRange)) {
           select(e.shiftKey ? [...selected, hitId] : [hitId]);
-          // 選んでいる状態から別のパーツを選んだ最初の操作は、選ぶだけにする。
-          // ハンドルをつかみ損ねて後ろのパーツを押したときなどに、そのまま動かさない（I-050）
+          // 選んでいる状態から別のパーツを選んだ最初の操作は、選ぶだけにする（I-050）
           if (selected.length > 0) return;
+          const next = snapshot(env);
+          startDrag(env, 'move', null, e, next.info, next.editor);
+          return;
         }
-        const next = snapshot(env);
-        const started = startDrag(env, 'move', null, e, next.info, next.editor);
-        // 複数を選んでいるときに、そのうちの1つをクリックしただけなら、それだけを選ぶ
-        if (started && !e.shiftKey && selected.includes(hitId) && selected.length > 1) started.clickSelect = [hitId];
-        return;
       }
-      if (info.box && boxContains(info.box, e.canvasPoint)) {
-        startDrag(env, 'move', null, e, info, editor);
+      // 範囲の中・選んでいるパーツ（グループなら中のパーツ）の上: 選んでいるものを動かす
+      if (inRange || (hitId !== null && inSelection(model, selected, hitId))) {
+        const started = startDrag(env, 'move', null, e, info, editor);
+        // 複数を選んでいるときに、そのうちの1つをクリックしただけなら、それだけを選ぶ
+        if (started && hitId && !e.shiftKey && selected.includes(hitId) && selected.length > 1)
+          started.clickSelect = [hitId];
         return;
       }
       if (!e.shiftKey && selected.length > 0) select([]);
+    },
+
+    // マウスの形（I-069）: 範囲の中は移動、拡縮のハンドルは向きに合った矢印、回転のハンドルと◎はつかむ形、外は既定
+    cursorAt(e) {
+      const env = slot.get();
+      if (!env) return null;
+      if (drag?.keyed.active() && !drag.blocked) return drag.cursor;
+      if (e.ctrlKey) return null;
+      const { project, editor, info } = snapshot(env);
+      if (info.targets.length === 0) return null;
+      const handles = computeHandles(info, env.view(), pivotMovable(project.model, editor, info));
+      if (!handles) return null;
+      const hit = hitHandle(handles, e.screenPoint);
+      if (hit?.kind === 'scale') return scaleCursor(handles, hit.handle);
+      if (hit) return 'grab';
+      return inOperationRange(handles, e.screenPoint) ? 'move' : null;
     },
 
     onPointerMove(e) {
@@ -440,8 +497,17 @@ export function createSelectTool(slot: EnvSlot): SelectTool {
       const { project, editor, info } = snapshot(env);
       const handles = computeHandles(info, view, pivotMovable(project.model, editor, info));
       if (handles) drawHandles(ctx, handles, hotHandle(handles));
+      // 余白より外で別のパーツの上にマウスがあるとき、押すと切り替わる先を点線と名前で出す（I-069）
+      if (!drag?.keyed.active() && hover && handles && info.targets.length > 0 && !inOperationRange(handles, hover)) {
+        const model = project.model;
+        const deformed = env.lastDeformed();
+        const at = { x: (hover.x - view.offset.x) / view.scale, y: (hover.y - view.offset.y) / view.scale };
+        const other = deformed ? hitTestItems(deformed, at, (id) => !isLockedDeep(model, id)) : null;
+        if (other && !inSelection(model, editor.selectedPartIds, other))
+          drawSwitchHint(ctx, model, deformed, view, other);
+      }
       // 動かせない中心にも説明を出す。ドラッグの判定や中心の移動量は変えない。
-      if (!drag?.keyed.active() && handles?.pivot && hover && distance(handles.pivot, hover) <= HANDLE_RADIUS) {
+      if (!drag?.keyed.active() && handles?.pivot && hover && distance(handles.pivot, hover) <= HANDLE_GRAB_RADIUS) {
         const message = isPreviewOffBase(project.model, editor)
           ? '回転中心（プレビュー中は移せない。値をすべて戻す）'
           : editor.activeParameterIds.length > 0

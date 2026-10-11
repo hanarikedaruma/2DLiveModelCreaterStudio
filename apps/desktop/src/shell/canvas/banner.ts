@@ -1,6 +1,8 @@
 // キャンバスの上の中央に重ねて描く案内の帯（ツールの次の手順など）と、選べるものを囲む点線。
 // キャンバスの領域は縮めない。折り返しても文字は欠かさない（テストは描いた文字をつなげて比べる）
-import type { Vec2 } from '@app/schema';
+import type { Model, Vec2 } from '@app/schema';
+import type { DeformedModel, ViewTransform } from '@app/contracts';
+import { canvasToScreen } from './view';
 
 const FONT = '13px sans-serif';
 const LINE_HEIGHT = 18;
@@ -79,4 +81,33 @@ export function drawPickOutline(ctx: CanvasRenderingContext2D, min: Vec2, max: V
   ctx.fillStyle = cssColor('--accent-text', '#ffffff');
   ctx.fillText(name, min.x + 2, y + 3);
   ctx.restore();
+}
+
+// パーツ自身と子孫の、変形後の頂点の外接矩形（画面座標）。対象を選ぶ段と、切り替わる先の予告（I-069）で使う
+export function partOutline(
+  model: Model,
+  deformed: DeformedModel,
+  view: ViewTransform,
+  partId: string,
+): { min: Vec2; max: Vec2 } | null {
+  const parentOf = new Map(model.parts.map((p) => [p.id, p.parentId]));
+  const inside = (id: string) => {
+    let at: string | null | undefined = id;
+    for (let n = 0; at && n < 64; n++) {
+      if (at === partId) return true;
+      at = parentOf.get(at);
+    }
+    return false;
+  };
+  let min = { x: Infinity, y: Infinity };
+  let max = { x: -Infinity, y: -Infinity };
+  for (const item of deformed.items) {
+    if (!inside(item.partId)) continue;
+    for (let k = 0; k + 1 < item.positions.length; k += 2) {
+      const p = canvasToScreen(view, { x: item.positions[k]!, y: item.positions[k + 1]! });
+      min = { x: Math.min(min.x, p.x), y: Math.min(min.y, p.y) };
+      max = { x: Math.max(max.x, p.x), y: Math.max(max.y, p.y) };
+    }
+  }
+  return min.x <= max.x && min.y <= max.y ? { min, max } : null;
 }

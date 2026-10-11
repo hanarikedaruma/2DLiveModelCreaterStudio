@@ -5,7 +5,9 @@ import { pointsToModelSpace } from '@app/core';
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
-import { applyAffine, distance, hitTestItems, invert, itemPoints, pointInTriangle } from '../canvas/geometry';
+import { applyAffine, distance, hitTestItems, invert, itemPoints } from '../canvas/geometry';
+import { partOutline } from '../../../shell/canvas/banner';
+import { drawSwitchHint, nearRect, nearTriangles, toScreen } from '../canvas/targetRange';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { meshKeySpace } from '../../../services/keyEditor/points';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
@@ -89,10 +91,6 @@ export function verticesInRect(points: Vec2[], a: Vec2, b: Vec2): number[] {
     if (p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY) out.push(i);
   });
   return out;
-}
-
-function meshContains(points: Vec2[], mesh: Mesh, p: Vec2): boolean {
-  return mesh.triangles.some(([a, b, c]) => pointInTriangle(p, points[a]!, points[b]!, points[c]!));
 }
 
 // ---- 頂点の選択 ----
@@ -204,6 +202,7 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
   const softRadius = createNumberStore(0);
   let drag: Drag | null = null;
   let lastClick: { time: number; screen: Vec2 } | null = null;
+  let pointer: Vec2 | null = null; // マウスの位置（画面座標）。切り替わる先の予告に使う（I-069）
   let pending: Promise<unknown> = Promise.resolve();
   let cache: { model: unknown; values: unknown; deltas: TargetDeltas } | null = null;
 
@@ -232,6 +231,16 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
     return mesh && s.meshId === mesh.id ? s.indices.filter((i) => i < mesh.vertices.length) : [];
   };
   const select = (meshId: string | null, indices: number[]) => selection.set({ meshId, indices });
+
+  // 対象のメッシュ（無ければパーツの外接矩形）と、そのまわりの余白の中か（I-069）。ここを押しても別のパーツへ切り替えない
+  const inTargetRange = (env: ToolEnv, snap: ReturnType<typeof snapshot>, screen: Vec2): boolean => {
+    const view = env.view();
+    if (snap.mesh && snap.points) return nearTriangles(toScreen(view, snap.points), snap.mesh.triangles, screen);
+    const deformed = env.lastDeformed();
+    const outline =
+      snap.target && deformed ? partOutline(snap.project.model, deformed, view, snap.target.part.id) : null;
+    return !!outline && nearRect(outline.min, outline.max, screen);
+  };
 
   // 形を変える。vertices バインディングにキーがあれば「変形を新しいメッシュへ移します」と確認し、
   // キーを新しいメッシュへ転写する（1つの transaction。カード28で MVP のリセットを置き換えた）
@@ -418,6 +427,7 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
     },
 
     onPointerMove(e) {
+      pointer = e.screenPoint;
       if (!drag) return;
       if (drag.kind === 'rect') {
         drag.current = e.canvasPoint;
@@ -462,10 +472,10 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
         select(mesh.id, [...new Set([...base, ...inside])]);
         return;
       }
-      // クリック: 選択を外す。メッシュの外で別のパーツを押したら、そのパーツに切り替える
+      // クリック: 選択を外す。メッシュと余白の外で別のパーツを押したら、そのパーツに切り替える（I-069）
       const hadVertices = selectedOf(mesh).length > 0;
       if (!current.shift) select(mesh?.id ?? null, []);
-      if (mesh && points && meshContains(points, mesh, e.canvasPoint)) return;
+      if (target && inTargetRange(env, snap, e.screenPoint)) return;
       const deformed = env.lastDeformed();
       const model = project.model;
       const other = deformed ? hitTestItems(deformed, e.canvasPoint, (id) => !isLockedDeep(model, id)) : null;
@@ -560,6 +570,15 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
           ctx.strokeStyle = on ? '#ffffff' : accent;
           ctx.strokeRect(p.x - s, p.y - s, s * 2, s * 2);
         });
+      }
+      // メッシュと余白の外で別のパーツの上にマウスがあるとき、押すと切り替わる先を出す（I-069）
+      const snap = snapshot(env);
+      if (!drag && pointer && snap.target && !inTargetRange(env, snap, pointer)) {
+        const model = snap.project.model;
+        const deformed = env.lastDeformed();
+        const at = { x: (pointer.x - view.offset.x) / view.scale, y: (pointer.y - view.offset.y) / view.scale };
+        const other = deformed ? hitTestItems(deformed, at, (id) => !isLockedDeep(model, id)) : null;
+        if (other && other !== snap.target.part.id) drawSwitchHint(ctx, model, deformed, view, other);
       }
       if (drag?.kind === 'rect' && drag.moved) {
         const a = canvasToScreen(view, drag.start);

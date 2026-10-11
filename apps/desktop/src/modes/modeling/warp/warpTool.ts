@@ -6,6 +6,7 @@ import type { DeformedModel, TargetDeltas, ViewTransform } from '@app/contracts'
 import { isUsableWarp, pointsToModelSpace } from '@app/core';
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { drawCanvasBanner, drawPickOutline } from '../../../shell/canvas/banner';
+import { drawSwitchHint, nearPolygon, nearRect, toScreen } from '../canvas/targetRange';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
 import { applyLinear, distance, invert, type Affine } from '../canvas/geometry';
@@ -188,6 +189,7 @@ export interface WarpEditor {
 export function createWarpEditor(slot: EnvSlot): WarpEditor {
   const selection = createSelectionStore();
   let drag: Drag | null = null;
+  let pointer: Vec2 | null = null; // マウスの位置（画面座標）。切り替わる先の予告に使う（I-069）
   let cache: { model: unknown; values: unknown; deltas: TargetDeltas } | null = null;
 
   const snapshot = (env: ToolEnv) => {
@@ -246,6 +248,28 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
     };
   };
 
+  // 格子（無ければグループの外接矩形）と、そのまわりの余白の中か（I-069）。ここを押しても別のパーツへ切り替えない
+  const inTargetRange = (
+    env: ToolEnv,
+    snap: ReturnType<typeof snapshot>,
+    groupId: string | undefined,
+    screen: Vec2,
+  ): boolean => {
+    const view = env.view();
+    if (snap.target) {
+      const lines = gridPolylines(snap.project.model, snap.deltas, snap.target);
+      const { rows, columns } = snap.target.warp;
+      const top = lines[0] ?? [];
+      const bottom = lines[rows] ?? [];
+      const left = lines[rows + 1] ?? [];
+      const right = lines[rows + 1 + columns] ?? [];
+      const outline = [...top, ...right, ...[...bottom].reverse(), ...[...left].reverse()];
+      if (nearPolygon(toScreen(view, outline), screen)) return true;
+    }
+    const box = groupId ? groupOutline(snap.project.model, env.lastDeformed(), view, groupId) : null;
+    return !!box && nearRect(box.min, box.max, screen);
+  };
+
   // 制御点とグループの選択を外し、グループを選ぶ段に戻る
   const deselectGroup = (env: ToolEnv) => {
     select(null, []);
@@ -299,6 +323,7 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
     },
 
     onPointerMove(e) {
+      pointer = e.screenPoint;
       if (!drag) return;
       if (drag.kind === 'rect') {
         drag.current = e.canvasPoint;
@@ -334,7 +359,8 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       }
       drag = null;
       if (!env) return;
-      const { project, editor, target, points } = snapshot(env);
+      const snap = snapshot(env);
+      const { project, editor, target, points } = snap;
       if (current.moved) {
         if (!target || !points) return;
         const inside = verticesInRect(points, current.start, e.canvasPoint);
@@ -343,13 +369,15 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
         return;
       }
       if (current.shift) return;
-      // クリック: 制御点の選択を外す。選んでいるグループの外のパーツを押したら、そのグループに切り替える
+      // クリック: 制御点の選択を外す。格子と余白の外で、選んでいるグループの外のパーツを押したら、
+      // そのグループに切り替える（I-069）
       const hadPoints = target ? selectedOf(target.warp).length > 0 : false;
       select(target?.warp.id ?? null, []);
       const model = project.model;
       const deformed = env.lastDeformed();
       const hit = deformed ? imagePartAt(model, deformed, e.canvasPoint) : null;
       const groupId = target?.part.id ?? (editor.selectedPartIds.length === 1 ? editor.selectedPartIds[0] : undefined);
+      if (inTargetRange(env, snap, groupId, e.screenPoint)) return;
       if (hit) {
         const inside = groupId !== undefined && ancestorsOf(model, hit).some((p) => p.id === groupId);
         const next = pickWarpGroup(model, hit);
@@ -381,6 +409,25 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
     },
 
     drawOverlay(ctx, view) {
+      // 格子と余白の外で別のグループのパーツの上にマウスがあるとき、押すと切り替わる先を出す（I-069）
+      {
+        const env = slot.get();
+        if (env && !drag && pointer) {
+          const snap = snapshot(env);
+          const model = snap.project.model;
+          const editor = snap.editor;
+          const groupId =
+            snap.target?.part.id ?? (editor.selectedPartIds.length === 1 ? editor.selectedPartIds[0] : undefined);
+          if (groupId && !inTargetRange(env, snap, groupId, pointer)) {
+            const deformed = env.lastDeformed();
+            const at = { x: (pointer.x - view.offset.x) / view.scale, y: (pointer.y - view.offset.y) / view.scale };
+            const hit = deformed ? imagePartAt(model, deformed, at) : null;
+            const next = hit ? pickWarpGroup(model, hit) : null;
+            const inside = hit !== null && ancestorsOf(model, hit).some((q) => q.id === groupId);
+            if (next && !inside && next !== groupId) drawSwitchHint(ctx, model, deformed, view, next);
+          }
+        }
+      }
       const env = slot.get();
       if (!env) return;
       const snap = snapshot(env);

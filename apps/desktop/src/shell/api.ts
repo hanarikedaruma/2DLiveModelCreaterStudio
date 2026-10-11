@@ -126,6 +126,8 @@ export interface CanvasTool {
   onKeyDown?(e: KeyboardEvent): void;
   // 右クリック（動かさずに離したとき）。省略するとパーツの選択を外す
   onContextClick?(e: CanvasPointerEvent): void;
+  // マウスの下の形（CSS の cursor）。省略・null なら cursor（ツールの既定）。押していないときも呼ぶので軽くする（I-069・CC-016）
+  cursorAt?(e: CanvasPointerEvent): string | null;
   drawOverlay?(ctx: CanvasRenderingContext2D, view: ViewTransform): void;
 }
 // 最初に登録したものが既定のツール

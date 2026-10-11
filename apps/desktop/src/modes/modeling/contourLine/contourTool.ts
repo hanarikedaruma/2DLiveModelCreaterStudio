@@ -19,7 +19,8 @@ import {
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { canvasToScreen } from '../../../shell/canvas/view';
 import type { EnvSlot, ToolEnv } from '../canvas/env';
-import { distance, hitTestItems, pointInTriangle } from '../canvas/geometry';
+import { distance, hitTestItems } from '../canvas/geometry';
+import { drawSwitchHint, nearTriangles, toScreen } from '../canvas/targetRange';
 import {
   PREVIEW_OFF_BASE_MESSAGE,
   beginLiveEdit,
@@ -196,6 +197,7 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
   let stroke: { points: Vec2[]; screenStart: Vec2; screenLength: number; last: Vec2 } | null = null;
   let clicks: Vec2[] = [];
   let hover: Vec2 | null = null;
+  let pointer: Vec2 | null = null; // マウスの位置（画面座標）。切り替わる先の予告に使う（I-069）
   let lastClick: { time: number; screen: Vec2 } | null = null;
   let radiusEdit: { live: LiveEdit; lineId: string } | null = null;
   let pending: Promise<unknown> = Promise.resolve();
@@ -531,12 +533,9 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
     return { points: [...points.slice(0, s + 1), uv, ...points.slice(s + 1)], index: s + 1 };
   };
 
-  const meshContains = (snap: ContourSnapshot, p: Vec2) =>
-    !!snap.mesh &&
-    !!snap.positions &&
-    snap.mesh.triangles.some(([a, b, c]) =>
-      pointInTriangle(p, snap.positions![a]!, snap.positions![b]!, snap.positions![c]!),
-    );
+  // 対象のメッシュと、そのまわりの余白の中か（I-069）。ここを押しても別のパーツへ切り替えない
+  const inTargetRange = (snap: ContourSnapshot, view: ViewTransform, screen: Vec2) =>
+    !!snap.mesh && !!snap.positions && nearTriangles(toScreen(view, snap.positions), snap.mesh.triangles, screen);
 
   const deselectPart = (env: ToolEnv) => {
     state.set({ handles: [], drawing: false });
@@ -649,6 +648,7 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
     },
 
     onPointerMove(e) {
+      pointer = e.screenPoint;
       const env = slot.get();
       if (!env) return;
       if (state.get().drawing && !stroke) {
@@ -769,7 +769,7 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
       if (distance(e.screenPoint, current.screenStart) >= DRAG_THRESHOLD) return;
       const hadHandles = state.get().handles.length > 0;
       state.set({ handles: [] });
-      if (meshContains(snap, e.canvasPoint)) return;
+      if (inTargetRange(snap, env.view(), e.screenPoint)) return;
       const deformed = env.lastDeformed();
       const model = snap.project.model;
       const other = deformed ? hitTestItems(deformed, e.canvasPoint, (id) => !isLockedDeep(model, id)) : null;
@@ -867,6 +867,15 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
           ctx.strokeStyle = line;
           ctx.stroke();
         });
+      }
+      // メッシュと余白の外で別のパーツの上にマウスがあるとき、押すと切り替わる先を出す（I-069）
+      if (!drag && !stroke && !state.get().drawing && pointer && snap.part && !inTargetRange(snap, view, pointer)) {
+        const model = snap.project.model;
+        const deformed = env.lastDeformed();
+        const at = { x: (pointer.x - view.offset.x) / view.scale, y: (pointer.y - view.offset.y) / view.scale };
+        const other = deformed ? hitTestItems(deformed, at, (id) => !isLockedDeep(model, id)) : null;
+        if (other && other !== snap.part.id && partById(model, other)?.kind === 'image')
+          drawSwitchHint(ctx, model, deformed, view, other);
       }
       // 引いている途中の線
       const preview = stroke ? stroke.points : clicks.length > 0 ? [...clicks, ...(hover ? [hover] : [])] : null;
