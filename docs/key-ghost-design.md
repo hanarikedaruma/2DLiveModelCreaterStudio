@@ -70,7 +70,11 @@ Transform（頭の変形）  パラメータ編集中は画面上で操作（数
   - もう一度押すと消えた（[画面](evidence/key-ghost-2026-10-11/screen-ghost-off.jpg)）。
   - Transform のパレットに、頭の変形の今の値（Rotation −21）が出た。
   - 800×600 では、キャンバスの幅が狭く、ツールの並びは横にスクロールする（前から同じ）。［透かし］もスクロールした先にある。
-- 未実施: 本番アプリでの確認、人による全手順（`tests/usecase/changes.md` の UC-CH-45）。
+- 本番アプリ（2026-10-11）: I-069 と一緒に、コミット 2b84fe8 から `pnpm app:install` で更新し（I-069・I-070 を一緒に）、release と配置した exe の SHA256 が一致した（FEA2E80A…）。インストール版で確かめた。
+  - ツールの並びに［透かし］があり、押してから顔をドラッグすると、元の顔の位置が青く薄く残った（[画面](evidence/key-ghost-2026-10-11/installed-ghost-and-moved-face.jpg)）。
+  - パラメータ（顔 左右）の行を押すと、Transform の案内が「パラメータ編集中は画面上で操作（数値は今の形）」になり、数値は読み取り専用になった（[画面](evidence/key-ghost-2026-10-11/installed-parameter-editing.jpg)）。
+  - もう一度押すと透かしは消えた。実行時のエラーは無かった。
+- 未実施: 人による全手順（`tests/usecase/changes.md` の UC-CH-45）。
 
 ## 範囲の外・関係するもの
 
