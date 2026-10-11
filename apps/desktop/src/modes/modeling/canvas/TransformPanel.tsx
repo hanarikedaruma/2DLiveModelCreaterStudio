@@ -1,19 +1,21 @@
 // Transform パネル。選択中のパーツの基準状態の値を数値で表示・編集する
-// （パラメータの編集中と、値だけがデフォルト値でない間は読み取り専用）
-import { useRef, useState, type FC } from 'react';
-import type { Part, Project, Vec2 } from '@app/schema';
-import type { Command, ProjectStore } from '@app/contracts';
-import { patchPart } from '@app/core';
+// （パラメータの編集中と、値だけがデフォルト値でない間は、今の形の値を読み取り専用で出す）
+import { useMemo, useRef, useState, type FC } from 'react';
+import type { Model, Part, Project, Vec2 } from '@app/schema';
+import type { BindingEvaluator, Command, ParamValues, ProjectStore } from '@app/contracts';
+import { partOpacity, patchPart } from '@app/core';
 import { PanelSections, useEditor, useProject, useServices } from '../../../shell/api';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { useBindEnv, type EnvSlot } from './env';
 import { beginLiveEdit, type LiveEdit } from './liveEdit';
 import { applyLinear, poseMatrix } from './geometry';
+import { effectivePose, paramValuesOf } from './parts';
 import './transform.css';
 
 // 編集中のパラメータが無いのに値だけがデフォルト値でない（表情を作っている途中など）ときの案内（I-029）
 export const PREVIEW_OFF_BASE_NOTE =
   'キーを編集していないパラメータの値がデフォルト値でない間は編集できない（見えている形と違うため。パラメータパネルの［値をすべて戻す］で戻す）';
+export const PARAM_EDIT_NOTE = 'パラメータ編集中は画面上で操作（数値は今の形）';
 
 export type FieldKey = 'x' | 'y' | 'rotation' | 'scaleX' | 'scaleY' | 'pivotX' | 'pivotY' | 'opacity';
 
@@ -58,6 +60,14 @@ export function fieldValue(part: Part, key: FieldKey): number {
     case 'opacity':
       return part.opacity;
   }
+}
+
+// 今の形の値（基準 + キーの差分。回転中心は変わらない）。パラメータの編集中・プレビュー中に出す（I-070）
+export function currentPart(model: Model, values: ParamValues, evaluator: BindingEvaluator, part: Part): Part {
+  const params = paramValuesOf(model, values);
+  const pose = effectivePose(part, evaluator.evaluate(model, params).transforms[part.id]);
+  const opacity = partOpacity(model, part.id, params);
+  return { ...part, position: pose.position, rotation: pose.rotation, scale: pose.scale, opacity };
 }
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
@@ -168,7 +178,7 @@ export function makeTransformPanel(slot: EnvSlot): FC {
     useBindEnv(slot);
     const project = useProject();
     const [editor] = useEditor();
-    const { store } = useServices();
+    const { store, evaluator } = useServices();
     const liveRef = useRef<LiveEdit | null>(null);
 
     const parts = editor.selectedPartIds
@@ -179,6 +189,10 @@ export function makeTransformPanel(slot: EnvSlot): FC {
     // プレビュー中（編集していないパラメータの値がデフォルト値でない）に変えると、見えている形と違うものを編集してしまう（キャンバスでも動かせない）
     const offBase = isPreviewOffBase(project.model, editor);
     const readOnly = editor.activeParameterIds.length > 0 || offBase;
+    const shown = useMemo(
+      () => (primary && readOnly ? currentPart(project.model, editor.editorParamValues, evaluator, primary) : primary),
+      [primary, readOnly, project.model, editor.editorParamValues, evaluator],
+    );
 
     const onDepth = (value: number) => {
       if (readOnly) return;
@@ -201,7 +215,7 @@ export function makeTransformPanel(slot: EnvSlot): FC {
             </div>
             {readOnly && (
               <p className="transform-readonly" role="note">
-                {offBase ? PREVIEW_OFF_BASE_NOTE : 'パラメータ編集中は画面上で操作'}
+                {offBase ? PREVIEW_OFF_BASE_NOTE : PARAM_EDIT_NOTE}
               </p>
             )}
             <div className="transform-grid">
@@ -209,7 +223,7 @@ export function makeTransformPanel(slot: EnvSlot): FC {
                 <NumberField
                   key={`${primary.id}:${f.key}`}
                   label={f.label}
-                  value={fieldValue(primary, f.key)}
+                  value={fieldValue(shown ?? primary, f.key)}
                   digits={f.digits}
                   readOnly={readOnly}
                   onCommit={(v) => {

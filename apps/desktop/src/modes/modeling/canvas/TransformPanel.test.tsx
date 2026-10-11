@@ -6,7 +6,7 @@ import { createDeformPipeline } from '@app/core';
 import { registerPanelSection } from '../../../shell/api';
 import { registry } from '../../../shell/registry';
 import { register } from './index';
-import { formatNumber, PREVIEW_OFF_BASE_NOTE } from './TransformPanel';
+import { formatNumber, PARAM_EDIT_NOTE, PREVIEW_OFF_BASE_NOTE } from './TransformPanel';
 import { makeMesh } from '../structure/testing';
 import { openSample, pointer, renderShell, stubSize } from './testUtils';
 
@@ -190,7 +190,7 @@ describe('Transform パネル', () => {
     const { panel, select, input, type, part, services } = await open();
     select(['part-torso']);
     act(() => services.editor.set({ activeParameterIds: ['FaceAngleX'] }));
-    expect(panel().getByText('パラメータ編集中は画面上で操作')).toBeTruthy();
+    expect(panel().getByText(PARAM_EDIT_NOTE)).toBeTruthy();
     expect(input('X').readOnly).toBe(true);
     type('X', '50');
     expect(part('part-torso').position.x).toBe(0);
@@ -202,7 +202,7 @@ describe('Transform パネル', () => {
     select(['part-torso']);
     act(() => services.editor.set({ activeParameterIds: [], editorParamValues: { FaceAngleX: 30 } }));
     expect(panel().getByText(PREVIEW_OFF_BASE_NOTE)).toBeTruthy();
-    expect(panel().queryByText('パラメータ編集中は画面上で操作')).toBeNull();
+    expect(panel().queryByText(PARAM_EDIT_NOTE)).toBeNull();
     expect(input('X').readOnly).toBe(true);
     type('X', '50');
     expect(part('part-torso').position.x).toBe(0);

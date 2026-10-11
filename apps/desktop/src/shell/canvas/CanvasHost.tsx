@@ -1,6 +1,6 @@
 // モデリングの中央のキャンバス。services の evaluator → pipeline → renderer で
 // EditorState.editorParamValues の状態を描き、拡大縮小・移動・ツールへの pointer の受け渡しをする
-import { useCallback, useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Model, Project, Vec2 } from '@app/schema';
 import type { DeformedModel, EditorState, ParamValues, Renderer } from '@app/contracts';
 import { HairDynamicsSession, chestStaticParams } from '@app/core';
@@ -14,9 +14,11 @@ import {
   type CanvasToolTarget,
 } from '../api';
 import { useShell } from '../context';
+import { onAppEvent } from '../events';
 import { isTypingTarget } from '../keys';
 import { registry, visibleAt } from '../registry';
 import { drawCanvasBanner, drawPickOutline, partOutline } from './banner';
+import { drawGhost, freezeDeformed, ghostImage, type GhostImage } from './ghost';
 import { boundsOf, fitRect, pan, zoomAt, type Rect } from './view';
 
 // 無いパラメータはデフォルト値
@@ -28,6 +30,7 @@ export function paramValuesFor(model: Model, editorValues: ParamValues): ParamVa
 
 const WHEEL_ZOOM = 0.0015;
 const CONTEXT_CLICK_SLOP = 4; // 右ボタンをこれより動かして離したら、右クリックとみなさない（画面のピクセル）
+const PROJECT_LOADED_EVENT = 'projectLoaded'; // プロジェクトを開いた・新規に作った（project/actions.ts が出す）
 
 // 対象の要るツールで、まだ対象を選んでいない（枠が「対象を選ぶ段」を受け持つ）
 export function pickingTarget(
@@ -77,6 +80,9 @@ export function CanvasHost() {
   const pickRef = useRef<number | null>(null); // 対象を選ぶ段で押している pointer（ツールへは渡さない）
   const hoverRef = useRef<Vec2 | null>(null); // 最後のマウスの位置（キャンバス座標）
   const fittedRef = useRef<string | null>(null);
+  // 透かし（I-070）: ［透かし］を押したときの形。もう一度押すか、プロジェクトを開くまで重ねる（保存しない）
+  const [ghost, setGhost] = useState<DeformedModel | null>(null);
+  const ghostImageRef = useRef<GhostImage | null>(null);
 
   const activeTool: CanvasTool | undefined = snapshot.tools.find((t) => t.id === activeToolId);
   // 今のかんたん/詳細で出すツール（I-008）
@@ -87,14 +93,14 @@ export function CanvasHost() {
   const picking = pickingTarget(activeTool, project, editor) !== null;
 
   // 描くときは最新の値を使う
-  const latest = useRef({ project, editor, snapshot, activeTool });
-  latest.current = { project, editor, snapshot, activeTool };
+  const latest = useRef({ project, editor, snapshot, activeTool, ghost });
+  latest.current = { project, editor, snapshot, activeTool, ghost };
 
   const drawNow = useCallback(() => {
     scheduledRef.current = false;
     const renderer = rendererRef.current;
     if (!renderer) return;
-    const { project, editor, snapshot, activeTool } = latest.current;
+    const { project, editor, snapshot, activeTool, ghost } = latest.current;
     const currentView = controller.getState().view;
     let cache = cacheRef.current;
     const motion = controller.getState().motionPreview;
@@ -119,6 +125,10 @@ export function CanvasHost() {
       cacheRef.current = cache;
       controller.setLastDeformed(cache.deformed);
     }
+    // 透かしの絵は、今の形より先に描いて写す（止めた形・表示・大きさが変わったときだけ）
+    const main = canvasRef.current;
+    ghostImageRef.current =
+      ghost && main ? ghostImage(ghostImageRef.current, ghost, currentView, main, renderer) : null;
     renderer.render(cache.deformed, currentView, { type: 'transparent' });
 
     const overlay = overlayRef.current;
@@ -127,6 +137,7 @@ export function CanvasHost() {
     const dpr = overlay.clientWidth > 0 ? overlay.width / overlay.clientWidth : 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, overlay.width, overlay.height);
+    if (ghostImageRef.current) drawGhost(ctx, ghostImageRef.current.image, overlay.width, overlay.height);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     for (const o of snapshot.overlays) {
       ctx.save();
@@ -159,7 +170,19 @@ export function CanvasHost() {
   useEffect(requestDraw, [motionPreview, requestDraw]);
 
   // 描画の元になるものが変わったら描き直す
-  useEffect(requestDraw, [requestDraw, project, editor, view, snapshot, activeTool]);
+  useEffect(requestDraw, [requestDraw, project, editor, view, snapshot, activeTool, ghost]);
+  // 別のプロジェクトを開いたら（新規に作ったら）透かしを消す
+  useEffect(() => onAppEvent(PROJECT_LOADED_EVENT, () => setGhost(null)), []);
+
+  // ［透かし］: 今見えている形を止めて重ねる。もう一度押すと消す
+  const toggleGhost = () => {
+    if (ghost) {
+      setGhost(null);
+      return;
+    }
+    const deformed = controller.lastDeformed();
+    if (deformed) setGhost(freezeDeformed(deformed));
+  };
   // 使っているツールが今のかんたん/詳細で出ないものになったら、既定のツール（最初に出すもの）に戻す
   const fallbackToolId = tools[0]?.id;
   const activeHidden = activeTool !== undefined && !visibleAt(activeTool.level, uiLevel);
@@ -411,6 +434,14 @@ export function CanvasHost() {
           </button>
         ))}
         <span className="spacer" />
+        <button
+          type="button"
+          aria-pressed={ghost !== null}
+          title="今の形を薄く重ねて残す（もう一度押すと消す）"
+          onClick={toggleGhost}
+        >
+          透かし
+        </button>
         <span className="canvas-zoom" aria-label="倍率">
           {Math.round(view.scale * 100)}%
         </span>
