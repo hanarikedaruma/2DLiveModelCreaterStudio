@@ -243,7 +243,8 @@ export interface Model {
   - 顔 左右 +30 のキーで、線の真ん中の点を内へ動かすと、線と輪郭が滑らかに曲がった（[前](evidence/contour-line-2026-10-11/screen-key30-before.jpg)・[後](evidence/contour-line-2026-10-11/screen-key30-after.jpg)）。記録先は顔 左右のキー、Undo の名前は「輪郭線で整える」。Ctrl+Z で1回で戻り、Ctrl+Y でやり直せた。
   - ⓘ の説明（[画面](evidence/contour-line-2026-10-11/screen-info-1440.jpg)）、800×600 での右の列（[画面](evidence/contour-line-2026-10-11/screen-800.jpg)）、メッシュの「まわりも動かす」40px の点線の円（[画面](evidence/contour-line-2026-10-11/screen-mesh-soft.jpg)。選んだ頂点が 4.2px、まわりの8頂点が 1.9〜0.04px 動いた）。
 - 一緒に動かすパーツの候補は、顔の線だと目や口なども影響幅にかかって多くなるので、候補の欄は高さ 160px で中をスクロールする形にした。
-- 未実施: インストール版のアプリでの確認、人による全手順（tests/usecase/changes.md の UC-CH-43）、保存して開き直す手操作。
+- 本番アプリ: コミット 8a36ade から `pnpm app:install` で更新した（release と配置の SHA256 が一致）。インストール版で、新しいプロジェクトに顔の PNG を読み込み、メッシュの自動生成（頂点 45）→ 線を引く → 線に沿って頂点を足す（線の上の頂点 30、間隔 約 5px）→ 線の真ん中をつまんで動かす（頂点 72）を確かめた。実行時のエラーは無い（[画面](evidence/contour-line-2026-10-11/installed-contour-1920.jpg)・[メッシュ](evidence/contour-line-2026-10-11/installed-mesh-1920.jpg)）。
+- 未実施: 人による全手順（tests/usecase/changes.md の UC-CH-43）、保存して開き直す手操作。
 
 ## 範囲の外・関係するもの
 
