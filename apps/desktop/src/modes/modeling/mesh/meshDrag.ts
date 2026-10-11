@@ -125,12 +125,14 @@ export function createPointTargetMapper(
   };
 }
 
+// weights（頂点ごとの 0..1）を渡すと、見た目の移動量にその割合を掛ける（「まわりも動かす」。I-068 の D6）
 export function createMeshDragMapper(
   model: Model,
   deltas: TargetDeltas,
   partId: string,
   mesh: Mesh,
   indices: number[],
+  weights?: readonly number[],
 ): (delta: Vec2) => MeshMove[] | null {
   const local = meshLocalPositions(mesh, deltas);
   const visible = pointsToModelSpace(
@@ -140,5 +142,11 @@ export function createMeshDragMapper(
     indices.map((i) => local[i]!),
   );
   const mapper = createMeshTargetMapper(model, deltas, partId, mesh, indices);
-  return (delta) => mapper(visible.map((p) => ({ x: p.x + delta.x, y: p.y + delta.y })));
+  return (delta) =>
+    mapper(
+      visible.map((p, k) => {
+        const w = weights?.[k] ?? 1;
+        return { x: p.x + delta.x * w, y: p.y + delta.y * w };
+      }),
+    );
 }

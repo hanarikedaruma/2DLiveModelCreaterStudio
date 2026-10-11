@@ -7,7 +7,18 @@ import {
   bounceFrame,
   createBindingEvaluator,
 } from '@app/core';
-import type { Binding, CurveGuide, Mesh, Model, Part, Physics, Project, ShoulderCollider, Vec2 } from '@app/schema';
+import type {
+  Binding,
+  ContourLine,
+  CurveGuide,
+  Mesh,
+  Model,
+  Part,
+  Physics,
+  Project,
+  ShoulderCollider,
+  Vec2,
+} from '@app/schema';
 import type { Command } from '@app/contracts';
 import { basePart, childrenOf, idSequence, isInside, partsCenter, removeParts, subtreeIds, topMost } from './modelOps';
 
@@ -192,6 +203,7 @@ export interface DuplicateVariant {
   assetId(id: string | null): string | null;
   guide?(copy: CurveGuide): CurveGuide;
   collider?(copy: ShoulderCollider): ShoulderCollider;
+  contourLine?(copy: ContourLine): ContourLine; // I-068
 }
 
 // パーツ（グループなら子孫ごと）を複製する。複製は元のすぐ後ろの兄弟に入れ、描画順は元のいちばん前面のすぐ前に足す。
@@ -300,6 +312,21 @@ export function duplicateParts(
     if (variant.guide) copy = variant.guide(copy);
     newGuides.push(copy);
   }
+  // 輪郭線（I-068）: 点は画像の上の位置なのでそのまま写す。一緒に動かすパーツは、一緒に複製したものだけを残す
+  const newContourLines: ContourLine[] = [];
+  for (const l of model.contourLines ?? []) {
+    const partId = partIds.get(l.partId);
+    if (!partId) continue;
+    let copy: ContourLine = {
+      ...l,
+      id: next(),
+      partId,
+      points: l.points.map((p) => ({ ...p })),
+      withPartIds: l.withPartIds.flatMap((id) => (partIds.has(id) ? [partIds.get(id)!] : [])),
+    };
+    if (variant.contourLine) copy = variant.contourLine(copy);
+    newContourLines.push(copy);
+  }
   let drawOrder = model.drawOrder;
   if (originals.length > 0) {
     const last = model.drawOrder.indexOf(originals.at(-1)!);
@@ -395,6 +422,9 @@ export function duplicateParts(
       bindings: [...model.bindings, ...newBindings],
       ...(model.curveGuides ? { curveGuides: [...model.curveGuides, ...newGuides] } : {}),
       ...(model.shoulderColliders ? { shoulderColliders: [...model.shoulderColliders, ...newColliders] } : {}),
+      ...(model.contourLines || newContourLines.length
+        ? { contourLines: [...(model.contourLines ?? []), ...newContourLines] }
+        : {}),
       drawOrder,
     },
   };

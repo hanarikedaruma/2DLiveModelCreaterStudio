@@ -158,6 +158,18 @@ export function removeParts(project: Project, ids: readonly string[]): Project {
     ...(model.shoulderColliders
       ? { shoulderColliders: model.shoulderColliders.filter((c) => !removedColliders.has(c.id)) }
       : {}),
+    // 輪郭線（I-068）: 消したパーツの線を消し、一緒に動かすパーツから消したパーツを外す
+    ...(model.contourLines
+      ? {
+          contourLines: model.contourLines
+            .filter((l) => !removed.has(l.partId))
+            .map((l) =>
+              l.withPartIds.some((id) => removed.has(id))
+                ? { ...l, withPartIds: l.withPartIds.filter((id) => !removed.has(id)) }
+                : l,
+            ),
+        }
+      : {}),
   };
   return {
     ...project,

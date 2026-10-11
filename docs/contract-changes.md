@@ -21,6 +21,20 @@
 
 ## 記録
 
+### CC-015 輪郭線の保存と計算の公開（I-068、2026-10-11 CL）
+
+- 決めた日: 2026-10-11。ユーザーが[設計](contour-line-design.md)の D1〜D9 を推奨のとおり承認（「推奨設定でよいです」）。D9 で、CO が設計書を読むこと、CC-015 と流れ線・パーツの構造（複製・反転・修復）のファイルを触ることを決めた。
+- 対象の契約: `@app/schema` の `Model`・`Project.schemaVersion`・`SCHEMA_VERSION`、`@app/core` の公開。
+- 変更前: 輪郭線は無い。`SCHEMA_VERSION` は 6。
+- 変更後:
+  - `Model.contourLines?: ContourLine[]`（省略は空）。`ContourLine` は `id`・`partId`（線を引いた画像パーツ）・`name`・`points: Vec2[]`（素材の画像の中の位置 = UV。2個以上で、隣どうしは別の位置）・`radius`（影響幅。キャンバスの px。`CONTOUR_RADIUS_MIN`〜`MAX` = 4〜400）・`withPartIds: Id[]`（一緒に動かす画像パーツ。重複なし、`partId` を含めない）。
+  - `SCHEMA_VERSION` は 7。6→7 は何も足さない（既存のメッシュ・キー・物理を変えない）。
+  - `@app/core` に輪郭線の計算を足した: `contourBasis`・`contourKnots`・`contourSamples`（点を通る Catmull-Rom 曲線。区間の割合は絵の上の点の配置で固定）、`contourOnMesh`・`attachPoint`・`attachedPoint`（UV で三角形につける）、`spreadAlongLine`・`contourFalloff`・`distanceToLine`（線の動きを頂点へ広げる）、`fitLineMotion`（線のすぐそばの頂点を最小二乗で直す）、`contourShapeValid`（裏返り・潰れの確かめ）。
+  - 描画・変形のパイプライン・`DeformedModel`・出力・物理の契約は変えない。輪郭線は編集の道具で、再生中には評価しない（動きはキーの頂点の差分に入る）。
+- 理由: 輪郭の頂点を1つずつ動かすと段々に折れる（I-068）。線を絵の上に残し、キーごとに同じ線で整えられるようにするため。
+- 影響するカード: なし。読み込みの修復（`packages/io/src/project/repair.ts`）、パーツの削除・複製・左右反転（`modeling/structure/`。反転では UV の x を 1 − x）、PSD の再読み込みで大きさが変わった素材（キャンバス上の同じ位置になるように UV を直す）に線の扱いを足した。
+- 移行: 版の数を確かめるテスト（schema の5件・io の3件）と、胸の固定のプロジェクトを開いて往復するテスト（`chest.c98.test.ts`。開くときと同じく `loadProjectJson` で今の版へ移行する）を 7 に合わせた。
+
 ### CC-014 胸の重力・慣性・2出力とモデル座標の頂点キー（カード98、2026-10-09 CO）
 
 - ユーザーの先行実装指示により、[重力の修正設計](step4/chest-gravity-design.md)に必要な胸の契約だけを直列に実装。schemaVersionは6、5→6は保存済みのモデル・物理を保ち、胸を自動追加しない。

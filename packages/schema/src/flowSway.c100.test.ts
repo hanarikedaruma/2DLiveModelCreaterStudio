@@ -32,7 +32,7 @@ describe('流れ揺れの保存', () => {
     const p = project();
     p.schemaVersion = 4;
     const next = loadProjectJson(JSON.stringify(p));
-    expect(next.schemaVersion).toBe(6);
+    expect(next.schemaVersion).toBe(7);
     expect(next.model).toEqual(p.model);
     expect(next.physics).toEqual(p.physics);
     expect(next.model.curveGuides![0]!.dynamics).toBeUndefined();

@@ -47,6 +47,7 @@ export function reloadPsdCommand(input: ReloadInput, options: { newId?: () => st
         if (update.next.id !== old.id) {
           const mesh = update.change === 'resized' ? (input.meshes[part.id] ?? null) : null;
           p = replaceAssetCommand(part.id, update.next.id, mesh, options).apply(p);
+          if (update.change === 'resized') p = remapContourLines(p, part.id, old, update.next);
           if (update.change === 'moved') {
             const delta = offsetDelta(old, update.next);
             p = shiftMesh(p, part.meshId, delta, shifted);
@@ -73,6 +74,23 @@ export function reloadPsdCommand(input: ReloadInput, options: { newId?: () => st
       // 素材の並びは保つ（置き換えたものは同じ場所に、新しいものは最後に）
       const assets = [...project.assets.map((a) => updates.get(a.id)?.next ?? a), ...added];
       return { ...p, assets };
+    },
+  };
+}
+
+// 輪郭線（I-068）の点は画像の中の位置（UV）なので、大きさの変わった素材では、キャンバス上の同じ位置になるように直す
+function remapContourLines(project: Project, partId: string, old: Asset, next: Asset): Project {
+  const lines = project.model.contourLines;
+  if (!lines?.some((l) => l.partId === partId) || next.width <= 0 || next.height <= 0) return project;
+  const remap = (uv: Vec2): Vec2 => ({
+    x: (uv.x * old.width + old.offset.x - next.offset.x) / next.width,
+    y: (uv.y * old.height + old.offset.y - next.offset.y) / next.height,
+  });
+  return {
+    ...project,
+    model: {
+      ...project.model,
+      contourLines: lines.map((l) => (l.partId === partId ? { ...l, points: l.points.map(remap) } : l)),
     },
   };
 }

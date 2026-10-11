@@ -18,6 +18,7 @@ export const MESH_TOOL_ID = 'modeling.mesh';
 export const MESH_PICK_PROMPT = 'メッシュを編集する画像パーツを、キャンバスでクリックして選ぶ';
 
 export const VERTEX_RADIUS = 7; // 画面のピクセル
+export const SOFT_RADIUS_MAX = 200; // 「まわりも動かす」幅の上限（キャンバスの px）
 export const DOUBLE_CLICK_MS = 400;
 const DOUBLE_CLICK_DISTANCE = 6;
 const DRAG_THRESHOLD = 3;
@@ -101,6 +102,56 @@ export interface VertexSelection {
   indices: number[];
 }
 
+// 選んだ頂点からの距離 d での「まわりも動かす」割合（幅 radius で 0、滑らかに下がる）
+export function softWeight(d: number, radius: number): number {
+  if (!(radius > 0) || d >= radius) return 0;
+  const t = d / radius;
+  return 1 - t * t * (3 - 2 * t);
+}
+
+// 選んだ頂点と、幅 radius の内側のまわりの頂点。割合は選んだ頂点が 1、まわりは softWeight
+export function softSelection(
+  points: readonly Vec2[],
+  indices: readonly number[],
+  radius: number,
+): { indices: number[]; weights: number[] } {
+  const chosen = new Set(indices);
+  const all = [...indices];
+  const weights = indices.map(() => 1);
+  if (radius > 0) {
+    points.forEach((p, i) => {
+      if (chosen.has(i)) return;
+      let d = Infinity;
+      for (const j of indices) d = Math.min(d, distance(p, points[j]!));
+      const w = softWeight(d, radius);
+      if (w > 1e-6) {
+        all.push(i);
+        weights.push(w);
+      }
+    });
+  }
+  return { indices: all, weights };
+}
+
+function createNumberStore(initial: number) {
+  let value = initial;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => value,
+    set(next: number) {
+      if (next === value) return;
+      value = next;
+      for (const l of [...listeners]) l();
+    },
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
+
 function createSelectionStore() {
   let state: VertexSelection = { meshId: null, indices: [] };
   const listeners = new Set<() => void>();
@@ -139,6 +190,8 @@ type Drag =
 export interface MeshEditor {
   tool: CanvasTool;
   selection: { get(): VertexSelection; subscribe(listener: () => void): () => void };
+  // 頂点を動かすとき、まわりの頂点も滑らかについてくる幅（キャンバスの px。0 は選んだ頂点だけ）
+  softRadius: { get(): number; set(radius: number): void; subscribe(listener: () => void): () => void };
   clearSelection(): void;
   generate(): Promise<void>;
   deleteSelected(): Promise<void>;
@@ -148,6 +201,7 @@ export interface MeshEditor {
 export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } = {}): MeshEditor {
   const now = options.now ?? (() => performance.now());
   const selection = createSelectionStore();
+  const softRadius = createNumberStore(0);
   let drag: Drag | null = null;
   let lastClick: { time: number; screen: Vec2 } | null = null;
   let pending: Promise<unknown> = Promise.resolve();
@@ -266,11 +320,13 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
     e: CanvasPointerEvent,
     indices: number[],
   ) => {
-    const { target, mesh, project, editor, deltas } = snap;
+    const { target, mesh, project, editor, deltas, points } = snap;
     if (!target || !mesh) return;
     const { keyEditor, store } = env.services;
     const pointsTarget = { kind: 'mesh' as const, meshId: mesh.id };
     const label = '頂点の移動';
+    // 「まわりも動かす」幅があれば、まわりの頂点も距離に応じた割合で動かす
+    const soft = points ? softSelection(points, indices, softRadius.get()) : { indices, weights: indices.map(() => 1) };
     drag = {
       kind: 'vertices',
       start: e.canvasPoint,
@@ -278,8 +334,9 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
       started: false,
       moves:
         meshKeySpace(project, editor, mesh.id) === 'model'
-          ? (d) => indices.map((index) => ({ index, d }))
-          : createMeshDragMapper(project.model, deltas, target.part.id, mesh, indices),
+          ? (d) =>
+              soft.indices.map((index, k) => ({ index, d: { x: d.x * soft.weights[k]!, y: d.y * soft.weights[k]! } }))
+          : createMeshDragMapper(project.model, deltas, target.part.id, mesh, soft.indices, soft.weights),
       inverseErrorNotified: false,
       keyed: startKeyedDrag<Move[]>({
         store,
@@ -479,6 +536,22 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
         ctx.stroke();
         ctx.globalAlpha = 1;
         const selected = new Set(selectedOf(mesh));
+        // 「まわりも動かす」幅を、選んだ頂点のまわりに点線の円で出す
+        const soft = softRadius.get() * view.scale;
+        if (soft > 0 && selected.size > 0) {
+          ctx.save();
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = accent;
+          ctx.globalAlpha = 0.5;
+          for (const i of selected) {
+            const p = screen[i];
+            if (!p) continue;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, soft, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
         screen.forEach((p, i) => {
           const on = selected.has(i);
           const s = on ? 4 : 3;
@@ -502,6 +575,11 @@ export function createMeshEditor(slot: EnvSlot, options: { now?: () => number } 
   return {
     tool,
     selection: { get: selection.get, subscribe: selection.subscribe },
+    softRadius: {
+      get: softRadius.get,
+      set: (radius) => softRadius.set(Math.min(SOFT_RADIUS_MAX, Math.max(0, Math.round(radius)))),
+      subscribe: softRadius.subscribe,
+    },
     clearSelection: () => select(null, []),
     generate,
     deleteSelected,

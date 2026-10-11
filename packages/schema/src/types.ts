@@ -144,6 +144,16 @@ export interface CurveGuide {
   collision?: HairCollisionSettings; // 揺れとは独立。省略はOFF
 }
 
+// 輪郭線（I-068 / schemaVersion 7）。形を整える道具で、描画・物理・出力では使わない（形はキーの頂点の差分に入る）
+export interface ContourLine {
+  id: Id;
+  partId: Id; // 線を引いた画像パーツ。線はこのパーツの画像の上につく
+  name: string; // パレットに出す名前
+  points: Vec2[]; // 点。素材の画像の中の位置（UV、0..1）。2個以上、線の向きの順
+  radius: number; // 影響幅（キャンバスの px）。CONTOUR_RADIUS_MIN..MAX
+  withPartIds: Id[]; // 一緒に動かす画像パーツ（partId は含めない）
+}
+
 // ---- Warp ----
 
 export interface Warp {
@@ -217,11 +227,12 @@ export interface Model {
   bindings: Binding[];
   curveGuides?: CurveGuide[]; // 省略は空。カード99 / schemaVersion 4
   shoulderColliders?: ShoulderCollider[];
+  contourLines?: ContourLine[]; // 省略は空。I-068 / schemaVersion 7
   lipSync: LipSync;
   setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
 }
 export interface Project {
-  schemaVersion: number; // 現在は6（胸のモデル座標の弾み。旧版は開くときに移行）
+  schemaVersion: number; // 現在は7（輪郭線。旧版は開くときに移行）
   id: Id;
   name: string;
   assets: Asset[];

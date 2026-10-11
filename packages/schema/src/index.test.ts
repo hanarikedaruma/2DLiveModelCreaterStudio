@@ -14,7 +14,7 @@ describe('@app/schema の公開', () => {
     ] as const) {
       expect(schema[name], name).toBeTypeOf('function');
     }
-    expect(schema.SCHEMA_VERSION).toBe(6); // カード98の胸揺れ
+    expect(schema.SCHEMA_VERSION).toBe(7); // I-068 の輪郭線
     expect(schema.PARALLAX_RATIO).toBe(0.08);
     expect(schema.STANDARD_PARAMETERS).toHaveLength(28);
   });

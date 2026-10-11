@@ -39,6 +39,20 @@ export function repairProject(project: Project): RepairResult {
     repairs.push(`対象が無い流れ線 ${project.model.curveGuides!.length - validGuides.length} 本を外した`);
     project = { ...project, model: { ...project.model, curveGuides: validGuides } };
   }
+  // 輪郭線（I-068）: 対象の画像パーツが無い線を外し、一緒に動かすパーツから無いものを外す
+  if (project.model.contourLines) {
+    const images = new Set(project.model.parts.filter((p) => p.kind === 'image').map((p) => p.id));
+    const lines = project.model.contourLines.filter((l) => images.has(l.partId));
+    if (lines.length !== project.model.contourLines.length)
+      repairs.push(`対象が無い輪郭線 ${project.model.contourLines.length - lines.length} 本を外した`);
+    const fixed = lines.map((l) => {
+      if (l.withPartIds.every((id) => images.has(id))) return l;
+      repairs.push(`輪郭線の一緒に動かすパーツから、無いパーツを外した（${l.name}）`);
+      return { ...l, withPartIds: l.withPartIds.filter((id) => images.has(id)) };
+    });
+    if (fixed.length !== project.model.contourLines.length || fixed.some((l, i) => l !== lines[i]))
+      project = { ...project, model: { ...project.model, contourLines: fixed } };
+  }
   const parameterIds = new Set(project.model.parameters.map((p) => p.id));
   const repairedPhysics = project.physics.map((ph) => {
     if (!ph.verticalOutputParameterId || parameterIds.has(ph.verticalOutputParameterId)) return ph;

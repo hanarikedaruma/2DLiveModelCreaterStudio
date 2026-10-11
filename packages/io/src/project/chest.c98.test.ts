@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { MemoryFileSystem } from '@app/contracts';
-import { validateProject } from '@app/schema';
+import { loadProjectJson } from '@app/schema';
 import { createProjectIO } from './projectIO';
 
 const fixture = () => {
-  const p = validateProject(
-    JSON.parse(readFileSync(new URL('../../../../fixtures/chest-model/project.json', import.meta.url), 'utf8')),
+  // 開くときと同じく今の版へ移行する（I-068 で版が 7 になった）
+  const p = loadProjectJson(
+    readFileSync(new URL('../../../../fixtures/chest-model/project.json', import.meta.url), 'utf8'),
   );
   p.assets = [];
   p.model.parts = p.model.parts.map((part) => ({ ...part, assetId: null }));

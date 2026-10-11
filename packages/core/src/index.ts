@@ -11,3 +11,4 @@ export * from './layers'; // カード36
 export * from './anim'; // カード47
 export * from './physics'; // カード49
 export * from './hairDynamics'; // カード100
+export * from './contourLine'; // I-068

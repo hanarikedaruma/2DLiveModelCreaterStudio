@@ -23,6 +23,20 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+.mesh-soft {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 12px;
+}
+.mesh-soft input {
+  width: 100%;
+  min-width: 0;
+}
+.mesh-soft output {
+  font-variant-numeric: tabular-nums;
+}
 .mesh-hint {
   margin: 0;
   color: var(--text-dim);

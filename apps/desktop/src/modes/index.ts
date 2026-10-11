@@ -5,6 +5,7 @@ import { register as registerParameters } from './modeling/parameters';
 import { register as registerStructure } from './modeling/structure';
 import { register as registerMeshEdit } from './modeling/mesh';
 import { register as registerCurveGuide } from './modeling/curveGuide';
+import { register as registerContourLine } from './modeling/contourLine'; // I-068
 import { register as registerStudio } from './studio';
 import { register as registerStudioProducers } from './studio/producers'; // カード36
 import { register as registerWarp } from './modeling/warp'; // カード29
@@ -35,6 +36,7 @@ export function registerModes(): void {
   registerStructure(); // カード20
   registerMeshEdit(); // カード21
   registerCurveGuide(); // カード99: 線で曲げる・重力
+  registerContourLine(); // I-068: 輪郭線で整える
   registerStudio(); // カード22
   registerStudioProducers(); // カード36
   registerWarp(); // カード29

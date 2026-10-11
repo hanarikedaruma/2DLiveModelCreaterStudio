@@ -2,6 +2,8 @@ import { z } from 'zod';
 import {
   BLEND_MODES,
   BLEND_OPS,
+  CONTOUR_RADIUS_MAX,
+  CONTOUR_RADIUS_MIN,
   MAX_BINDING_PARAMETERS,
   PARAMETER_GROUP_IDS,
   STANDARD_PART_TYPES,
@@ -11,6 +13,7 @@ import type {
   Animation,
   Asset,
   Binding,
+  ContourLine,
   CurveGuide,
   Environment,
   Expression,
@@ -230,6 +233,26 @@ const curveGuide: z.ZodType<CurveGuide> = z
     }
   });
 
+const contourLine: z.ZodType<ContourLine> = z
+  .object({
+    id,
+    partId: id,
+    name: z.string(),
+    points: z
+      .array(vec2)
+      .min(2)
+      .refine(
+        (points) => points.slice(1).every((p, i) => Math.hypot(p.x - points[i]!.x, p.y - points[i]!.y) > 1e-9),
+        '隣の点は別の位置にする',
+      ),
+    radius: num.min(CONTOUR_RADIUS_MIN).max(CONTOUR_RADIUS_MAX),
+    withPartIds: z.array(id).refine((ids) => new Set(ids).size === ids.length, '一緒に動かすパーツが重複している'),
+  })
+  .superRefine((l, ctx) => {
+    if (l.withPartIds.includes(l.partId))
+      ctx.addIssue({ code: 'custom', path: ['withPartIds'], message: '線を引いたパーツは含めない' });
+  });
+
 const parameterGroup: z.ZodType<ParameterGroup> = z.object({ id: parameterGroupId, name: z.string() });
 
 const parameter: z.ZodType<Parameter> = z
@@ -380,6 +403,7 @@ const model: z.ZodType<Model> = z
         }),
       )
       .optional(),
+    contourLines: z.array(contourLine).optional(),
     lipSync,
     setupHints: z.object({ closedLineL: z.array(vec2).nullable(), closedLineR: z.array(vec2).nullable() }),
   })
@@ -391,6 +415,7 @@ const model: z.ZodType<Model> = z
     uniqueIds(m.bindings, 'bindings', ctx);
     uniqueIds(m.curveGuides ?? [], 'curveGuides', ctx);
     uniqueIds(m.shoulderColliders ?? [], 'shoulderColliders', ctx);
+    uniqueIds(m.contourLines ?? [], 'contourLines', ctx);
     const targets = new Set<string>();
     (m.curveGuides ?? []).forEach((g, i) => {
       if (targets.has(g.partId))

@@ -1,7 +1,7 @@
 import { validateProject } from './validate';
 import type { Project } from './types';
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 // { [版]: その版の json を次の版に変換する関数 }
 export type Migrations = Record<number, (json: Record<string, unknown>) => Record<string, unknown>>;
@@ -12,6 +12,7 @@ export const MIGRATIONS: Migrations = {
     isRecord(json.model) ? { ...json, model: { ...json.model, curveGuides: json.model.curveGuides ?? [] } } : json,
   4: (json) => json, // dynamicsの省略はOFF。既存の軸/線/キーを変更しない
   5: (json) => json, // 胸は使うときだけ。既存の物理・partのキーを変更しない
+  6: (json) => json, // 輪郭線（I-068）は使うときだけ。省略は空で、既存のメッシュ・キーを変更しない
 };
 
 export class ProjectVersionError extends Error {

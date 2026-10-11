@@ -1,0 +1,58 @@
+{
+ "control": [
+  [
+   637.95,
+   282.0
+  ],
+  [
+   627.1,
+   330.0
+  ],
+  [
+   608.0,
+   368.0
+  ],
+  [
+   577.45,
+   398.0
+  ],
+  [
+   540.0,
+   422.95
+  ]
+ ],
+ "drag": [
+  -9.69,
+  -7.08
+ ],
+ "metrics": {
+  "A": {
+   "label": "元の絵",
+   "vertices": 109
+  },
+  "B": {
+   "label": "今: 輪郭の頂点を目標へ動かす",
+   "vertices": 109,
+   "triangles": 170,
+   "maxErrorPx": 3.8,
+   "meanErrorPx": 1.11,
+   "maxAngleJumpDeg": 14.8
+  },
+  "C": {
+   "label": "案: 線で動かす（今のメッシュ）",
+   "vertices": 109,
+   "triangles": 170,
+   "maxErrorPx": 3.3,
+   "meanErrorPx": 1.18,
+   "maxAngleJumpDeg": 6.0
+  },
+  "D": {
+   "label": "案: 線に沿って頂点を足してから線で動かす",
+   "vertices": 139,
+   "triangles": 230,
+   "maxErrorPx": 0.4,
+   "meanErrorPx": 0.16,
+   "maxAngleJumpDeg": 4.8
+  }
+ }
+}

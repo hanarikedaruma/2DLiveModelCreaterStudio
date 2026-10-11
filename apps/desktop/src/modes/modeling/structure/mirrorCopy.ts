@@ -199,6 +199,8 @@ export function mirrorCopy(
           points: copy.points.map((p) => ({ x: mx(p.x), y: p.y })) as typeof copy.points,
         }),
         collider: (copy) => ({ ...copy, points: copy.points.map((p) => ({ x: mx(p.x), y: p.y })) }),
+        // 反転した素材では、絵の同じ所の UV は x が 1 − x になる（メッシュの uvs と同じ）
+        contourLine: (copy) => ({ ...copy, points: copy.points.map((p) => ({ x: 1 - p.x, y: p.y })) }),
         assetId: (id) => (id !== null ? (prepared.assetMap[id] ?? id) : null),
       });
       return next === withAssets ? project : next;
