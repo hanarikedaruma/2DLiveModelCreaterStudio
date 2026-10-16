@@ -1,0 +1,9 @@
+[
+ {"file":"../../docs/evidence/studio-speech-breath-2026-10-16/cosy-neutral.wav","expectedTranscripts":["あなたのことが大好きです。"]},
+ {"file":"cosy-probe/fp32-instruct-whole.wav","expectedTranscripts":["あなたのことが大好きです。"]},
+ {"file":"../../docs/evidence/studio-speech-breath-2026-10-16/qwen-old.wav","expectedTranscripts":["あ、あなたのことが、だ、大好きです。","あなたのことが大好きです。"]},
+ {"file":"cosy-corrected/neutral.wav","expectedTranscripts":["あなたのことが大好きです。"]},
+ {"file":"cosy-corrected/breath.wav","expectedTranscripts":["あなたのことがだっ大好き","あなたのことが大好き","あなたのことがだっだいすき","あなたのことがだいすき","あなたのことがだ大好き","あなたのことが大大好き"]},
+ {"file":"cosy-corrected/faithful.wav","expectedTranscripts":["あなたのことがだっ大好きです","あなたのことが大好きです","あなたのことがだっだいすきです","あなたのことがだいすきです","あなたのことがだ大好きです","あなたのことが大大好きです"]},
+ {"file":"../../docs/evidence/studio-speech-breath-2026-10-16/cosy-breath.wav","expectedTranscripts":["あなたのことがだっ大好き","あなたのことが大好き","あなたのことがだいすき"]}
+]

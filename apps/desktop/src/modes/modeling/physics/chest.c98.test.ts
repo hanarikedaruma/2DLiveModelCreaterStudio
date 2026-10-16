@@ -17,7 +17,7 @@ import { removeParameterCommand, parameterUsage } from '../userParams/userParams
 import { simulateSwayPreview } from './preview';
 import { createKeyEditor } from '../../../services/keyEditor';
 import { meshKeySpace } from '../../../services/keyEditor/points';
-import { editorAt, DETAIL } from '../../../services/keyEditor/testing';
+import { editorAt } from '../../../services/keyEditor/testing';
 
 const fixture = () =>
   validateProject(
@@ -129,7 +129,7 @@ describe('胸の設定・履歴・複製・編集', () => {
   it('モデル座標でキーを編集し、固定点の差分は0のままにする', () => {
     const p = fixture(),
       b = p.physics[0]!.bounce!,
-      editor = editorAt({ BustY: 1 }, DETAIL),
+      editor = editorAt({ BustY: 1 }),
       keyEditor = createKeyEditor();
     expect(meshKeySpace(p, editor, b.meshId)).toBe('model');
     const free = b.weights.indexOf(1),

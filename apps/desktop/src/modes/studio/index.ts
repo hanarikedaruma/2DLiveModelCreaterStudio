@@ -1,6 +1,13 @@
 // スタジオ（カード22）。register() で枠（shell/api.ts）に中央とパネルを登録する
 import { registerCenter, registerPanel, registerPanelSection } from '../../shell/api';
-import { OutputSection, STUDIO_SETTINGS_PANEL, StudioSettingsPanel, TrackingSection } from './sections';
+import {
+  OutputSection,
+  STUDIO_AUDIO_PANEL,
+  STUDIO_SETTINGS_PANEL,
+  StudioAudioPanel,
+  StudioSettingsPanel,
+  TrackingSection,
+} from './sections';
 import { StudioCenter } from './StudioCenter';
 import { studioRuntime } from './runtime';
 import type { ProjectDirResolver } from './backgrounds';
@@ -10,6 +17,14 @@ export { registerLayerProducer, registerFrameSink, useStudioRuntime, type Studio
 
 export function register(): void {
   registerCenter('studio', StudioCenter);
+  registerPanel({
+    id: STUDIO_AUDIO_PANEL,
+    mode: 'studio',
+    area: 'right',
+    title: 'マイク・音声',
+    order: -10,
+    component: StudioAudioPanel,
+  });
   registerPanel({
     id: STUDIO_SETTINGS_PANEL,
     mode: 'studio',

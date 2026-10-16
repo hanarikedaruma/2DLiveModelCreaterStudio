@@ -11,6 +11,7 @@ export function register(): void {
     title: 'パラメータ',
     order: 10,
     component: ParameterPanel,
+    info: PARAMETER_PANEL_ID,
   });
   registerCanvasOverlay(EDITING_OVERLAY_ID, drawEditingOverlay);
 }

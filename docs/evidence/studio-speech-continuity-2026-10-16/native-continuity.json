@@ -1,0 +1,46 @@
+{
+  "state": "stopped",
+  "sessionId": "185205dd9d6649d58bed5a79f02d7d31",
+  "error": "",
+  "mute": true,
+  "bypass": false,
+  "metrics": {
+    "bufferTargetMs": 4186.1875,
+    "bufferedMs": 0,
+    "codecFrames": 104,
+    "cudaGraph": 1,
+    "estimatedAudioSeconds": 9.63,
+    "estimatedRtf": 1.6339136171882276,
+    "firstAudioMs": 7219.085499987006,
+    "firstAudioWallMs": 1792100742639.1462,
+    "firstPcmSeconds": 1.239769099993282,
+    "frames": 199680,
+    "generationSeconds": 12.94577209999261,
+    "loadSeconds": 0,
+    "predictorGraphReplays": 104,
+    "rate": 24000,
+    "rebuffers": 0,
+    "rtf": 1.555982223556804,
+    "seconds": 8.32,
+    "startupBufferMs": 4474.583333333333,
+    "statefulDecoder": 1,
+    "textEmbeddingOffloadMiB": 593.5,
+    "vramMiB": 4009.49951171875
+  },
+  "converting": false,
+  "conversionOutput": null,
+  "source": "speech",
+  "speech": {
+    "delivery": "stream",
+    "history": [
+      "今日は、みんなに大切なことを伝えたいです。いつもそばにいてくれて、ありがとう。みんなのことがすきです。"
+    ],
+    "preparation": {
+      "owner": "",
+      "revision": 0,
+      "state": "idle"
+    },
+    "resident": true,
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+  }
+}

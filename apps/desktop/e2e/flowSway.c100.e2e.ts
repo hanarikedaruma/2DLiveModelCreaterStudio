@@ -134,7 +134,7 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
         s.store.load(p);
         s.editor.set({ mode: 'modeling', selectedPartIds: ['hair'], activeParameterIds: [], editorParamValues: {} });
       }, project);
-      await page.getByRole('button', { name: '線で曲げる', exact: true }).click();
+      await page.getByRole('button', { name: '流線で曲げる', exact: true }).click();
       const panel = page.locator('[data-panel-id="curveGuide"]');
       const parts = page.locator('[data-panel-id="structure.parts"]');
       const settings = page.locator('[data-panel-id="partSettings"]');
@@ -274,7 +274,7 @@ describe('流れ線で揺らす・両方式の表示と試す操作', () => {
       await page.getByRole('button', { name: '選択・変形', exact: true }).click();
       expect(await panel.count()).toBe(0);
       expect(await page.evaluate(() => !!window.__studio.canvas.getState().motionPreview)).toBe(true);
-      await page.getByRole('button', { name: '線で曲げる', exact: true }).click();
+      await page.getByRole('button', { name: '流線で曲げる', exact: true }).click();
       await panel.getByRole('button', { name: '動きを止める', exact: true }).click();
       await page.waitForFunction(() => !window.__studio.canvas.getState().motionPreview);
       expect(await page.evaluate(() => window.__studio.services.store.get())).toEqual(saved);

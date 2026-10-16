@@ -12,16 +12,21 @@ import { registerProject } from './project';
 import { createEnvironment, createServices } from './services';
 import { createDialogController } from './shell/dialogs';
 import { createCanvasController } from './shell/canvas/controller';
+import { bindSpeechInput } from './speechInput/host';
+import { startSpeechInputWindow } from './speechInput/window';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root が見つからない');
 
 // 出力ウィンドウ（カード22）は同じ index.html を /output で開く
-if (window.location.pathname.startsWith('/output')) {
+if (window.location.pathname.startsWith('/speech-input')) {
+  startSpeechInputWindow(root);
+} else if (window.location.pathname.startsWith('/output')) {
   startOutputWindow(root);
 } else {
   const services = createServices();
   const environment = createEnvironment(services);
+  bindSpeechInput(services, environment);
   const dialogs = createDialogController();
   const canvas = createCanvasController();
   registerModes();

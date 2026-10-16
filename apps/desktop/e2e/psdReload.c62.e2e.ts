@@ -231,8 +231,6 @@ async function importSample() {
     s.store.load({ ...p, model: { ...p.model, bindings: [...p.model.bindings, ...bindings] } });
     s.editor.set({ mode: 'modeling' });
   });
-  const detail = page.getByRole('button', { name: '詳細', exact: true });
-  if (await detail.count()) await detail.click();
   const trayToggle = page.locator('[data-panel-id="assets.tray"] .panel-title button');
   if ((await trayToggle.getAttribute('aria-expanded')) === 'false') await trayToggle.click();
   await page.getByRole('button', { name: 'PSD を読み込み直す', exact: true }).waitFor();

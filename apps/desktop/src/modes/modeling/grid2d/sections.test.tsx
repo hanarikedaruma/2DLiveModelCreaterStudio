@@ -51,8 +51,6 @@ function moveFace(s: Services, dx: number, dy: number) {
   act(() => s.store.dispatch(command));
 }
 
-const detail = (s: Services) => act(() => s.editor.set({ uiLevel: { ...s.editor.get().uiLevel, modeling: 'detail' } }));
-
 describe('方向グリッド（かんたん）', () => {
   it('補正キーのロックは選んだマスだけに作用し、1軸キーと他のマスを保つ（I-019）', () => {
     const s = setup();
@@ -122,8 +120,8 @@ describe('方向グリッド（かんたん）', () => {
     expect(cell('右上').getAttribute('aria-label')).toBe('右上（自動）');
   });
 
-  it('かんたんでだけ出る。3×3 のマスで、斜めには状態が出る', () => {
-    const s = setup();
+  it('組み合わせの補正の中に最初から出る。3×3 のマスで、斜めには状態が出る', () => {
+    setup();
     const grid = directionGrid()!;
     expect(combinationGrid()).toBeNull();
     expect(
@@ -135,14 +133,14 @@ describe('方向グリッド（かんたん）', () => {
       '上（顔 上下だけ）',
       '右上（自動）',
       '左（顔 左右だけ）',
-      '正面（基準状態）',
+      '正面（既定値のキー）',
       '右（顔 左右だけ）',
       '左下（自動）',
       '下（顔 上下だけ）',
       '右下（自動）',
     ]);
-    detail(s);
-    expect(directionGrid()).toBeNull();
+
+    expect(screen.getByRole('button', { name: '方向グリッド' }).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('マスを押すとその値を編集中にする。上下左右は1パラメータ、斜めと中央は2パラメータ', () => {
@@ -168,7 +166,7 @@ describe('方向グリッド（かんたん）', () => {
     fireEvent.click(cell('正面'));
     expect(s.editor.get().activeParameterIds).toEqual(['FaceAngleX', 'FaceAngleY']);
     expect(s.editor.get().editorParamValues).toEqual({ FaceAngleX: 0, FaceAngleY: 0 });
-    expect(screen.getByText('正面: 基準状態を編集する')).toBeTruthy();
+    expect(screen.getByText('正面: 2つの既定値の組み合わせのキーを編集する')).toBeTruthy();
   });
 
   it('斜めのマスの見た目は、補正前は上下と左右の和になる', () => {
@@ -251,13 +249,13 @@ describe('方向グリッド（かんたん）', () => {
   });
 });
 
-describe('組み合わせの補正（詳細）', () => {
+describe('任意の組み合わせの補正', () => {
   const select = (label: string) => screen.getByRole('combobox', { name: `${label}のパラメータ` }) as HTMLSelectElement;
 
-  it('詳細でだけ出る。最初は顔の向きの組で、格子は各パラメータのキー位置の組み合わせ', () => {
-    const s = setup();
+  it('表示切替をせず直接選べる。最初は顔の向きの組で、格子は各パラメータのキー位置の組み合わせ', () => {
+    setup();
     expect(screen.queryByRole('combobox', { name: '横のパラメータ' })).toBeNull();
-    detail(s);
+    fireEvent.click(screen.getByRole('button', { name: '任意の組み合わせ' }));
     expect(select('横').value).toBe('FaceAngleX');
     expect(select('縦').value).toBe('FaceAngleY');
     const buttons = within(combinationGrid()!).getAllByRole('button');
@@ -265,10 +263,10 @@ describe('組み合わせの補正（詳細）', () => {
     expect(buttons[0]!.getAttribute('aria-label')).toBe('顔 左右 -30・顔 上下 +30（自動）');
   });
 
-  it('2パラメータを編集中にしてから詳細にすると、その組で始まる', () => {
+  it('2パラメータを編集中にしてから任意の組み合わせを選ぶと、その組で始まる', () => {
     const s = setup();
     act(() => s.editor.set({ activeParameterIds: ['EyeSmileL', 'EyeOpenL'], editorParamValues: {} }));
-    detail(s);
+    fireEvent.click(screen.getByRole('button', { name: '任意の組み合わせ' }));
     expect(select('横').value).toBe('EyeSmileL');
     expect(select('縦').value).toBe('EyeOpenL');
   });
@@ -276,7 +274,7 @@ describe('組み合わせの補正（詳細）', () => {
   it('任意の2パラメータを選び、組み合わせのマスを直すと補正のキーができ、[自動に戻す] で消える', () => {
     const s = setup();
     const loaded = s.store.get();
-    detail(s);
+    fireEvent.click(screen.getByRole('button', { name: '任意の組み合わせ' }));
     fireEvent.change(select('横'), { target: { value: 'EyeOpenL' } });
     fireEvent.change(select('縦'), { target: { value: 'EyeSmileL' } });
     const grid = combinationGrid()!;
@@ -288,7 +286,7 @@ describe('組み合わせの補正（詳細）', () => {
       '目 開閉 L 0・目 笑顔 L 1（自動）',
       '目 開閉 L 1・目 笑顔 L 1（目 笑顔 Lだけ）',
       '目 開閉 L 0・目 笑顔 L 0（目 開閉 Lだけ）',
-      '目 開閉 L 1・目 笑顔 L 0（基準状態）',
+      '目 開閉 L 1・目 笑顔 L 0（既定値のキー）',
     ]);
 
     // 閉じた目 × 笑顔 を押して頂点を直す
@@ -302,7 +300,7 @@ describe('組み合わせの補正（詳細）', () => {
     if (command === 'needsKey') throw new Error('キーがあるはず');
     act(() => s.store.dispatch(command));
     const [binding] = pairBindings(s.store.get().model, { a: 'EyeOpenL', b: 'EyeSmileL' });
-    expect(binding!.keys.find((k) => k.coords.join() === '0,1')).toMatchObject({ source: 'manual', locked: false });
+    expect(binding!.keys.find((k) => k.coords.join() === '0,1')).toMatchObject({ source: 'manual', locked: true });
     expect(cell('目 開閉 L 0・目 笑顔 L 1').getAttribute('aria-label')).toBe('目 開閉 L 0・目 笑顔 L 1（修正済み）');
     const after = [...s.evaluator.evaluate(s.store.get().model, s.editor.get().editorParamValues).vertices['m-eye']!];
     expect(after).toEqual(before.map((v, i) => (i === 3 ? v - 3 : v)));
@@ -318,8 +316,8 @@ describe('組み合わせの補正（詳細）', () => {
   });
 
   it('同じパラメータを選ぶと入れ替える。キーの無いパラメータには案内を出す', () => {
-    const s = setup();
-    detail(s);
+    setup();
+    fireEvent.click(screen.getByRole('button', { name: '任意の組み合わせ' }));
     fireEvent.change(select('横'), { target: { value: 'FaceAngleY' } });
     expect(select('横').value).toBe('FaceAngleY');
     expect(select('縦').value).toBe('FaceAngleX');

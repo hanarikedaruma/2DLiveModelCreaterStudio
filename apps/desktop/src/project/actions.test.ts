@@ -5,6 +5,7 @@ import { createAutoSaver, createProjectIO } from '@app/io';
 import { createFakeServices } from '../services';
 import { createEnvironmentStore, memoryEnvironmentStorage } from '../shell/environment';
 import { onAppEvent } from '../shell/events';
+import { createDialogController } from '../shell/dialogs';
 import { createProjectActions, PROJECT_LOADED, type ProjectPlatform } from './actions';
 
 // jsdom には createImageBitmap が無いので、画像の代わりに大きさだけを持つものを作る
@@ -30,7 +31,12 @@ function asset(id: string): Asset {
   };
 }
 
-function setup(options: { fs?: MemoryFileSystem; answers?: { confirm?: boolean; prompt?: string | null } } = {}) {
+function setup(
+  options: {
+    fs?: MemoryFileSystem;
+    answers?: { confirm?: boolean; prompt?: string | null; recovery?: 'restore' | 'later' | 'discard' | null };
+  } = {},
+) {
   const fs = options.fs ?? new MemoryFileSystem();
   const base = createFakeServices();
   const io = createProjectIO(fs);
@@ -44,10 +50,15 @@ function setup(options: { fs?: MemoryFileSystem; answers?: { confirm?: boolean; 
   };
   const environment = createEnvironmentStore(memoryEnvironmentStorage());
   const dialogs = {
+    ...createDialogController(),
     confirm: vi.fn(async () => options.answers?.confirm ?? true),
     prompt: vi.fn(async () => (options.answers && 'prompt' in options.answers ? options.answers.prompt! : 'テスト')),
     notify: vi.fn(),
   };
+  vi.spyOn(dialogs, 'choose').mockImplementation(async (_message, choices) => {
+    const answer = options.answers && 'recovery' in options.answers ? options.answers.recovery : 'restore';
+    return choices.find((choice) => choice.value === answer)?.value ?? null;
+  });
   const picked: (string | null)[] = [];
   const platform: ProjectPlatform = {
     pickFolder: vi.fn(async () => picked.shift() ?? null),
@@ -194,7 +205,7 @@ describe('起動時の復元', () => {
 
     const next = setup({ fs });
     expect(await next.actions.recoverOnStartup()).toBe(true);
-    expect(next.dialogs.confirm).toHaveBeenCalledWith(expect.stringContaining('復元'));
+    expect(next.dialogs.choose).toHaveBeenCalledWith(expect.stringContaining('復元'), expect.any(Array));
     expect(next.services.store.get().name).toBe('作業中');
     expect(next.services.assets.getPng('a1')).toBeDefined();
     expect(next.actions.dir()).toBeNull();
@@ -220,7 +231,7 @@ describe('起動時の復元', () => {
   it('残っていなければ何も聞かず、断ったらいまの空のプロジェクトのまま', async () => {
     const empty = setup();
     expect(await empty.actions.recoverOnStartup()).toBe(false);
-    expect(empty.dialogs.confirm).not.toHaveBeenCalled();
+    expect(empty.dialogs.choose).not.toHaveBeenCalled();
 
     const fs = new MemoryFileSystem();
     const crashed = setup({ fs });
@@ -228,10 +239,113 @@ describe('起動時の復元', () => {
     crashed.services.store.dispatch(rename('作業中'));
     await (crashed.services.autoSaver as unknown as { flush(): Promise<void> }).flush();
     crashed.services.autoSaver.stop();
-    const declined = setup({ fs, answers: { confirm: false } });
+    const declined = setup({ fs, answers: { recovery: 'later' } });
     const before = declined.services.store.get();
     expect(await declined.actions.recoverOnStartup()).toBe(false);
     expect(declined.services.store.get()).toBe(before);
+  });
+});
+
+describe('復元の保留と破棄（I-071）', () => {
+  async function crashed(fs: MemoryFileSystem, name: string, saved = false) {
+    const context = setup({ fs });
+    await context.services.assets.put('a1', PNG);
+    context.services.store.dispatch({ label: '素材', apply: (p) => ({ ...p, name, assets: [asset('a1')] }) });
+    const dir = saved ? `/work/${name}` : `/appdata/unsaved/${context.services.store.get().id}`;
+    if (saved) await context.actions.saveAs(dir);
+    context.services.autoSaver.start(dir);
+    for (const suffix of ['古い', '最新']) {
+      context.services.store.dispatch(rename(`${name} ${suffix}`));
+      await (context.services.autoSaver as unknown as { flush(): Promise<void> }).flush();
+    }
+    context.services.autoSaver.stop();
+    return { ...context, dir };
+  }
+
+  it.each(['later', null] as const)('保留=%sなら残し、次回は復元できる', async (recovery) => {
+    const fs = new MemoryFileSystem();
+    const previous = await crashed(fs, '保留の作業');
+    const before = await fs.list(`${previous.dir}/backups`);
+    const later = setup({ fs, answers: { recovery } });
+    expect(await later.actions.recoverOnStartup()).toBe(false);
+    later.services.autoSaver.stop();
+    expect(await fs.list(`${previous.dir}/backups`)).toEqual(before);
+    const restore = setup({ fs });
+    expect(await restore.actions.recoverOnStartup()).toBe(true);
+    expect(restore.services.store.get().name).toBe('保留の作業 最新');
+    expect(restore.actions.isDirty()).toBe(true);
+    restore.services.autoSaver.stop();
+  });
+
+  it.each([false, true])('保存済み=%s: 破棄しても本体と素材を残し、次回は同じ作業を聞かない', async (saved) => {
+    const fs = new MemoryFileSystem();
+    const previous = await crashed(fs, '破棄の作業', saved);
+    const base = saved ? await fs.readText(`${previous.dir}/project.json`) : null;
+    const discard = setup({ fs, answers: { recovery: 'discard' } });
+    if (saved) discard.environment.set({ lastProjectDir: previous.dir });
+    expect(await discard.actions.recoverOnStartup()).toBe(false);
+    discard.services.autoSaver.stop();
+    expect(discard.dialogs.notify).toHaveBeenCalledWith('自動保存を破棄した');
+    expect(await fs.list(`${previous.dir}/backups`)).toEqual([]);
+    expect(await fs.readBinary(`${previous.dir}/assets/a1.png`)).toEqual(PNG);
+    if (base) expect(await fs.readText(`${previous.dir}/project.json`)).toBe(base);
+    const next = setup({ fs });
+    if (saved) next.environment.set({ lastProjectDir: previous.dir });
+    expect(await next.actions.recoverOnStartup()).toBe(false);
+    next.services.autoSaver.stop();
+    expect(next.dialogs.choose).not.toHaveBeenCalled();
+  });
+
+  it('破棄できない場合は失敗を知らせ、最新の自動保存と現在のプロジェクトを残す', async () => {
+    const fs = new MemoryFileSystem();
+    const previous = await crashed(fs, '残す作業');
+    const next = setup({ fs, answers: { recovery: 'discard' } });
+    const current = next.services.store.get();
+    vi.spyOn(next.services.autoSaver, 'discardRecovery').mockRejectedValue(new Error('書き込み禁止'));
+    expect(await next.actions.recoverOnStartup()).toBe(false);
+    expect(next.dialogs.notify).toHaveBeenCalledWith(
+      expect.stringContaining('自動保存を破棄できなかった: 書き込み禁止'),
+    );
+    expect(next.dialogs.notify).not.toHaveBeenCalledWith('自動保存を破棄した');
+    expect(next.services.store.get()).toBe(current);
+    expect(await next.services.autoSaver.findRecoverable(previous.dir)).not.toBeNull();
+    next.services.store.dispatch(rename('現在の作業'));
+    await (next.services.autoSaver as unknown as { flush(): Promise<void> }).flush();
+    next.services.autoSaver.stop();
+    expect(await fs.exists(`/appdata/unsaved/${current.id}/backups`)).toBe(true);
+  });
+
+  it('確認中に候補が新しくなったら取り直し、新しい作業を消さず復元できる', async () => {
+    const fs = new MemoryFileSystem();
+    const previous = await crashed(fs, '候補の作業');
+    const next = setup({ fs });
+    vi.mocked(next.dialogs.choose).mockImplementationOnce(async () => {
+      previous.services.autoSaver.start(previous.dir);
+      previous.services.store.dispatch(rename('確認中の新しい作業'));
+      await (previous.services.autoSaver as unknown as { flush(): Promise<void> }).flush();
+      previous.services.autoSaver.stop();
+      return 'discard';
+    });
+    expect(await next.actions.recoverOnStartup()).toBe(true);
+    expect(next.dialogs.choose).toHaveBeenCalledTimes(2);
+    expect(next.services.store.get().name).toBe('確認中の新しい作業');
+    expect(await fs.list(`${previous.dir}/backups`)).toHaveLength(3);
+    next.services.autoSaver.stop();
+  });
+
+  it('複数の候補では指定した作業だけ破棄し、別の作業を復元できる', async () => {
+    const fs = new MemoryFileSystem();
+    const discarded = await crashed(fs, '破棄する', true);
+    const restored = await crashed(fs, '復元する');
+    const next = setup({ fs });
+    next.environment.set({ lastProjectDir: discarded.dir });
+    vi.mocked(next.dialogs.choose).mockResolvedValueOnce('discard').mockResolvedValueOnce('restore');
+    expect(await next.actions.recoverOnStartup()).toBe(true);
+    expect(await fs.list(`${discarded.dir}/backups`)).toEqual([]);
+    expect(await fs.list(`${restored.dir}/backups`)).toHaveLength(2);
+    expect(next.services.store.get().name).toBe('復元する 最新');
+    expect(next.actions.dir()).toBeNull();
+    next.services.autoSaver.stop();
   });
 });
 

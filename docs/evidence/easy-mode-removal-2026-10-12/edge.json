@@ -1,0 +1,55 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "modes": [
+        {
+          "mode": "modeling",
+          "warp": true,
+          "generation": true,
+          "multipleMask": true,
+          "autoSetup": true,
+          "directionAndCombination": true
+        },
+        {
+          "mode": "animation",
+          "transitionNumbers": true,
+          "affectedGroups": true
+        },
+        {
+          "mode": "studio",
+          "trackingMap": true,
+          "motionNumbers": true
+        }
+      ],
+      "legacyEasySettingsIgnored": true
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "modes": [
+        {
+          "mode": "modeling",
+          "warp": true,
+          "generation": true,
+          "multipleMask": true,
+          "autoSetup": true,
+          "directionAndCombination": true
+        },
+        {
+          "mode": "animation",
+          "transitionNumbers": true,
+          "affectedGroups": true
+        },
+        {
+          "mode": "studio",
+          "trackingMap": true,
+          "motionNumbers": true
+        }
+      ],
+      "legacyEasySettingsIgnored": true
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,23 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "parameterHelp": 5,
+      "legacyPanelHelp": true,
+      "noHorizontalOverflow": true,
+      "noProjectChanges": true,
+      "escape": true
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "parameterHelp": 5,
+      "legacyPanelHelp": true,
+      "noHorizontalOverflow": true,
+      "noProjectChanges": true,
+      "escape": true
+    }
+  ],
+  "errors": []
+}

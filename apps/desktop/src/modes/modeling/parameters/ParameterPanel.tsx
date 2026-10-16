@@ -4,18 +4,22 @@
 import { useEffect } from 'react';
 import { MAX_BINDING_PARAMETERS, PARAMETER_GROUPS, type Model, type Parameter, type ParameterGroup } from '@app/schema';
 import { PanelSections, useCanvas, useDialogs, useEditor, useProject, useServices } from '../../../shell/api';
+import { InfoButton } from '../../../help/InfoButton';
+import { PARAMETER_HELP_IDS } from '../../../help/infoTexts';
 import {
   applyGeneration,
   deleteKeyAt,
   generateBetween,
   GENERATION_CHOICES,
   generationOf,
+  hasDefaultKeyDifference,
   isDepthParameter,
   keysAt,
   lockRange,
   moveKeyAt,
   rebuildDepth,
   regenerateKeys,
+  resetDefaultKeyAt,
   toggleLockAt,
   type GenerationChoice,
 } from './generate';
@@ -69,15 +73,16 @@ export function ParameterPanel() {
   const activeIds = active.map((p) => p.id);
   const depthIds = activeIds.filter(isDepthParameter);
 
-  // 押すと、そのパラメータだけのキーを編集する（それまで編集していたパラメータは編集をやめてデフォルト値に戻し、
-  // プレビューの値は残す）。Ctrl+クリックで編集中のパラメータに加える（組み合わせのキー。MAX_EDITING まで）。
+  // 押すと、そのパラメータだけのキーを編集する。ほかのパラメータの値（それまで編集していたものも、プレビューの値も）は
+  // すべてデフォルト値に戻し、そのパラメータのキーだけの形にする（I-085）。
+  // Ctrl+クリックで編集中のパラメータに加える（組み合わせのキー。MAX_EDITING まで。ほかの値はそのまま）。
   // 編集中の行をもう一度押すと、そのパラメータの編集をやめてデフォルト値に戻す（I-028）
   const toggle = (p: Parameter, additive: boolean) => {
     const values = editor.editorParamValues;
-    const without = (ids: string[]) => Object.fromEntries(Object.entries(values).filter(([id]) => !ids.includes(id)));
     if (activeIds.includes(p.id)) {
-      setEditor({ activeParameterIds: activeIds.filter((id) => id !== p.id), editorParamValues: without([p.id]) });
-    } else if (additive && activeIds.length > 0) {
+      const rest = Object.fromEntries(Object.entries(values).filter(([id]) => id !== p.id));
+      setEditor({ activeParameterIds: activeIds.filter((id) => id !== p.id), editorParamValues: rest });
+    } else if (additive) {
       if (activeIds.length >= MAX_EDITING) {
         dialogs.notify(`キーを一緒に編集できるパラメータは ${MAX_EDITING} つまで`);
         return;
@@ -87,10 +92,7 @@ export function ParameterPanel() {
         editorParamValues: { ...values, [p.id]: valueOf(p, editor) },
       });
     } else {
-      setEditor({
-        activeParameterIds: [p.id],
-        editorParamValues: { ...without(activeIds), [p.id]: valueOf(p, editor) },
-      });
+      setEditor({ activeParameterIds: [p.id], editorParamValues: { [p.id]: valueOf(p, editor) } });
     }
   };
 
@@ -124,8 +126,7 @@ export function ParameterPanel() {
     reportScope('すべて再補間', regenerateKeys(services.store, services.keyGenerator, activeIds, undefined, partIds));
   };
 
-  // 生成方式は詳細モードで選ぶ。曲面は顔の向き（FaceAngleX・FaceAngleY）のときだけ
-  const detail = editor.uiLevel.modeling === 'detail';
+  // 曲面は顔の向き（FaceAngleX・FaceAngleY）のときだけ
   const generation = generationOf(model, activeIds);
   const choices = GENERATION_CHOICES.filter(
     (c) => c.id !== 'surface' || depthIds.length > 0 || generation === 'surface',
@@ -137,6 +138,12 @@ export function ParameterPanel() {
 
   // 行のキーの印と範囲の操作（編集中の行だけで使える）
   const keyActionsFor = (p: Parameter): KeyActions => ({
+    resetDefaultKey: hasDefaultKeyDifference(model, p.id, partIds)
+      ? () => {
+          resetDefaultKeyAt(services.store, p.id, partIds);
+          dialogs.notify(`${scopeText}の既定値キーの差を消した（基準の形に戻した）`);
+        }
+      : undefined,
     toggleLock: (value) => toggleLockAt(services.store, p.id, value),
     lockRange: (range, locked) => lockRange(services.store, p.id, range, locked),
     regenerateRange: (range) => {
@@ -225,53 +232,61 @@ export function ParameterPanel() {
           >
             値をすべて戻す
           </button>
-          <button
-            type="button"
-            disabled={active.length === 0}
-            title="編集中のパラメータのキーの間に、中間のキーを作る"
-            onClick={generate}
-          >
-            間を生成
-          </button>
-          <button
-            type="button"
-            disabled={active.length === 0}
-            title="ロックしたキーと代表のキーを残し、中間のキーを生成方式で作り直す"
-            onClick={regenerateAll}
-          >
-            すべて再補間
-          </button>
-          {depthIds.length > 0 && (
+          <InfoButton infoId={PARAMETER_HELP_IDS.generateBetween}>
             <button
               type="button"
-              title="パーツの奥行きから、顔の向きのキーを作り直す（ロックしたキーは残る）"
-              onClick={() => rebuildDepth(services.store, services.keyGenerator, depthIds)}
+              disabled={active.length === 0}
+              title="編集中のパラメータのキーの間に、中間のキーを作る"
+              onClick={generate}
             >
-              奥行きで作り直す
+              間を生成
             </button>
+          </InfoButton>
+          <InfoButton infoId={PARAMETER_HELP_IDS.regenerateAll}>
+            <button
+              type="button"
+              disabled={active.length === 0}
+              title="ロックしたキーと代表のキーを残し、中間のキーを生成方式で作り直す"
+              onClick={regenerateAll}
+            >
+              すべて再補間
+            </button>
+          </InfoButton>
+          {depthIds.length > 0 && (
+            <InfoButton infoId={PARAMETER_HELP_IDS.rebuildDepth}>
+              <button
+                type="button"
+                title="パーツの奥行きから、顔の向きのキーを作り直す（ロックしたキーは残る）"
+                onClick={() => rebuildDepth(services.store, services.keyGenerator, depthIds)}
+              >
+                奥行きで作り直す
+              </button>
+            </InfoButton>
           )}
         </div>
-        {detail && active.length > 0 && (
-          <label className="parameter-generation" title={GENERATION_TITLE}>
-            <span>生成方式</span>
-            <select
-              aria-label="生成方式"
-              value={generation ?? 'linear'}
-              disabled={generation === null}
-              onChange={(e) => choose(e.currentTarget.value as GenerationChoice)}
-            >
-              {generation === 'mixed' && (
-                <option value="mixed" disabled>
-                  混在
-                </option>
-              )}
-              {choices.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </label>
+        {active.length > 0 && (
+          <InfoButton infoId={PARAMETER_HELP_IDS.generation}>
+            <label className="parameter-generation" title={GENERATION_TITLE}>
+              <span>生成方式</span>
+              <select
+                aria-label="生成方式"
+                value={generation ?? 'linear'}
+                disabled={generation === null}
+                onChange={(e) => choose(e.currentTarget.value as GenerationChoice)}
+              >
+                {generation === 'mixed' && (
+                  <option value="mixed" disabled>
+                    混在
+                  </option>
+                )}
+                {choices.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </InfoButton>
         )}
         {active.length > 0 && (
           <p className="parameter-hint">

@@ -59,6 +59,11 @@ export function createLipSyncProducer(options?: {
 
   return {
     id: 'lipSync',
+    reset() {
+      open = 0;
+      lastTime = null;
+      sampler?.clear();
+    },
     configure(o) {
       config = {
         mouthSource: MOUTH_SOURCES.includes(o.mouthSource) ? o.mouthSource : config.mouthSource,
@@ -85,7 +90,7 @@ export function createLipSyncProducer(options?: {
       const blend: NonNullable<Layer['blend']> = { MouthOpen: mouthSource === 'max' ? 'max' : 'override' };
       const probabilities = sampler?.current(ctx.now);
       vowelTime = null;
-      if (probabilities && ctx.project.model.lipSync.vowels.length > 0) {
+      if (probabilities && probabilities.closed < 0.99 && ctx.project.model.lipSync.vowels.length > 0) {
         if (weight > 0) vowelTime = sampler!.frameTime();
         for (const id of ['MouthOpen', 'MouthForm', 'MouthWidth']) {
           const parameter = ctx.project.model.parameters.find((p) => p.id === id);

@@ -4,7 +4,7 @@ import { ensureStandardParameters, type Binding, type Project, type TransformDel
 import type { Command, EditorState } from '@app/contracts';
 import { createBindingEvaluator } from '@app/core';
 import { createKeyEditor } from '../../../services/keyEditor';
-import { deepFreeze, delta, DETAIL, editorAt, part, projectWith } from '../../../services/keyEditor/testing';
+import { deepFreeze, delta, editorAt, part, projectWith } from '../../../services/keyEditor/testing';
 import { addKeysCommand, opacityAt, opacityCommand } from './opacityKey';
 
 const keyEditor = createKeyEditor();
@@ -111,7 +111,7 @@ describe('不透明度のキー（絶対値。I-026）', () => {
     expect(shown(base, 'ribbon', { MouthOpen: 1 })).toBeCloseTo(0.4);
   });
 
-  it('2つのパラメータの組のキーにも記録する（かんたんモードではロックする）', () => {
+  it('2つのパラメータの組にも記録し、組・単独のどちらの手動キーもロックする', () => {
     const p = project();
     const editor = editorAt({ FaceAngleX: 30, FaceAngleY: -30 });
     const after = run(p, opacityCommand(keyEditor, p, editor, ['face'], 0.25));
@@ -122,9 +122,8 @@ describe('不透明度のキー（絶対値。I-026）', () => {
       locked: true,
     });
     expect(shown(after, 'face', { FaceAngleX: 30, FaceAngleY: -30 })).toBeCloseTo(0.25);
-    // 詳細モードではロックしない
-    const detail = run(p, opacityCommand(keyEditor, p, editorAt({ FaceAngleX: 30 }, DETAIL), ['face'], 0.5));
-    expect(detail.model.bindings[0]!.keys.find((k) => k.coords[0] === 30)!.locked).toBe(false);
+    const single = run(p, opacityCommand(keyEditor, p, editorAt({ FaceAngleX: 30 }), ['face'], 0.5));
+    expect(single.model.bindings[0]!.keys.find((k) => k.coords[0] === 30)!.locked).toBe(true);
   });
 
   it('ほかのパラメータの不透明度のキーがあっても、いまの見え方を指定した値にする', () => {

@@ -1,0 +1,8 @@
+torch==2.5.1
+torchaudio==2.5.1
+numpy==1.26.4
+qwen-tts==0.1.1
+transformers==4.57.3
+accelerate==1.12.0
+truststore==0.10.4
+soundfile==0.14.0

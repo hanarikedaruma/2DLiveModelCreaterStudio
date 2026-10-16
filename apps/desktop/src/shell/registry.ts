@@ -1,7 +1,7 @@
 // 差し込み口の登録先。モジュールの読み込み時に register* で登録し、画面は useRegistry で読む。
 // 同じ id で登録し直すと置き換える（開発中の HMR で二重に並ばないように）。
 import type { FC } from 'react';
-import type { ModeId, UiLevel } from '@app/schema';
+import type { ModeId } from '@app/schema';
 import type { ViewTransform } from '@app/contracts';
 import type { CanvasTool, MenuItem, PanelDef, SectionDef } from './api';
 
@@ -57,11 +57,6 @@ export const registry = {
   reset: () => update(() => empty()),
 };
 
-// level が 'detail' のものは uiLevel が 'detail' のときだけ、'easy' のものは 'easy' のときだけ出す。'both'（省略）は常に出す
-export function visibleAt(level: 'easy' | 'detail' | 'both' | undefined, uiLevel: UiLevel): boolean {
-  return level === undefined || level === 'both' || level === uiLevel;
-}
-
 export function byOrder<T extends { order?: number }>(items: T[]): T[] {
   // order が同じなら登録順
   return items
@@ -70,6 +65,6 @@ export function byOrder<T extends { order?: number }>(items: T[]): T[] {
     .map((x) => x.item);
 }
 
-export function panelsFor(s: RegistrySnapshot, mode: ModeId, area: PanelDef['area'], uiLevel: UiLevel): PanelDef[] {
-  return byOrder(s.panels.filter((p) => p.mode === mode && p.area === area && visibleAt(p.level, uiLevel)));
+export function panelsFor(s: RegistrySnapshot, mode: ModeId, area: PanelDef['area']): PanelDef[] {
+  return byOrder(s.panels.filter((p) => p.mode === mode && p.area === area));
 }

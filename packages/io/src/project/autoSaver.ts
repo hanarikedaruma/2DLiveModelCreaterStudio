@@ -34,7 +34,7 @@ export interface AutosaveInfo {
   savedAt: string; // ISO 8601
 }
 
-const AUTOSAVE_NAME = /^autosave-.+\.json$/;
+const AUTOSAVE_NAME = /^autosave-[^/\\:]+\.json$/;
 
 export function isAutosaveName(name: string): boolean {
   return AUTOSAVE_NAME.test(name);
@@ -103,6 +103,15 @@ export function createAutoSaver(
     },
 
     findRecoverable: (dir) => findRecoverable(fs, dir),
+    discardRecovery(dir, expectedPath) {
+      // このインスタンスの既に始まった書き込みと、破棄を直列にする。
+      const result = writing.then(() => discardRecovery(fs, dir, expectedPath));
+      writing = result.then(
+        () => undefined,
+        () => undefined,
+      );
+      return result;
+    },
   };
 }
 
@@ -180,4 +189,25 @@ export async function findRecoverable(fs: FileSystem, dir: string): Promise<stri
     return canonicalJson(content) === canonicalJson(savedJson) ? null : path;
   }
   return null;
+}
+
+// フォルダ全体を消さず、表示した世代までの自動保存JSONだけを消す（I-071）。
+export async function discardRecovery(
+  fs: FileSystem,
+  dir: string,
+  expectedPath: string,
+): Promise<'discarded' | 'changed'> {
+  const backups = joinPath(dir, BACKUPS_DIR);
+  const expectedName = expectedPath.slice(expectedPath.lastIndexOf('/') + 1);
+  if (!isAutosaveName(expectedName) || joinPath(backups, expectedName) !== expectedPath) {
+    throw new Error('破棄する自動保存のパスが対象のフォルダと一致しない');
+  }
+  if ((await findRecoverable(fs, dir)) !== expectedPath) return 'changed';
+  const names = (await fs.list(backups)).filter((name) => isAutosaveName(name) && name <= expectedName).sort();
+  // .jsonという名前のフォルダをremoveで再帰削除しないよう、先に全対象が読めるファイルか確かめる。
+  for (const name of names) await fs.readBinary(joinPath(backups, name));
+  if ((await findRecoverable(fs, dir)) !== expectedPath) return 'changed';
+  // 古い世代から消す。途中で失敗しても、表示した最新の作業をなるべく残す。
+  for (const name of names) await fs.remove(joinPath(backups, name));
+  return (await findRecoverable(fs, dir)) === null ? 'discarded' : 'changed';
 }

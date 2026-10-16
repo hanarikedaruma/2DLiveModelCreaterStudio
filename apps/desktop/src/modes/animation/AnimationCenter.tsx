@@ -2,6 +2,8 @@
 // プレビューは時刻 t でトラックを補間した値を描く（遷移は付けない。スタジオでの再生は別のカード）
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from '../../shell/api';
+import { clampSize, useElementSize, useResizableSize } from '../../shell/layoutSizes';
+import { Splitter } from '../../shell/splitter';
 import { updateAnimationCommand } from './commands';
 import { lastKeyTime, MAX_DURATION, MIN_DURATION, roundTime, sampleAnimation, setDuration } from './keyframes';
 import { formatClock, formatTime } from './labels';
@@ -27,6 +29,19 @@ const schedule: (cb: () => void) => Handle =
       };
 
 export function AnimationCenter() {
+  const measured = useElementSize<HTMLDivElement>();
+  const toolbar = useElementSize<HTMLDivElement>();
+  const width = measured.width || 800;
+  const height = measured.height || 600;
+  const stacked = width <= 600;
+  const timeline = useResizableSize('animation.timeline.height');
+  const sliders = useResizableSize(stacked ? 'animation.sliders.height' : 'animation.sliders.width');
+  const timelineMax = Math.max(120, height - (toolbar.height || 34) - 200);
+  const timelineHeight = clampSize(timeline.value ?? Math.max(180, height * 0.4), 120, timelineMax);
+  const mainHeight = Math.max(160, height - (toolbar.height || 34) - timelineHeight);
+  const slidersMin = stacked ? 80 : 180;
+  const slidersMax = stacked ? Math.max(80, mainHeight - 80) : Math.max(180, Math.min(480, width - 320));
+  const slidersSize = clampSize(sliders.value ?? (stacked ? mainHeight / 2 : 260), slidersMin, slidersMax);
   const dispatch = useDispatch();
   const { project, animation, time, state, setState } = useCurrentAnimation();
   const values = useMemo(
@@ -79,8 +94,8 @@ export function AnimationCenter() {
   };
 
   return (
-    <div className="anim-center">
-      <div className="anim-toolbar" role="toolbar" aria-label="再生">
+    <div className="anim-center" ref={measured.ref}>
+      <div className="anim-toolbar" role="toolbar" aria-label="再生" ref={toolbar.ref}>
         <button
           type="button"
           aria-label="先頭へ"
@@ -132,11 +147,42 @@ export function AnimationCenter() {
           </label>
         )}
       </div>
-      <div className="anim-main">
+      <div className={`anim-main${stacked ? ' stacked' : ''}`}>
         <AnimationPreview values={values} />
-        <ParameterSliders values={values} />
+        <div className={stacked ? 'row-boundary' : 'column-boundary'}>
+          <Splitter
+            key={stacked ? 'sliders.height' : 'sliders.width'}
+            label={stacked ? 'スライダーの高さ' : 'スライダーの幅'}
+            axis={stacked ? 'y' : 'x'}
+            direction={-1}
+            value={slidersSize}
+            current={() => slidersSize}
+            min={slidersMin}
+            max={slidersMax}
+            onPreview={sliders.preview}
+            onCommit={sliders.commit}
+          />
+        </div>
+        <div className="anim-sliders-area" style={stacked ? { height: slidersSize } : { width: slidersSize }}>
+          <ParameterSliders values={values} />
+        </div>
       </div>
-      <Timeline values={values} />
+      <div className="row-boundary">
+        <Splitter
+          label="タイムラインの高さ"
+          axis="y"
+          direction={-1}
+          value={timelineHeight}
+          current={() => timelineHeight}
+          min={120}
+          max={timelineMax}
+          onPreview={timeline.preview}
+          onCommit={timeline.commit}
+        />
+      </div>
+      <div className="anim-timeline-area" style={{ height: timelineHeight }}>
+        <Timeline values={values} />
+      </div>
     </div>
   );
 }

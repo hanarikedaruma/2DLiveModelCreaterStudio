@@ -1,0 +1,167 @@
+{
+  "identifier": "jp.co.globalsystems.live2dstudio.verification-i078-20261012",
+  "work": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\i078-ui-1791800811206",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "tools": {
+        "workflow": [
+          {
+            "kind": "image",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 1.39px",
+            "alignmentUndo": true
+          },
+          {
+            "kind": "group",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 1.39px",
+            "alignmentUndo": true
+          }
+        ],
+        "ownWarpTools": [
+          {
+            "tool": "選択・変形",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          },
+          {
+            "tool": "メッシュ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          },
+          {
+            "tool": "輪郭線で整える",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          },
+          {
+            "tool": "ワープ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "width": 960,
+      "height": 600,
+      "tools": {
+        "workflow": [
+          {
+            "kind": "image",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 3.05px",
+            "alignmentUndo": true
+          },
+          {
+            "kind": "group",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 3.05px",
+            "alignmentUndo": true
+          }
+        ],
+        "ownWarpTools": [
+          {
+            "tool": "選択・変形",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          },
+          {
+            "tool": "メッシュ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          },
+          {
+            "tool": "輪郭線で整える",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          },
+          {
+            "tool": "ワープ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": {
+              "schemaVersion": 8,
+              "bindingEqual": true,
+              "lookEqual": true
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "errors": []
+}

@@ -52,7 +52,7 @@ async function setup() {
     s.services.store.load(fixture());
     s.services.editor.set({ selectedPartIds: ['hair'] });
   });
-  fireEvent.click(screen.getByRole('button', { name: '線で曲げる' }));
+  fireEvent.click(screen.getByRole('button', { name: '流線で曲げる' }));
   await waitFor(() => expect(document.querySelector('[data-panel-id="curveGuide"]')).not.toBeNull());
   return s;
 }

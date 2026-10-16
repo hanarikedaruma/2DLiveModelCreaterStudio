@@ -307,7 +307,6 @@ describe('スタジオの設定の「キャリブレーション・動き」', (
 
   it('詳細で数値を変えるとカスタムになり、プリセットと同じ値に戻すとそのプリセットになる', async () => {
     const { environment, spies } = await setup();
-    fireEvent.click(section().getByRole('button', { name: /動きの数値/ }));
     const gain = section().getByLabelText('動きの大きさ（gain）') as HTMLInputElement;
     expect(gain.value).toBe('1');
     fireEvent.change(gain, { target: { value: '1.5' } });

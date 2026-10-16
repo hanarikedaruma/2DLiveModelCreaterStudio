@@ -1,21 +1,20 @@
-// ワープのパレットの中身（詳細モード、ワープ編集ツールのときだけ出る）。手順を ① グループを選ぶ ② 格子を追加
+// ワープ編集ツールのパレット。手順を ① パーツを選ぶ ② 格子を追加
 // ③ 制御点を動かす の順に並べ、済んだ段に ✓ を付ける。表示中のあいだ、ワープ編集ツールに services とダイアログを渡す
 import { useEffect, useState, useSyncExternalStore, type FC, type ReactNode } from 'react';
 import { useCanvas, useDialogs, useEditor, useProject, useServices } from '../../../shell/api';
 import { useBindEnv, type EnvSlot } from '../canvas/env';
-import { ancestorsOf, partById } from '../canvas/parts';
 import { isPreviewOffBase } from '../../../services/keyEditor/common';
-import { groupParts } from '../structure/commands';
 import { warpGuide } from './warpGuide';
 import {
   WARP_DIVISIONS,
   addWarpCommand,
   descendantImageBounds,
-  groupPart,
+  warpPart,
   removeWarpCommand,
   removeWarpMessage,
   refitWarpCommand,
-  warpGroupChoices,
+  straightenWarpCommand,
+  warpPartChoices,
   warpNeedsRefit,
   warpKeyCount,
   warpOfPart,
@@ -66,21 +65,20 @@ export function makeWarpSection(slot: EnvSlot, editor: WarpEditor): FC {
     const { setActiveTool, requestRedraw } = useCanvas();
     const [columns, setColumns] = useState<number>(WARP_DIVISIONS.initial);
     const [rows, setRows] = useState<number>(WARP_DIVISIONS.initial);
+    const [adjustment, setAdjustment] = useState<string | null>(null);
     const selection = useSyncExternalStore(editor.selection.subscribe, editor.selection.get);
     // 別のプロジェクトを開いたら（とパレットを出し直したら）制御点の選択を外す
     useEffect(() => editor.clearSelection(), [project.id]);
 
     const ids = state.selectedPartIds;
-    const group = ids.length === 1 ? groupPart(project.model, ids[0]) : null;
+    const group = ids.length === 1 ? warpPart(project.model, ids[0]) : null;
     const warp = group ? warpOfPart(project.model, group.id) : undefined;
     const offBase = isPreviewOffBase(project.model, state);
     const hasImages = group !== null && descendantImageBounds(project, group.id) !== null;
     const canAdd = !offBase && group !== null && !warp && hasImages;
-    const image = ids.length === 1 ? partById(project.model, ids[0]!) : undefined;
-    const parentGroup =
-      image?.kind === 'image' ? ancestorsOf(project.model, image.id).find((p) => p.kind === 'group') : undefined;
     const guide = warpGuide(project, state);
-    const choices = group ? warpGroupChoices(project, group.id) : [];
+    const choices = group ? warpPartChoices(project, group.id) : [];
+    useEffect(() => setAdjustment(null), [warp?.id]);
 
     const add = () => {
       if (!group || !canAdd) return;
@@ -98,12 +96,28 @@ export function makeWarpSection(slot: EnvSlot, editor: WarpEditor): FC {
       requestRedraw();
     };
 
-    const createGroup = () => {
-      if (image?.kind !== 'image' || offBase) return;
+    const straighten = async () => {
+      if (!warp || offBase) return;
+      const result = straightenWarpCommand(store.get(), warp.id);
+      if (!result) {
+        dialogs.notify('格子の向きを調整できない（格子・キーの座標を確認する）');
+        return;
+      }
+      const message = `確認した${result.samples}姿勢の最大ずれ: ${(Math.ceil(result.maxError * 100) / 100).toFixed(2)}px`;
+      if (
+        result.maxError > 0.01 &&
+        !(await dialogs.confirm(
+          `${message}。形の位置が変わることがあります。格子をまっすぐにしますか？（Undoで戻せます）`,
+        ))
+      )
+        return;
       const before = store.get();
-      store.dispatch(groupParts([image.id], { name: `${image.name}のグループ` }));
-      const created = store.get().model.parts.find((p) => !before.model.parts.some((old) => old.id === p.id));
-      if (created) editorStore.set({ selectedPartIds: [created.id] });
+      store.dispatch(result.command);
+      if (store.get() !== before) {
+        editor.clearSelection();
+        requestRedraw();
+        setAdjustment(message);
+      } else dialogs.notify('格子は基準の姿勢に合っている');
     };
     const refit = () => {
       if (!warp || offBase) return;
@@ -132,7 +146,7 @@ export function makeWarpSection(slot: EnvSlot, editor: WarpEditor): FC {
           </p>
         )}
         <ol className="warp-steps">
-          <Step mark="①" title="グループを選ぶ" state={group ? 'done' : 'current'}>
+          <Step mark="①" title="パーツを選ぶ" state={group ? 'done' : 'current'}>
             {group ? (
               <>
                 <p className="warp-info">対象: {group.name}</p>
@@ -151,18 +165,7 @@ export function makeWarpSection(slot: EnvSlot, editor: WarpEditor): FC {
                   </label>
                 )}
               </>
-            ) : (
-              image?.kind === 'image' &&
-              (parentGroup ? (
-                <button type="button" onClick={() => editorStore.set({ selectedPartIds: [parentGroup.id] })}>
-                  グループ「{parentGroup.name}」を選ぶ
-                </button>
-              ) : (
-                <button type="button" disabled={offBase} onClick={createGroup}>
-                  グループを作る
-                </button>
-              ))
-            )}
+            ) : null}
           </Step>
           <Step mark="②" title="格子を追加" state={warp ? 'done' : group ? 'current' : 'todo'}>
             {warp ? (
@@ -171,10 +174,19 @@ export function makeWarpSection(slot: EnvSlot, editor: WarpEditor): FC {
                   格子 {warp.columns}×{warp.rows}（制御点 {warp.points.length}）
                 </p>
                 <div className="warp-buttons">
+                  <button type="button" disabled={offBase} onClick={() => void straighten()}>
+                    格子をまっすぐにする
+                  </button>
                   <button type="button" onClick={() => void remove()}>
                     ワープを削除
                   </button>
                 </div>
+                <p className="warp-hint">格子の向きは基準の姿勢に合わせる。親の変形や傾きのキーでは一緒に動く</p>
+                {adjustment && (
+                  <p className="warp-hint" role="status">
+                    {adjustment}
+                  </p>
+                )}
                 {warpNeedsRefit(project, warp) && (
                   <>
                     <p className="warp-hint" role="note">

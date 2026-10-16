@@ -65,6 +65,7 @@ export function ensureStandardParameters(model: Model, phase: StandardPhase): Mo
 export function createDefaultEnvironment(): Environment {
   return {
     cameraDeviceId: null,
+    voice: { inputDeviceId: null, outputDeviceId: null, inputGainDb: 0, silenceThreshold: -50 },
     cameraCapture: { mode: 'auto', width: 640, height: 480, fps: 60 },
     mirror: true,
     calibration: null,
@@ -77,7 +78,7 @@ export function createDefaultEnvironment(): Environment {
     bodyFollowStrength: 'standard',
     expressionMode: 'stack',
     output: { method: 'window', width: 1920, height: 1080, fps: 60, adapterId: null },
-    uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
+
     lastProjectDir: null,
   };
 }

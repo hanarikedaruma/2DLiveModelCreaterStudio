@@ -1,0 +1,108 @@
+{
+  "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\projects\\cardigan-bob-20261010\\project.json",
+  "sourceUnchanged": true,
+  "sourceSha256": "1ba78d73cf3c6761f71310b6b3a89de33dfa678912f9cb7a406d54cb8d71cf97",
+  "schemaVersion": 8,
+  "poses": 309,
+  "warps": [
+    {
+      "id": "01M4NC1CHVF67SZ3XNSEDPR1VF",
+      "partId": "01M4KKK504DVC0Z3EDXEW8M69W",
+      "name": "目の変形 L",
+      "oldAngle": 0,
+      "newAngle": -0.002621358070725111,
+      "maxErrorPx": 0.02033462511532858,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NC220YF7FETNQQ23PXCDG7",
+      "partId": "01M4KKK504DVC0Z3EDXEW8M69X",
+      "name": "目の変形 R",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 1.4732814471680302,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NCE4XRSSG34GQBXR916FCD",
+      "partId": "01M4NCDZMJBZW5W5FXXTV5YTHW",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 0,
+      "status": "measured"
+    },
+    {
+      "id": "01M4ND3XN2599M5BR6Q07TDHWP",
+      "partId": "01M4ND3V8H600WTAQG9506C58D",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 21.42883762812761,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NFDBRY1PS58MP82K785GX7",
+      "partId": "01M4NFDA0N6G5Z4YSKF8AHHZJE",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 11.265238995774165,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NJ7ES5SHEXVV3G6SRRW2RP",
+      "partId": "01M4NJ2T50YS5CE1N4XXJF37QY",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.002621358070725111,
+      "maxErrorPx": 0.030822769013958244,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NJAX4VGGCS4EY1TYW7SMF5",
+      "partId": "01M4NJ36CR3R6K337PPKT3G10R",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 1.4599525505641544,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NJWYFRA6PHF9BF6SGNKZX8",
+      "partId": "01M4NJWVZPT2K6WPGAEXZYCZB8",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 3.2154873349186386,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NJYS7ZPPP7J4NZDDY9RC2R",
+      "partId": "01M4NJYPDRZAT93KC1WJ9499PE",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.13935136793437017,
+      "maxErrorPx": 1.8436569560646077,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NK3MW52R247QKV8R8S2JV5",
+      "partId": "01M4NK31MK6ZTQ2QP4F4ZQRW75",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.002621358070725111,
+      "maxErrorPx": 0.06918210439482674,
+      "status": "measured"
+    },
+    {
+      "id": "01M4NK6M9K7C1E3HS6YCS7WRMX",
+      "partId": "01M4NK6G4553T7BB0ACCWGYXV5",
+      "name": "グループ",
+      "oldAngle": 0,
+      "newAngle": -0.002621358070725111,
+      "maxErrorPx": 0.04501101729841168,
+      "status": "measured"
+    }
+  ]
+}

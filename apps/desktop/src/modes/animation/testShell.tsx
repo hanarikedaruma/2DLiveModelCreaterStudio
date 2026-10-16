@@ -98,8 +98,7 @@ export function setupAnimationScreen(project: Project = step1Project(), override
       fireEvent.change(input, { target: { value: String(value) } });
       fireEvent.blur(input);
     });
-  const setLevel = (level: 'easy' | 'detail') =>
-    act(() => editor.set({ uiLevel: { ...editor.get().uiLevel, animation: level } }));
+
   const animation = (i = 0) => store.get().animations[i]!;
   const lastParams = () => evaluate.mock.calls.at(-1)![1];
 
@@ -120,7 +119,7 @@ export function setupAnimationScreen(project: Project = step1Project(), override
     slide,
     release,
     enter,
-    setLevel,
+
     animation,
     lastParams,
   };

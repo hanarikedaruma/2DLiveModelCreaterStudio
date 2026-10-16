@@ -1,0 +1,12 @@
+{
+  "originalAgainstOriginal": true,
+  "bitIdentical": false,
+  "differenceRms": 0.04587350046667188,
+  "differencePeak": 0.6862475872039795,
+  "ready": {
+    "hopFrames": 8640,
+    "lookaheadFrames": 6144,
+    "minimumCaptureFrames": 25344,
+    "jitterSeconds": 0.04
+  }
+}

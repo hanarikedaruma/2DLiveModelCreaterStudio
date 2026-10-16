@@ -16,9 +16,20 @@ import {
 import { useShell } from '../context';
 import { onAppEvent } from '../events';
 import { isTypingTarget } from '../keys';
-import { registry, visibleAt } from '../registry';
+import { registry } from '../registry';
 import { drawCanvasBanner, drawPickOutline, partOutline } from './banner';
-import { drawGhost, freezeDeformed, ghostImage, type GhostImage } from './ghost';
+import {
+  drawGhost,
+  freezeDeformed,
+  ghostImage,
+  ghostTint,
+  readGhostStyle,
+  saveGhostStyle,
+  type GhostImage,
+  type GhostStyle,
+} from './ghost';
+import { GhostControls } from './GhostControls';
+import { drawGrid, readGridVisible, saveGridVisible } from './grid';
 import { boundsOf, fitRect, pan, zoomAt, type Rect } from './view';
 
 // 無いパラメータはデフォルト値
@@ -83,24 +94,35 @@ export function CanvasHost() {
   // 透かし（I-070）: ［透かし］を押したときの形。もう一度押すか、プロジェクトを開くまで重ねる（保存しない）
   const [ghost, setGhost] = useState<DeformedModel | null>(null);
   const ghostImageRef = useRef<GhostImage | null>(null);
+  // 透かしの濃さと色（I-082。見ている人ごとの好みとして覚える）
+  const [ghostStyle, setGhostStyle] = useState(readGhostStyle);
+  const changeGhostStyle = (style: GhostStyle) => {
+    setGhostStyle(style);
+    saveGhostStyle(style);
+  };
+  // グリッドの補助線（I-077。見ている人ごとの好みとして覚える）
+  const [grid, setGrid] = useState(readGridVisible);
+  const toggleGrid = () => {
+    setGrid(!grid);
+    saveGridVisible(!grid);
+  };
 
   const activeTool: CanvasTool | undefined = snapshot.tools.find((t) => t.id === activeToolId);
   // 今のかんたん/詳細で出すツール（I-008）
-  const uiLevel = editor.uiLevel[editor.mode];
-  const tools = snapshot.tools.filter((t) => visibleAt(t.level, uiLevel));
+  const tools = snapshot.tools;
   // パーツ専用のツール（toolbar: false）はパレットのボタンから切り替えるので、ツールバーには出さない
   const toolbarTools = tools.filter((t) => t.toolbar !== false);
   const picking = pickingTarget(activeTool, project, editor) !== null;
 
   // 描くときは最新の値を使う
-  const latest = useRef({ project, editor, snapshot, activeTool, ghost });
-  latest.current = { project, editor, snapshot, activeTool, ghost };
+  const latest = useRef({ project, editor, snapshot, activeTool, ghost, ghostStyle, grid });
+  latest.current = { project, editor, snapshot, activeTool, ghost, ghostStyle, grid };
 
   const drawNow = useCallback(() => {
     scheduledRef.current = false;
     const renderer = rendererRef.current;
     if (!renderer) return;
-    const { project, editor, snapshot, activeTool, ghost } = latest.current;
+    const { project, editor, snapshot, activeTool, ghost, ghostStyle, grid } = latest.current;
     const currentView = controller.getState().view;
     let cache = cacheRef.current;
     const motion = controller.getState().motionPreview;
@@ -128,7 +150,9 @@ export function CanvasHost() {
     // 透かしの絵は、今の形より先に描いて写す（止めた形・表示・大きさが変わったときだけ）
     const main = canvasRef.current;
     ghostImageRef.current =
-      ghost && main ? ghostImage(ghostImageRef.current, ghost, currentView, main, renderer) : null;
+      ghost && main
+        ? ghostImage(ghostImageRef.current, ghost, currentView, main, renderer, ghostTint(ghostStyle.color))
+        : null;
     renderer.render(cache.deformed, currentView, { type: 'transparent' });
 
     const overlay = overlayRef.current;
@@ -137,8 +161,20 @@ export function CanvasHost() {
     const dpr = overlay.clientWidth > 0 ? overlay.width / overlay.clientWidth : 1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, overlay.width, overlay.height);
-    if (ghostImageRef.current) drawGhost(ctx, ghostImageRef.current.image, overlay.width, overlay.height);
+    if (ghostImageRef.current)
+      drawGhost(ctx, ghostImageRef.current.image, overlay.width, overlay.height, ghostStyle.opacity);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (grid) {
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#5b8def';
+      drawGrid(
+        ctx,
+        currentView,
+        overlay.width / dpr,
+        overlay.height / dpr,
+        project.assets[0]?.canvasSize ?? null,
+        accent,
+      );
+    }
     for (const o of snapshot.overlays) {
       ctx.save();
       o.draw(ctx, currentView);
@@ -170,7 +206,7 @@ export function CanvasHost() {
   useEffect(requestDraw, [motionPreview, requestDraw]);
 
   // 描画の元になるものが変わったら描き直す
-  useEffect(requestDraw, [requestDraw, project, editor, view, snapshot, activeTool, ghost]);
+  useEffect(requestDraw, [requestDraw, project, editor, view, snapshot, activeTool, ghost, ghostStyle, grid]);
   // 別のプロジェクトを開いたら（新規に作ったら）透かしを消す
   useEffect(() => onAppEvent(PROJECT_LOADED_EVENT, () => setGhost(null)), []);
 
@@ -183,12 +219,6 @@ export function CanvasHost() {
     const deformed = controller.lastDeformed();
     if (deformed) setGhost(freezeDeformed(deformed));
   };
-  // 使っているツールが今のかんたん/詳細で出ないものになったら、既定のツール（最初に出すもの）に戻す
-  const fallbackToolId = tools[0]?.id;
-  const activeHidden = activeTool !== undefined && !visibleAt(activeTool.level, uiLevel);
-  useEffect(() => {
-    if (activeHidden && fallbackToolId !== undefined) setActiveTool(fallbackToolId);
-  }, [activeHidden, fallbackToolId, setActiveTool]);
   useEffect(() => controller.onRedrawRequest(requestDraw), [controller, requestDraw]);
 
   // レンダラー
@@ -434,6 +464,9 @@ export function CanvasHost() {
           </button>
         ))}
         <span className="spacer" />
+        <button type="button" aria-pressed={grid} title="グリッドの補助線を出す・消す" onClick={toggleGrid}>
+          グリッド
+        </button>
         <button
           type="button"
           aria-pressed={ghost !== null}
@@ -456,6 +489,7 @@ export function CanvasHost() {
         data-testid="canvas-stage"
         onKeyDown={(e) => {
           if (e.code === 'Space' || controller.getState().motionPreview || !activeTool?.onKeyDown) return;
+          if (isTypingTarget(e.target) || (e.target as Element).closest?.('.ghost-hud')) return; // 透かしの濃さ・色の操作
           activeTool.onKeyDown(e.nativeEvent);
           requestDraw();
         }}
@@ -473,6 +507,13 @@ export function CanvasHost() {
           onContextMenu={(e) => e.preventDefault()}
           onAuxClick={(e) => e.preventDefault()}
         />
+        {/* 透かしの濃さと色（I-082）。透かしを出している間だけ、キャンバスの右下に出す */}
+        {ghost && (
+          <div className="ghost-hud">
+            <span className="ghost-hud-title">透かし</span>
+            <GhostControls style={ghostStyle} onChange={changeGhostStyle} />
+          </div>
+        )}
       </div>
     </div>
   );

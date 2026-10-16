@@ -1,0 +1,33 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "note": "No expected text, language hint or reference transcript supplied to ASR. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "fp32-instruct-whole.wav",
+      "sha256": "6023bfe8dc2378b296fe45dd1f3353712e99d72d7cfeaf84464f5fdac94cbd30",
+      "seconds": 4.8,
+      "expectedTranscripts": [
+        "あなたのことが大好きです。"
+      ],
+      "transcript": " 예예가 나와딴 구독, 유튜브, 구독 부탁드립니다!",
+      "contentMatch": false,
+      "recognitionSeconds": 5.97583460000169
+    },
+    {
+      "file": "fp32-icl-whole.wav",
+      "sha256": "00277b46a3290688429b69b6c4b6e822f70a1122787d8af4a713016af962a9ae",
+      "seconds": 8.8,
+      "expectedTranscripts": [
+        "あ、あなたのことが、だ、大好きです。",
+        "あなたのことが大好きです。",
+        "あなたのことが、だ、大好きです。"
+      ],
+      "transcript": " Watch out. Yeah.",
+      "contentMatch": false,
+      "recognitionSeconds": 3.691888500005007
+    }
+  ],
+  "allContentMatched": false
+}

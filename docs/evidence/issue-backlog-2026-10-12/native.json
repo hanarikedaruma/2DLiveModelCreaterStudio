@@ -1,0 +1,74 @@
+{
+  "checks": [
+    {
+      "startup": "no-recovery",
+      "questions": 0
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "nativeDropUnderToast": true,
+      "undo": true,
+      "toastClick": true,
+      "help": 5,
+      "escape": true,
+      "noProjectChanges": true
+    },
+    {
+      "width": 960,
+      "height": 600,
+      "nativeDropUnderToast": true,
+      "undo": true,
+      "toastClick": true,
+      "help": 5,
+      "escape": true,
+      "noProjectChanges": true
+    },
+    {
+      "startup": "escape",
+      "questions": 1
+    },
+    {
+      "startup": "laterEnter",
+      "questions": 1
+    },
+    {
+      "startup": "restore",
+      "questions": 1
+    },
+    {
+      "startup": "discard",
+      "questions": 1
+    },
+    {
+      "startup": "no-recovery",
+      "questions": 0
+    },
+    {
+      "realFileIO": true,
+      "realRestarts": 5,
+      "escapeRetains": true,
+      "enterUsesFocusedChoice": true,
+      "restore": true,
+      "discardAllGenerations": true,
+      "noRepeatedPrompt": true,
+      "retainedFileHashes": [
+        [
+          "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\backlog-native-1791769314695\\project.json",
+          "71fd9ac53744abab5d976f9808218608a7475ba6a093155fdb451cb3e9ff73b4"
+        ],
+        [
+          "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\backlog-native-1791769314695\\assets\\01M4PWC2KVDVMJM3B33W1JBFKA.png",
+          "f7ef260410b7c43ba786b2ecc206f53ad74b97385ea96192885528a6d83b3de4"
+        ],
+        [
+          "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\backlog-native-1791769314695\\assets\\01M4PWC3ECRQEYMEVXQ068F1KE.png",
+          "f7ef260410b7c43ba786b2ecc206f53ad74b97385ea96192885528a6d83b3de4"
+        ]
+      ]
+    }
+  ],
+  "errors": [],
+  "projectDir": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\backlog-native-1791769314695",
+  "identifier": "jp.co.globalsystems.live2dstudio.verification-20261012"
+}

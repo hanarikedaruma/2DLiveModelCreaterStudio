@@ -33,6 +33,24 @@ function setup() {
 }
 
 describe('母音と音量の合成', () => {
+  it('母音を推定できない発話は音量の口開閉へ戻す', () => {
+    let send: Parameters<AudioSource['onSamples']>[0] = () => {};
+    const producer = createLipSyncProducer({
+      audio: {
+        onSamples: (listener) => {
+          send = listener;
+          return () => {};
+        },
+      },
+      vowels: { estimate: () => ({ closed: 1, a: 0, i: 0, u: 0, e: 0, o: 0 }) },
+    });
+    const { ctx } = setup();
+    ctx.project.model.lipSync.vowels.push({ vowel: 'closed', values: { MouthOpen: 0 } });
+    for (let time = 0; time <= 100; time += 10) producer.update({ time, rmsDb: -20 });
+    send(new Float32Array(960).fill(0.1), 48000, 100);
+    expect(producer.produce(ctx).values.MouthOpen).toBeCloseTo(producer.mouthOpen());
+    expect(producer.produce(ctx).values.MouthForm).toBeUndefined();
+  });
   it('確率で形を平均し、開きは母音と音量の小さい方、形は音量で重み付けする', () => {
     const { producer, ctx } = setup();
     const layer = producer.produce(ctx);

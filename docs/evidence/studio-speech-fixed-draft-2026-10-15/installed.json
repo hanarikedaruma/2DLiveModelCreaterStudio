@@ -1,0 +1,61 @@
+{
+  "matches": true,
+  "sha256": "24DAC1932D9A296ABFC6D7BB8CA4EB794B9DE48D38689E85AACDF5F3FF6E13E2",
+  "files": [
+    {
+      "matches": true,
+      "sha256": "6350D5EC511560E7499327A089480D779A2FD73FD924A92D8708E6AF78D8787E",
+      "file": "speech.py"
+    },
+    {
+      "matches": true,
+      "sha256": "81ABD2B97471D89D115D4DFF1CD769337B60DFBDC525F9C54B2C05942FE93DC5",
+      "file": "speech_config.py"
+    },
+    {
+      "matches": true,
+      "sha256": "9AA4CC856FCD192382A57B63DCC35F85B84A3336B85198A9AF61D8491CEB4557",
+      "file": "speech_worker.py"
+    },
+    {
+      "matches": true,
+      "sha256": "22DE41693933AE121C809C9D173EE94205C8180A62E7155573EA2BFE147D2751",
+      "file": "studio_speech.py"
+    },
+    {
+      "matches": true,
+      "sha256": "F4C8D2EB8E938DFA93ABC36B53EF75FE5A3259BACE46E47C99EC10B6BEA69957",
+      "file": "speech_stream_protocol.py"
+    },
+    {
+      "matches": true,
+      "sha256": "EB6F623C90A84677CD3884822EB6987FC3283B883052F2352A53BFF505834E2A",
+      "file": "speech_stream_backend.py"
+    },
+    {
+      "matches": true,
+      "sha256": "89DE4A5BFA19C2D3EE405DD2A2C13BEE34F3BF4845C757C641D013DD791ED8B5",
+      "file": "runtime.json"
+    },
+    {
+      "matches": true,
+      "sha256": "6CEFBCC623F46905AEA8A8225F7C52057F71B9589540178866BC646970134C61",
+      "file": "speech-stream-source.json"
+    },
+    {
+      "matches": true,
+      "sha256": "C25355EE776E5A4D1904C0989FA1A4326F17B544784D2551568F10E188F90192",
+      "file": "fetch-voice-clone.py"
+    },
+    {
+      "matches": true,
+      "sha256": "D5CA2E06A6F792B35A3631786F6807F61636CE18C6CF077504FF4FAA5F01FB38",
+      "file": "setup-speech.ps1"
+    },
+    {
+      "matches": true,
+      "sha256": "CCDEABB42F47CA251415F41C62B436CB85F3BD050779CF8E39639B1914885B87",
+      "file": "host.py"
+    }
+  ]
+}

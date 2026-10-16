@@ -1,0 +1,18 @@
+{
+  "source": "Public JVS sample",
+  "bestDelaySamples": 960,
+  "bestDelayMs": 20.0,
+  "bestCorrelation": 0.993252021818829,
+  "comparisons": [
+    {
+      "alignmentSamples": 480,
+      "correlation": 0.03404232020181444,
+      "mixRms": 0.04207141065678959
+    },
+    {
+      "alignmentSamples": 960,
+      "correlation": 0.993252021818829,
+      "mixRms": 0.04844911757131142
+    }
+  ]
+}

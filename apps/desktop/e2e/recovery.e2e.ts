@@ -1,11 +1,11 @@
 // 異常終了の後の復元（カード23）: 変更して自動保存を待つ → 強制終了 → 起動し直すと復元を提案する
-import { existsSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { answerDialog, launchApp, sleep, type RunningApp } from './app';
+import { answerDialog, appDataDir, launchApp, removeTestAutosave, sleep, type RunningApp } from './app';
 
 // Tauri の appDataDir（identifier のフォルダ）
-const APP_DATA = join(process.env.APPDATA ?? '', 'jp.co.globalsystems.live2dstudio');
+let appData = '';
 
 let app: RunningApp | null = null;
 let projectId = '';
@@ -13,7 +13,7 @@ let projectId = '';
 afterAll(async () => {
   await app?.close();
   // このテストで作った自動保存を残さない（残すと次の起動で復元を聞かれる）
-  if (projectId) rmSync(join(APP_DATA, 'unsaved', projectId), { recursive: true, force: true });
+  removeTestAutosave(appData, projectId);
 });
 
 describe('異常終了の後の復元', () => {
@@ -22,6 +22,7 @@ describe('異常終了の後の復元', () => {
 
     // 1. 起動して（前の自動保存を聞かれたら断り）、プロジェクトを変える
     app = await launchApp(9334);
+    appData = await appDataDir(app.page);
     while ((await answerDialog(app.page, 'キャンセル', 2000)) !== null) {
       // 前のテストや作業の残りは復元しない
     }
@@ -32,7 +33,7 @@ describe('異常終了の後の復元', () => {
     }, name);
 
     // 2. 自動保存（最後の変更から5秒）が書かれるのを待つ
-    const backups = join(APP_DATA, 'unsaved', projectId, 'backups');
+    const backups = join(appData, 'unsaved', projectId, 'backups');
     for (
       let i = 0;
       i < 60 && !(existsSync(backups) && readdirSync(backups).some((f) => f.startsWith('autosave-')));
@@ -57,11 +58,11 @@ describe('異常終了の後の復元', () => {
       const message = (await dialog.locator('.dialog-message').textContent()) ?? '';
       expect(message).toContain('復元しますか');
       if (message.includes(name)) {
-        await dialog.getByRole('button', { name: 'OK' }).click();
+        await dialog.getByRole('button', { name: '復元する' }).click();
         restored = true;
         break;
       }
-      await dialog.getByRole('button', { name: 'キャンセル' }).click();
+      await dialog.getByRole('button', { name: '後で決める' }).click();
     }
     expect(restored).toBe(true);
     await app.page.waitForFunction((n) => window.__studio.services.store.get().name === n, name);

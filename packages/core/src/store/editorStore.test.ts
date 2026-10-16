@@ -5,7 +5,7 @@ describe('createEditorStore', () => {
   it('初期値', () => {
     expect(createEditorStore().get()).toEqual({
       mode: 'modeling',
-      uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
+
       selectedPartIds: [],
       activeParameterIds: [],
       editorParamValues: {},

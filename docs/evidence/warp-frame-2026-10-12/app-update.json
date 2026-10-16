@@ -1,0 +1,9 @@
+{
+  "updatedAt": "2026-10-12T10:29:00.962Z",
+  "built": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\release\\live2d-studio.exe",
+  "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+  "bytes": 20302336,
+  "sha256": "331d08cb4e343a5a38d80ce14a8b7f90dd7a4ba2cda08e28a1acd304457db2fb",
+  "ordinaryIdentifier": "jp.co.globalsystems.live2dstudio",
+  "productionBuild": true
+}

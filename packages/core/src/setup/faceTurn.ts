@@ -2,8 +2,8 @@
 import type { Model, Part, Vec2, Warp } from '@app/schema';
 import type { TargetDeltas } from '@app/contracts';
 import { pointsToAncestorSpace } from '../deform/space';
-import { regularWarpPoints } from '../deform/warp';
-import { rectOfPoints } from '../generate/bounds';
+import { regularWarpPoints, warpToFrame } from '../deform/warp';
+import { baseWarpAngle, warpFrameBounds } from '../deform/warpFrame';
 import { clean } from '../generate/keys';
 import { SURFACE_MAX_ANGLE, SURFACE_RADIUS_RATIO } from '../generate/surface';
 import type { BoundsOf } from './pivots';
@@ -54,9 +54,21 @@ export function withHeadWarp(model: Model, boundsOf: BoundsOf, newId: () => stri
 function withTurnWarp(model: Model, boundsOf: BoundsOf, newId: () => string, type: 'faceGroup' | 'headRoot'): Model {
   const index = indexStandardParts(model.parts);
   const group = index.group(type);
-  if (!group || model.warps.some((w) => w.partId === group.id)) return model;
   // 頭部も顔の寸法を基準にする。長い後ろ髪で回転量が増えないよう、髪の長さを半径に含めない。
   const reference = type === 'headRoot' ? (index.group('faceGroup') ?? group) : group;
+  return group && reference ? withGroupWarp(model, boundsOf, newId, group, reference) : model;
+}
+
+// group にワープが1つも無ければ、reference（group 自身か子孫のグループ）の子孫の画像パーツの外接矩形 + 余白に、
+// 4×4 の規則的な格子を足す（見た目は変わらない）。目のグループの遠近（I-067 の A8）も使う
+export function withGroupWarp(
+  model: Model,
+  boundsOf: BoundsOf,
+  newId: () => string,
+  group: Part,
+  reference: Part = group,
+): Model {
+  if (model.warps.some((w) => w.partId === group.id)) return model;
   const parts = new Map(model.parts.map((p) => [p.id, p]));
   const points: Vec2[] = [];
   for (const part of model.parts) {
@@ -64,11 +76,9 @@ function withTurnWarp(model: Model, boundsOf: BoundsOf, newId: () => string, typ
     const local = pointsToAncestorSpace(model, NO_DELTAS, part.id, group.id, basePoints(model, part, boundsOf));
     points.push(...local.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y)));
   }
-  const rect = rectOfPoints(points);
-  if (!rect) return model;
-  const mx = Math.max(rect.width * FACE_WARP_MARGIN, 1);
-  const my = Math.max(rect.height * FACE_WARP_MARGIN, 1);
-  const bounds = { x: rect.x - mx, y: rect.y - my, width: rect.width + mx * 2, height: rect.height + my * 2 };
+  const angle = baseWarpAngle(model, group.id);
+  const bounds = warpFrameBounds(points, angle, FACE_WARP_MARGIN);
+  if (!bounds) return model;
   const n = FACE_WARP_DIVISIONS;
   const warp: Warp = {
     id: newId(),
@@ -76,7 +86,8 @@ function withTurnWarp(model: Model, boundsOf: BoundsOf, newId: () => string, typ
     columns: n,
     rows: n,
     bounds,
-    points: regularWarpPoints(bounds, n, n),
+    ...(angle !== 0 ? { angle } : {}),
+    points: regularWarpPoints(bounds, n, n, angle),
   };
   return { ...model, warps: [...model.warps, warp] };
 }
@@ -111,7 +122,8 @@ export function sphereTurn(warp: Warp, valueX: number, valueY: number): Vec2[] {
   const ky = tx / phi;
   const c = Math.cos(phi);
   const s = Math.sin(phi);
-  return warp.points.map((p) => {
+  return warp.points.map((point) => {
+    const p = warpToFrame(warp, point);
     let u = (p.x - cx) / r;
     let v = (cy - p.y) / r;
     const rho = Math.hypot(u, v);
@@ -124,7 +136,10 @@ export function sphereTurn(warp: Warp, valueX: number, valueY: number): Vec2[] {
     // ロドリゲスの回転の式: p cosφ + (k × p) sinφ + k (k·p)(1 − cosφ)
     const u2 = u * c + ky * w * s + kx * dot * (1 - c);
     const v2 = v * c - kx * w * s + ky * dot * (1 - c);
-    return { x: clean(r * (u2 - u)), y: clean(-r * (v2 - v)) };
+    const dx = r * (u2 - u),
+      dy = -r * (v2 - v),
+      a = warp.angle ?? 0;
+    return { x: clean(Math.cos(a) * dx - Math.sin(a) * dy), y: clean(Math.sin(a) * dx + Math.cos(a) * dy) };
   });
 }
 

@@ -1,0 +1,21 @@
+{
+  "ms": 537.2999999970198,
+  "state": {
+    "state": "stopped",
+    "sessionId": null,
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {},
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "こんにちは。今日は何をして遊ぼうか。"
+      ],
+      "resident": true
+    }
+  }
+}

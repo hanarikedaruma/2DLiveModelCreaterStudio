@@ -23,7 +23,7 @@ export const STATUS_WORDS: Record<CellStatus, string> = { auto: '自動', correc
 // マスの状態の言葉（読み上げとツールチップ）
 export function cellStatusText(pa: Parameter, pb: Parameter, cell: GridCell, status: CellStatus): string {
   const kind = cellKind(pa, pb, cell);
-  if (kind === 'center') return '基準状態';
+  if (kind === 'center') return '既定値のキー';
   if (kind === 'axis') return `${near(cell.a, pa.default) ? pb.name : pa.name}だけ`;
   return STATUS_WORDS[status];
 }

@@ -24,19 +24,21 @@ afterEach(() => {
 });
 
 describe('STEP2 の結合', () => {
-  it('I-039: 共通の姿勢から顔・髪を個別に動かす（頭全体のワープは作らない。メッシュの無い fixture は位置のキー）', () => {
+  it('I-039・I-067: 共通の姿勢から顔・髪を個別に動かす（頭全体のワープは作らない。メッシュの無い fixture は位置のキー）', () => {
     const s = createServices();
     const before = loadProjectJson(sampleJson);
     const p = s.autoSetup.plan(before).command.apply(before);
-    expect(p.model.warps).toHaveLength(0);
+    // ワープは目のグループの遠近のものだけ（I-067）
+    const groupType = (id: string) => p.model.parts.find((q) => q.id === id)?.standardType;
+    expect(p.model.warps.map((w) => groupType(w.partId)).sort()).toEqual(['eyeGroupL', 'eyeGroupR']);
     const shiftAt30 = (type: string) => {
       const part = p.model.parts.find((q) => q.standardType === type)!;
       const turn = p.model.bindings.find((b) => b.target.id === part.id && b.parameterIds[0] === 'FaceAngleX')!;
       const key = turn.keys.find((k) => k.coords[0] === 30)!;
       return (key.delta as { position: { x: number } }).position.x;
     };
-    // 目や前髪は向きへ、後ろ髪は逆へ
-    expect(shiftAt30('irisL')).toBeGreaterThan(0);
+    // 目（目のグループ）や前髪は向きへ、後ろ髪は逆へ
+    expect(shiftAt30('eyeGroupL')).toBeGreaterThan(0);
     expect(shiftAt30('frontHair')).toBeGreaterThan(0);
     expect(shiftAt30('backHair')).toBeLessThan(0);
   });
@@ -134,11 +136,21 @@ describe('STEP2 の結合', () => {
     const project = { ...p, model: ensureStandardParameters(p.model, 'step2') };
     project.model.lipSync.vowels = STANDARD_VOWELS;
     const estimate = vi.spyOn(services.vowels, 'estimate');
-    // サンプルは無音。推定が closed なら、音量だけでは開いていた口が閉じる。
+    // 成熟した「い」の合成波形を2つの10ms窓で送り、サービスの購読と口形への合成を確認する。
+    const synthesized = audio.synthVowel({
+      sampleRate: 48000,
+      durationMs: 100,
+      f0: 130,
+      formants: [
+        { frequency: 300, bandwidth: 80 },
+        { frequency: 2300, bandwidth: 100 },
+        { frequency: 3000, bandwidth: 140 },
+      ],
+    });
     services.lipSync.update({ time: 0, rmsDb: -20 });
-    send(new Float32Array(480), 48000, 0);
+    send(synthesized.subarray(3840, 4320), 48000, 0);
     expect(estimate).not.toHaveBeenCalled();
-    send(new Float32Array(480), 48000, 10);
+    send(synthesized.subarray(4320, 4800), 48000, 10);
     expect(estimate).toHaveBeenCalledTimes(1);
     const ctx: FrameContext = {
       now: 20,
@@ -148,7 +160,7 @@ describe('STEP2 の結合', () => {
       flags: { lipSyncWeight: 1, physicsActive: true },
     };
     const layer = services.lipSync.produce(ctx) as Layer;
-    expect(layer.values.MouthOpen).toBe(0);
+    expect(layer.values.MouthOpen).toBeGreaterThan(0);
     expect(layer.blend?.MouthWidth).toBe('override');
     expect((services.lipSync as audio.AudioLipSyncProducer).vowelFrameTime()).toBe(0);
   });

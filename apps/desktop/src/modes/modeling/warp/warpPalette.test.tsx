@@ -82,8 +82,6 @@ function project(warps: Warp[] = [bodyWarp()]): Project {
   };
 }
 
-const DETAIL = { modeling: 'detail', animation: 'easy', studio: 'easy' } as const;
-
 let restoreSize: () => void = () => {};
 beforeEach(() => {
   registry.reset();
@@ -102,7 +100,7 @@ async function open(initial: Project, select: string[] = []) {
   act(() => shell.services.store.load(initial));
   await waitFor(() => expect(shell.canvas.lastDeformed()?.items.length).toBe(3));
   await waitFor(() => expect(shell.canvas.getState().view.scale).toBeCloseTo(0.54));
-  act(() => shell.services.editor.set({ selectedPartIds: select, uiLevel: DETAIL }));
+  act(() => shell.services.editor.set({ selectedPartIds: select }));
   fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
   const palette = () => within(document.querySelector<HTMLElement>('[data-panel-id="warp"]')!);
   const steps = () => Array.from(document.querySelectorAll('.warp-step')).map((li) => li.classList[1]);
@@ -116,7 +114,7 @@ describe('ワープのパレットの手順', () => {
     expect(shell.steps()).toEqual(['current', 'todo', 'todo']);
     expect(shell.palette().getByRole('note').textContent).toBe(WARP_PICK_PROMPT);
     expect(warpEditor.tool.target!.prompt).toBe(WARP_PICK_PROMPT);
-    expect(document.querySelector('[aria-current="step"]')!.textContent).toMatch(/① グループを選ぶ/);
+    expect(document.querySelector('[aria-current="step"]')!.textContent).toMatch(/① パーツを選ぶ/);
   });
 
   it('画像を押すと、格子の付いたいちばん近い祖先のグループを選び、①② に ✓ が付いて ③ がいまの段になる', async () => {
@@ -135,6 +133,8 @@ describe('ワープのパレットの手順', () => {
     expect([...choose.options].map((o) => [o.value, o.textContent])).toEqual([
       ['body', '体（格子あり）'],
       ['arm', '　腕'],
+      ['hand', '　　手'],
+      ['chest', '　胸'],
     ]);
     fireEvent.change(choose, { target: { value: 'arm' } });
     expect(shell.selected()).toEqual(['arm']);
@@ -142,18 +142,19 @@ describe('ワープのパレットの手順', () => {
     expect((shell.palette().getByRole('button', { name: 'ワープを追加' }) as HTMLButtonElement).disabled).toBe(false);
     // 腕から見た候補は、祖先の体と腕
     const again = shell.palette().getByRole('combobox', { name: '対象を変える' }) as HTMLSelectElement;
-    expect([...again.options].map((o) => o.value)).toEqual(['body', 'arm']);
+    expect([...again.options].map((o) => o.value)).toEqual(['body', 'arm', 'hand']);
   });
 
-  it('どの祖先にも格子が無ければ、いちばん近いグループを選ぶ。グループに入っていない画像は、その画像を選んでグループを作る道を出す', async () => {
+  it('祖先にも格子が無ければ、押した画像を直接追加の対象にする', async () => {
     const shell = await open(project([]));
     shell.ptr.click(HAND);
-    expect(shell.selected()).toEqual(['arm']);
+    expect(shell.selected()).toEqual(['hand']);
     // 腕の外の髪を押すと髪（グループに入っていない画像）を選び、グループを選ぶ段に戻る
     shell.ptr.click(HAIR);
     expect(shell.selected()).toEqual(['hair']);
-    expect(shell.steps()).toEqual(['current', 'todo', 'todo']);
-    expect(shell.palette().getByRole('button', { name: 'グループを作る' })).toBeTruthy();
+    expect(shell.steps()).toEqual(['done', 'current', 'todo']);
+    expect(shell.palette().queryByRole('button', { name: 'グループを作る' })).toBeNull();
+    expect((shell.palette().getByRole('button', { name: 'ワープを追加' }) as HTMLButtonElement).disabled).toBe(false);
   });
 });
 

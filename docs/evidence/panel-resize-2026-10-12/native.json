@@ -1,0 +1,303 @@
+{
+  "identifier": "jp.co.globalsystems.live2dstudio.verification-i087-20261012",
+  "profile": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\panel-resize-1791772965429",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "modes": [
+        {
+          "mode": "modeling",
+          "layout": {
+            "center": {
+              "x": 250,
+              "y": 42.400001525878906,
+              "width": 890,
+              "height": 957.6000366210938
+            },
+            "left": {
+              "x": 0,
+              "y": 42.400001525878906,
+              "width": 250,
+              "height": 957.6000366210938
+            },
+            "right": {
+              "x": 1140,
+              "y": 42.400001525878906,
+              "width": 300,
+              "height": 957.6000366210938
+            }
+          },
+          "sizes": {
+            "modeling.column.left": 250,
+            "modeling.column.right": 300,
+            "modeling.panel.assets.tray": 488,
+            "modeling.panel.mesh": 144
+          },
+          "projectUnchangedByResize": true
+        },
+        {
+          "animationStacked": false,
+          "canvas": {
+            "width": 808,
+            "height": 634
+          },
+          "stage": {
+            "x": 250,
+            "y": 80,
+            "width": 646,
+            "height": 507
+          },
+          "dpr": 1.25
+        },
+        {
+          "mode": "animation",
+          "layout": {
+            "center": {
+              "x": 250,
+              "y": 42.400001525878906,
+              "width": 890,
+              "height": 957.6000366210938
+            },
+            "left": {
+              "x": 0,
+              "y": 42.400001525878906,
+              "width": 250,
+              "height": 957.6000366210938
+            },
+            "right": {
+              "x": 1140,
+              "y": 42.400001525878906,
+              "width": 300,
+              "height": 957.6000366210938
+            }
+          },
+          "sizes": {
+            "modeling.column.left": 250,
+            "modeling.column.right": 300,
+            "modeling.panel.assets.tray": 488,
+            "modeling.panel.mesh": 144,
+            "animation.column.left": 250,
+            "animation.column.right": 300,
+            "animation.timeline.height": 413,
+            "animation.sliders.width": 244
+          },
+          "projectUnchangedByResize": true
+        },
+        {
+          "mode": "studio",
+          "layout": {
+            "center": {
+              "x": 250,
+              "y": 42.400001525878906,
+              "width": 890,
+              "height": 713.6000366210938
+            },
+            "left": {
+              "x": 0,
+              "y": 42.400001525878906,
+              "width": 250,
+              "height": 957.6000366210938
+            },
+            "right": {
+              "x": 1140,
+              "y": 42.400001525878906,
+              "width": 300,
+              "height": 957.6000366210938
+            }
+          },
+          "sizes": {
+            "modeling.column.left": 250,
+            "modeling.column.right": 300,
+            "modeling.panel.assets.tray": 488,
+            "modeling.panel.mesh": 144,
+            "animation.column.left": 250,
+            "animation.column.right": 300,
+            "animation.timeline.height": 413,
+            "animation.sliders.width": 244,
+            "studio.column.left": 250,
+            "studio.column.right": 300,
+            "studio.bottom.height": 244,
+            "studio.bottom.studioExpressions.width": 469
+          },
+          "projectUnchangedByResize": true
+        },
+        {
+          "existingModeInitialization": [
+            {
+              "field": "animations",
+              "before": 0,
+              "after": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "restart": true,
+      "remembered": {
+        "modeling.column.left": 250,
+        "modeling.column.right": 300,
+        "modeling.panel.assets.tray": 488,
+        "modeling.panel.mesh": 144,
+        "animation.column.left": 250,
+        "animation.column.right": 300,
+        "animation.timeline.height": 413,
+        "animation.sliders.width": 244,
+        "studio.column.left": 250,
+        "studio.column.right": 300,
+        "studio.bottom.height": 244,
+        "studio.bottom.studioExpressions.width": 469
+      }
+    },
+    {
+      "width": 960,
+      "height": 600,
+      "modes": [
+        {
+          "mode": "modeling",
+          "layout": {
+            "center": {
+              "x": 250,
+              "y": 42.400001525878906,
+              "width": 410,
+              "height": 557.6000366210938
+            },
+            "left": {
+              "x": 0,
+              "y": 42.400001525878906,
+              "width": 250,
+              "height": 557.6000366210938
+            },
+            "right": {
+              "x": 660,
+              "y": 42.400001525878906,
+              "width": 300,
+              "height": 557.6000366210938
+            }
+          },
+          "sizes": {
+            "modeling.column.left": 250,
+            "modeling.column.right": 300,
+            "modeling.panel.assets.tray": 276,
+            "modeling.panel.mesh": 164
+          },
+          "projectUnchangedByResize": true
+        },
+        {
+          "animationStacked": true,
+          "canvas": {
+            "width": 513,
+            "height": 186
+          },
+          "stage": {
+            "x": 250,
+            "y": 80,
+            "width": 410,
+            "height": 149
+          },
+          "dpr": 1.25
+        },
+        {
+          "mode": "animation",
+          "layout": {
+            "center": {
+              "x": 250,
+              "y": 42.400001525878906,
+              "width": 410,
+              "height": 557.6000366210938
+            },
+            "left": {
+              "x": 0,
+              "y": 42.400001525878906,
+              "width": 250,
+              "height": 557.6000366210938
+            },
+            "right": {
+              "x": 660,
+              "y": 42.400001525878906,
+              "width": 300,
+              "height": 557.6000366210938
+            }
+          },
+          "sizes": {
+            "modeling.column.left": 250,
+            "modeling.column.right": 300,
+            "modeling.panel.assets.tray": 276,
+            "modeling.panel.mesh": 164,
+            "animation.column.left": 250,
+            "animation.column.right": 300,
+            "animation.timeline.height": 253,
+            "animation.sliders.height": 118
+          },
+          "projectUnchangedByResize": true
+        },
+        {
+          "mode": "studio",
+          "layout": {
+            "center": {
+              "x": 250,
+              "y": 42.400001525878906,
+              "width": 410,
+              "height": 313.6000061035156
+            },
+            "left": {
+              "x": 0,
+              "y": 42.400001525878906,
+              "width": 250,
+              "height": 557.6000366210938
+            },
+            "right": {
+              "x": 660,
+              "y": 42.400001525878906,
+              "width": 300,
+              "height": 557.6000366210938
+            }
+          },
+          "sizes": {
+            "modeling.column.left": 250,
+            "modeling.column.right": 300,
+            "modeling.panel.assets.tray": 276,
+            "modeling.panel.mesh": 164,
+            "animation.column.left": 250,
+            "animation.column.right": 300,
+            "animation.timeline.height": 253,
+            "animation.sliders.height": 118,
+            "studio.column.left": 250,
+            "studio.column.right": 300,
+            "studio.bottom.height": 244,
+            "studio.bottom.studioExpressions.width": 210
+          },
+          "projectUnchangedByResize": true
+        },
+        {
+          "existingModeInitialization": [
+            {
+              "field": "animations",
+              "before": 0,
+              "after": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "restart": true,
+      "remembered": {
+        "modeling.column.left": 250,
+        "modeling.column.right": 300,
+        "modeling.panel.assets.tray": 276,
+        "modeling.panel.mesh": 164,
+        "animation.column.left": 250,
+        "animation.column.right": 300,
+        "animation.timeline.height": 253,
+        "animation.sliders.height": 118,
+        "studio.column.left": 250,
+        "studio.column.right": 300,
+        "studio.bottom.height": 244,
+        "studio.bottom.studioExpressions.width": 210
+      }
+    }
+  ],
+  "errors": []
+}

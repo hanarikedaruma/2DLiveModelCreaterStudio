@@ -3,6 +3,7 @@
   --bg-panel: #26282c;
   --bg-raised: #30333a;
   --bg-hover: #3a3e46;
+  --bg-title: #33363d; /* パネルの見出し（中身の --bg-panel と見分ける） */
   --border: #3d4048;
   --text: #e6e7ea;
   --text-dim: #9a9ea8;
@@ -96,16 +97,15 @@ input {
 .project-name {
   color: var(--text-dim);
 }
-.ui-level {
-  display: flex;
-  gap: 2px;
-}
-.ui-level[hidden] {
-  display: none;
-}
 
 .menu {
   position: relative;
+}
+/* 左上の ☰ */
+.menu-button {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
 }
 .menu-list {
   position: absolute;
@@ -183,6 +183,10 @@ kbd {
 .shell-area-right > .panel:not(.collapsed) {
   flex-shrink: 0;
 }
+/* 左の列も、ユーザーが高さを決めたパネルは縮めず、列全体でスクロールする。 */
+.shell-area-left > .panel.sized:not(.collapsed) {
+  flex-shrink: 0;
+}
 /* ただし高さを決めていない共通パレットの中身は窓の高さの半分までにし、超えた分は中でスクロールする。
    中身のとても多いパネル（パラメータなど）が列を占めて、ほかのパネルを列の下へ押し出さないように */
 .shell-area-right > .panel:not(.collapsed):not(.sized):not(.object) > .panel-body {
@@ -203,19 +207,50 @@ kbd {
 .panel.sized > .panel-body {
   flex: none;
 }
-/* パネルの下の境目（高さを変えるつまみ） */
-.panel-resize {
+/* 共通の境目。列の間は既定の作業エリアを変えず、境界線の上に 6px の操作帯を重ねる。 */
+.splitter {
   flex: none;
-  height: 6px;
-  margin-bottom: -1px;
-  cursor: ns-resize;
   touch-action: none;
+  user-select: none;
 }
-.panel-resize:hover,
-.panel-resize:focus-visible,
-.panel-resize.dragging {
+.splitter-y {
+  height: 6px;
+  cursor: ns-resize;
+}
+.splitter-x {
+  width: 6px;
+  cursor: ew-resize;
+}
+.panel-resize {
+  margin-bottom: -1px;
+}
+.splitter:hover,
+.splitter:focus-visible,
+.splitter.dragging {
   outline: none;
   background: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.column-boundary,
+.row-boundary {
+  position: relative;
+  flex: none;
+  z-index: 5;
+}
+.column-boundary {
+  width: 0;
+}
+.row-boundary {
+  height: 0;
+}
+.column-boundary > .splitter {
+  position: absolute;
+  left: -3px;
+  height: 100%;
+}
+.row-boundary > .splitter {
+  position: absolute;
+  top: -3px;
+  width: 100%;
 }
 .shell-area-bottom {
   flex-direction: row;
@@ -224,8 +259,17 @@ kbd {
   border-top: 1px solid var(--border);
 }
 .shell-area-bottom .panel {
+  position: relative;
   flex: 1;
+  min-width: 200px;
   border-bottom: none;
+}
+.bottom-panel-resize {
+  position: absolute;
+  right: -3px;
+  top: 0;
+  height: 100%;
+  z-index: 5;
 }
 .shell-area-bottom .panel + .panel {
   border-left: 1px solid var(--border);
@@ -238,12 +282,14 @@ kbd {
   min-height: 0;
   border-bottom: 1px solid var(--border);
 }
+/* 見出しは中身と色を分ける（中身は --bg-panel） */
 .panel-title {
   display: flex;
   align-items: center;
   margin: 0;
   font-size: 12px;
   font-weight: 600;
+  background: var(--bg-title);
   border-bottom: 1px solid var(--border);
 }
 .panel-toggle {
@@ -267,7 +313,7 @@ kbd {
 /* オブジェクトパレット（選んだパーツ・使っているツールに合わせて出るもの）。見出しに薄い色と左の線を付け、
    右端に「ツール」「パーツ」の札を出す。中身は縮めず、足りない高さは共通パレットと列のスクロールで受ける */
 .panel.object > .panel-title {
-  background: color-mix(in srgb, var(--accent) 14%, var(--bg-panel));
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-title));
   box-shadow: inset 3px 0 0 var(--accent);
 }
 .panel.object > .panel-title .panel-toggle {
@@ -305,17 +351,38 @@ kbd {
   flex: none;
   padding: 8px 10px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-raised);
+  background: var(--bg);
   font-size: 12px;
   line-height: 1.6;
 }
 .panel-info-purpose {
   margin: 0 0 4px;
+  white-space: pre-line;
 }
-.panel-info-steps {
+.panel-info-steps,
+.panel-info-uses {
   margin: 0;
   padding-left: 1.4em;
   color: var(--text-dim);
+}
+.panel-info-uses + .panel-info-steps {
+  margin-top: 4px;
+}
+.info-control {
+  min-width: 0;
+  max-width: 100%;
+}
+.info-control-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.inline-info {
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow-wrap: anywhere;
 }
 .panel-caret {
   width: 10px;
@@ -372,6 +439,57 @@ kbd {
 .canvas-toolbar > .canvas-zoom {
   flex-shrink: 0;
   white-space: nowrap;
+}
+/* 透かしの濃さと色（I-082）。透かしを出している間、キャンバスの右下に浮かせる
+   （ツールバーの幅を増やさない。上の中央の案内の帯とも重ならない） */
+.ghost-hud {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  max-width: calc(100% - 16px);
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.35);
+}
+.ghost-hud-title {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+.ghost-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.ghost-controls input[type='range'] {
+  width: 72px;
+  padding: 0;
+}
+.ghost-opacity {
+  min-width: 30px;
+  color: var(--text-dim);
+  font-size: 11px;
+  text-align: right;
+}
+.ghost-controls button.ghost-color,
+.ghost-controls button.ghost-color:hover:not(:disabled) {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--ghost-color);
+}
+.ghost-controls button.ghost-color[aria-pressed='true'] {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 .canvas-zoom {
   color: var(--text-dim);
@@ -441,6 +559,7 @@ kbd {
 }
 .dialog-buttons {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
@@ -461,23 +580,8 @@ kbd {
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.4);
   cursor: pointer;
 }
-
-/* かんたんモードで、その項目だけ詳細を開く（DetailDisclosure） */
-.detail-disclosure {
-  margin-top: 6px;
-}
-.detail-disclosure-toggle {
-  border: none;
-  background: transparent;
-  color: var(--text-dim);
-  padding: 2px 0;
-}
-.detail-disclosure-toggle:hover:not(:disabled) {
-  background: transparent;
-  color: var(--text);
-}
-.detail-disclosure-content {
-  margin-top: 4px;
-  padding-left: 12px;
-  border-left: 2px solid var(--border);
+/* 内部ドラッグ中は、通知の下の素材の割り当て枠などへ pointerup を届ける（I-075）。 */
+body.dnd-dragging .toasts,
+body.dnd-dragging .toast {
+  pointer-events: none;
 }

@@ -1,0 +1,297 @@
+{
+  "owned": [
+    {
+      "pid": 20456,
+      "started": 1792114666.918507,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--embedded-browser-webview=1",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--noerrdialogs",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--autoplay-policy=no-user-gesture-required",
+        "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection",
+        "--remote-debugging-port=9351",
+        "--lang=ja-JP",
+        "--mojo-named-platform-channel-pipe=22740.20812.13658246677981134643",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da"
+      ]
+    },
+    {
+      "pid": 23120,
+      "started": 1792114668.8815558,
+      "command": [
+        "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\.venv-quality\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "\\\\?\\C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\debug\\voice-engine\\host.py",
+        "--data",
+        "C:\\Users\\hanar\\AppData\\Roaming\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\voice",
+        "--model-root",
+        "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger"
+      ]
+    },
+    {
+      "pid": 16608,
+      "started": 1792114668.8991077,
+      "command": [
+        "\\??\\C:\\Windows\\system32\\conhost.exe",
+        "0x4"
+      ]
+    },
+    {
+      "pid": 28276,
+      "started": 1792114668.9244177,
+      "command": [
+        "C:\\Users\\hanar\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "\\\\?\\C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\debug\\voice-engine\\host.py",
+        "--data",
+        "C:\\Users\\hanar\\AppData\\Roaming\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\voice",
+        "--model-root",
+        "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger"
+      ]
+    },
+    {
+      "pid": 25264,
+      "started": 1792114676.0377865,
+      "command": [
+        "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\.venv-voice-design\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "\\\\?\\C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\debug\\voice-engine\\speech_worker.py",
+        "--cache",
+        "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-models",
+        "--stream-serve"
+      ]
+    },
+    {
+      "pid": 28784,
+      "started": 1792114676.0557215,
+      "command": [
+        "\\??\\C:\\Windows\\system32\\conhost.exe",
+        "0x4"
+      ]
+    },
+    {
+      "pid": 21944,
+      "started": 1792114676.0801537,
+      "command": [
+        "C:\\Users\\hanar\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "\\\\?\\C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\debug\\voice-engine\\speech_worker.py",
+        "--cache",
+        "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-models",
+        "--stream-serve"
+      ]
+    },
+    {
+      "pid": 4632,
+      "started": 1792114666.9745772,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=crashpad-handler",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "/prefetch:4",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da",
+        "--monitor-self-annotation=ptype=crashpad-handler",
+        "--database=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView\\Crashpad",
+        "--annotation=IsOfficialBuild=1",
+        "--annotation=channel=",
+        "--annotation=chromium-version=155.0.8059.40",
+        "--annotation=exe=C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--annotation=plat=Win64",
+        "--annotation=prod=Edge WebView2",
+        "--annotation=ver=155.0.4283.45",
+        "--initial-client-data=0x19c,0x1a0,0x1a4,0x178,0x1ac,0x7ffd845b83e0,0x7ffd845b83f0,0x7ffd845b8400"
+      ]
+    },
+    {
+      "pid": 12220,
+      "started": 1792114667.2128377,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=gpu-process",
+        "--gpu-recent-crash-count=0",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--gpu-preferences=WAAAAAAAAADgAAAEAAAAAAAAAAAAAGAAQAAAAAAAAAADAAAAAAAAADgAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAoAAAAAAAAAAgAAAAAAAAAEAAAAAIAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAA=",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=1756,i,16379328238551665303,215838432686612082,262144",
+        "--field-trial-handle=1896,i,11468039388143829928,4701164616881465016,262144",
+        "--disable-features=msPdfOOUI,msSmartScreenProtection,msWebOOUI",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1900,i,9714266871190755843,1739121979774123057,4",
+        "--trace-process-track-uuid=3190708988185955192",
+        "--mojo-platform-channel-handle=1892",
+        "/prefetch:2",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da"
+      ]
+    },
+    {
+      "pid": 24612,
+      "started": 1792114667.217247,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=network.mojom.NetworkService",
+        "--lang=ja",
+        "--service-sandbox-type=none",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=2092,i,11247832817908605787,11522207619080034409,524288",
+        "--field-trial-handle=1896,i,11468039388143829928,4701164616881465016,262144",
+        "--disable-features=msPdfOOUI,msSmartScreenProtection,msWebOOUI",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1900,i,9714266871190755843,1739121979774123057,4",
+        "--trace-process-track-uuid=3190708989122997041",
+        "--mojo-platform-channel-handle=2100",
+        "/prefetch:11",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da"
+      ]
+    },
+    {
+      "pid": 11392,
+      "started": 1792114667.2672276,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=storage.mojom.StorageService",
+        "--lang=ja",
+        "--service-sandbox-type=service",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--startup-read-main-dll",
+        "--metrics-shmem-handle=2516,i,2429079130476917751,6679722073729749898,524288",
+        "--field-trial-handle=1896,i,11468039388143829928,4701164616881465016,262144",
+        "--disable-features=msPdfOOUI,msSmartScreenProtection,msWebOOUI",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1900,i,9714266871190755843,1739121979774123057,4",
+        "--trace-process-track-uuid=3190708990060038890",
+        "--mojo-platform-channel-handle=2536",
+        "/prefetch:13",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da"
+      ]
+    },
+    {
+      "pid": 25360,
+      "started": 1792114667.37349,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=renderer",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--autoplay-policy=no-user-gesture-required",
+        "--remote-debugging-port=9351",
+        "--video-capture-use-gpu-memory-buffer",
+        "--lang=ja",
+        "--js-flags",
+        "--device-scale-factor=1.25",
+        "--num-raster-threads=4",
+        "--enable-main-frame-before-activation",
+        "--renderer-client-id=5",
+        "--js-flags=--ms-user-locale=ja_JP",
+        "--ssd-no-pressure-read-main-dll",
+        "--launch-time-ticks=86586121359",
+        "--metrics-shmem-handle=3740,i,13175720118083716938,7786291522094696248,1048576",
+        "--field-trial-handle=1896,i,11468039388143829928,4701164616881465016,262144",
+        "--disable-features=msPdfOOUI,msSmartScreenProtection,msWebOOUI",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1900,i,9714266871190755843,1739121979774123057,4",
+        "--trace-process-track-uuid=3190708990997080739",
+        "--mojo-platform-channel-handle=3784",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da",
+        "/prefetch:1"
+      ]
+    },
+    {
+      "pid": 27120,
+      "started": 1792114668.8818984,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=utility",
+        "--utility-sub-type=audio.mojom.AudioService",
+        "--lang=ja",
+        "--service-sandbox-type=audio",
+        "--video-capture-use-gpu-memory-buffer",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--skip-read-main-dll",
+        "--metrics-shmem-handle=4372,i,8799324954739015254,2979977013463244230,524288",
+        "--field-trial-handle=1896,i,11468039388143829928,4701164616881465016,262144",
+        "--disable-features=msPdfOOUI,msSmartScreenProtection,msWebOOUI",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1900,i,9714266871190755843,1739121979774123057,4",
+        "--trace-process-track-uuid=3190708991934122588",
+        "--mojo-platform-channel-handle=4364",
+        "/prefetch:12",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da"
+      ]
+    },
+    {
+      "pid": 2212,
+      "started": 1792114669.0547411,
+      "command": [
+        "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\155.0.4283.45\\msedgewebview2.exe",
+        "--type=renderer",
+        "--noerrdialogs",
+        "--user-data-dir=C:\\Users\\hanar\\AppData\\Local\\jp.co.globalsystems.live2dstudio.speech-verification-20261015\\EBWebView",
+        "--webview-exe-name=live2d-studio.exe",
+        "--webview-exe-version=0.0.0",
+        "--embedded-browser-webview=1",
+        "--embedded-browser-webview-dpi-awareness=2",
+        "--autoplay-policy=no-user-gesture-required",
+        "--remote-debugging-port=9351",
+        "--video-capture-use-gpu-memory-buffer",
+        "--lang=ja",
+        "--js-flags",
+        "--device-scale-factor=1.25",
+        "--num-raster-threads=4",
+        "--enable-main-frame-before-activation",
+        "--renderer-client-id=9",
+        "--js-flags=--ms-user-locale=ja_JP",
+        "--skip-read-main-dll",
+        "--launch-time-ticks=86587805046",
+        "--metrics-shmem-handle=4580,i,4260446496027676667,3310788398497234482,1048576",
+        "--field-trial-handle=1896,i,11468039388143829928,4701164616881465016,262144",
+        "--disable-features=msPdfOOUI,msSmartScreenProtection,msWebOOUI",
+        "--variations-seed-version",
+        "--pseudonymization-salt-handle=1900,i,9714266871190755843,1739121979774123057,4",
+        "--trace-process-track-uuid=3190708994745248135",
+        "--mojo-platform-channel-handle=4596",
+        "/pfhostedapp:f89413a1b09202a306eb18b8640682aed1fa64da",
+        "/prefetch:1"
+      ]
+    }
+  ],
+  "remaining": []
+}

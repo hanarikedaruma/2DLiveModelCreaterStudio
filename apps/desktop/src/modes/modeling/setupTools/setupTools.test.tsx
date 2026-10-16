@@ -1,14 +1,16 @@
-import { act, fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Mesh, Project, Vec2 } from '@app/schema';
-import { createAutoSetup, type ProjectStoreWithHistory } from '@app/core';
+import { mapMeshPoint, type Mesh, type Project, type Vec2 } from '@app/schema';
+import { createAutoSetup, createBindingEvaluator, createDeformPipeline, type ProjectStoreWithHistory } from '@app/core';
 import { registry } from '../../../shell/registry';
 import { register as registerAssets } from '../assets';
 import { register as registerCanvasEdit } from '../canvas';
-import { RecordingContext, openSample, pointer, renderShell, sampleProject, stubSize } from '../canvas/testUtils';
+import { RecordingContext, pointer, renderShell, sampleProject, stubSize } from '../canvas/testUtils';
 import { SELECT_TOOL_ID } from '../canvas/selectTool';
 import { CLOSED_LINE_TOOL_ID, SETUP_TOOLS_PANEL_ID, closedLineTool, register } from './index';
-import { SHORT_LINE_MESSAGE, tracingHint } from './closedLineTool';
+import { eyeDisplay, lineOnScreen, setClosedLine } from './closedLine';
+import { REPLACE_BLINK_MESSAGE } from './ClosedLinePanel';
+import { SHORT_LINE_MESSAGE } from './closedLineTool';
 
 // sample-model の画像パーツに、素材の矩形の 3×3 の格子のメッシュを付けたもの
 function sampleWithMeshes(): Project {
@@ -52,9 +54,21 @@ beforeEach(() => {
 afterEach(() => restoreSize());
 
 // 両目の白目を選んで開く（「閉じた目の線」は目のパーツを選んでいる間だけ出るパーツのパレット）
-async function open(project = sampleProject(), select = ['part-eyeWhiteL', 'part-eyeWhiteR']) {
-  const shell = renderShell(() => ({ autoSetup: createAutoSetup() }));
-  await openSample(shell, project);
+async function open(project = sampleWithMeshes(), select = ['part-eyeWhiteL', 'part-eyeWhiteR']) {
+  const setup = createAutoSetup();
+  // jsdomのfake素材は画素を持たない。画素による形の検証はcoreと実ブラウザで行う。
+  const shell = renderShell(() => ({
+    autoSetup: { ...setup, blink: (p, side) => setup.blink(p, side) },
+    evaluator: createBindingEvaluator(),
+    pipeline: createDeformPipeline(),
+  }));
+  act(() => shell.services.store.load(project));
+  await waitFor(() =>
+    expect(shell.canvas.lastDeformed()?.items.length).toBe(
+      project.model.parts.filter((p) => p.kind === 'image' && p.meshId).length,
+    ),
+  );
+  await waitFor(() => expect(shell.canvas.getState().view.scale).toBeCloseTo(0.36));
   act(() => shell.services.editor.set({ selectedPartIds: select }));
   const store = shell.services.store as ProjectStoreWithHistory;
   const panelEl = () => document.querySelector<HTMLElement>(`[data-panel-id="${SETUP_TOOLS_PANEL_ID}"]`);
@@ -77,7 +91,7 @@ const STROKE_L: Vec2[] = [
 
 describe('目のパーツのパレット', () => {
   it('目専用のツールはツールバーに無く、目のパーツを選んでいる間だけ色付きのパーツのパレットとして上に出る', async () => {
-    const shell = await open(sampleProject(), []);
+    const shell = await open(sampleWithMeshes(), []);
     const labels = toolbarButtons().map((b) => b.textContent);
     expect(labels).not.toContain('閉じた目の線をなぞる');
     expect(labels).not.toContain('閉じた線のなぞり');
@@ -105,23 +119,14 @@ describe('目のパーツのパレット', () => {
   });
 
   it('ⓘ で目的と流れを出し、もう一度押すと閉じる', async () => {
-    const shell = await open(sampleProject(), ['part-eyeWhiteL']);
+    const shell = await open(sampleWithMeshes(), ['part-eyeWhiteL']);
     const button = within(shell.panelEl()!).getByRole('button', { name: '「閉じた目の線」の説明' });
     expect(screen.queryByRole('note', { name: '「閉じた目の線」の説明' })).toBeNull();
     fireEvent.click(button);
     expect(button.getAttribute('aria-expanded')).toBe('true');
     const note = screen.getByRole('note', { name: '「閉じた目の線」の説明' });
-    expect(note.textContent).toMatch(/まばたきで目を閉じたときのまぶたの形を決める/);
-    expect(
-      within(note)
-        .getAllByRole('listitem')
-        .map((li) => li.textContent),
-    ).toEqual([
-      '目のパーツ（白目・上まぶたなど）を選ぶと、このパレットが出る',
-      '［閉じた目の線をなぞる］を押し、閉じた目のまつげの線を、目の端から端までドラッグする',
-      '［かんたんセットアップで反映］を押す',
-      'パラメータの目の開閉を動かして確かめる。直すときは［なぞり直す］。上まぶたと白目を割り当てていないと効かない',
-    ]);
+    expect(note.textContent).toContain('閉じたときのまぶたの下の端');
+    expect(note.textContent).toContain('この目のまばたきを作る');
     fireEvent.click(button);
     expect(screen.queryByRole('note', { name: '「閉じた目の線」の説明' })).toBeNull();
   });
@@ -140,14 +145,16 @@ describe('閉じた目の線のパネル', () => {
     // ツールバーのどのボタンも押されていない（パレットから使うツール）
     expect(toolbarButtons().some((b) => b.getAttribute('aria-pressed') === 'true')).toBe(false);
     expect(shell.panel().getByRole('button', { name: '目 R の線をなぞる' }).getAttribute('aria-pressed')).toBe('true');
-    expect(shell.panel().getByText(/キャンバスで目 R（画面の左）の閉じた線を/)).toBeTruthy();
+    expect(shell.panel().getByText(/キャンバスで目 R（画面の左）の閉じたときのまぶたの下の端を/)).toBeTruthy();
   });
 
-  it('なぞると、その目の線がキャンバス座標で保存され（x の昇順）、1回で Undo できる。保存したら元のツールに戻る', async () => {
+  it('なぞると、その目の線が画像上の位置で保存され（x の昇順）、1回で Undo できる。保存したら元のツールに戻る', async () => {
     const shell = await open();
     fireEvent.click(shell.panel().getByRole('button', { name: '目 L の線をなぞる' }));
     shell.ptr.drag(STROKE_L[0]!, STROKE_L[4]!, {}, 3, STROKE_L.slice(1, 4));
-    const line = shell.hints().closedLineL!;
+    const attached = shell.hints().closedLineL!;
+    expect(attached.partId).toBe('part-eyeWhiteL');
+    const line = lineOnScreen(shell.services, attached)!;
     expect(shell.hints().closedLineR).toBeNull();
     expect(line.length).toBeGreaterThan(5);
     expect(line[0]!.x).toBeCloseTo(530, 0);
@@ -171,7 +178,7 @@ describe('閉じた目の線のパネル', () => {
     const left = shell.hints().closedLineL;
     fireEvent.click(shell.panel().getByRole('button', { name: '目 R の線をなぞる' }));
     shell.ptr.drag({ x: 470, y: 486 }, { x: 340, y: 486 }, {}, 6, [{ x: 405, y: 496 }]);
-    const right = shell.hints().closedLineR!;
+    const right = lineOnScreen(shell.services, shell.hints().closedLineR!)!;
     expect(right[0]!.x).toBeCloseTo(340, 0);
     expect(right[right.length - 1]!.x).toBeCloseTo(470, 0);
     expect(right.every((p, i) => i === 0 || p.x > right[i - 1]!.x)).toBe(true);
@@ -228,7 +235,7 @@ describe('閉じた目の線のパネル', () => {
   });
 
   it('なぞっている間は、目以外を選んでもパレットを出したままにし、保存して戻ると消える', async () => {
-    const shell = await open(sampleProject(), ['part-eyeWhiteL']);
+    const shell = await open(sampleWithMeshes(), ['part-eyeWhiteL']);
     fireEvent.click(shell.panel().getByRole('button', { name: '目 L の線をなぞる' }));
     act(() => shell.services.editor.set({ selectedPartIds: ['part-torso'] }));
     expect(shell.panel().getByTestId('closed-line-state-L')).toBeTruthy();
@@ -242,52 +249,52 @@ describe('閉じた目の線のパネル', () => {
     const shell = await open();
     fireEvent.click(shell.panel().getByRole('button', { name: '目 L の線をなぞる' }));
     shell.ptr.drag(STROKE_L[0]!, STROKE_L[4]!, {}, 2);
-    const saved = shell.hints().closedLineL!;
+    const saved = lineOnScreen(shell.services, shell.hints().closedLineL!)!;
     const view = shell.canvas.getState().view;
     const ctx = new RecordingContext();
-    closedLineTool.tool.drawOverlay!(ctx.asContext(), view);
+    closedLineTool.drawSaved(ctx.asContext(), view);
     expect(ctx.named('moveTo')).toHaveLength(1);
     expect(ctx.named('lineTo')).toHaveLength(saved.length - 1);
-    expect(ctx.named('arc')).toHaveLength(2); // 両端の点
+    expect(ctx.named('arc')).toHaveLength(saved.length); // 両端の点
     const first = ctx.named('moveTo')[0]!;
     expect(first[0]).toBeCloseTo(saved[0]!.x * view.scale + view.offset.x, 3);
-    expect(ctx.texts.join('')).toBe(tracingHint('L'));
+    expect(ctx.texts).toHaveLength(0);
 
     fireEvent.click(shell.panel().getByRole('button', { name: '目 R の線をなぞる' }));
     shell.ptr.down({ x: 340, y: 486 });
     shell.ptr.move({ x: 400, y: 490 });
     const drawing = new RecordingContext();
     closedLineTool.tool.drawOverlay!(drawing.asContext(), view);
-    expect(drawing.named('moveTo')).toHaveLength(2);
+    expect(drawing.named('moveTo').length).toBeGreaterThan(2);
     shell.ptr.up({ x: 400, y: 490 });
   });
 });
 
-describe('かんたんセットアップとのつながり', () => {
-  it('なぞった線で [かんたんセットアップ] を押すと、まばたきが線に沿うキー（頂点）になる', async () => {
+describe('自動セットアップとのつながり', () => {
+  it('なぞった線で [自動セットアップ] を押すと、まばたきが線に沿うキー（頂点）になる', async () => {
     const shell = await open(sampleWithMeshes());
     fireEvent.click(shell.panel().getByRole('button', { name: '目 L の線をなぞる' }));
     shell.ptr.drag(STROKE_L[0]!, STROKE_L[4]!, {}, 3, STROKE_L.slice(1, 4));
     const assign = within(document.querySelector<HTMLElement>('[data-panel-id="assets.assign"]')!);
-    fireEvent.click(assign.getByRole('button', { name: 'かんたんセットアップ' }));
+    fireEvent.click(assign.getByRole('button', { name: '自動セットアップ' }));
     const model = shell.store.get().model;
     const lid = model.parts.find((q) => q.standardType === 'upperLidL')!;
     const blink = model.bindings.find(
       (b) => b.channel === 'vertices' && b.target.id === lid.meshId && b.parameterIds[0] === 'EyeOpenL',
     );
-    expect(blink?.keys.map((k) => k.coords[0])).toEqual([0, 1]);
+    expect(blink?.keys.map((k) => k.coords[0])).toEqual([0, 0.25, 0.5, 0.75, 1]);
     // 線の無い R は MVP の閉じ方のまま
     const lidR = model.parts.find((q) => q.standardType === 'upperLidR')!;
     expect(model.bindings.some((b) => b.channel === 'vertices' && b.target.id === lidR.meshId)).toBe(false);
-    expect(shell.store.undoLabel()).toBe('かんたんセットアップ');
+    expect(shell.store.undoLabel()).toBe('自動セットアップ');
   });
 
-  it('パレットの［かんたんセットアップで反映］は、割り当てのボタンと同じ結果になる', async () => {
+  it('パレットでは、その目のまばたきだけを1回のUndoで反映する', async () => {
     const viaAssign = await open(sampleWithMeshes());
     fireEvent.click(viaAssign.panel().getByRole('button', { name: '目 L の線をなぞる' }));
     viaAssign.ptr.drag(STROKE_L[0]!, STROKE_L[4]!, {}, 3, STROKE_L.slice(1, 4));
-    fireEvent.click(viaAssign.panel().getByRole('button', { name: 'かんたんセットアップで反映' }));
-    expect(viaAssign.store.undoLabel()).toBe('かんたんセットアップ');
+    fireEvent.click(viaAssign.panel().getByRole('button', { name: '目 L のまばたきを作る' }));
+    expect(viaAssign.store.undoLabel()).toBe('この目のまばたきを作る');
     const model = viaAssign.store.get().model;
     const lid = model.parts.find((q) => q.standardType === 'upperLidL')!;
     expect(
@@ -295,5 +302,114 @@ describe('かんたんセットアップとのつながり', () => {
         (b) => b.channel === 'vertices' && b.target.id === lid.meshId && b.parameterIds[0] === 'EyeOpenL',
       ),
     ).toBe(true);
+  });
+});
+
+describe('片目の操作の安全性（I-090）', () => {
+  it('任意の開き具合と回転の姿勢でなぞっても画像上の同じ位置に保存する', async () => {
+    const p = sampleWithMeshes();
+    const white = p.model.parts.find((p) => p.standardType === 'eyeWhiteL')!;
+    white.rotation = 8;
+    white.position = { x: 13, y: -7 };
+    white.pivot = { x: 595, y: 470 };
+    const shell = await open(p, [white.id]);
+    act(() => shell.services.editor.set({ editorParamValues: { EyeOpenL: 0.6, EyeOpenR: 0.8 } }));
+    const display = eyeDisplay(shell.services, white.id)!;
+    const uvs = [0.05, 0.27, 0.5, 0.73, 0.95].map((x) => ({ x, y: 0.82 }));
+    const points = uvs.map((uv) => mapMeshPoint(display.mesh, display.mesh.uvs, display.positions, uv)!);
+    fireEvent.click(shell.panel().getByRole('button', { name: '目 L の線をなぞる' }));
+    shell.ptr.drag(points[0]!, points.at(-1)!, {}, 3, points.slice(1, -1));
+    const line = shell.hints().closedLineL!;
+    expect(line.partId).toBe(white.id);
+    line.points.forEach((p) => expect(p.y).toBeCloseTo(0.82, 5));
+    expect(shell.services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.6, EyeOpenR: 0.8 });
+  });
+
+  it('提案した線の点だけをドラッグで変更しUndoでき、閉じ具合は作品の履歴を増やさない', async () => {
+    const shell = await open();
+    act(() =>
+      shell.store.dispatch(
+        setClosedLine('L', {
+          partId: 'part-eyeWhiteL',
+          points: [
+            { x: 0.05, y: 0.82 },
+            { x: 0.5, y: 0.82 },
+            { x: 0.95, y: 0.82 },
+          ],
+        }),
+      ),
+    );
+    const before = shell.store.get(),
+      line = shell.hints().closedLineL!;
+    fireEvent.change(shell.panel().getByRole('slider', { name: '目 L の閉じ具合' }), { target: { value: '0.45' } });
+    expect(shell.services.editor.get().editorParamValues.EyeOpenL).toBeCloseTo(0.55);
+    expect(shell.store.get()).toBe(before);
+    fireEvent.click(shell.panel().getByRole('button', { name: '目 L の線の点を動かす' }));
+    const point = lineOnScreen(shell.services, line)![1]!;
+    shell.ptr.drag(point, { x: point.x, y: point.y + 4 });
+    const after = shell.hints().closedLineL!;
+    expect(after.points[0]).toEqual(line.points[0]);
+    expect(after.points[2]).toEqual(line.points[2]);
+    expect(after.points[1]!.y).toBeGreaterThan(line.points[1]!.y);
+    act(() => shell.store.undo());
+    expect(shell.store.get()).toBe(before);
+  });
+
+  it('手修正の置き換えは取消でき、確認中に作品が変わったら再確認する', async () => {
+    const shell = await open(sampleWithMeshes(), ['part-eyeWhiteL']);
+    act(() =>
+      shell.store.dispatch(
+        setClosedLine('L', {
+          partId: 'part-eyeWhiteL',
+          points: [
+            { x: 0.05, y: 0.82 },
+            { x: 0.5, y: 0.82 },
+            { x: 0.95, y: 0.82 },
+          ],
+        }),
+      ),
+    );
+    const first = shell.services.autoSetup.blink(shell.store.get(), 'L');
+    act(() => shell.store.dispatch(first.command!));
+    const p = shell.store.get();
+    const manual = {
+      ...p,
+      model: {
+        ...p.model,
+        bindings: p.model.bindings.map((b) =>
+          b.channel === 'vertices' && b.parameterIds[0] === 'EyeOpenL'
+            ? { ...b, keys: b.keys.map((k) => ({ ...k, source: 'manual' as const, locked: true })) }
+            : b,
+        ),
+      },
+    };
+    act(() => shell.store.load(manual));
+    fireEvent.click(shell.panel().getByRole('button', { name: '目 L のまばたきを作る' }));
+    const dialog = await screen.findByRole('dialog', { name: REPLACE_BLINK_MESSAGE });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'キャンセル' }));
+    await waitFor(() =>
+      expect(shell.panel().getByRole('button', { name: '目 L のまばたきを作る' }).hasAttribute('disabled')).toBe(false),
+    );
+    expect(shell.store.get()).toBe(manual);
+    fireEvent.click(shell.panel().getByRole('button', { name: '目 L のまばたきを作る' }));
+    const second = await screen.findByRole('dialog', { name: REPLACE_BLINK_MESSAGE });
+    const changed = { ...manual, name: '確認中に更新' };
+    act(() => shell.store.load(changed));
+    fireEvent.click(within(second).getByRole('button', { name: 'OK' }));
+    const again = await screen.findByRole('dialog', { name: REPLACE_BLINK_MESSAGE });
+    expect(shell.store.get()).toBe(changed);
+    fireEvent.click(within(again).getByRole('button', { name: 'OK' }));
+    await waitFor(() => expect(shell.store.get()).not.toBe(changed));
+    expect(shell.store.get().name).toBe('確認中に更新');
+    act(() => shell.store.undo());
+    expect(shell.store.get()).toBe(changed);
+  });
+
+  it('メッシュが無い理由をパレットに出す', async () => {
+    const p = sampleWithMeshes();
+    p.model.parts.find((p) => p.standardType === 'eyeWhiteL')!.meshId = null;
+    const shell = await open(p, ['part-upperLidL']);
+    expect(shell.panel().getByText(/メッシュを先に作って/)).toBeTruthy();
+    expect(shell.panel().getByRole('button', { name: '目 L の線をなぞる' }).hasAttribute('disabled')).toBe(true);
   });
 });

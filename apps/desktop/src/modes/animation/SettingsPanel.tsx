@@ -1,10 +1,11 @@
 // 登録の設定（アニメーションの right のパネル、カード46）。選んでいるアニメーションの
 // 再生速度・ループ・影響範囲・遷移・再開始を変える（どれも1回の Undo。プロジェクトに入るので保存される）。
-// かんたん: 影響範囲は自動、遷移は 自動 / すばやく / 自然 / ゆっくり と「トラッキングに戻る」。
-// 詳細: 影響範囲をグループごとに選び、遷移の blendIn・blendOut・カーブ・合成方法・リップシンク / 物理演算の維持を変える
+// 影響範囲の自動/グループ選択、遷移のプリセット/数値・合成方法・リップシンク/物理演算の維持を表示する。
 import { useId, useState } from 'react';
+import { InfoButton } from '../../help/InfoButton';
+import { ANIMATION_HELP_IDS } from '../../help/infoTexts';
 import type { Animation, ParameterGroupId } from '@app/schema';
-import { DetailDisclosure, PanelSections, useDispatch } from '../../shell/api';
+import { PanelSections, useDispatch } from '../../shell/api';
 import { useConfirmOverwriteCustom } from '../../shell/level';
 import { updateAnimationCommand } from './commands';
 import { formatTime, groupNames, PRESET_CHOICES } from './labels';
@@ -122,7 +123,7 @@ export function AnimationSettingsPanel() {
           ? `自動（トラックのあるグループ: ${auto.length > 0 ? groupNames(model, auto) : 'まだ無い'}）`
           : `選んだグループ: ${groupNames(model, anim.affectedGroups)}`}
       </p>
-      <DetailDisclosure label="影響範囲を選ぶ">
+      <>
         <div className="anim-options">
           <label className="anim-check">
             <input
@@ -164,9 +165,25 @@ export function AnimationSettingsPanel() {
             </div>
           )}
         </div>
-      </DetailDisclosure>
+      </>
 
       <h3 className="anim-heading">遷移</h3>
+      <label className="anim-check">
+        <input
+          type="checkbox"
+          checked={t.startFromCurrent === true}
+          disabled={anim.periodic}
+          onChange={(e) => setOptions({ startFromCurrent: e.target.checked })}
+        />
+        現在の姿勢を始点にする（実験）
+      </label>
+      <InfoButton infoId={ANIMATION_HELP_IDS.startFromCurrent} />
+      {t.startFromCurrent && (
+        <p className="anim-note">
+          スタジオの再生で、今の姿勢へ記録した動きの変化量を重ねます。始まりの秒数で動き始めをなじませます。タイムラインは記録した値を表示します。
+        </p>
+      )}
+      {anim.periodic && <p className="anim-note">この実験設定は通常のアニメーション専用です。</p>}
       <div className="anim-choices" role="group" aria-label="遷移">
         {PRESET_CHOICES.map((c) => (
           <button key={c.id} type="button" aria-pressed={preset === c.id} onClick={() => choosePreset(c.id)}>
@@ -188,7 +205,7 @@ export function AnimationSettingsPanel() {
         トラッキングに戻る
       </label>
       {!t.returnToTracking && <p className="anim-note">終わったら最後の値のまま止まる（次の再生か停止で戻る）</p>}
-      <DetailDisclosure label="遷移の詳細">
+      <>
         <div className="anim-options">
           <label className="anim-field">
             <span>始まり</span>
@@ -269,7 +286,7 @@ export function AnimationSettingsPanel() {
             物理演算を維持
           </label>
         </div>
-      </DetailDisclosure>
+      </>
 
       <h3 className="anim-heading">再開始</h3>
       <div className="anim-choices" role="group" aria-label="再開始">

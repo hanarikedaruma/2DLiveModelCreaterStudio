@@ -1,0 +1,110 @@
+[
+  {
+    "threads": 4,
+    "index": 0,
+    "totalMs": 813.9148999471217,
+    "semanticMs": 117.12009995244443,
+    "regulatorMs": 15.848299954086542,
+    "diffusionMs": 160.18850007094443,
+    "vocoderMs": 479.9279000144452
+  },
+  {
+    "threads": 4,
+    "index": 1,
+    "totalMs": 281.9525001104921,
+    "semanticMs": 31.742899911478162,
+    "regulatorMs": 7.48009979724884,
+    "diffusionMs": 157.5033999979496,
+    "vocoderMs": 78.28340004198253
+  },
+  {
+    "threads": 4,
+    "index": 2,
+    "totalMs": 214.57979991100729,
+    "semanticMs": 32.13499998673797,
+    "regulatorMs": 5.24159986525774,
+    "diffusionMs": 126.98760000057518,
+    "vocoderMs": 41.8221999425441
+  },
+  {
+    "threads": 4,
+    "index": 3,
+    "totalMs": 240.71249994449317,
+    "semanticMs": 30.9387999586761,
+    "regulatorMs": 5.217100027948618,
+    "diffusionMs": 148.6340998671949,
+    "vocoderMs": 46.87080020084977
+  },
+  {
+    "threads": 4,
+    "index": 4,
+    "totalMs": 189.69749985262752,
+    "semanticMs": 21.30990009754896,
+    "regulatorMs": 3.3867999445647,
+    "diffusionMs": 117.1864999923855,
+    "vocoderMs": 42.04309987835586
+  },
+  {
+    "threads": 4,
+    "index": 5,
+    "totalMs": 236.3849999383092,
+    "semanticMs": 25.342099834233522,
+    "regulatorMs": 3.681299975141883,
+    "diffusionMs": 156.72439988702536,
+    "vocoderMs": 45.15159991569817
+  },
+  {
+    "threads": 1,
+    "index": 0,
+    "totalMs": 193.1939001660794,
+    "semanticMs": 21.62870019674301,
+    "regulatorMs": 3.736299928277731,
+    "diffusionMs": 123.72949998825788,
+    "vocoderMs": 38.28019998036325
+  },
+  {
+    "threads": 1,
+    "index": 1,
+    "totalMs": 168.90419996343553,
+    "semanticMs": 18.45470000989735,
+    "regulatorMs": 3.0165999196469784,
+    "diffusionMs": 101.49669996462762,
+    "vocoderMs": 40.09649995714426
+  },
+  {
+    "threads": 1,
+    "index": 2,
+    "totalMs": 347.07540017552674,
+    "semanticMs": 35.738500067964196,
+    "regulatorMs": 4.777000052854419,
+    "diffusionMs": 223.01570000126958,
+    "vocoderMs": 76.30559988319874
+  },
+  {
+    "threads": 1,
+    "index": 3,
+    "totalMs": 217.6838000304997,
+    "semanticMs": 28.10300001874566,
+    "regulatorMs": 5.3264000453054905,
+    "diffusionMs": 137.52260012552142,
+    "vocoderMs": 38.747200043872
+  },
+  {
+    "threads": 1,
+    "index": 4,
+    "totalMs": 161.83620016090572,
+    "semanticMs": 23.106700042262673,
+    "regulatorMs": 2.2772999946027994,
+    "diffusionMs": 98.62649999558926,
+    "vocoderMs": 32.57780009880662
+  },
+  {
+    "threads": 1,
+    "index": 5,
+    "totalMs": 172.67520003952086,
+    "semanticMs": 17.640399979427457,
+    "regulatorMs": 2.0453999750316143,
+    "diffusionMs": 99.61719997227192,
+    "vocoderMs": 46.5355000924319
+  }
+]

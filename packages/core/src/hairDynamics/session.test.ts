@@ -24,6 +24,47 @@ function run(fps: number, config = settings) {
   return frames;
 }
 describe('流れ揺れの慣性の試作', () => {
+  it('実験再生で停止すると曲がりを保持し、頭の移動へ追従して再開の瞬間も飛ばない（I-060）', () => {
+    const session = new HairDynamicsSession();
+    let moving = line();
+    for (let i = 0; i <= 30; i++)
+      moving = session.advance('g', line(i < 30 ? 0 : 25), along, 0.15, settings, 'g', '', {
+        now: (i * 1000) / 60,
+        dt: 1000 / 60,
+        frameId: i,
+        active: true,
+      }).curve;
+    expect(Math.abs(moving.at(-1)!.x - 25)).toBeGreaterThan(1);
+    const frozen = session.advance('g', line(25), along, 0.15, settings, 'g', '', {
+      now: 1000,
+      dt: 200,
+      frameId: 50,
+      active: false,
+      freeze: true,
+    });
+    frozen.curve.forEach((p, i) => {
+      expect(p.x).toBeCloseTo(moving[i]!.x, 10);
+      expect(p.y).toBeCloseTo(moving[i]!.y, 10);
+    });
+    const translated = session.advance('g', line(30), along, 0.15, settings, 'g', '', {
+      now: 2000,
+      dt: 1000,
+      frameId: 51,
+      active: false,
+      freeze: true,
+    });
+    translated.curve.forEach((p, i) => {
+      expect(p.x).toBeCloseTo(moving[i]!.x + 5, 10);
+      expect(p.y).toBeCloseTo(moving[i]!.y, 10);
+    });
+    const resumed = session.advance('g', line(30), along, 0.15, settings, 'g', '', {
+      now: 2100,
+      dt: 100,
+      frameId: 52,
+      active: true,
+    });
+    expect(resumed.curve).toEqual(translated.curve);
+  });
   it('静止線と固定区間を保ち、移動に遅れと余韻を加えて収束する', () => {
     const frames = run(60);
     expect(frames[0]!.curve).toEqual(line());

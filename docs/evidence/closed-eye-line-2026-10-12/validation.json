@@ -1,0 +1,66 @@
+{
+  "issue": "I-090",
+  "contract": "CC-022",
+  "schemaVersion": 9,
+  "decisions": ["D1A", "D2A", "D3A", "D4A", "D5A", "D6A", "D7A"],
+  "unit": {
+    "packages": 10,
+    "files": 313,
+    "tests": 2703,
+    "schema": 100,
+    "core": 699,
+    "desktop": 1379,
+    "passed": true,
+    "logs": [".cache/i090-tests.log", ".cache/i090-core-all.log"],
+    "note": "全体実行後の旧版メッシュ未生成の移行追加は、core全699件で再検証"
+  },
+  "typecheck": { "passed": true, "log": ".cache/i090-typecheck.log" },
+  "eslint": { "passed": true, "log": ".cache/i090-lint.log" },
+  "prettier": { "passed": true, "log": ".cache/i090-prettier.log" },
+  "diffCheck": { "passed": true },
+  "nativeE2e": { "files": 16, "tests": 29, "passed": true, "log": ".cache/i090-native.log" },
+  "browser": {
+    "report": "edge.json",
+    "sizes": [
+      [1440, 1000],
+      [800, 600]
+    ],
+    "errors": []
+  },
+  "native": {
+    "report": "native.json",
+    "logicalSizes": [
+      [1440, 1000],
+      [960, 600]
+    ],
+    "errors": [],
+    "roundTripProjectEqual": true
+  },
+  "modelCopy": { "report": "model-audit.json", "originalUnchanged": true, "wholeAutoSetupNotRun": true },
+  "workflow": {
+    "tracedAtEyeOpen": 0.6,
+    "uvEndpointErrorBelow": 0.0001,
+    "pointDragUndo": true,
+    "customReplacementCancelled": true,
+    "stalePlanReconfirmed": true,
+    "oneEyeScopePreserved": true
+  },
+  "poses": {
+    "faceAngleX": [-30, 0, 30],
+    "eyeOpenStep": 0.05,
+    "countPerModel": 63,
+    "finite": true,
+    "closedWhiteAndClippedIrisPixels": 0,
+    "openPixelsPresent": true
+  },
+  "app": {
+    "report": "app-update.json",
+    "installedStartup": "installed-startup.json",
+    "production": true,
+    "hashesMatch": true,
+    "started": true,
+    "debugApiAbsent": true,
+    "errors": []
+  },
+  "mainLockReleased": true
+}

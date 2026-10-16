@@ -128,7 +128,12 @@ describe('開く・新規の流れ（カード23 の ProjectActions）', () => {
     const base = createFakeServices();
     const services: Services = { ...base, fs, io: createProjectIO(fs) };
     offs.push(connectStep1Params(services.store));
-    const dialogs = { confirm: vi.fn(async () => true), prompt: vi.fn(async () => '新しい'), notify: vi.fn() };
+    const dialogs = {
+      choose: async () => null,
+      confirm: vi.fn(async () => true),
+      prompt: vi.fn(async () => '新しい'),
+      notify: vi.fn(),
+    };
     const actions = createProjectActions({
       services,
       environment: createEnvironmentStore(memoryEnvironmentStorage()),

@@ -36,9 +36,7 @@ describe('物理の画面', () => {
     expect(screen.queryByLabelText('胸：軸揺れ：ON')).toBeNull();
     expect(screen.getByLabelText('揺れパラメータ').textContent).toContain('胸揺れ 左右');
     expect(screen.getByLabelText('揺れパラメータ').textContent).toContain('胸揺れ 上下');
-    fireEvent.click(screen.getByRole('button', { name: '物理の数値' }));
     expect((screen.getByRole('spinbutton', { name: '胸の重力の強さ' }) as HTMLInputElement).value).toBe('0.3');
-    fireEvent.click(screen.getByRole('button', { name: '胸の固定範囲' }));
     expect(screen.getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' })).toBeTruthy();
     const fixedBefore = p.physics[0]!.bounce!.weights.filter((w) => w === 0).length;
     const topBand = screen.getByRole('spinbutton', { name: '固定する上端の帯' });

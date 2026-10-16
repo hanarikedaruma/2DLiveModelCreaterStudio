@@ -1,0 +1,138 @@
+{
+  "passed": false,
+  "sourceSeconds": 6.0,
+  "checks": {
+    "SeedModel": true,
+    "Composer": true,
+    "audio_processing.py": true,
+    "filter_chain.py": true,
+    "quality_voice/backend.py": true,
+    "quality_voice/worker.py": true,
+    "quality_voice/live.py": true,
+    "quality_voice/audio_processing.py": true,
+    "quality_voice/filter_chain.py": true,
+    "quality_voice/execution_lock.py": true,
+    "quality_voice/processes.py": true,
+    "quality_voice/fetch_models.py": true,
+    "quality_voice/fetch_realtime_models.py": true,
+    "quality_voice/requirements.txt": true,
+    "quality_voice/requirements-lock.txt": true
+  },
+  "comparisons": [
+    {
+      "quality": "fast",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 8640,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 25344,
+        "jitterSeconds": 0.04
+      },
+      "integratedReady": {
+        "hopFrames": 8640,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 25344,
+        "jitterSeconds": 0.04
+      },
+      "bitIdentical": false,
+      "differenceRms": 0.028680628664240822,
+      "differencePeak": 0.44863632321357727,
+      "originalMaxProcessingMs": 1784.6266999840736,
+      "integratedMaxProcessingMs": 582.0750000420958,
+      "outputPeak": 0.47153204679489136,
+      "passed": false
+    },
+    {
+      "quality": "balanced",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 11520,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 31104,
+        "jitterSeconds": 0.04
+      },
+      "integratedReady": {
+        "hopFrames": 11520,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 31104,
+        "jitterSeconds": 0.04
+      },
+      "bitIdentical": false,
+      "differenceRms": 0.023249990272103248,
+      "differencePeak": 0.45207925513386726,
+      "originalMaxProcessingMs": 649.1181999444962,
+      "integratedMaxProcessingMs": 585.8327001333237,
+      "outputPeak": 0.7208333015441895,
+      "passed": false
+    },
+    {
+      "quality": "stable",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 14400,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 36864,
+        "jitterSeconds": 0.04
+      },
+      "integratedReady": {
+        "hopFrames": 14400,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 36864,
+        "jitterSeconds": 0.04
+      },
+      "bitIdentical": false,
+      "differenceRms": 0.022091467228730788,
+      "differencePeak": 0.30740849673748016,
+      "originalMaxProcessingMs": 656.0619999654591,
+      "integratedMaxProcessingMs": 826.2267999816686,
+      "outputPeak": 0.7232630252838135,
+      "passed": false
+    },
+    {
+      "quality": "hq",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 144000,
+        "lookaheadFrames": 12288,
+        "minimumCaptureFrames": 300288,
+        "jitterSeconds": 1.0
+      },
+      "integratedReady": {
+        "hopFrames": 144000,
+        "lookaheadFrames": 12288,
+        "minimumCaptureFrames": 300288,
+        "jitterSeconds": 1.0
+      },
+      "bitIdentical": true,
+      "differenceRms": 0.0,
+      "differencePeak": 0.0,
+      "originalMaxProcessingMs": 3227.150799939409,
+      "integratedMaxProcessingMs": 2222.552599851042,
+      "outputPeak": 0.5119539499282837,
+      "passed": true
+    },
+    {
+      "quality": "hqQuality",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 144000,
+        "lookaheadFrames": 12288,
+        "minimumCaptureFrames": 300288,
+        "jitterSeconds": 1.0
+      },
+      "integratedReady": {
+        "hopFrames": 144000,
+        "lookaheadFrames": 12288,
+        "minimumCaptureFrames": 300288,
+        "jitterSeconds": 1.0
+      },
+      "bitIdentical": true,
+      "differenceRms": 0.0,
+      "differencePeak": 0.0,
+      "originalMaxProcessingMs": 2896.6497001238167,
+      "integratedMaxProcessingMs": 3626.1082999408245,
+      "outputPeak": 0.4406794309616089,
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "alignment": [
+    {
+      "strength": 0.4,
+      "sourceFrames": 414240,
+      "outputFrames": 413280,
+      "alignmentSamples": 960,
+      "mixedMatchesCorrectlyAlignedReference": true,
+      "differencePeak": 0.0
+    },
+    {
+      "strength": 0.5,
+      "sourceFrames": 414240,
+      "outputFrames": 413280,
+      "alignmentSamples": 960,
+      "mixedMatchesCorrectlyAlignedReference": true,
+      "differencePeak": 0.0
+    },
+    {
+      "strength": 0.85,
+      "sourceFrames": 414240,
+      "outputFrames": 413280,
+      "alignmentSamples": 960,
+      "mixedMatchesCorrectlyAlignedReference": true,
+      "differencePeak": 0.0
+    },
+    {
+      "strength": 1.0,
+      "sourceFrames": 414240,
+      "outputFrames": 413280,
+      "alignmentSamples": 960,
+      "mixedMatchesCorrectlyAlignedReference": true,
+      "differencePeak": 0.0
+    }
+  ],
+  "frequencyResponse": [
+    {
+      "tone": {},
+      "hz": 200,
+      "toneGainDb": 0.0,
+      "toneAndStockFiltersGainDb": -6.47772769231414e-07
+    },
+    {
+      "tone": {},
+      "hz": 1000,
+      "toneGainDb": 0.0,
+      "toneAndStockFiltersGainDb": -0.692072798104137
+    },
+    {
+      "tone": {},
+      "hz": 3000,
+      "toneGainDb": 0.0,
+      "toneAndStockFiltersGainDb": -0.9721061673264839
+    },
+    {
+      "tone": {},
+      "hz": 6000,
+      "toneGainDb": 0.0,
+      "toneAndStockFiltersGainDb": -1.0213320083264954
+    },
+    {
+      "tone": {
+        "bodyDb": 3,
+        "softnessDb": 6
+      },
+      "hz": 200,
+      "toneGainDb": -0.5002153559684476,
+      "toneAndStockFiltersGainDb": -0.5002160313314253
+    },
+    {
+      "tone": {
+        "bodyDb": 3,
+        "softnessDb": 6
+      },
+      "hz": 1000,
+      "toneGainDb": -2.9783912451478707,
+      "toneAndStockFiltersGainDb": -3.6704639936572625
+    },
+    {
+      "tone": {
+        "bodyDb": 3,
+        "softnessDb": 6
+      },
+      "hz": 3000,
+      "toneGainDb": -3.230102281629837,
+      "toneAndStockFiltersGainDb": -4.202208276311911
+    },
+    {
+      "tone": {
+        "bodyDb": 3,
+        "softnessDb": 6
+      },
+      "hz": 6000,
+      "toneGainDb": -5.486998538284046,
+      "toneAndStockFiltersGainDb": -6.395890961958891
+    }
+  ],
+  "notAPhonemeOrSubjectiveQualityTest": true
+}

@@ -262,7 +262,6 @@ describe('組み合わせの補正の格子', () => {
     // 詳細では補正のキーはロックしない
     const editor = editorWith({
       ...cellPatch(smile, open, cell),
-      uiLevel: { ...defaultEditorState().uiLevel, modeling: 'detail' },
     });
     const command = keyEditor.pointsEdit(project, editor, { kind: 'mesh', meshId: 'm-eye' }, [
       { index: 0, d: { x: 0, y: -2 } },
@@ -273,7 +272,7 @@ describe('組み合わせの補正の格子', () => {
     expect(b!.parameterIds).toEqual(['EyeSmileL', 'EyeOpenL']);
     expect(b!.keys.find((k) => k.coords[0] === 1 && k.coords[1] === 0)).toMatchObject({
       source: 'manual',
-      locked: false,
+      locked: true,
     });
     expect(cellStatus(edited, pair, cell)).toBe('corrected');
     // 逆の組でも同じバインディングを見る

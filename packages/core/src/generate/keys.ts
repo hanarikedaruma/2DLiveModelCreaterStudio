@@ -64,6 +64,34 @@ export function sortKeys(keys: readonly ParameterKey[]): ParameterKey[] {
   return [...keys].sort((p, q) => keyCoord(p) - keyCoord(q));
 }
 
+// I-072: 作り直すときの手で直した既定値の補正。バインディングの軸順で探す
+export function defaultKey(binding: Binding | undefined, defaults: readonly number[]): ParameterKey | undefined {
+  return binding?.keys.find(
+    (k) =>
+      (k.source === 'manual' || k.locked) &&
+      k.coords.length === defaults.length &&
+      k.coords.every((v, i) => sameCoord(v, defaults[i]!)),
+  );
+}
+
+// 自動で作る形に既定値の補正を重ねる。残す手動キーには掛けない。不透明度は I-026 の規則を保つ
+export function withDefaultOffset(
+  delta: ParameterKey['delta'],
+  offset: ParameterKey['delta'] | undefined,
+): ParameterKey['delta'] {
+  if (!offset) return delta;
+  if (Array.isArray(delta) && Array.isArray(offset)) {
+    return delta.map((p, i) => ({ x: p.x + (offset[i]?.x ?? 0), y: p.y + (offset[i]?.y ?? 0) }));
+  }
+  if (Array.isArray(delta) || Array.isArray(offset)) return delta;
+  return {
+    position: { x: delta.position.x + offset.position.x, y: delta.position.y + offset.position.y },
+    rotation: delta.rotation + offset.rotation,
+    scale: { x: delta.scale.x * offset.scale.x, y: delta.scale.y * offset.scale.y },
+    opacity: delta.opacity,
+  };
+}
+
 // 昇順で重なりの無い値の列
 export function sortedUnique(values: readonly number[]): number[] {
   const out: number[] = [];
@@ -102,6 +130,7 @@ export interface RebuildInput {
   // keys の opacity でパーツ自身の不透明度を決める（I-026）。既存が不透明度のバインディングなら false でもそのまま
   controlsOpacity?: boolean;
   opacityBase?: number; // パーツの Part.opacity。不透明度のバインディングに、不透明度を決めないキーを足すときの値
+  defaultCoord?: number; // パラメータの既定値。手で直した形を新しい自動キーにも重ねる（I-072）
 }
 
 // 1パラメータの transform バインディングを作り直す。keep のキーは残し、同じ位置には新しいキーを作らない。
@@ -109,14 +138,20 @@ export interface RebuildInput {
 export function rebuildTransformBinding(input: RebuildInput): Binding {
   const { existing } = input;
   const controls = input.controlsOpacity === true || existing?.controlsOpacity === true;
-  let kept = existing ? existing.keys.filter(input.keep) : [];
+  const origin = input.defaultCoord === undefined ? undefined : defaultKey(existing, [input.defaultCoord]);
+  let kept = existing ? existing.keys.filter((k) => input.keep(k) || (k === origin && k.source === 'manual')) : [];
   // 不透明度のバインディングにするとき、残すキーの opacity（使っていなかった値）は計画のキーから補間する
   if (input.controlsOpacity && existing && !existing.controlsOpacity) {
     kept = kept.map((k) => withOpacity(k, opacityOfSpecs(input.keys, keyCoord(k))));
   }
   const fresh: ParameterKey[] = input.keys
     .filter((spec) => !kept.some((k) => sameCoord(keyCoord(k), spec.coord)))
-    .map((spec): ParameterKey => ({ coords: [spec.coord], delta: spec.delta, source: 'auto', locked: false }))
+    .map((spec): ParameterKey => ({
+      coords: [spec.coord],
+      delta: withDefaultOffset(spec.delta, origin?.delta),
+      source: 'auto',
+      locked: false,
+    }))
     // 不透明度を決めない計画のキーは、不透明度のバインディングでは基準値のまま（変化なし）にする
     .map((k) => (controls && !input.controlsOpacity ? withOpacity(k, input.opacityBase ?? 1) : k));
   const keys = sortKeys([...kept, ...fresh]);

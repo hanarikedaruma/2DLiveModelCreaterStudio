@@ -7,6 +7,11 @@ import { studioRuntime, useStudioRuntime } from './runtime';
 import { CameraCaptureSettings } from './CameraCaptureSettings';
 
 export const STUDIO_SETTINGS_PANEL = 'studioSettings';
+export const STUDIO_AUDIO_PANEL = 'studioAudio';
+
+export function StudioAudioPanel() {
+  return <PanelSections panelId={STUDIO_AUDIO_PANEL} />;
+}
 
 function errorText(e: unknown): string {
   return e instanceof Error ? e.message : String(e);

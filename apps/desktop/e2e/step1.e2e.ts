@@ -9,9 +9,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Environment } from '@app/schema';
-import { answerDialog, launchApp, ROOT, sleep, slash, type RunningApp } from './app';
+import { answerDialog, appDataDir, launchApp, removeTestAutosave, ROOT, sleep, slash, type RunningApp } from './app';
 
-const APP_DATA = join(process.env.APPDATA ?? '', 'jp.co.globalsystems.live2dstudio');
+let appData = '';
 
 let app: RunningApp | null = null;
 let workDir = '';
@@ -43,6 +43,7 @@ function workstationLocked(): boolean {
 
 beforeAll(async () => {
   app = await launchApp(9338);
+  appData = await appDataDir(app.page);
   while ((await answerDialog(app.page, 'キャンセル', 2000)) !== null) {
     // 前の作業の残りは復元しない
   }
@@ -76,7 +77,7 @@ afterAll(async () => {
   }
   await app?.close();
   if (workDir) rmSync(workDir, { recursive: true, force: true });
-  if (projectId) rmSync(join(APP_DATA, 'unsaved', projectId), { recursive: true, force: true });
+  removeTestAutosave(appData, projectId);
 });
 
 describe('STEP1 の結合', () => {
@@ -281,6 +282,10 @@ describe('STEP1 の結合', () => {
       const off = s.audio.onLevel(() => levels++);
       try {
         await s.audio.start(devices[0]!.id);
+        // start はキャプチャの構築完了。最初の波形が届いてから定常時の1秒を測る。
+        const readyDeadline = performance.now() + 5000;
+        while (levels === 0 && performance.now() < readyDeadline) await new Promise((r) => setTimeout(r, 10));
+        if (levels === 0) throw new Error('5秒以内にマイクの音量が届かない');
         levels = 0;
         await new Promise((r) => setTimeout(r, 1000));
         return { devices: devices.length, levels, error: null };

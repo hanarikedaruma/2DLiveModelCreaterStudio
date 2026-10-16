@@ -49,8 +49,6 @@ export function editorAt(values: Record<string, number>, patch: Partial<EditorSt
   };
 }
 
-export const DETAIL: Partial<EditorState> = { uiLevel: { modeling: 'detail', animation: 'easy', studio: 'easy' } };
-
 export function delta(patch: Partial<TransformDelta> = {}): TransformDelta {
   return { position: { x: 0, y: 0 }, rotation: 0, scale: { x: 1, y: 1 }, opacity: 1, ...patch };
 }

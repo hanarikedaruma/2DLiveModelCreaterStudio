@@ -31,11 +31,11 @@ async function open() {
 }
 
 describe('流れ線のパレット', () => {
-  it('線で曲げるツールのときだけ、色付きのツールのパレットとして右の列の上に出る。ⓘ で目的と流れを出す', async () => {
+  it('流線で曲げるツールのときだけ、色付きのツールのパレットとして右の列の上に出る。ⓘ で目的と流れを出す', async () => {
     const shell = await open();
     act(() => shell.services.editor.set({ selectedPartIds: ['hair'] }));
     expect(shell.panelEl()).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: '線で曲げる' }));
+    fireEvent.click(screen.getByRole('button', { name: '流線で曲げる' }));
     const el = shell.panelEl()!;
     expect(el.classList.contains('object')).toBe(true);
     expect(el.getAttribute('data-object')).toBe('tool');
@@ -51,7 +51,7 @@ describe('流れ線のパレット', () => {
 
   it('髪を選ばずにツールにすると、キャンバスで押した髪を選ぶ（何も無い所では選ばない）。右クリックで外せる', async () => {
     const shell = await open();
-    fireEvent.click(screen.getByRole('button', { name: '線で曲げる' }));
+    fireEvent.click(screen.getByRole('button', { name: '流線で曲げる' }));
     expect(CURVE_PICK_PROMPT).toMatch(/クリックして選ぶ/);
     shell.ptr.click(EMPTY);
     expect(shell.selected()).toEqual([]);

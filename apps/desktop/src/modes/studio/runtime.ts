@@ -4,6 +4,7 @@ import { useMemo, useSyncExternalStore } from 'react';
 import {
   LAYER_ORDER,
   type Background,
+  type AnimationStartPose,
   type DeformedModel,
   type Layer,
   type LayerProducer,
@@ -112,6 +113,7 @@ export function createStudioRuntime(
   let override: ModelTransform | null = null;
   let lastNow: number | null = null;
   let last: StudioFrame | null = null;
+  let previousAnimationPose: AnimationStartPose | null = null;
   let state: StudioRuntimeState = { running: false, status: 'stopped' };
   const listeners = new Set<() => void>();
   // 同じ producer・sink の例外は1回だけ知らせる（毎フレーム出さない）
@@ -172,40 +174,70 @@ export function createStudioRuntime(
     if (hairProject !== project && !s.store.canUndo()) {
       hairSession.reset();
       s.physics.reset();
+      previousAnimationPose = null;
     }
     hairProject = project;
     const dt = lastNow === null ? 0 : Math.max(0, now - lastNow);
+    if (lastNow !== null && now < lastNow) previousAnimationPose = null;
     lastNow = now;
     const { parameters } = project.model;
     const flags = { lipSyncWeight: 1, physicsActive: true }; // 前のレイヤーが書き換えて後のレイヤーへ伝える
     const frameId = ++hairFrameId;
     const layers: Layer[] = [];
     let mixedSoFar = s.mixer.mix(parameters, []);
+    let animationValues = { ...mixedSoFar };
+    const lipSyncOffsets: ParamValues = {},
+      physicsOffsets: ParamValues = {};
     for (const p of ordered()) {
       let produced: Layer | Layer[] | null;
       try {
-        produced = p.produce({ now, dt, frameId, project, mixedSoFar, flags, layersSoFar: [...layers] });
+        produced = p.produce({
+          now,
+          dt,
+          frameId,
+          project,
+          mixedSoFar,
+          flags,
+          layersSoFar: [...layers],
+          previousAnimationPose,
+        });
       } catch (e) {
         report(p, `レイヤー（${p.id}）`, e);
         continue;
       }
       // 配列なら配列の順に合成する（カード45）
       const added = produced === null ? [] : Array.isArray(produced) ? produced : [produced];
-      if (added.length === 0) continue;
-      layers.push(...added);
-      mixedSoFar = s.mixer.mix(parameters, [...layers]);
+      const before = mixedSoFar;
+      if (added.length) {
+        layers.push(...added);
+        mixedSoFar = s.mixer.mix(parameters, [...layers]);
+      }
+      if (LAYER_ORDER.indexOf(p.id) <= LAYER_ORDER.indexOf('animation')) animationValues = { ...mixedSoFar };
+      const offsets = p.id === 'lipSync' ? lipSyncOffsets : p.id === 'physics' ? physicsOffsets : null;
+      if (offsets)
+        for (const id of new Set(added.flatMap((layer) => Object.keys(layer.values)))) {
+          if (Number.isFinite(before[id]) && Number.isFinite(mixedSoFar[id]))
+            offsets[id] = (offsets[id] ?? 0) + mixedSoFar[id]! - before[id]!;
+        }
     }
     const params = mixedSoFar;
     const model = hairFrames(s).evaluate(
       project,
       params,
-      { now, dt, frameId, active: flags.physicsActive },
+      {
+        now,
+        dt,
+        frameId,
+        active: flags.physicsActive,
+        ...('freezePhysics' in flags ? { freeze: flags.freezePhysics === true } : {}),
+      },
       hairSession,
     );
     const view = outputView(modelRect(project), override ?? sceneModelTransform(project), outputSize);
     const background = backgrounds.resolve(sceneBackground(project));
     const frame: StudioFrame = { model, view, background, params, now, layers: [...layers] };
     last = frame;
+    previousAnimationPose = { projectId: project.id, values: animationValues, lipSyncOffsets, physicsOffsets };
     if (preview) {
       try {
         preview(frame);
@@ -267,6 +299,7 @@ export function createStudioRuntime(
         hairSession.reset();
         override = null;
         last = null;
+        previousAnimationPose = null;
         lastNow = null;
       }
       attachments += 1;
@@ -278,6 +311,7 @@ export function createStudioRuntime(
         attached = false;
         attachments -= 1;
         if (attachments === 0) {
+          previousAnimationPose = null;
           hairSession.reset();
           cancelFrame?.();
           cancelFrame = null;

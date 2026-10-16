@@ -161,9 +161,9 @@ describe('モデリングの「表情」パネル', () => {
     expect(store.get().expressions).toEqual([]);
   });
 
-  it('詳細モード: グループごとに「トラッキングに重ねる / 固定する」を選ぶと、その blend で登録する', () => {
-    const { store, editor } = setup();
-    act(() => editor.set({ uiLevel: { ...editor.get().uiLevel, modeling: 'detail' } }));
+  it('グループごとに「トラッキングに重ねる / 固定する」を選ぶと、その blend で登録する', () => {
+    const { store } = setup();
+
     click('新しい表情');
     slide('顔 左右', 12);
     slide('目 開閉 L', 0.6);
@@ -192,11 +192,9 @@ describe('モデリングの「表情」パネル', () => {
     expect(brow.getByRole('button', { name: 'トラッキングに重ねる' }).getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('かんたんモードでは2択を出さない（詳細を開けば選べる）', () => {
+  it('合成方法は最初から表示する', () => {
     setup();
     click('新しい表情');
-    expect(panel().queryByRole('group', { name: '目の合成方法' })).toBeNull();
-    click('合成方法');
     expect(panel().getByRole('group', { name: '目の合成方法' })).toBeTruthy();
   });
 

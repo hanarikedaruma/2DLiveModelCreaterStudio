@@ -31,7 +31,7 @@ import {
   type Renderer,
   type Services,
 } from '@app/contracts';
-import { createAudioSource, createLipSyncProducer, createVowelEstimator } from '@app/audio';
+import { createAudioSource, createLipSyncProducer, createVowelEstimator, createPlaybackAudioRouter } from '@app/audio';
 import {
   createAutoBlink,
   createAnimationPlayer,
@@ -56,6 +56,7 @@ import { createSpoutSink } from './output/spout/sink';
 import { appConfigDirPath, isTauri } from './platform/tauri';
 import { TauriFileSystem } from './platform/tauriFs';
 import { createKeyEditor } from './services/keyEditor';
+import { createVoiceService, createFakeVoiceService } from './services/voice/service';
 import { createProjectTrackingLayer } from './services/trackingLayer';
 import {
   createEnvironmentStore,
@@ -108,7 +109,12 @@ export function createServices(): Services {
   };
   // 自動まばたき。スタジオの実行部の自動の層（STEP3 のカード66）が、目の値がカメラから来ていない間に使う
   const autoBlink = createAutoBlink();
-  const audio = createAudioSource();
+  const voice = createVoiceService();
+  const playback = createPlaybackAudioRouter(createAudioSource(), voice, {
+    offsetMs: () => store.get().studio.voice?.syncOffsetMs ?? 0,
+    linked: () => store.get().studio.voice?.mouthLinked ?? true,
+  });
+  const audio = playback.audio;
   const vowels = createVowelEstimator();
   return {
     store,
@@ -136,7 +142,8 @@ export function createServices(): Services {
     ),
     // STEP1（カード44で本物に差し替えた）
     audio,
-    lipSync: createLipSyncProducer({ audio, vowels }),
+    voice,
+    lipSync: playback.wrap(createLipSyncProducer({ audio, vowels })),
     autoBlink,
     bodyFollow: createBodyFollowProducer(),
     expressions: createExpressionController(),
@@ -200,6 +207,7 @@ export function createFakeServices(): Services {
     trackingLayer: new FakeTrackingLayer(),
     ...createStep1FakeServices(),
     ...createStep2FakeServices(),
+    voice: createFakeVoiceService(),
   };
 }
 

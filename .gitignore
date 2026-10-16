@@ -15,3 +15,9 @@ apps/desktop/src-tauri/gen/schemas/
 # 別作業で作ったローカルのモデルと一時生成用スクリプト（カード55）
 /projects/
 /fixtures/scripts/build-desktop-character.ts
+tools/voice-engine/runtime.json
+tools/voice-engine/**/__pycache__/
+tools/build/
+
+# アプリが保存時に作るローカルの自動バックアップ
+/fixtures/sample-model/backups/

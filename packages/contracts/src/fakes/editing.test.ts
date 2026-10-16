@@ -5,7 +5,7 @@ import { FakeAutoSetup, FakeKeyEditor, FakeKeyGenerator, FakeMeshGenerator } fro
 
 const editor: EditorState = {
   mode: 'modeling',
-  uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
+
   selectedPartIds: [],
   activeParameterIds: ['FaceAngleX'],
   editorParamValues: { FaceAngleX: 30 },

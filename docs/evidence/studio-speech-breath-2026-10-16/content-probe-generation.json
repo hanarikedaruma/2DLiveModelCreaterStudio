@@ -1,0 +1,20 @@
+[
+  {
+    "file": "fp32-instruct-whole.wav",
+    "text": "あなたのことが大好きです。",
+    "tokenizerRoundTrip": "あなたのことが大好きです。",
+    "precision": "fp32",
+    "stream": false,
+    "generationSeconds": 8.05665999998746,
+    "seconds": 4.8
+  },
+  {
+    "file": "fp32-icl-whole.wav",
+    "text": "あ、あなたのことが、だ、大好きです。",
+    "tokenizerRoundTrip": "あ、あなたのことが、だ、大好きです。",
+    "precision": "fp32",
+    "stream": false,
+    "generationSeconds": 15.367049300009967,
+    "seconds": 8.8
+  }
+]

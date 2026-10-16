@@ -19,6 +19,27 @@ async function answerConfirm(ok: boolean) {
 }
 
 describe('登録の設定', () => {
+  it('現在の姿勢からの実験設定をUndo・プリセット切替・保存後の再読込で保つ（I-060）', async () => {
+    const s = setupAnimationScreen(step1Project([sampleAnimationData()]));
+    const box = () =>
+      s.settings().getByRole('checkbox', { name: '現在の姿勢を始点にする（実験）' }) as HTMLInputElement;
+    expect(box().checked).toBe(false);
+    s.click(box());
+    expect(s.animation().transition.startFromCurrent).toBe(true);
+    expect(s.settings().getByText(/タイムラインは記録した値/)).toBeTruthy();
+    act(() => s.store.undo());
+    expect(box().checked).toBe(false);
+    act(() => s.store.redo());
+    s.click(s.settings().getByRole('button', { name: 'ゆっくり' }));
+    expect(s.animation().transition.startFromCurrent).toBe(true);
+    const io = createProjectIO(new MemoryFileSystem()),
+      p = s.store.get();
+    await io.save('/i060', p, {});
+    const loaded = await io.load('/i060');
+    expect(loaded.project.schemaVersion).toBe(11);
+    expect(loaded.project.animations[0]!.transition.startFromCurrent).toBe(true);
+    expect(loaded.project.animations[0]!.tracks).toEqual(p.animations[0]!.tracks);
+  });
   it('アニメーションが無ければそう出す', () => {
     const { settings } = setupAnimationScreen();
     expect(settings().getByText('アニメーションを選ぶと設定できる')).toBeTruthy();
@@ -47,7 +68,7 @@ describe('登録の設定', () => {
     expect(s.animation().speed).toBe(1);
   });
 
-  it('かんたん: 遷移は 自動 / すばやく / 自然 / ゆっくり と「トラッキングに戻る」。詳細の項目は出さない', () => {
+  it('遷移のプリセットと「トラッキングに戻る」を選べ、数値と合成方法も常に表示する', () => {
     const s = setupAnimationScreen(step1Project([sampleAnimationData()]));
     expect(pressed(s.settings(), '遷移')).toEqual(['自動']);
     s.click(s.settings().getByRole('button', { name: 'ゆっくり' }));
@@ -60,16 +81,13 @@ describe('登録の設定', () => {
     s.click(s.settings().getByRole('checkbox', { name: 'トラッキングに戻る' }));
     expect(s.animation().transition.returnToTracking).toBe(false);
 
-    expect(s.settings().queryByRole('spinbutton', { name: '始まりの遷移（blendIn、秒）' })).toBeNull();
-    expect(s.settings().queryByRole('group', { name: '合成方法' })).toBeNull();
-    // 「遷移の詳細」を開けば変えられる
-    s.click(s.settings().getByRole('button', { name: /遷移の詳細/ }));
+    expect(s.settings().getByRole('group', { name: '合成方法' })).toBeTruthy();
     expect(s.settings().getByRole('spinbutton', { name: '始まりの遷移（blendIn、秒）' })).toBeTruthy();
   });
 
   it('詳細: blendIn・blendOut・カーブ・合成方法・リップシンクを維持・物理演算を維持', () => {
     const s = setupAnimationScreen(step1Project([sampleAnimationData()]));
-    s.setLevel('detail');
+
     s.enter(s.settings(), '始まりの遷移（blendIn、秒）', 0.5);
     s.enter(s.settings(), '終わりの遷移（blendOut、秒）', 1.2);
     s.click(s.settings().getByRole('button', { name: '線形' }));
@@ -98,7 +116,7 @@ describe('登録の設定', () => {
 
   it('カスタムのときにプリセットを選ぶと上書きを確かめる。キャンセルならそのまま', async () => {
     const s = setupAnimationScreen(step1Project([sampleAnimationData()]));
-    s.setLevel('detail');
+
     s.enter(s.settings(), '始まりの遷移（blendIn、秒）', 0.5);
     s.click(s.settings().getByRole('button', { name: 'すばやく' }));
     await answerConfirm(false);
@@ -112,13 +130,12 @@ describe('登録の設定', () => {
     expect(s.animation().transition.preset).toBe('slow');
   });
 
-  it('影響範囲: かんたんは自動（トラックのあるグループ）。詳細はグループごとに選び、すべて外すと自動', () => {
+  it('影響範囲: 自動からグループごとに選べ、すべて外すと自動', () => {
     const s = setupAnimationScreen(step1Project([sampleAnimationData()]));
     const status = () => s.settings().getByLabelText('影響範囲の状態').textContent;
     expect(status()).toBe('自動（トラックのあるグループ: 顔・目・口）');
-    expect(s.settings().queryByRole('radio', { name: 'グループを選ぶ' })).toBeNull();
+    expect(s.settings().getByRole('radio', { name: 'グループを選ぶ' })).toBeTruthy();
 
-    s.setLevel('detail');
     s.click(s.settings().getByRole('radio', { name: 'グループを選ぶ' }));
     expect(s.animation().affectedGroups).toEqual(['face', 'eye', 'mouth']);
     const groups = () => within(s.settings().getByRole('group', { name: '影響するグループ' }));
@@ -134,7 +151,7 @@ describe('登録の設定', () => {
 
   it('影響範囲: トラックが無くても「グループを選ぶ」で選べる。すべて外すと自動に戻る', () => {
     const empty = setupAnimationScreen(step1Project([createAnimation('空', 'empty')]));
-    empty.setLevel('detail');
+
     expect(empty.settings().getByLabelText('影響範囲の状態').textContent).toBe(
       '自動（トラックのあるグループ: まだ無い）',
     );
@@ -153,7 +170,7 @@ describe('登録の設定', () => {
   it('登録の設定は保存される（保存して読み直しても同じ。読み直した画面にも出る）', async () => {
     const io = createProjectIO(new MemoryFileSystem());
     const s = setupAnimationScreen(step1Project([sampleAnimationData()]));
-    s.setLevel('detail');
+
     s.enter(s.settings(), '再生速度（倍）', 1.25);
     s.click(s.settings().getByRole('checkbox', { name: 'ループ（止めるまで繰り返す）' }));
     s.click(s.settings().getByRole('radio', { name: 'グループを選ぶ' }));

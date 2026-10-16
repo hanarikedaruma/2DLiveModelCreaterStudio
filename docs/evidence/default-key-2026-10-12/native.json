@@ -1,0 +1,115 @@
+{
+  "identifier": "jp.co.globalsystems.live2dstudio.verification-i072-20261012",
+  "work": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\i072-ui-1791796841222",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "tools": [
+        {
+          "tool": "選択・変形",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        },
+        {
+          "tool": "メッシュ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        },
+        {
+          "tool": "輪郭線で整える",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        },
+        {
+          "tool": "ワープ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        }
+      ]
+    },
+    {
+      "width": 960,
+      "height": 600,
+      "tools": [
+        {
+          "tool": "選択・変形",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        },
+        {
+          "tool": "メッシュ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        },
+        {
+          "tool": "輪郭線で整える",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        },
+        {
+          "tool": "ワープ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true,
+          "roundTrip": {
+            "schemaVersion": 7,
+            "bindingEqual": true,
+            "lookEqual": true
+          }
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

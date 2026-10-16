@@ -1,6 +1,7 @@
 use tauri::Manager;
 
 mod output; // Spout2 出力（カード41）
+mod voice;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,13 +17,17 @@ pub fn run() {
 
     builder
         .manage(output::SpoutState::default())
+        .manage(voice::VoiceState::default())
         .invoke_handler(tauri::generate_handler![
             output::spout_start,
             output::spout_set_textures,
             output::spout_submit,
             output::spout_stop,
             output::spout_adapters,
-            output::spout_status
+            output::spout_status,
+            voice::voice_connect,
+            voice::voice_request,
+            voice::voice_configure_runtime
         ])
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
@@ -33,9 +38,23 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("アプリの起動に失敗した")
         .run(|app, event| {
-            // 閉じるときに Spout2 の送り手を一覧から消す
-            if let tauri::RunEvent::Exit = event {
-                output::shutdown(&app.state::<output::SpoutState>());
+            match event {
+                // 別入力窓や出力窓が残っていても、メイン画面を閉じたら
+                // モデルを解放してアプリ全体を終了する。
+                tauri::RunEvent::WindowEvent {
+                    label,
+                    event: tauri::WindowEvent::Destroyed,
+                    ..
+                } if label == "main" => {
+                    voice::shutdown_app(&app.state::<voice::VoiceState>());
+                    output::shutdown(&app.state::<output::SpoutState>());
+                    app.exit(0);
+                }
+                tauri::RunEvent::Exit => {
+                    voice::shutdown_app(&app.state::<voice::VoiceState>());
+                    output::shutdown(&app.state::<output::SpoutState>());
+                }
+                _ => {}
             }
         });
 }

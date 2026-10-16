@@ -3,18 +3,17 @@
 // - シーンで有効にした標準の呼吸（周期アニメーション）で、Breath が時間とともに動く
 // - 表情で顔を向けると、物理の producer（実行部の最後）が髪揺れのパラメータを動かす
 // - アニメーションを再生すると、遷移しながらその値になり、止めると戻る
-import { rmSync } from 'node:fs';
-import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { answerDialog, launchApp, sleep, type RunningApp } from './app';
+import { answerDialog, appDataDir, launchApp, removeTestAutosave, sleep, type RunningApp } from './app';
 
-const APP_DATA = join(process.env.APPDATA ?? '', 'jp.co.globalsystems.live2dstudio');
+let appData = '';
 
 let app: RunningApp | null = null;
 let projectId = '';
 
 beforeAll(async () => {
   app = await launchApp(9339);
+  appData = await appDataDir(app.page);
   while ((await answerDialog(app.page, 'キャンセル', 2000)) !== null) {
     // 前の作業の残りは復元しない
   }
@@ -33,7 +32,7 @@ afterAll(async () => {
     })
     .catch(() => {});
   await app?.close();
-  if (projectId) rmSync(join(APP_DATA, 'unsaved', projectId), { recursive: true, force: true });
+  removeTestAutosave(appData, projectId);
 });
 
 // 実行部が描いたフレームのパラメータを ms ごとに count 回読む

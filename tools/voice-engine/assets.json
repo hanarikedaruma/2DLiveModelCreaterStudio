@@ -1,0 +1,24 @@
+{
+  "assets": [
+    {
+      "path": "voice-noise.dll",
+      "bytes": 14936576,
+      "sha256": "8f37a954a01d67a14d96cf04937d5818714fd5315283c54b18c1521636f6e513"
+    },
+    {
+      "path": "models/silero_vad.onnx",
+      "bytes": 2327524,
+      "sha256": "1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3"
+    },
+    {
+      "path": "voices/original-soft-girl.wav",
+      "bytes": 1607084,
+      "sha256": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    },
+    {
+      "bytes": 790,
+      "path": "voices/original-soft-girl.json",
+      "sha256": "a7af89d453ea4aa5aa58b866e1acdb0ab00aabd357860bab08ce4c83c69ac37a"
+    }
+  ]
+}

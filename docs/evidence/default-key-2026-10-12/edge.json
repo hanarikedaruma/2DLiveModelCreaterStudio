@@ -1,0 +1,73 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "tools": [
+        {
+          "tool": "選択・変形",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        },
+        {
+          "tool": "メッシュ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        },
+        {
+          "tool": "輪郭線で整える",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        },
+        {
+          "tool": "ワープ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        }
+      ]
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "tools": [
+        {
+          "tool": "選択・変形",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        },
+        {
+          "tool": "メッシュ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        },
+        {
+          "tool": "輪郭線で整える",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        },
+        {
+          "tool": "ワープ編集",
+          "endpointMaxMovementPx": 0,
+          "baseUnchanged": true,
+          "defaultKeyLocked": true,
+          "resetAndUndo": true
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

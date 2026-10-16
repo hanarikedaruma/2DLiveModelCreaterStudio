@@ -1,0 +1,58 @@
+{
+  "state": {
+    "state": "stopped",
+    "sessionId": "9de6492ecd8042e0b1cc8c3f114add84",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "bufferTargetMs": 1537.1875,
+      "bufferedMs": 0,
+      "codecFrames": 48,
+      "cudaGraph": 1,
+      "estimatedAudioSeconds": 3.888372093023256,
+      "estimatedRtf": 1.3881146640596855,
+      "firstAudioMs": 2774.2335499823093,
+      "firstAudioWallMs": 1792100637047.9714,
+      "firstPcmSeconds": 1.0475761000125203,
+      "frames": 92160,
+      "generationSeconds": 5.143039900009171,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 48,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 1.339333307294055,
+      "seconds": 3.84,
+      "startupBufferMs": 1914.5833333333333,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "こんにちは。今日は何をして遊ぼうか。"
+      ],
+      "preparation": {
+        "owner": "9e14e287-befc-42bc-9cdc-5e7852d5a1d4",
+        "revision": 6,
+        "state": "generating"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  "frames": 386,
+  "nonzero": 0,
+  "finite": true,
+  "monotonic": true,
+  "backward": [],
+  "phases": [
+    "loading",
+    "priming",
+    "running"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "stopMs": 90.39999999850988,
+  "lateFrames": 0,
+  "state": {
+    "state": "stopped",
+    "sessionId": null,
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {},
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "history": [
+        "みなさん、こんにちは。今日もよろしくね。"
+      ],
+      "resident": false
+    }
+  }
+}

@@ -134,9 +134,9 @@ describe('パラメータパネル', () => {
     expect(marksOf('FaceAngleX')).toHaveLength(0);
 
     fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }));
-    // 選んだパラメータを編集中にする。プレビューの値（目 開閉 L）は残す（I-028）
+    // 選んだパラメータを編集中にする。ほかの値（プレビューの目 開閉 L）はデフォルト値に戻す（I-085）
     expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX']);
-    expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2, FaceAngleX: 0 });
+    expect(services.editor.get().editorParamValues).toEqual({ FaceAngleX: 0 });
     act(() => services.editor.set({ editorParamValues: { FaceAngleX: 0 } }));
     expect(row('FaceAngleX').querySelector('button')!.getAttribute('aria-pressed')).toBe('true');
     // ● = manual・auto、○ = generated、■ = locked
@@ -191,19 +191,31 @@ describe('パラメータパネル', () => {
     expect(screen.getByRole('button', { name: '値をすべて戻す' }).hasAttribute('disabled')).toBe(true);
   });
 
-  it('ほかの行を押すと編集するパラメータを替え、それまで編集していた値は戻し、プレビューの値は残す', () => {
+  it('ほかの行を押すと編集するパラメータを替え、ほかの値（それまで編集していた値もプレビューの値も）はすべて戻す（I-085）', () => {
     const { services } = setup();
-    act(() => services.editor.set({ editorParamValues: { EyeOpenL: 0.2 } }));
     fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }));
     fireEvent.change(slider('顔 左右'), { target: { value: '30' } });
+    fireEvent.change(slider('目 開閉 L'), { target: { value: '0.2' } });
+    // プレビューしていた値のパラメータを押すと、その値のまま編集を始める
+    fireEvent.change(slider('口 開閉'), { target: { value: '0.6' } });
     fireEvent.click(screen.getByRole('button', { name: /^口 開閉/ }));
     expect(services.editor.get().activeParameterIds).toEqual(['MouthOpen']);
-    expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2, MouthOpen: 0 });
-    // 編集中の行をもう一度押すと、その編集をやめてデフォルト値に戻す
+    expect(services.editor.get().editorParamValues).toEqual({ MouthOpen: 0.6 });
+    expect(screen.queryByText(/プレビュー中:/)).toBeNull();
+    // 編集中の行をもう一度押すと、その編集をやめてデフォルト値に戻す（ほかの値はそのまま）
+    fireEvent.change(slider('目 開閉 L'), { target: { value: '0.2' } });
     fireEvent.change(slider('口 開閉'), { target: { value: '1' } });
     fireEvent.click(screen.getByRole('button', { name: /^口 開閉/ }));
     expect(services.editor.get().activeParameterIds).toEqual([]);
     expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2 });
+  });
+
+  it('編集中のパラメータが無いときの Ctrl+クリックは、プレビューの値を残したまま編集を始める', () => {
+    const { services } = setup();
+    fireEvent.change(slider('目 開閉 L'), { target: { value: '0.2' } });
+    fireEvent.click(screen.getByRole('button', { name: /^顔 左右/ }), { ctrlKey: true });
+    expect(services.editor.get().activeParameterIds).toEqual(['FaceAngleX']);
+    expect(services.editor.get().editorParamValues).toEqual({ EyeOpenL: 0.2, FaceAngleX: 0 });
   });
 
   it('Ctrl+クリックで編集中のパラメータに加える（組み合わせのキー。4つまで）', () => {

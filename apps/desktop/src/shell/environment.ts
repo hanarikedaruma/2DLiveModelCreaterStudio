@@ -64,7 +64,7 @@ export function parseEnvironment(text: string | null): Environment {
       ...defaults,
       ...json,
       output: { ...defaults.output, ...json.output },
-      uiLevel: { ...defaults.uiLevel, ...json.uiLevel },
+
       trackingCustom: { ...defaults.trackingCustom, ...json.trackingCustom },
       cameraCapture: { ...defaults.cameraCapture, ...json.cameraCapture },
     };

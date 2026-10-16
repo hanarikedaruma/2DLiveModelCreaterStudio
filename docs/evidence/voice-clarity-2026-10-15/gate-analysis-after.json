@@ -1,0 +1,42 @@
+[
+  {
+    "source": "normal",
+    "inputDb": 0,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.999999843446418,
+    "denoisedRmsRatio": 0.8704542212484249,
+    "speechMaskSeconds": 5.7519375,
+    "probabilityP50": 0.9959895014762878,
+    "probabilityP95": 0.9999912500381469
+  },
+  {
+    "source": "normal",
+    "inputDb": -18,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.999999853775928,
+    "denoisedRmsRatio": 0.8720949850788798,
+    "speechMaskSeconds": 5.7199375,
+    "probabilityP50": 0.9853405952453613,
+    "probabilityP95": 0.9999860405921936
+  },
+  {
+    "source": "slow",
+    "inputDb": 0,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.9999997250332509,
+    "denoisedRmsRatio": 0.867131199520342,
+    "speechMaskSeconds": 7.999916666666667,
+    "probabilityP50": 0.9855073392391205,
+    "probabilityP95": 0.9997648119926452
+  },
+  {
+    "source": "slow",
+    "inputDb": -18,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.9997725353473221,
+    "denoisedRmsRatio": 0.8401109672282827,
+    "speechMaskSeconds": 7.583916666666667,
+    "probabilityP50": 0.9564734697341919,
+    "probabilityP95": 0.9992868006229401
+  }
+]

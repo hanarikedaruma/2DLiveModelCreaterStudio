@@ -294,16 +294,13 @@ describe('範囲の選択', () => {
 });
 
 describe('生成方式', () => {
-  const detail = (s: Services) =>
-    act(() => s.editor.set({ uiLevel: { ...s.editor.get().uiLevel, modeling: 'detail' } }));
   const select = () => screen.getByRole('combobox', { name: '生成方式' }) as HTMLSelectElement;
 
-  it('詳細モードでだけ選べる。なめらかを選ぶと中間キーを smoothstep で作り直し、1回で Undo できる', () => {
+  it('最初から生成方式を選べ、なめらかで中間キーを smoothstep で作り直し、1回で Undo できる', () => {
     const { services } = setup();
     const loaded = services.store.get();
     editRow(/^顔 左右/);
-    expect(screen.queryByRole('combobox', { name: '生成方式' })).toBeNull();
-    detail(services);
+
     expect(select().value).toBe('linear');
     expect([...select().options].map((o) => o.textContent)).toEqual(['線形', '回転', '曲面', 'なめらか']);
 
@@ -324,7 +321,7 @@ describe('生成方式', () => {
   it('曲面は顔の向きのときだけ出て、ワープのキーを球面で作る。1回で Undo できる', () => {
     const { services } = setup(sampleProject(true));
     const loaded = services.store.get();
-    detail(services);
+
     editRow(/^口 開閉/);
     expect([...select().options].map((o) => o.value)).toEqual(['linear', 'rotate', 'ease']);
     editRow(/^顔 左右/);
@@ -344,7 +341,7 @@ describe('生成方式', () => {
 
   it('曲面にできるワープのキーが無ければ知らせ、何も変えない', () => {
     const { services } = setup();
-    detail(services);
+
     editRow(/^顔 左右/);
     fireEvent.change(select(), { target: { value: 'surface' } });
     expect(screen.getByText('曲面にできるのは、顔の向きのワープのキーだけ')).toBeTruthy();

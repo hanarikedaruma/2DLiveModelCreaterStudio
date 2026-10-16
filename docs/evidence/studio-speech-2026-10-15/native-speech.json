@@ -1,0 +1,29 @@
+{
+  "frames": 312,
+  "nonzero": 0,
+  "monotonic": true,
+  "finite": true,
+  "state": {
+    "state": "stopped",
+    "sessionId": "34c26abd7a1540bdb92f7d405c066ff2",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "generationSeconds": 12.8963173000011,
+      "loadSeconds": 17.28303009999945,
+      "seconds": 3.12,
+      "vramMiB": 4086.734375
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "history": [
+        "みなさん、こんにちは。今日もよろしくね。"
+      ],
+      "resident": true
+    }
+  },
+  "input": null
+}

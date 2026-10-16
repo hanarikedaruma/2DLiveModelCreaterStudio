@@ -1,11 +1,15 @@
 import { validateProject } from './validate';
 import type { Project } from './types';
+import { attachClosedEyeLine } from './closedEyeLine';
+import type { Model, Vec2 } from './types';
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 11;
 
 // { [版]: その版の json を次の版に変換する関数 }
 export type Migrations = Record<number, (json: Record<string, unknown>) => Record<string, unknown>>;
 export const MIGRATIONS: Migrations = {
+  10: (json) => json, // AI音声は省略OFF。既存の口形・機器・キーを変更しない。
+  9: (json) => json, // I-060は省略OFF。既存の遷移・トラック・再生方法を変えない
   1: opacityKeysToAbsolute,
   2: trackingSetupFromMappings,
   3: (json) =>
@@ -13,6 +17,25 @@ export const MIGRATIONS: Migrations = {
   4: (json) => json, // dynamicsの省略はOFF。既存の軸/線/キーを変更しない
   5: (json) => json, // 胸は使うときだけ。既存の物理・partのキーを変更しない
   6: (json) => json, // 輪郭線（I-068）は使うときだけ。省略は空で、既存のメッシュ・キーを変更しない
+  7: (json) => json, // 格子の向きの省略は0。既存の格子・キーは自動で作り直さない（I-078/I-079）
+  8: (json) => {
+    if (!isRecord(json.model) || !isRecord(json.model.setupHints)) return json;
+    const model = json.model as unknown as Model;
+    const hints = { ...json.model.setupHints };
+    for (const side of ['L', 'R'] as const) {
+      const key = side === 'L' ? 'closedLineL' : 'closedLineR';
+      const points = hints[key];
+      if (Array.isArray(points)) {
+        const usable = points.every((p) => isRecord(p) && Number.isFinite(p.x) && Number.isFinite(p.y));
+        // 壊れた入力の診断はvalidateに任せる。幾何が無い場合も線を保持する。
+        hints[key] =
+          usable && Array.isArray(model.parts) && Array.isArray(model.meshes) && Array.isArray(model.warps)
+            ? attachClosedEyeLine(model, side, points as Vec2[])
+            : { partId: null, points };
+      }
+    }
+    return { ...json, model: { ...json.model, setupHints: hints } };
+  },
 };
 
 export class ProjectVersionError extends Error {

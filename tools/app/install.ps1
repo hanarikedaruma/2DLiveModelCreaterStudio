@@ -49,6 +49,19 @@ if (-not (Test-Path $built)) { throw "本番用の実行ファイルがありま
 Assert-NotRunning
 New-Item -ItemType Directory -Force $dest | Out-Null
 Copy-Item $built $target -Force
+$taskVoiceSource = Join-Path $root 'tools\voice-engine'
+$taskVoiceTarget = Join-Path $dest 'voice-engine'
+New-Item -ItemType Directory -Force -Path $taskVoiceTarget | Out-Null
+# Pythonの生成物を除き、AI音声のコード・素材・ライセンスを配置する。
+foreach ($taskVoiceFile in (Get-ChildItem -LiteralPath $taskVoiceSource -File -Recurse | Where-Object { $_.FullName -notmatch '[\\/]__pycache__[\\/]' })) {
+  $taskVoiceRelative = $taskVoiceFile.FullName.Substring($taskVoiceSource.Length).TrimStart('\','/')
+  $taskVoiceDestination = Join-Path $taskVoiceTarget $taskVoiceRelative
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $taskVoiceDestination) | Out-Null
+  Copy-Item -LiteralPath $taskVoiceFile.FullName -Destination $taskVoiceDestination -Force
+}
+# 旧統合版で加えたGPU待機処理は使わない。自分が配置したファイルだけを除く。
+$taskObsoleteVoiceFile = Join-Path $taskVoiceTarget 'gpu_warm.py'
+if (Test-Path -LiteralPath $taskObsoleteVoiceFile) { Remove-Item -LiteralPath $taskObsoleteVoiceFile -Force }
 
 $shell = New-Object -ComObject WScript.Shell
 foreach ($link in $links) {

@@ -74,10 +74,16 @@ export function makeContourPanel(slot: EnvSlot, editor: ContourEditor): FC {
                 消す
               </button>
             </div>
-            {tool.drawing && (
+            {tool.drawing ? (
               <p className="contour-warning" role="status">
                 輪郭をなぞる（ドラッグ）。点を順にクリックしてもよい（ダブルクリックか Enter で終わり、Esc でやめる）
               </p>
+            ) : (
+              !reason && (
+                <p className="contour-hint">
+                  点や線の無い所から輪郭をなぞると、新しい線を引く。点を順にクリックして引くときは［線を引く］
+                </p>
+              )
             )}
             {current && (
               <>

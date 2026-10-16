@@ -91,21 +91,21 @@ describe('モードとパネル', () => {
       id: 't.sec1',
       panelId: 't.left',
       order: 1,
-      level: 'easy',
+
       component: () => <span>かんたんのセクション</span>,
     });
     registerPanelSection({
       id: 't.sec3',
       panelId: 't.left',
       order: 3,
-      level: 'detail',
+
       component: () => <span>詳細のセクション</span>,
     });
     registerPanel({
       id: 't.right',
       mode: 'modeling',
       area: 'right',
-      level: 'detail',
+
       title: '詳細だけのパネル',
       component: () => null,
     });
@@ -138,20 +138,18 @@ describe('モードとパネル', () => {
     expect(screen.getByText('左のパネル')).toBeTruthy();
   });
 
-  it('セクションは order 順に並び、uiLevel で出し分けられる', () => {
+  it('I-088: 登録したセクションとパネルは常に表示し、セクションは order 順に並ぶ', () => {
     const { services } = setup();
     const sectionIds = () =>
       [...document.querySelectorAll('[data-section-id]')].map((el) => el.getAttribute('data-section-id'));
-    expect(sectionIds()).toEqual(['t.sec1', 't.sec2']);
-    expect(screen.queryByText('詳細だけのパネル')).toBeNull();
-
-    act(() => services.editor.set({ uiLevel: { modeling: 'detail', animation: 'easy', studio: 'easy' } }));
-    expect(sectionIds()).toEqual(['t.sec2', 't.sec3']);
+    expect(sectionIds()).toEqual(['t.sec1', 't.sec2', 't.sec3']);
     expect(screen.getByText('詳細だけのパネル')).toBeTruthy();
 
-    // ほかのモードの uiLevel には影響されない
-    act(() => services.editor.set({ uiLevel: { modeling: 'easy', animation: 'detail', studio: 'detail' } }));
-    expect(screen.queryByText('詳細だけのパネル')).toBeNull();
+    act(() => services.editor.set({ mode: 'studio' }));
+    expect(sectionIds()).toEqual([]);
+    act(() => services.editor.set({ mode: 'modeling' }));
+    expect(sectionIds()).toEqual(['t.sec1', 't.sec2', 't.sec3']);
+    expect(screen.getByText('詳細だけのパネル')).toBeTruthy();
   });
 
   it('パネルは見出しを押すとたため、中身は外さずに隠すだけ。たたんだことを覚える', () => {
@@ -184,9 +182,10 @@ describe('モードとパネル', () => {
     expect(mounts).toBe(1);
   });
 
-  it('かんたん/詳細の切り替えボタンを出す（カード27）', () => {
+  it('I-088: 表示のかんたん/詳細の切り替えを出さない', () => {
     setup();
-    expect(screen.getByRole('group', { name: 'かんたん/詳細' }).hidden).toBe(false);
+    expect(screen.queryByRole('group', { name: 'かんたん/詳細' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '詳細' })).toBeNull();
   });
 });
 
@@ -381,14 +380,22 @@ describe('Undo / Redo のキー', () => {
 });
 
 describe('環境設定とダイアログ', () => {
-  it('environment.json の uiLevel を EditorState に反映し、変えたら保存する', async () => {
+  it('I-088: 古い environment.json の uiLevel を無視し、ほかの設定を保持して保存できる', async () => {
     const { services, storage, environment } = setup({
-      environmentText: JSON.stringify({ uiLevel: { modeling: 'detail', animation: 'easy', studio: 'easy' } }),
+      environmentText: JSON.stringify({
+        uiLevel: { modeling: 'easy', animation: 'detail', studio: 'easy' },
+        mirror: false,
+        silenceThreshold: -40,
+      }),
     });
-    await waitFor(() => expect(services.editor.get().uiLevel.modeling).toBe('detail'));
-    act(() => services.editor.set({ uiLevel: { modeling: 'detail', animation: 'easy', studio: 'detail' } }));
+    await waitFor(() => expect(environment.get().mirror).toBe(false));
+    expect(services.editor.get()).not.toHaveProperty('uiLevel');
+    expect(environment.get()).not.toHaveProperty('uiLevel');
+    act(() => environment.set({ eyeTracking: false }));
     await environment.flush();
-    expect(JSON.parse(storage.text!).uiLevel).toEqual({ modeling: 'detail', animation: 'easy', studio: 'detail' });
+    const saved = JSON.parse(storage.text!);
+    expect(saved).not.toHaveProperty('uiLevel');
+    expect(saved).toMatchObject({ mirror: false, silenceThreshold: -40, eyeTracking: false });
   });
 
   it('confirm・prompt・notify', async () => {

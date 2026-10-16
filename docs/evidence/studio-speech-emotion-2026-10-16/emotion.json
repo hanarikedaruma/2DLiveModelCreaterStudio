@@ -1,0 +1,104 @@
+{
+  "runs": [
+    {
+      "text": "あなたのことが大好きです",
+      "style": "cheerful",
+      "performanceText": "あなたのことが大好きです",
+      "planningMs": 0.005599998985417187,
+      "wav": "0-cheerful.wav",
+      "meta": {
+        "rate": 24000,
+        "frames": 51840,
+        "seconds": 2.16,
+        "generationSeconds": 2.516087099997094,
+        "firstPcmSeconds": 0.8697424999991199,
+        "rtf": 1.1648551388875434,
+        "codecFrames": 27,
+        "vramMiB": 4009.49951171875,
+        "delivery": "stream",
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+        "cudaGraph": 1,
+        "predictorGraphReplays": 27,
+        "textEmbeddingOffloadMiB": 593.5,
+        "statefulDecoder": 1,
+        "performanceMs": 0.00549999822396785,
+        "hesitations": 0
+      }
+    },
+    {
+      "text": "あなたのことが大好きです",
+      "style": "shy",
+      "performanceText": "あ、あなたのことが…だ、大好きです",
+      "planningMs": 1.0393999982625246,
+      "wav": "0-shy.wav",
+      "meta": {
+        "rate": 24000,
+        "frames": 86400,
+        "seconds": 3.6,
+        "generationSeconds": 4.040762000004179,
+        "firstPcmSeconds": 0.8516226999927312,
+        "rtf": 1.1224338888900496,
+        "codecFrames": 45,
+        "vramMiB": 4009.49951171875,
+        "delivery": "stream",
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+        "cudaGraph": 1,
+        "predictorGraphReplays": 45,
+        "textEmbeddingOffloadMiB": 593.5,
+        "statefulDecoder": 1,
+        "performanceMs": 0.047299996367655694,
+        "hesitations": 2
+      }
+    },
+    {
+      "text": "みんなのことが大好きです",
+      "style": "cheerful",
+      "performanceText": "みんなのことが大好きです",
+      "planningMs": 0.0037999998312443495,
+      "wav": "1-cheerful.wav",
+      "meta": {
+        "rate": 24000,
+        "frames": 86400,
+        "seconds": 3.6,
+        "generationSeconds": 4.039813700001105,
+        "firstPcmSeconds": 0.8577024999976857,
+        "rtf": 1.122170472222529,
+        "codecFrames": 45,
+        "vramMiB": 4009.49951171875,
+        "delivery": "stream",
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+        "cudaGraph": 1,
+        "predictorGraphReplays": 45,
+        "textEmbeddingOffloadMiB": 593.5,
+        "statefulDecoder": 1,
+        "performanceMs": 0.007599999662488699,
+        "hesitations": 0
+      }
+    },
+    {
+      "text": "みんなのことが大好きです",
+      "style": "shy",
+      "performanceText": "み、みんなのことが…だ、大好きです",
+      "planningMs": 0.04430000262800604,
+      "wav": "1-shy.wav",
+      "meta": {
+        "rate": 24000,
+        "frames": 96000,
+        "seconds": 4.0,
+        "generationSeconds": 4.51329820000683,
+        "firstPcmSeconds": 0.8710757000080775,
+        "rtf": 1.1283245500017074,
+        "codecFrames": 50,
+        "vramMiB": 4009.49951171875,
+        "delivery": "stream",
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+        "cudaGraph": 1,
+        "predictorGraphReplays": 50,
+        "textEmbeddingOffloadMiB": 593.5,
+        "statefulDecoder": 1,
+        "performanceMs": 0.040700004319660366,
+        "hesitations": 2
+      }
+    }
+  ]
+}

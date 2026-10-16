@@ -1,0 +1,108 @@
+{
+  "text": "こんにちは。今日もよろしくね。",
+  "offloadMiB": 593.5,
+  "graphVerified": true,
+  "runs": [
+    {
+      "rate": 24000,
+      "frames": 61440,
+      "seconds": 2.56,
+      "generationSeconds": 7.491536500005168,
+      "firstPcmSeconds": 1.9810743999987608,
+      "rtf": 2.9263814453145187,
+      "codecFrames": 32,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 0,
+      "predictorGraphReplays": 0,
+      "textEmbeddingOffloadMiB": 593.5,
+      "mode": "original",
+      "chunkSeconds": [
+        1.9892777999921236,
+        3.832422099992982,
+        5.654260399998748,
+        7.496495400002459
+      ],
+      "pcmFloat32Sha256": "95c67d3844cb6e27926a64d1a38ad024efbda0020285e5333b245775d34de322"
+    },
+    {
+      "rate": 24000,
+      "frames": 61440,
+      "seconds": 2.56,
+      "generationSeconds": 2.8707205999962753,
+      "firstPcmSeconds": 0.8359330999956001,
+      "rtf": 1.121375234373545,
+      "codecFrames": 32,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 1,
+      "predictorGraphReplays": 32,
+      "textEmbeddingOffloadMiB": 593.5,
+      "mode": "graph",
+      "chunkSeconds": [
+        0.8439253000105964,
+        1.5212541000073543,
+        2.2004320999985794,
+        2.87594579999859
+      ],
+      "pcmFloat32Sha256": "95c67d3844cb6e27926a64d1a38ad024efbda0020285e5333b245775d34de322"
+    },
+    {
+      "rate": 24000,
+      "frames": 61440,
+      "seconds": 2.56,
+      "generationSeconds": 7.4990460999979405,
+      "firstPcmSeconds": 1.9912738999992143,
+      "rtf": 2.9293148828116955,
+      "codecFrames": 32,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 0,
+      "predictorGraphReplays": 0,
+      "textEmbeddingOffloadMiB": 593.5,
+      "mode": "original",
+      "chunkSeconds": [
+        1.998984499994549,
+        3.8167011000041384,
+        5.661943999992218,
+        7.5040290000033565
+      ],
+      "pcmFloat32Sha256": "95c67d3844cb6e27926a64d1a38ad024efbda0020285e5333b245775d34de322"
+    },
+    {
+      "rate": 24000,
+      "frames": 61440,
+      "seconds": 2.56,
+      "generationSeconds": 2.9188978000020143,
+      "firstPcmSeconds": 0.8586114999925485,
+      "rtf": 1.1401944531257868,
+      "codecFrames": 32,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 1,
+      "predictorGraphReplays": 32,
+      "textEmbeddingOffloadMiB": 593.5,
+      "mode": "graph",
+      "chunkSeconds": [
+        0.867030599998543,
+        1.5526266999950167,
+        2.244061299992609,
+        2.9245955999940634
+      ],
+      "pcmFloat32Sha256": "95c67d3844cb6e27926a64d1a38ad024efbda0020285e5333b245775d34de322"
+    }
+  ],
+  "pcmIdentical": true,
+  "medianGenerationSeconds": {
+    "original": 7.495291300001554,
+    "graph": 2.8948091999991448
+  },
+  "medianFirstPcmSeconds": {
+    "original": 1.9861741499989876,
+    "graph": 0.8472722999940743
+  }
+}

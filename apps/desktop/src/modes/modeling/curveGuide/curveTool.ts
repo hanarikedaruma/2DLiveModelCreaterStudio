@@ -21,7 +21,7 @@ import {
   activeParams,
   coordsOf,
   findBinding,
-  isBaseState,
+  isDefaultState,
   isPreviewOffBase,
   keyIndexAt,
 } from '../../../services/keyEditor/common';
@@ -172,7 +172,7 @@ export function createCurveEditor(slot: EnvSlot) {
 
   const tool: CanvasTool = {
     id: CURVE_TOOL_ID,
-    label: '線で曲げる',
+    label: '流線で曲げる',
     cursor: 'crosshair',
     onPointerDown(e) {
       if (shoulder.active()) {
@@ -406,7 +406,7 @@ export function createCurveEditor(slot: EnvSlot) {
       env.dialogs.notify('軸揺れの出力以外の姿勢パラメータを選んでください。軸の動きと流れ揺れはキーへ記録しません。');
       return Promise.resolve();
     }
-    if (isBaseState(params) || isPreviewOffBase(snap.project.model, bakeEditor)) {
+    if (isDefaultState(params) || isPreviewOffBase(snap.project.model, bakeEditor)) {
       env.dialogs.notify(
         '編集するパラメータを選んで基準値以外の姿勢にしてください。プレビュー中の別の値は戻すか、編集対象に加えてください。',
       );

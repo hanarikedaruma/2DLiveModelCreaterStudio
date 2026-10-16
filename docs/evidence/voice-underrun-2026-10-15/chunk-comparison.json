@@ -1,0 +1,977 @@
+[
+  {
+    "name": "fixed180",
+    "patternMs": [
+      180
+    ],
+    "steps": 4,
+    "historySeconds": 1.5,
+    "generationHistorySeconds": 0.4,
+    "calls": 34,
+    "sourceMs": 6120.0,
+    "totalProcessingMs": 7105.480698868632,
+    "averageComputeRatio": 1.1610262579850705,
+    "processingP50Ms": 202.7952999342233,
+    "processingP95Ms": 255.19496003398666,
+    "requiredSourceLagMs": 1473.4806988686323,
+    "records": [
+      {
+        "hopMs": 180.0,
+        "processingMs": 327.24269991740584,
+        "requiredSourceLagMs": 635.2426999174058
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 207.9318999312818,
+        "requiredSourceLagMs": 663.1745998486876
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 214.41719983704388,
+        "requiredSourceLagMs": 697.5917996857315
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 204.57249996252358,
+        "requiredSourceLagMs": 722.1642996482551
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 219.04259989969432,
+        "requiredSourceLagMs": 761.2068995479494
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 196.72619993798435,
+        "requiredSourceLagMs": 777.9330994859338
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 182.48980003409088,
+        "requiredSourceLagMs": 780.4228995200247
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 180.02239987254143,
+        "requiredSourceLagMs": 780.4452993925661
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 205.44249983504415,
+        "requiredSourceLagMs": 805.8877992276102
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 197.45590002276003,
+        "requiredSourceLagMs": 823.3436992503703
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 195.91959984973073,
+        "requiredSourceLagMs": 839.263299100101
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 269.0215001348406,
+        "requiredSourceLagMs": 928.2847992349416
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 231.9285999983549,
+        "requiredSourceLagMs": 980.2133992332965
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 200.4949999973178,
+        "requiredSourceLagMs": 1000.7083992306143
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 205.55569999851286,
+        "requiredSourceLagMs": 1026.2640992291272
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 207.39690004847944,
+        "requiredSourceLagMs": 1053.6609992776066
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 198.7775000743568,
+        "requiredSourceLagMs": 1072.4384993519634
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 196.4849999640137,
+        "requiredSourceLagMs": 1088.923499315977
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 187.46739998459816,
+        "requiredSourceLagMs": 1096.3908993005753
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 189.7762999869883,
+        "requiredSourceLagMs": 1106.1671992875636
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 190.50579983741045,
+        "requiredSourceLagMs": 1116.672999124974
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 192.67140002921224,
+        "requiredSourceLagMs": 1129.3443991541862
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 188.9810999855399,
+        "requiredSourceLagMs": 1138.3254991397262
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 213.93129997886717,
+        "requiredSourceLagMs": 1172.2567991185933
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 188.36840009316802,
+        "requiredSourceLagMs": 1180.6251992117614
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 215.90479998849332,
+        "requiredSourceLagMs": 1216.5299992002547
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 189.7326000034809,
+        "requiredSourceLagMs": 1226.2625992037356
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 188.38840001262724,
+        "requiredSourceLagMs": 1234.6509992163628
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 215.68059991113842,
+        "requiredSourceLagMs": 1270.3315991275012
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 201.018099905923,
+        "requiredSourceLagMs": 1291.3496990334243
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 215.0769999716431,
+        "requiredSourceLagMs": 1326.4266990050673
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 206.54139993712306,
+        "requiredSourceLagMs": 1352.9680989421904
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 247.74989997968078,
+        "requiredSourceLagMs": 1420.7179989218712
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 232.76269994676113,
+        "requiredSourceLagMs": 1473.4806988686323
+      }
+    ]
+  },
+  {
+    "name": "alternating120_240",
+    "patternMs": [
+      120,
+      240
+    ],
+    "steps": 4,
+    "historySeconds": 1.5,
+    "generationHistorySeconds": 0.4,
+    "calls": 34,
+    "sourceMs": 6120.0,
+    "totalProcessingMs": 7676.826599985361,
+    "averageComputeRatio": 1.254383431370157,
+    "processingP50Ms": 218.11910008545965,
+    "processingP95Ms": 304.37950488412747,
+    "requiredSourceLagMs": 2053.2593999449164,
+    "records": [
+      {
+        "hopMs": 120.0,
+        "processingMs": 231.56720004044473,
+        "requiredSourceLagMs": 479.56720004044473
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 233.54450007900596,
+        "requiredSourceLagMs": 601.544500079006
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 229.24860008060932,
+        "requiredSourceLagMs": 590.7931001596153
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 265.0951000396162,
+        "requiredSourceLagMs": 735.8882001992315
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 296.78469989448786,
+        "requiredSourceLagMs": 792.6729000937194
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 318.2468998711556,
+        "requiredSourceLagMs": 990.919799964875
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 316.8128998950124,
+        "requiredSourceLagMs": 1067.7326998598874
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 297.68459987826645,
+        "requiredSourceLagMs": 1245.4172997381538
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 274.4766999967396,
+        "requiredSourceLagMs": 1279.8939997348934
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 267.9793001152575,
+        "requiredSourceLagMs": 1427.873299850151
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 246.06500007212162,
+        "requiredSourceLagMs": 1433.9382999222726
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 245.4276999924332,
+        "requiredSourceLagMs": 1559.3659999147058
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 220.04149993881583,
+        "requiredSourceLagMs": 1539.4074998535216
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 226.95100004784763,
+        "requiredSourceLagMs": 1646.3584999013692
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 186.0845999326557,
+        "requiredSourceLagMs": 1592.443099834025
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 194.98779997229576,
+        "requiredSourceLagMs": 1667.4308998063207
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 178.83729981258512,
+        "requiredSourceLagMs": 1606.2681996189058
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 189.627300016582,
+        "requiredSourceLagMs": 1675.8954996354878
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 179.90770004689693,
+        "requiredSourceLagMs": 1615.8031996823847
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 190.7879998907447,
+        "requiredSourceLagMs": 1686.5911995731294
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 185.19840016961098,
+        "requiredSourceLagMs": 1631.7895997427404
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 207.51690003089607,
+        "requiredSourceLagMs": 1719.3064997736365
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 184.36970002949238,
+        "requiredSourceLagMs": 1663.6761998031288
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 187.98280018381774,
+        "requiredSourceLagMs": 1731.6589999869466
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 202.24329992197454,
+        "requiredSourceLagMs": 1693.9022999089211
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 231.12899996340275,
+        "requiredSourceLagMs": 1805.0312998723239
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 218.86750007979572,
+        "requiredSourceLagMs": 1783.8987999521196
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 217.37070009112358,
+        "requiredSourceLagMs": 1881.2695000432432
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 213.34129991009831,
+        "requiredSourceLagMs": 1854.6107999533415
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 198.96090007387102,
+        "requiredSourceLagMs": 1933.5717000272125
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 204.73510003648698,
+        "requiredSourceLagMs": 1898.3068000636995
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 192.4367998726666,
+        "requiredSourceLagMs": 1970.743599936366
+      },
+      {
+        "hopMs": 120.0,
+        "processingMs": 234.61739998310804,
+        "requiredSourceLagMs": 1965.3609999194741
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 207.89840002544224,
+        "requiredSourceLagMs": 2053.2593999449164
+      }
+    ]
+  },
+  {
+    "name": "fixed240",
+    "patternMs": [
+      240
+    ],
+    "steps": 4,
+    "historySeconds": 1.5,
+    "generationHistorySeconds": 0.4,
+    "calls": 25,
+    "sourceMs": 6000.0,
+    "totalProcessingMs": 4973.933399189264,
+    "averageComputeRatio": 0.8289888998648772,
+    "processingP50Ms": 197.08019983954728,
+    "processingP95Ms": 215.84940017201004,
+    "requiredSourceLagMs": 585.7987999748439,
+    "records": [
+      {
+        "hopMs": 240.0,
+        "processingMs": 195.09379984810948,
+        "requiredSourceLagMs": 563.0937998481095
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 195.4019998665899,
+        "requiredSourceLagMs": 563.4019998665899
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 209.5383999403566,
+        "requiredSourceLagMs": 577.5383999403566
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 217.18400018289685,
+        "requiredSourceLagMs": 585.1840001828969
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 217.79879997484386,
+        "requiredSourceLagMs": 585.7987999748439
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 196.50099985301495,
+        "requiredSourceLagMs": 564.500999853015
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 197.08019983954728,
+        "requiredSourceLagMs": 565.0801998395473
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 199.0027001593262,
+        "requiredSourceLagMs": 567.0027001593262
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 194.0721001010388,
+        "requiredSourceLagMs": 562.0721001010388
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 210.5110001284629,
+        "requiredSourceLagMs": 578.5110001284629
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 206.6542999818921,
+        "requiredSourceLagMs": 574.6542999818921
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 200.57559991255403,
+        "requiredSourceLagMs": 568.575599912554
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 209.90629983134568,
+        "requiredSourceLagMs": 577.9062998313457
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 199.52029990963638,
+        "requiredSourceLagMs": 567.5202999096364
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 188.63370013423264,
+        "requiredSourceLagMs": 556.6337001342326
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 192.9361999500543,
+        "requiredSourceLagMs": 560.9361999500543
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 190.00199995934963,
+        "requiredSourceLagMs": 558.0019999593496
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 205.53399994969368,
+        "requiredSourceLagMs": 573.5339999496937
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 198.35419999435544,
+        "requiredSourceLagMs": 566.3541999943554
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 186.3283000420779,
+        "requiredSourceLagMs": 554.3283000420779
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 191.2219999358058,
+        "requiredSourceLagMs": 559.2219999358058
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 190.98419998772442,
+        "requiredSourceLagMs": 558.9841999877244
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 186.35729979723692,
+        "requiredSourceLagMs": 554.3572997972369
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 194.5841999258846,
+        "requiredSourceLagMs": 562.5841999258846
+      },
+      {
+        "hopMs": 240.0,
+        "processingMs": 200.1567999832332,
+        "requiredSourceLagMs": 568.1567999832332
+      }
+    ]
+  },
+  {
+    "name": "alternating180_300",
+    "patternMs": [
+      180,
+      300
+    ],
+    "steps": 4,
+    "historySeconds": 1.5,
+    "generationHistorySeconds": 0.4,
+    "calls": 26,
+    "sourceMs": 6240.0,
+    "totalProcessingMs": 5428.604800952598,
+    "averageComputeRatio": 0.869968718101378,
+    "processingP50Ms": 210.0788998650387,
+    "processingP95Ms": 231.27620009472594,
+    "requiredSourceLagMs": 675.5731000304222,
+    "records": [
+      {
+        "hopMs": 180.0,
+        "processingMs": 199.49260004796088,
+        "requiredSourceLagMs": 507.4926000479609
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 205.5222000926733,
+        "requiredSourceLagMs": 633.5222000926733
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 187.09459993988276,
+        "requiredSourceLagMs": 520.6168000325561
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 223.30169985070825,
+        "requiredSourceLagMs": 651.3016998507082
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 200.69409999996424,
+        "requiredSourceLagMs": 551.9957998506725
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 216.68460010550916,
+        "requiredSourceLagMs": 644.6846001055092
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 209.53219989314675,
+        "requiredSourceLagMs": 554.2167999986559
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 247.5731000304222,
+        "requiredSourceLagMs": 675.5731000304222
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 185.17850013449788,
+        "requiredSourceLagMs": 560.7516001649201
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 203.20780016481876,
+        "requiredSourceLagMs": 631.2078001648188
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 185.88170013390481,
+        "requiredSourceLagMs": 517.0895002987236
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 216.06909995898604,
+        "requiredSourceLagMs": 644.069099958986
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 210.62559983693063,
+        "requiredSourceLagMs": 554.6946997959167
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 213.61229987815022,
+        "requiredSourceLagMs": 641.6122998781502
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 190.96700008958578,
+        "requiredSourceLagMs": 532.579299967736
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 200.64739999361336,
+        "requiredSourceLagMs": 628.6473999936134
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 223.753800150007,
+        "requiredSourceLagMs": 552.4012001436204
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 233.13340009190142,
+        "requiredSourceLagMs": 661.1334000919014
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 210.62580007128417,
+        "requiredSourceLagMs": 571.7592001631856
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 216.3889000657946,
+        "requiredSourceLagMs": 644.3889000657946
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 188.44550009816885,
+        "requiredSourceLagMs": 532.8344001639634
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 196.57610007561743,
+        "requiredSourceLagMs": 624.5761000756174
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 201.22119993902743,
+        "requiredSourceLagMs": 525.7973000146449
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 220.75680014677346,
+        "requiredSourceLagMs": 648.7568001467735
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 225.70460010319948,
+        "requiredSourceLagMs": 574.4614002499729
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 215.91420006006956,
+        "requiredSourceLagMs": 643.9142000600696
+      }
+    ]
+  },
+  {
+    "name": "fixed300",
+    "patternMs": [
+      300
+    ],
+    "steps": 4,
+    "historySeconds": 1.5,
+    "generationHistorySeconds": 0.4,
+    "calls": 20,
+    "sourceMs": 6000.0,
+    "totalProcessingMs": 4191.7558999266475,
+    "averageComputeRatio": 0.6986259833211079,
+    "processingP50Ms": 205.2065999014303,
+    "processingP95Ms": 230.96849019639194,
+    "requiredSourceLagMs": 666.942600088194,
+    "records": [
+      {
+        "hopMs": 300.0,
+        "processingMs": 225.634700153023,
+        "requiredSourceLagMs": 653.634700153023
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 205.2166999783367,
+        "requiredSourceLagMs": 633.2166999783367
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 200.9257001336664,
+        "requiredSourceLagMs": 628.9257001336664
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 205.19649982452393,
+        "requiredSourceLagMs": 633.1964998245239
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 208.92579993233085,
+        "requiredSourceLagMs": 636.9257999323308
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 197.21239991486073,
+        "requiredSourceLagMs": 625.2123999148607
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 217.69169997423887,
+        "requiredSourceLagMs": 645.6916999742389
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 199.28480009548366,
+        "requiredSourceLagMs": 627.2848000954837
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 200.16689994372427,
+        "requiredSourceLagMs": 628.1668999437243
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 198.94559984095395,
+        "requiredSourceLagMs": 626.945599840954
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 230.54880020208657,
+        "requiredSourceLagMs": 658.5488002020866
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 196.07429997995496,
+        "requiredSourceLagMs": 624.074299979955
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 197.65369989909232,
+        "requiredSourceLagMs": 625.6536998990923
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 203.74959986656904,
+        "requiredSourceLagMs": 631.749599866569
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 238.942600088194,
+        "requiredSourceLagMs": 666.942600088194
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 223.5582999419421,
+        "requiredSourceLagMs": 651.5582999419421
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 210.9821999911219,
+        "requiredSourceLagMs": 638.9821999911219
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 214.29920010268688,
+        "requiredSourceLagMs": 642.2992001026869
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 216.62739990279078,
+        "requiredSourceLagMs": 644.6273999027908
+      },
+      {
+        "hopMs": 300.0,
+        "processingMs": 200.11900016106665,
+        "requiredSourceLagMs": 628.1190001610667
+      }
+    ]
+  },
+  {
+    "name": "fixed180_repeat",
+    "patternMs": [
+      180
+    ],
+    "steps": 4,
+    "historySeconds": 1.5,
+    "generationHistorySeconds": 0.4,
+    "calls": 34,
+    "sourceMs": 6120.0,
+    "totalProcessingMs": 8117.335500428453,
+    "averageComputeRatio": 1.3263620098739302,
+    "processingP50Ms": 211.17154997773468,
+    "processingP95Ms": 340.73691007215524,
+    "requiredSourceLagMs": 2488.3865004424006,
+    "records": [
+      {
+        "hopMs": 180.0,
+        "processingMs": 176.9489999860525,
+        "requiredSourceLagMs": 484.9489999860525
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 187.8786999732256,
+        "requiredSourceLagMs": 495.8786999732256
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 201.99239999055862,
+        "requiredSourceLagMs": 517.8710999637842
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 213.90459989197552,
+        "requiredSourceLagMs": 551.7756998557597
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 196.77230017259717,
+        "requiredSourceLagMs": 568.5480000283569
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 188.98139987140894,
+        "requiredSourceLagMs": 577.5293998997658
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 199.4424001313746,
+        "requiredSourceLagMs": 596.9718000311404
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 210.20869980566204,
+        "requiredSourceLagMs": 627.1804998368025
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 203.9777000900358,
+        "requiredSourceLagMs": 651.1581999268383
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 200.05079987458885,
+        "requiredSourceLagMs": 671.2089998014271
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 191.50239997543395,
+        "requiredSourceLagMs": 682.7113997768611
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 191.30770000629127,
+        "requiredSourceLagMs": 694.0190997831523
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 196.6703999787569,
+        "requiredSourceLagMs": 710.6894997619092
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 199.60300019010901,
+        "requiredSourceLagMs": 730.2924999520183
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 207.0774999447167,
+        "requiredSourceLagMs": 757.369999896735
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 197.8609999641776,
+        "requiredSourceLagMs": 775.2309998609126
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 206.4890000037849,
+        "requiredSourceLagMs": 801.7199998646975
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 207.50040002167225,
+        "requiredSourceLagMs": 829.2203998863697
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 212.13440014980733,
+        "requiredSourceLagMs": 861.354800036177
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 270.3117998316884,
+        "requiredSourceLagMs": 951.6665998678654
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 405.8352999854833,
+        "requiredSourceLagMs": 1177.5018998533487
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 270.1937002129853,
+        "requiredSourceLagMs": 1267.695600066334
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 282.59470011107624,
+        "requiredSourceLagMs": 1370.2903001774102
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 335.1969001814723,
+        "requiredSourceLagMs": 1525.4872003588825
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 351.025499869138,
+        "requiredSourceLagMs": 1696.5127002280205
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 314.1129999421537,
+        "requiredSourceLagMs": 1830.6257001701742
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 283.44220016151667,
+        "requiredSourceLagMs": 1934.067900331691
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 263.27400002628565,
+        "requiredSourceLagMs": 2017.3419003579766
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 270.979099906981,
+        "requiredSourceLagMs": 2108.3210002649575
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 284.1988999862224,
+        "requiredSourceLagMs": 2212.51990025118
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 237.02350002713501,
+        "requiredSourceLagMs": 2269.543400278315
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 239.94120000861585,
+        "requiredSourceLagMs": 2329.484600286931
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 270.17339994199574,
+        "requiredSourceLagMs": 2419.6580002289265
+      },
+      {
+        "hopMs": 180.0,
+        "processingMs": 248.72850021347404,
+        "requiredSourceLagMs": 2488.3865004424006
+      }
+    ]
+  }
+]

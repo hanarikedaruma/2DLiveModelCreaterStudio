@@ -1,7 +1,18 @@
 // ワープの追加・削除のコマンドと、追加するときの格子の計算（カード29）。計算は純粋関数
 import { newId, type Model, type Part, type Project, type Vec2, type Warp } from '@app/schema';
 import type { Command, TargetDeltas } from '@app/contracts';
-import { isUsableWarp, pointsToAncestorSpace, refitWarp, regularWarpPoints } from '@app/core';
+import {
+  baseWarpAngle,
+  createBindingEvaluator,
+  createDeformPipeline,
+  isUsableWarp,
+  pointsToAncestorSpace,
+  refitWarp,
+  regularWarpPoints,
+  reorientWarp,
+  warpFrameBounds,
+  warpToFrame,
+} from '@app/core';
 import { ancestorsOf, imageDescendants, partById } from '../canvas/parts';
 
 export const WARP_DIVISIONS = { min: 2, max: 8, initial: 4 } as const;
@@ -21,14 +32,14 @@ export function clampDivisions(n: number): number {
   return Math.min(WARP_DIVISIONS.max, Math.max(WARP_DIVISIONS.min, Math.round(n)));
 }
 
-// グループに付いているワープ（1つのグループに1つまで作る）
+// パーツに付いているワープ（画像・グループとも1つまで作る）
 export function warpOfPart(model: Model, partId: string): Warp | undefined {
   return model.warps.find((w) => w.partId === partId);
 }
 
-export function groupPart(model: Model, partId: string | undefined): Part | null {
+export function warpPart(model: Model, partId: string | undefined): Part | null {
   const part = partId === undefined ? undefined : partById(model, partId);
-  return part?.kind === 'group' ? part : null;
+  return part ?? null;
 }
 
 const hasUsableWarp = (model: Model, partId: string) => {
@@ -36,33 +47,35 @@ const hasUsableWarp = (model: Model, partId: string) => {
   return !!warp && isUsableWarp(warp);
 };
 
-// キャンバスで押した画像パーツから、ワープの対象に選ぶもの。格子の付いたいちばん近い祖先のグループ、
-// どの祖先にも格子が無ければいちばん近いグループ、グループに入っていなければその画像（グループを作る道を出す）
-export function pickWarpGroup(model: Model, imageId: string): string {
+// 押した画像自身の格子、格子のある最も近い親、押した画像の順で選ぶ
+export function pickWarpPart(model: Model, imageId: string): string {
+  if (hasUsableWarp(model, imageId)) return imageId;
   const groups = ancestorsOf(model, imageId).filter((p) => p.kind === 'group');
-  return (groups.find((g) => hasUsableWarp(model, g.id)) ?? groups[0])?.id ?? imageId;
+  return groups.find((g) => hasUsableWarp(model, g.id))?.id ?? imageId;
 }
 
-export interface GroupChoice {
+export interface WarpChoice {
   part: Part;
   depth: number; // 字下げ（いちばん上の祖先が 0）
   warp: boolean; // 格子が付いている
 }
 
-// 「対象を変える」の候補: 選んだグループの祖先（上から）、そのグループ、画像を含む一段下の子のグループ
-export function warpGroupChoices(project: Project, groupId: string): GroupChoice[] {
+// 対象を変える候補: 祖先、選択したパーツ、画像を含む直下のグループと子孫の画像
+export function warpPartChoices(project: Project, groupId: string): WarpChoice[] {
   const model = project.model;
-  const group = groupPart(model, groupId);
+  const group = warpPart(model, groupId);
   if (!group) return [];
   const chain = [...ancestorsOf(model, group.id).filter((p) => p.kind === 'group')].reverse();
   const children = model.parts.filter(
-    (p) => p.parentId === group.id && p.kind === 'group' && imageDescendants(model, p.id).length > 0,
+    (p) =>
+      (p.parentId === group.id && p.kind === 'group' && imageDescendants(model, p.id).length > 0) ||
+      (p.kind === 'image' && ancestorsOf(model, p.id).some((a) => a.id === group.id)),
   );
   const choice = (part: Part, depth: number) => ({ part, depth, warp: hasUsableWarp(model, part.id) });
   return [
     ...chain.map((p, i) => choice(p, i)),
     choice(group, chain.length),
-    ...children.map((p) => choice(p, chain.length + 1)),
+    ...children.map((p) => choice(p, chain.length + ancestorsOf(model, p.id).findIndex((a) => a.id === group.id) + 1)),
   ];
 }
 
@@ -84,25 +97,34 @@ function basePoints(project: Project, part: Part): Vec2[] {
 // 子孫の画像パーツの外接矩形（基準状態）。グループのワープを掛ける直前の空間
 // （子孫の変形と、間にあるグループのワープ・変形を掛けた位置）で測る。画像パーツが無ければ null
 export function descendantImageBounds(project: Project, groupId: string): Rect | null {
-  const model = project.model;
+  return pointsBounds(warpInputPoints(project, groupId));
+}
+
+function pointsBounds(points: Vec2[]): Rect | null {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  for (const id of imageDescendants(model, groupId)) {
-    if (id === groupId) continue;
-    const part = partById(model, id);
-    if (!part) continue;
-    for (const p of pointsToAncestorSpace(model, NO_DELTAS, id, groupId, basePoints(project, part))) {
-      if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
-      minX = Math.min(minX, p.x);
-      minY = Math.min(minY, p.y);
-      maxX = Math.max(maxX, p.x);
-      maxY = Math.max(maxY, p.y);
-    }
+  for (const p of points) {
+    if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) continue;
+    minX = Math.min(minX, p.x);
+    minY = Math.min(minY, p.y);
+    maxX = Math.max(maxX, p.x);
+    maxY = Math.max(maxY, p.y);
   }
   if (minX > maxX || minY > maxY) return null;
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+export function warpInputPoints(project: Project, partId: string): Vec2[] {
+  const model = project.model,
+    selected = partById(model, partId);
+  if (!selected) return [];
+  if (selected.kind === 'image') return basePoints(project, selected);
+  return imageDescendants(model, partId).flatMap((id) => {
+    const part = partById(model, id);
+    return part ? pointsToAncestorSpace(model, NO_DELTAS, id, partId, basePoints(project, part)) : [];
+  });
 }
 
 // 外接矩形に余白を足した格子の範囲。幅や高さが 0 でも格子が潰れないよう、余白は最低 1px にする
@@ -114,13 +136,21 @@ export function warpBoundsFor(rect: Rect): Rect {
 
 // グループに付けるワープ（規則的な格子なので、付けただけでは見た目は変わらない）。付けられなければ null
 export function createWarp(project: Project, groupId: string, columns: number, rows: number, id: string): Warp | null {
-  if (!groupPart(project.model, groupId)) return null;
-  const rect = descendantImageBounds(project, groupId);
-  if (!rect) return null;
-  const bounds = warpBoundsFor(rect);
+  if (!warpPart(project.model, groupId)) return null;
+  const angle = baseWarpAngle(project.model, groupId);
+  const bounds = warpFrameBounds(warpInputPoints(project, groupId), angle, WARP_MARGIN);
+  if (!bounds) return null;
   const c = clampDivisions(columns);
   const r = clampDivisions(rows);
-  return { id, partId: groupId, columns: c, rows: r, bounds, points: regularWarpPoints(bounds, c, r) };
+  return {
+    id,
+    partId: groupId,
+    columns: c,
+    rows: r,
+    bounds,
+    ...(angle !== 0 ? { angle } : {}),
+    points: regularWarpPoints(bounds, c, r, angle),
+  };
 }
 
 // [ワープを追加]。id は apply を純粋にするため先に決めておく。すでにワープがあるか、付けられなければ何もしない
@@ -168,7 +198,7 @@ export function removeWarpCommand(warpId: string): Command {
 export const removeWarpMessage = (count: number) => `このワープのキー（${count}個）も消えます`;
 
 export function warpNeedsRefit(project: Project, warp: Warp): boolean {
-  const rect = descendantImageBounds(project, warp.partId);
+  const rect = pointsBounds(warpInputPoints(project, warp.partId).map((p) => warpToFrame(warp, p)));
   const b = warp.bounds;
   return (
     rect !== null &&
@@ -181,7 +211,7 @@ export function warpNeedsRefit(project: Project, warp: Warp): boolean {
 
 export function refitWarpCommand(project: Project, warpId: string): Command | null {
   const warp = project.model.warps.find((w) => w.id === warpId);
-  const rect = warp ? descendantImageBounds(project, warp.partId) : null;
+  const rect = warp ? pointsBounds(warpInputPoints(project, warp.partId).map((p) => warpToFrame(warp, p))) : null;
   if (!warp || !rect) return null;
   const result = refitWarp(warp, warpBoundsFor(rect), project.model.bindings);
   if (!result) return null;
@@ -198,5 +228,54 @@ export function refitWarpCommand(project: Project, warpId: string): Command | nu
               bindings: result.bindings,
             },
           },
+  };
+}
+
+// 表示するずれは、既定値・全キー座標・1軸の途中の姿勢で、全描画頂点を実測する
+export function straightenWarpCommand(
+  project: Project,
+  warpId: string,
+): { command: Command; maxError: number; samples: number } | null {
+  const warp = project.model.warps.find((w) => w.id === warpId);
+  if (!warp) return null;
+  const result = reorientWarp(warp, baseWarpAngle(project.model, warp.partId), project.model.bindings);
+  if (!result) return null;
+  const model = {
+    ...project.model,
+    warps: project.model.warps.map((w) => (w.id === warpId ? result.warp : w)),
+    bindings: result.bindings,
+  };
+  const values: Record<string, number>[] = [{}];
+  for (const b of project.model.bindings) {
+    for (const k of b.keys) values.push(Object.fromEntries(b.parameterIds.map((id, i) => [id, k.coords[i] ?? 0])));
+    if (b.parameterIds.length === 1) {
+      const coords = [...new Set(b.keys.map((k) => k.coords[0]!))].sort((a, b) => a - b);
+      for (let i = 1; i < coords.length; i++) values.push({ [b.parameterIds[0]!]: (coords[i - 1]! + coords[i]!) / 2 });
+    }
+  }
+  const evaluator = createBindingEvaluator(),
+    pipeline = createDeformPipeline();
+  let maxError = 0;
+  for (const v of values) {
+    const old = pipeline.deform(project.model, evaluator.evaluate(project.model, v));
+    const next = pipeline.deform(model, evaluator.evaluate(model, v));
+    for (const item of old.items) {
+      const other = next.byPartId[item.partId];
+      if (!other) return null;
+      for (let i = 0; i < item.positions.length; i += 2)
+        maxError = Math.max(
+          maxError,
+          Math.hypot(item.positions[i]! - other.positions[i]!, item.positions[i + 1]! - other.positions[i + 1]!),
+        );
+    }
+  }
+  if (!Number.isFinite(maxError)) return null;
+  return {
+    maxError,
+    samples: values.length,
+    command: {
+      label: '格子をまっすぐにする',
+      apply: (p) => (p !== project || result.warp === warp ? p : { ...p, model }),
+    },
   };
 }

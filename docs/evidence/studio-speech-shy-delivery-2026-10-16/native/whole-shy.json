@@ -1,0 +1,61 @@
+{
+  "state": "stopped",
+  "sessionId": "80b191ede28a41ae83acb4b5eb48791b",
+  "error": "",
+  "mute": true,
+  "bypass": false,
+  "metrics": {
+    "breathyOnset": 1,
+    "breathyOnsetContextMs": 640,
+    "breathyOnsetEligible": 1,
+    "breathyOnsetEndMs": 330,
+    "breathyOnsetMs": 5.101000002468936,
+    "breathyOnsetStartMs": 70,
+    "breathyWordOnset": 1,
+    "breathyWordOnsetEndMs": 1040,
+    "breathyWordOnsetStartMs": 970,
+    "codecFrames": 45,
+    "cudaGraph": 1,
+    "dacClockCorrections": 419,
+    "firstAudioMs": 21.02455000579357,
+    "firstAudioWallMs": 1792131222991.6384,
+    "firstPcmSeconds": 5.636853199990583,
+    "frames": 104455,
+    "generationSeconds": 24.200810599999382,
+    "hesitations": 2,
+    "loadSeconds": 0,
+    "performanceMs": 0.18349998572375625,
+    "predictorGraphReplays": 45,
+    "prefetchHit": 1,
+    "rate": 24000,
+    "rtf": 5.560475366425592,
+    "seconds": 4.352291666666667,
+    "shyDelivery": 1,
+    "shyGapAddedMs": 230,
+    "shyIntroGapMs": 650,
+    "shyProcessingMs": 38.35729997081216,
+    "shyTailBreaths": 3,
+    "shyTailEndMs": 3760,
+    "shyTailStartMs": 3580,
+    "shyTempoRatio": 0.88,
+    "statefulDecoder": 1,
+    "textEmbeddingOffloadMiB": 593.5,
+    "vramMiB": 4011.12451171875
+  },
+  "converting": false,
+  "conversionOutput": null,
+  "source": "speech",
+  "speech": {
+    "delivery": "whole",
+    "history": [
+      "あなたのことが大好きです"
+    ],
+    "preparation": {
+      "owner": "",
+      "revision": 0,
+      "state": "idle"
+    },
+    "resident": true,
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+  }
+}

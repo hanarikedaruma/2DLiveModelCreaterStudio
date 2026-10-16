@@ -1,0 +1,46 @@
+{
+  "frames": 392,
+  "nonzero": 0,
+  "monotonic": true,
+  "finite": true,
+  "state": {
+    "state": "stopped",
+    "sessionId": "a7c88d6c3b224b25bfdeda3d368360e5",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "codecFrames": 49,
+      "cudaGraph": 1,
+      "firstAudioMs": 24232.46700000763,
+      "firstPcmSeconds": 2.0886169000004884,
+      "frames": 94080,
+      "generationSeconds": 6.451807799996459,
+      "loadSeconds": 15.62886919999437,
+      "predictorGraphReplays": 49,
+      "prefetchHit": 0,
+      "rate": 24000,
+      "rtf": 1.6458693367337909,
+      "seconds": 3.92,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "whole",
+      "history": [
+        "みなさん、こんにちは。今日もよろしくね。"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  "input": null
+}

@@ -1,0 +1,35 @@
+{
+  "exeSha256": "4950BB1F1E6497A2C2D8FCA0BDDBF37AF7B5DAA6327CF19FF268345AD77F3AAC",
+  "files": [
+    {
+      "file": "speech.py",
+      "sha256": "55924227CC8F26240B87C47C42663D51C0B8A15B00E1B5DFE75CC804F5BF6664"
+    },
+    {
+      "file": "speech_worker.py",
+      "sha256": "7BB09D6DFBEC0D51138958C7E7162C840C4C2855E4375293E4814A18649054D3"
+    },
+    {
+      "file": "speech_stream_backend.py",
+      "sha256": "323A5679532C137E6A8D640206C5A7EEAF7779265563139F4177C3DD09C1F55A"
+    },
+    {
+      "file": "speech_predictor_graph.py",
+      "sha256": "50B8BCA529E573CE4BBA2D57694D87CD4ADB2A3C373474DEAA714F5522075821"
+    },
+    {
+      "file": "speech_memory.py",
+      "sha256": "9BC09E7A43C2BB22BADCD8AADA9767ECF84868EBADDB4994F8E3CCDB358974F1"
+    },
+    {
+      "file": "studio_speech.py",
+      "sha256": "A775B32847C11E393DCF66CFD75654F87D6FF1F4627BE05E854847D220245FC5"
+    },
+    {
+      "file": "speech-stream-source.json",
+      "sha256": "6CEFBCC623F46905AEA8A8225F7C52057F71B9589540178866BC646970134C61"
+    }
+  ],
+  "installPath": "C:/Users/hanar/AppData/Local/Programs/2D Live Model Creator Studio",
+  "verifiedAt": "2026-10-16T05:19:40.0250514+09:00"
+}

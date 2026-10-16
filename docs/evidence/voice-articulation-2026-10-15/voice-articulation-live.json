@@ -1,0 +1,33 @@
+{
+  "exe": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+  "debugHook": false,
+  "inputs": 4,
+  "outputs": 4,
+  "quality": "balanced",
+  "muted": true,
+  "inputGainDb": 6,
+  "bodyDb": 3,
+  "softnessDb": 6,
+  "adjustedMeter": "1.7181152500711505e-8",
+  "width": {
+    "client": 229,
+    "scroll": 229
+  },
+  "liveSeconds": 15,
+  "devices": {
+    "input": {
+      "id": "2:マイク (Razer Seiren Mini)",
+      "name": "マイク (Razer Seiren Mini)"
+    },
+    "output": {
+      "id": "2:スピーカー (Sound Blaster Play! 3)",
+      "name": "スピーカー (Sound Blaster Play! 3)"
+    }
+  },
+  "estimatedMs": 684,
+  "underruns": 0,
+  "overflows": 0,
+  "diagnostics": "音声の計測推定内部遅延 684ms / 処理 98ms / GPU 1047MiB不足 0 / overflow 0 / 解析落ち 0入力の過大サンプル 0 / 出力のピーク抑制 0.0 dB相手側までの通話遅延とは異なります。声・フィルタ・口の設定はプロジェクト保存にも含まれます。",
+  "errors": [],
+  "screenshot": "voice-articulation-live.png"
+}

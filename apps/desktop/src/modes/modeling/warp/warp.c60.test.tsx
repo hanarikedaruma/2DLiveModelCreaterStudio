@@ -180,8 +180,6 @@ function project(patch: Partial<Model> = {}): Project {
 
 // ---- 画面 ----
 
-const DETAIL = { modeling: 'detail', animation: 'easy', studio: 'easy' } as const;
-
 // キーの生成（間を生成・再補間など）が呼ばれたかを記録する
 function generatorSpy() {
   const calls: string[] = [];
@@ -225,7 +223,7 @@ async function open(initial: Project, select: string[], tool = true) {
   act(() => shell.services.store.load(initial));
   await waitFor(() => expect(shell.canvas.lastDeformed()?.items.length).toBe(4));
   await waitFor(() => expect(shell.canvas.getState().view.scale).toBeCloseTo(0.54));
-  act(() => shell.services.editor.set({ selectedPartIds: select, uiLevel: DETAIL }));
+  act(() => shell.services.editor.set({ selectedPartIds: select }));
   if (tool) fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
   const store = shell.services.store as ProjectStoreWithHistory;
   const section = () => within(document.querySelector<HTMLElement>('[data-section-id="modeling.warp"]')!);
@@ -371,25 +369,20 @@ describe('カード60: ワープのツールを選んだときの案内', () => 
     expect(ctx.texts).toEqual([]);
   });
 
-  it('画像を選んでいるときは、それを含むグループを選ぶか作る操作を出す', async () => {
+  it('画像を選ぶと直接追加でき、対象を変える欄で親も選べる', async () => {
     const shell = await open(project(), ['a']);
     expect(shell.notes()).toHaveLength(1);
-    expect(shell.notes()[0]).toMatch(GUIDE.noGroup);
-    fireEvent.click(shell.section().getByRole('button', { name: 'グループ「体」を選ぶ' }));
+    expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
+    fireEvent.change(shell.section().getByRole('combobox', { name: '対象を変える' }), { target: { value: 'g' } });
     expect(shell.services.editor.get().selectedPartIds).toEqual(['g']);
     expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
     expect(shell.store.canUndo()).toBe(false);
 
     act(() => shell.services.editor.set({ selectedPartIds: ['c'] }));
     expect(shell.section().queryByRole('button', { name: /グループ「/ })).toBeNull();
-    fireEvent.click(shell.section().getByRole('button', { name: 'グループを作る' }));
-    const created = shell.services.editor.get().selectedPartIds[0]!;
-    const group = shell.store.get().model.parts.find((p) => p.id === created)!;
-    expect(group).toMatchObject({ kind: 'group', name: '髪のグループ', parentId: null });
-    expect(shell.store.get().model.parts.find((p) => p.id === 'c')!.parentId).toBe(created);
-    expect(shell.section().getByText('対象: 髪のグループ')).toBeTruthy();
+    expect(shell.section().queryByRole('button', { name: 'グループを作る' })).toBeNull();
+    expect(shell.section().getByText('対象: 髪')).toBeTruthy();
     expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
-    act(() => shell.store.undo());
     expect(shell.store.get().model.parts.find((p) => p.id === 'c')!.parentId).toBeNull();
     expect(shell.store.canUndo()).toBe(false);
   });
@@ -468,12 +461,11 @@ describe('カード60: 「ワープを追加」からそのまま制御点の編
     expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
   });
 
-  it('案内だけで、画像の選択 → グループを作る → 追加 → 制御点の移動 → キーへの記録 → Undo まで進める', async () => {
+  it('画像へ直接追加 → 制御点の移動 → キーへの記録 → Undoまで進める', async () => {
     const shell = await open(project(), ['c']);
     const initial = shell.store.get();
     // 1. 画像を選んでいる: グループを作る道が出る
-    expect(shell.notes()[0]).toMatch(GUIDE.noGroup);
-    fireEvent.click(shell.section().getByRole('button', { name: 'グループを作る' }));
+    expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
     const groupId = shell.services.editor.get().selectedPartIds[0]!;
     // 2. 格子が無い: ワープを追加
     expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
@@ -481,7 +473,7 @@ describe('カード60: 「ワープを追加」からそのまま制御点の編
     // 3. そのまま制御点の編集
     expect(activeTool()).toBe('ワープ編集');
     expect(shell.notes()).toEqual([]);
-    expect(shell.section().getByText('対象: 髪のグループ')).toBeTruthy();
+    expect(shell.section().getByText('対象: 髪')).toBeTruthy();
     expect(shell.section().getByTestId('warp-info').textContent).toBe('格子 4×4（制御点 25）');
     const warp = shell.warpOf(groupId)!;
     expect(warp.bounds.x).toBeCloseTo(C_BOUNDS.x);
@@ -506,7 +498,7 @@ describe('カード60: 「ワープを追加」からそのまま制御点の編
     expect(bindings).toHaveLength(1);
     expect(bindings[0]).toMatchObject({ channel: 'warpPoints', parameterIds: ['FaceAngleX'], keyValues: [[0, 30]] });
     const k30 = bindings[0]!.keys.find((k) => k.coords[0] === 30)!;
-    expect(k30).toMatchObject({ source: 'manual', locked: false });
+    expect(k30).toMatchObject({ source: 'manual', locked: true });
     near((k30.delta as Vec2[])[12]!, { x: 20, y: -15 });
     // 基準の制御点はそのまま
     near(shell.warpOf(groupId)!.points[12]!, { x: 120, y: 110 });
@@ -527,7 +519,6 @@ describe('カード60: 「ワープを追加」からそのまま制御点の編
     expect(shell.warpOf(groupId)).toBeUndefined();
     act(() => shell.services.editor.set({ activeParameterIds: [], editorParamValues: {} }));
     expect(shell.notes()[0]).toMatch(GUIDE.noWarp);
-    act(() => shell.store.undo());
     expect(shell.store.get()).toBe(initial);
     expect(shell.store.canUndo()).toBe(false);
     expect(shell.generatorCalls).toEqual([]);

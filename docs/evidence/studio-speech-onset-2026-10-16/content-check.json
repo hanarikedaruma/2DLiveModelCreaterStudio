@@ -1,0 +1,22 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "note": "No expected text, language hint or reference transcript supplied to ASR. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "soft-onset.wav",
+      "sha256": "b99f8b64f2647aa68801cb1f1d938f4d350cd63f610b6c8eeded9c99c6c275d4",
+      "seconds": 3.6,
+      "expectedTranscripts": [
+        "あなたのことが、だ、大好きです。",
+        "あ、あなたのことが、だ、大好きです。",
+        "あなたのことが大好きです。"
+      ],
+      "transcript": "あなたのことが大好きです",
+      "contentMatch": true,
+      "recognitionSeconds": 3.7440493000030983
+    }
+  ],
+  "allContentMatched": true
+}

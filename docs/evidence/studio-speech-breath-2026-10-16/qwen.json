@@ -1,0 +1,64 @@
+[
+  {
+    "name": "old",
+    "text": "あなたのことが大好きです",
+    "meta": {
+      "rate": 24000,
+      "frames": 86400,
+      "seconds": 3.6,
+      "generationSeconds": 4.259245399996871,
+      "firstPcmSeconds": 0.9510001000016928,
+      "rtf": 1.183123722221353,
+      "codecFrames": 45,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 1,
+      "predictorGraphReplays": 45,
+      "textEmbeddingOffloadMiB": 593.5,
+      "statefulDecoder": 1,
+      "performanceMs": 0.9557000012136996,
+      "hesitations": 2
+    }
+  },
+  {
+    "name": "phonetic",
+    "text": "ぁっ……あなたのことがぁ……だっ……だいすきぃ",
+    "meta": {
+      "rate": 24000,
+      "frames": 142080,
+      "seconds": 5.92,
+      "generationSeconds": 6.986328799990588,
+      "firstPcmSeconds": 0.8962868999951752,
+      "rtf": 1.1801231081065182,
+      "codecFrames": 74,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 1,
+      "predictorGraphReplays": 74,
+      "textEmbeddingOffloadMiB": 593.5,
+      "statefulDecoder": 1
+    }
+  },
+  {
+    "name": "faithful",
+    "text": "ぁっ……あなたのことがぁ……だっ……大好きですぅ",
+    "meta": {
+      "rate": 24000,
+      "frames": 124800,
+      "seconds": 5.2,
+      "generationSeconds": 5.9898944000015035,
+      "firstPcmSeconds": 0.8857160000043223,
+      "rtf": 1.1519027692310584,
+      "codecFrames": 65,
+      "vramMiB": 4009.49951171875,
+      "delivery": "stream",
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "cudaGraph": 1,
+      "predictorGraphReplays": 65,
+      "textEmbeddingOffloadMiB": 593.5,
+      "statefulDecoder": 1
+    }
+  }
+]

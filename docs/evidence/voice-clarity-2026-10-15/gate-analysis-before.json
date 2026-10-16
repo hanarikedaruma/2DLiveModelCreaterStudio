@@ -1,0 +1,122 @@
+[
+  {
+    "source": "normal",
+    "inputDb": 0,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.999999843446418,
+    "denoisedRmsRatio": 0.8704542212484249,
+    "speechMaskSeconds": 5.7519375,
+    "probabilityP50": 0.9840644598007202,
+    "probabilityP95": 0.9999907732009887
+  },
+  {
+    "source": "normal",
+    "inputDb": 0,
+    "mode": "lessDenoise",
+    "sourceEnergyRetainedByGate": 0.9999998326890196,
+    "denoisedRmsRatio": 0.7403472472184317,
+    "speechMaskSeconds": 5.6559375,
+    "probabilityP50": 0.9734832644462585,
+    "probabilityP95": 0.9999852895736694
+  },
+  {
+    "source": "normal",
+    "inputDb": 0,
+    "mode": "vadOnlyBoost",
+    "sourceEnergyRetainedByGate": 0.999999843446418,
+    "denoisedRmsRatio": 0.8704542212484249,
+    "speechMaskSeconds": 5.7519375,
+    "probabilityP50": 0.995142936706543,
+    "probabilityP95": 0.9999908804893494
+  },
+  {
+    "source": "normal",
+    "inputDb": -18,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.9999998345250148,
+    "denoisedRmsRatio": 0.8720949850788798,
+    "speechMaskSeconds": 5.6879375,
+    "probabilityP50": 0.8501238226890564,
+    "probabilityP95": 0.9999428033828736
+  },
+  {
+    "source": "normal",
+    "inputDb": -18,
+    "mode": "lessDenoise",
+    "sourceEnergyRetainedByGate": 0.9999998282901809,
+    "denoisedRmsRatio": 0.7407864395998526,
+    "speechMaskSeconds": 5.6239375,
+    "probabilityP50": 0.7766741514205933,
+    "probabilityP95": 0.9998830318450928
+  },
+  {
+    "source": "normal",
+    "inputDb": -18,
+    "mode": "vadOnlyBoost",
+    "sourceEnergyRetainedByGate": 0.999999853775928,
+    "denoisedRmsRatio": 0.8720949850788798,
+    "speechMaskSeconds": 5.7199375,
+    "probabilityP50": 0.9853405952453613,
+    "probabilityP95": 0.999985647201538
+  },
+  {
+    "source": "slow",
+    "inputDb": 0,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.9997770167181743,
+    "denoisedRmsRatio": 0.867131199520342,
+    "speechMaskSeconds": 7.647916666666666,
+    "probabilityP50": 0.9800930917263031,
+    "probabilityP95": 0.9998132646083832
+  },
+  {
+    "source": "slow",
+    "inputDb": 0,
+    "mode": "lessDenoise",
+    "sourceEnergyRetainedByGate": 0.9999996347151298,
+    "denoisedRmsRatio": 0.7785881250573796,
+    "speechMaskSeconds": 7.807916666666666,
+    "probabilityP50": 0.9088291525840759,
+    "probabilityP95": 0.9995088219642639
+  },
+  {
+    "source": "slow",
+    "inputDb": 0,
+    "mode": "vadOnlyBoost",
+    "sourceEnergyRetainedByGate": 0.9999997250332509,
+    "denoisedRmsRatio": 0.867131199520342,
+    "speechMaskSeconds": 8.031916666666667,
+    "probabilityP50": 0.9862226843833923,
+    "probabilityP95": 0.9997538596391677
+  },
+  {
+    "source": "slow",
+    "inputDb": -18,
+    "mode": "current",
+    "sourceEnergyRetainedByGate": 0.9866713109796452,
+    "denoisedRmsRatio": 0.8401109672282827,
+    "speechMaskSeconds": 7.295916666666667,
+    "probabilityP50": 0.7481359839439392,
+    "probabilityP95": 0.9939962059259415
+  },
+  {
+    "source": "slow",
+    "inputDb": -18,
+    "mode": "lessDenoise",
+    "sourceEnergyRetainedByGate": 0.9995645786284804,
+    "denoisedRmsRatio": 0.7709855682422393,
+    "speechMaskSeconds": 7.423916666666667,
+    "probabilityP50": 0.6222132742404938,
+    "probabilityP95": 0.9892011463642121
+  },
+  {
+    "source": "slow",
+    "inputDb": -18,
+    "mode": "vadOnlyBoost",
+    "sourceEnergyRetainedByGate": 0.9997725353473221,
+    "denoisedRmsRatio": 0.8401109672282827,
+    "speechMaskSeconds": 7.583916666666667,
+    "probabilityP50": 0.95582714676857,
+    "probabilityP95": 0.9993120461702347
+  }
+]

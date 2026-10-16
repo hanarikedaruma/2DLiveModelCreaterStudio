@@ -1,7 +1,7 @@
-// 音量のリップシンク（カード37）。register() で実行部に producer を、スタジオの設定にセクションを入れる
+// 音量のリップシンク（カード37）。実行部のproducerと、マイク・音声パネルのセクションを登録する
 import { registerPanelSection } from '../../../shell/api';
 import { registerLayerProducer } from '../runtime';
-import { STUDIO_SETTINGS_PANEL } from '../sections';
+import { STUDIO_AUDIO_PANEL } from '../sections';
 import { lipSyncBinding } from './lipSync';
 import { LipSyncSection } from './LipSyncSection';
 
@@ -15,8 +15,8 @@ export function register(): void {
   unregisterLipSync = registerLayerProducer(lipSyncBinding.producer);
   registerPanelSection({
     id: 'studio.lipSync',
-    panelId: STUDIO_SETTINGS_PANEL,
-    order: 16,
+    panelId: STUDIO_AUDIO_PANEL,
+    order: 20,
     component: LipSyncSection,
   });
 }

@@ -1,0 +1,67 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "languageHint": "Japanese",
+  "note": "No expected text or reference transcript supplied to ASR. Any language hint is recorded separately. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "i-body-01.wav",
+      "sha256": "4a56ed2bb9ba1ef42b8773ef71545f06ec8434ee217967cb57b9c5b370ae26b5",
+      "seconds": 1.19,
+      "expectedTranscripts": [
+        "行きます。",
+        "いきます。"
+      ],
+      "transcript": "いきます",
+      "contentMatch": true,
+      "recognitionSeconds": 4.086650800003554
+    },
+    {
+      "file": "u-body-01.wav",
+      "sha256": "7710b7fe0de24386efb4d35c3f36bf9da14fa184f6fba44ece33e7710c9b9f9a",
+      "seconds": 0.95,
+      "expectedTranscripts": [
+        "うん。"
+      ],
+      "transcript": "ん?",
+      "contentMatch": false,
+      "recognitionSeconds": 2.4706967000092845
+    },
+    {
+      "file": "e-body-01.wav",
+      "sha256": "156a4163681852128eda3b5d8f3a04ea293839c21258fa73a56db4cf062b421d",
+      "seconds": 1.95,
+      "expectedTranscripts": [
+        "ええんですか。"
+      ],
+      "transcript": "ええんですか?",
+      "contentMatch": true,
+      "recognitionSeconds": 2.280602499988163
+    },
+    {
+      "file": "o-body-01.wav",
+      "sha256": "396e2c5a57e43679dd06dc2ed28910329468b80ffc215b792b89258c5c563d08",
+      "seconds": 1.34,
+      "expectedTranscripts": [
+        "おっきい。"
+      ],
+      "transcript": "おっきい",
+      "contentMatch": true,
+      "recognitionSeconds": 2.7003394000057597
+    },
+    {
+      "file": "bodies-i-u-e-o-02.wav",
+      "sha256": "067a1e81ebf8804c39c49ace6264a48aec2b84ba014e02b330408cbb876ad999",
+      "seconds": 6.93,
+      "expectedTranscripts": [
+        "行きます。うん。ええんですか。おっきい。",
+        "いきます。うん。ええんですか。おっきい。"
+      ],
+      "transcript": "いきますうん? 永遠ですか?大きい",
+      "contentMatch": false,
+      "recognitionSeconds": 2.707238499991945
+    }
+  ],
+  "allContentMatched": false
+}

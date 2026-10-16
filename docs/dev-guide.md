@@ -28,8 +28,8 @@ pnpm exec prettier --write packages/core/src/eval   # 触ったフォルダだ�
 - 画面のテストは jsdom と @testing-library/react（例: apps/desktop/src/shell/Shell.test.tsx）。jsdom には 2D/WebGL のコンテキストが無いので、描画はテスト用のレンダラーに差し替える。サービスは `createFakeServices()`（apps/desktop/src/services.ts。仮実装だけで組み立てる）を使い、必要なものだけ上書きする。
 - 仮実装を本物に替えるのは結合のカード（MVP は 23・24、STEP1 は 44）。部品のカードは `services.ts` を書き換えない。STEP1 のサービス（audio・lipSync・autoBlink・bodyFollow・expressions・calibration・hotkeys・spout）は、カード44まではアプリの中でも仮実装なので、画面は仮実装で動くように作り、本物はパッケージの中でテストする。
 - STEP2（カード45）から `LayerProducer.produce` は `Layer | Layer[] | null` を返す（同じ id のレイヤーは配列の順に合成）。produce の結果を契約の型のまま使うところでは、配列も受け取る（例: `r === null ? [] : Array.isArray(r) ? r : [r]`）。
-- かんたん/詳細の部品: `presetOf`・`DetailDisclosure` は shell/api.ts から、`useUiLevel`・`confirmOverwriteCustom(dialogs, current)`・`useConfirmOverwriteCustom()`（プリセットを選び直すとき、今の値が 'custom' なら「個別に調整した値を上書きします」を確かめる）は shell/level から import する（shell/level は api.ts を使うので、api.ts からは公開しない）。
-- jsdom で `<Shell>` を描くテストは、描画を何もしないレンダラーに替える（例: apps/desktop/src/shell/DetailDisclosure.test.tsx の `{ ...createFakeServices(), createRenderer: () => renderer }`）。
+- 表示の「かんたん／詳細」はI-088・CC-019で廃止した。登録の`level`や`DetailDisclosure`を使わず、詳細項目も常に表示する。`presetOf`はshell/api.tsから、`confirmOverwriteCustom(dialogs, current)`・`useConfirmOverwriteCustom()`（プリセットを選び直すとき、今の値が'custom'なら「個別に調整した値を上書きします」を確かめる）はshell/levelからimportする。
+- jsdomで`<Shell>`を描くテストは、描画を何もしないレンダラーに替える（例: apps/desktop/src/shell/Shell.test.tsxの`{ ...createFakeServices(), createRenderer: () => renderer }`）。
 - ExpressionController の `apply(null, now)` は、変数に入れた形（`expressions.apply(null, now)`）で呼ぶと ESLint の prefer-spread に取り違えられる（`services.expressions.apply(…)` の形なら出ない）。呼ぶところに `// eslint-disable-next-line prefer-spread -- ExpressionController.apply は Function.prototype.apply ではない` を付ける。
 
 ## 部品のカードを並行して作るとき（STEP1 の S1・S2 など）

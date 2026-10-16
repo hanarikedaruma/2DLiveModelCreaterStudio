@@ -1,0 +1,26 @@
+[
+  {
+    "quality": "fast",
+    "modelOutputReusedForComparison": true,
+    "inputWindowsIdentical": true,
+    "pcmBitIdentical": true,
+    "differencePeak": 0.0,
+    "samples": 288000
+  },
+  {
+    "quality": "balanced",
+    "modelOutputReusedForComparison": true,
+    "inputWindowsIdentical": true,
+    "pcmBitIdentical": true,
+    "differencePeak": 0.0,
+    "samples": 288000
+  },
+  {
+    "quality": "stable",
+    "modelOutputReusedForComparison": true,
+    "inputWindowsIdentical": true,
+    "pcmBitIdentical": true,
+    "differencePeak": 0.0,
+    "samples": 288000
+  }
+]

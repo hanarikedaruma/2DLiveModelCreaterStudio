@@ -141,7 +141,7 @@ function CurrentCell({ pair, pa, pb, cell, name }: CurrentCellProps) {
   if ((pair.fixed ?? []).length > 0 && kind !== 'combined') {
     return <p className="grid2d-current">{name}: 断面のパラメータとの組み合わせのキーを編集する</p>;
   }
-  if (kind === 'center') return <p className="grid2d-current">{name}: 基準状態を編集する</p>;
+  if (kind === 'center') return <p className="grid2d-current">{name}: 2つの既定値の組み合わせのキーを編集する</p>;
   if (kind === 'axis') {
     const p = cellPatch(pa, pb, cell).activeParameterIds[0] === pa.id ? pa : pb;
     return (

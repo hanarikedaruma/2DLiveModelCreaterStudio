@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "backend": "seed-xlsr-tiny",
+  "name": "Original Soft Girl Realtime",
+  "sourceRepo": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\seed-vc",
+  "cacheDirectory": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\realtime-models",
+  "reference": "../voices/original-soft-girl.wav",
+  "steps": 4,
+  "cfgRate": 0,
+  "hopSeconds": 0.18,
+  "lookaheadSeconds": 0.08,
+  "historySeconds": 1.5,
+  "generationHistorySeconds": 0.4,
+  "referenceSeconds": 2,
+  "outputGainDb": -3,
+  "seed": 1729,
+  "qualityAccepted": false,
+  "inputCleanup": {
+    "noiseReduction": 0.85,
+    "speechOnly": true,
+    "speechSensitivity": 40,
+    "latencyMode": "lowLatency",
+    "noiseLibrary": "../voice-noise.dll",
+    "vadModel": "../models/silero_vad.onnx"
+  },
+  "voiceTone": {
+    "brightnessDb": 0,
+    "bodyDb": 0,
+    "softnessDb": 0
+  },
+  "outputFilters": {
+    "schemaVersion": 1,
+    "enabled": true,
+    "items": [
+      {
+        "id": "default-resonance",
+        "type": "resonance",
+        "name": "電子感・金属音の抑制",
+        "enabled": true,
+        "params": {
+          "strength": 35,
+          "frequencyHz": 1800,
+          "q": 1.2,
+          "sensitivity": 75
+        }
+      },
+      {
+        "id": "default-deesser",
+        "type": "deesser",
+        "name": "高音のザラつき・歯擦音の抑制",
+        "enabled": true,
+        "params": {
+          "strength": 30,
+          "frequencyHz": 5800,
+          "thresholdDb": -40
+        }
+      },
+      {
+        "id": "default-lowpass",
+        "type": "lowpass",
+        "name": "高音を丸める（ローパス）",
+        "enabled": true,
+        "params": {
+          "frequencyHz": 9000
+        }
+      }
+    ]
+  }
+}

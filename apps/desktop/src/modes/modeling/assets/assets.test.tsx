@@ -259,17 +259,19 @@ describe('割り当て', () => {
   });
 });
 
-describe('かんたんセットアップ', () => {
+describe('自動セットアップ', () => {
   it('plan が呼ばれ、command を1回の Undo で実行し、警告を通知で出す', async () => {
     const plan = vi.fn((_project: Project) => ({
       command: { label: 'セットアップ', apply: (p: Project) => ({ ...p, name: 'セットアップ済み' }) },
       warnings: ['顔の素材が無い', '口の中が無い'],
     }));
-    const services = testServices({ autoSetup: { plan } });
+    const services = testServices({
+      autoSetup: { plan, blink: () => ({ command: null, reason: null, replacesCustom: false }) },
+    });
     renderShell(services);
     await withAssets(services, [['a.png', 10, 10]]);
     const before = services.store.get();
-    fireEvent.click(screen.getByRole('button', { name: 'かんたんセットアップ' }));
+    fireEvent.click(screen.getByRole('button', { name: '自動セットアップ' }));
     expect(plan).toHaveBeenCalledWith(before);
     expect(services.store.get().name).toBe('セットアップ済み');
     expect(screen.getByText('顔の素材が無い')).toBeTruthy();

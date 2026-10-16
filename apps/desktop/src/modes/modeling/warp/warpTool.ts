@@ -3,7 +3,7 @@
 // グループを選ぶまでは、枠が案内の帯とクリックでの選択を受け持つ（target）
 import type { Model, Part, Vec2, Warp } from '@app/schema';
 import type { DeformedModel, TargetDeltas, ViewTransform } from '@app/contracts';
-import { isUsableWarp, pointsToModelSpace } from '@app/core';
+import { isUsableWarp, warpPointsToModelSpace } from '@app/core';
 import type { CanvasPointerEvent, CanvasTool } from '../../../shell/api';
 import { drawCanvasBanner, drawPickOutline } from '../../../shell/canvas/banner';
 import { drawSwitchHint, nearPolygon, nearRect, toScreen } from '../canvas/targetRange';
@@ -14,7 +14,7 @@ import { isPreviewOffBase } from '../../../services/keyEditor/common';
 import { PREVIEW_OFF_BASE_MESSAGE, startKeyedDrag, type KeyedDrag } from '../canvas/liveEdit';
 import { ancestorsOf, imagePartAt, paramValuesOf, partById } from '../canvas/parts';
 import { nearestVertex, verticesInRect } from '../mesh/meshTool';
-import { groupPart, pickWarpGroup, warpOfPart } from './warpOps';
+import { warpPart, pickWarpPart, warpOfPart } from './warpOps';
 import { WARP_PICK_PROMPT, warpGuide } from './warpGuide';
 
 export const WARP_TOOL_ID = 'modeling.warp';
@@ -33,7 +33,7 @@ export interface WarpTarget {
 export function warpTarget(model: Model, selectedIds: string[]): WarpTarget | null {
   for (const id of selectedIds) {
     const part = partById(model, id);
-    if (part?.kind !== 'group') continue;
+    if (!part) continue;
     const warp = warpOfPart(model, part.id);
     if (warp && isUsableWarp(warp)) return { part, warp };
   }
@@ -49,7 +49,7 @@ export function controlPoints(warp: Warp, deltas: TargetDeltas): Vec2[] {
 
 // 制御点の見えている位置（グループの変形と、祖先のワープ・変形を掛けたキャンバス上の位置）
 export function displayControlPoints(model: Model, deltas: TargetDeltas, target: WarpTarget): Vec2[] {
-  return pointsToModelSpace(model, deltas, target.part.id, controlPoints(target.warp, deltas));
+  return warpPointsToModelSpace(model, deltas, target.part.id, controlPoints(target.warp, deltas));
 }
 
 const lerp = (a: Vec2, b: Vec2, t: number): Vec2 => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
@@ -79,7 +79,7 @@ export function gridPolylines(
   const lines: Vec2[][] = [];
   for (let j = 0; j <= warp.rows; j++) lines.push(line(warp.columns, (i) => at(i, j)));
   for (let i = 0; i <= warp.columns; i++) lines.push(line(warp.rows, (j) => at(i, j)));
-  const mapped = pointsToModelSpace(model, deltas, target.part.id, lines.flat());
+  const mapped = warpPointsToModelSpace(model, deltas, target.part.id, lines.flat());
   let n = 0;
   return lines.map((l) => l.map(() => mapped[n++]!));
 }
@@ -100,7 +100,7 @@ export function canvasToWarpLinear(
     const p = local[i] ?? { x: 0, y: 0 };
     probes.push(p, { x: p.x + h, y: p.y }, { x: p.x, y: p.y + h });
   }
-  const mapped = pointsToModelSpace(model, deltas, target.part.id, probes);
+  const mapped = warpPointsToModelSpace(model, deltas, target.part.id, probes);
   return indices.map((_, n) => {
     const o = mapped[n * 3]!;
     const ex = mapped[n * 3 + 1]!;
@@ -110,9 +110,9 @@ export function canvasToWarpLinear(
 }
 
 // グループを選んでいる（1つだけ）、または格子の付いたグループを選んでいる。対象を選ぶ段かを決める
-export function hasWarpGroup(model: Model, selectedIds: string[]): boolean {
+export function hasWarpPart(model: Model, selectedIds: string[]): boolean {
   return (
-    warpTarget(model, selectedIds) !== null || (selectedIds.length === 1 && groupPart(model, selectedIds[0]) !== null)
+    warpTarget(model, selectedIds) !== null || (selectedIds.length === 1 && warpPart(model, selectedIds[0]) !== null)
   );
 }
 
@@ -279,14 +279,14 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
   const tool: CanvasTool = {
     id: WARP_TOOL_ID,
     label: 'ワープ編集',
-    level: 'detail', // ワープのパレットと同じく詳細でだけ出す（I-008）
+    // ワープのパレットは、このツールのときだけ出す
     cursor: 'crosshair',
     target: {
       prompt: WARP_PICK_PROMPT,
-      has: (project, editor) => hasWarpGroup(project.model, editor.selectedPartIds),
+      has: (project, editor) => hasWarpPart(project.model, editor.selectedPartIds),
       pick: (project, deformed, p) => {
         const hit = imagePartAt(project.model, deformed, p);
-        return hit ? pickWarpGroup(project.model, hit) : null;
+        return hit ? pickWarpPart(project.model, hit) : null;
       },
     },
 
@@ -380,7 +380,7 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       if (inTargetRange(env, snap, groupId, e.screenPoint)) return;
       if (hit) {
         const inside = groupId !== undefined && ancestorsOf(model, hit).some((p) => p.id === groupId);
-        const next = pickWarpGroup(model, hit);
+        const next = pickWarpPart(model, hit);
         if (!inside && next !== groupId) {
           env.services.editor.set({ selectedPartIds: [next] });
           select(null, []);
@@ -422,7 +422,7 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
             const deformed = env.lastDeformed();
             const at = { x: (pointer.x - view.offset.x) / view.scale, y: (pointer.y - view.offset.y) / view.scale };
             const hit = deformed ? imagePartAt(model, deformed, at) : null;
-            const next = hit ? pickWarpGroup(model, hit) : null;
+            const next = hit ? pickWarpPart(model, hit) : null;
             const inside = hit !== null && ancestorsOf(model, hit).some((q) => q.id === groupId);
             if (next && !inside && next !== groupId) drawSwitchHint(ctx, model, deformed, view, next);
           }
@@ -436,7 +436,7 @@ export function createWarpEditor(slot: EnvSlot): WarpEditor {
       const guide = warpGuide(snap.project, snap.editor);
       // 格子がまだ無いグループは、どのグループかが分かるように範囲を点線で囲む
       const ids = snap.editor.selectedPartIds;
-      const group = !target && ids.length === 1 ? groupPart(snap.project.model, ids[0]) : null;
+      const group = !target && ids.length === 1 ? warpPart(snap.project.model, ids[0]) : null;
       const outline = group ? groupOutline(snap.project.model, env.lastDeformed(), view, group.id) : null;
       if (outline) drawPickOutline(ctx, outline.min, outline.max);
       if (guide) drawCanvasBanner(ctx, guide);

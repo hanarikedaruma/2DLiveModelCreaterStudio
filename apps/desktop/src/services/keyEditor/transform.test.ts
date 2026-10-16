@@ -4,7 +4,6 @@ import type { Command } from '@app/contracts';
 import { createBindingEvaluator, partOpacity } from '@app/core';
 import { createKeyEditor } from './index';
 import {
-  DETAIL,
   deepFreeze,
   delta,
   editorAt,
@@ -70,12 +69,14 @@ describe('基準状態の編集', () => {
     expect(result.model.bindings).toEqual([]);
   });
 
-  it('パラメータを選んでいてもデフォルト値なら基準状態を変える', () => {
+  it('パラメータの既定値を直すと、基準を変えず既定値のキー1つを作る（I-072）', () => {
     const project = baseProject();
     const cmd = keyEditor.transformEdit(project, editorAt({ FaceAngleX: 0 }), ['face'], { dPosition: { x: 1, y: 2 } });
     const result = command(cmd).apply(project);
-    expect(result.model.parts[0]!.position).toEqual({ x: 1, y: 2 });
-    expect(result.model.bindings).toEqual([]);
+    expect(result.model.parts).toEqual(project.model.parts);
+    expect(result.model.bindings[0]!.keys).toEqual([
+      { coords: [0], delta: delta({ position: { x: 1, y: 2 } }), source: 'manual', locked: true },
+    ]);
   });
 
   it('値が変わらない変更や、無いパーツへの変更では同じプロジェクトを返す', () => {
@@ -131,7 +132,7 @@ describe('1つのパラメータでの編集', () => {
     ]);
     const project = baseProject([original]);
     const result = command(
-      keyEditor.transformEdit(project, editorAt({ FaceAngleX: 30 }, DETAIL), ['face'], {
+      keyEditor.transformEdit(project, editorAt({ FaceAngleX: 30 }), ['face'], {
         dPosition: { x: 5, y: -2 },
         dRotation: 3,
         scaleFactor: { x: 0.5, y: 2 },
@@ -143,14 +144,14 @@ describe('1つのパラメータでの編集', () => {
     expect(b.keys[2]!.delta).toEqual(
       delta({ position: { x: 15, y: -2 }, rotation: 8, scale: { x: 0.6, y: 2 }, opacity: 0.8 }),
     );
-    // source は manual にする。詳細モードでは locked を変えない
-    expect(b.keys[2]).toMatchObject({ source: 'manual', locked: false });
+    // 手動で編集したキーはロックする
+    expect(b.keys[2]).toMatchObject({ source: 'manual', locked: true });
     // ほかのキーはそのまま
     expect(b.keys.slice(0, 2)).toEqual(original.keys.slice(0, 2));
     expect(b.keyValues).toEqual([[0, 15, 30]]);
   });
 
-  it('かんたんモードでは編集したキーを locked にする', () => {
+  it('既存と新規のどちらの手動キーも locked にする', () => {
     const project = baseProject([
       faceXBinding([
         { coords: [0], delta: delta(), source: 'auto', locked: false },
@@ -161,12 +162,12 @@ describe('1つのパラメータでの編集', () => {
       keyEditor.transformEdit(project, editorAt({ FaceAngleX: 30 }), ['face'], { dRotation: 1 }),
     ).apply(project);
     expect(easy.model.bindings[0]!.keys[1]).toMatchObject({ source: 'manual', locked: true });
-    // 新しいバインディングのキーも詳細モードではロックしない
+    // 新しいバインディングのキーも保護する
     const empty = baseProject();
     const fresh = command(
-      keyEditor.transformEdit(empty, editorAt({ FaceAngleX: 30 }, DETAIL), ['face'], { dRotation: 1 }),
+      keyEditor.transformEdit(empty, editorAt({ FaceAngleX: 30 }), ['face'], { dRotation: 1 }),
     ).apply(empty);
-    expect(fresh.model.bindings[0]!.keys[1]).toMatchObject({ source: 'manual', locked: false });
+    expect(fresh.model.bindings[0]!.keys[1]).toMatchObject({ source: 'manual', locked: true });
   });
 
   it('値は min..max に丸めてから探す', () => {
@@ -277,11 +278,11 @@ describe('キーの無い値と addKeyAtCurrentValue', () => {
   it('キーの範囲の外に足しても見た目が変わらない（端のキーの差分になる）', () => {
     const project = baseProject([faceXBinding(keys.slice(1))]);
     const added = keyEditor
-      .addKeyAtCurrentValue(project, editorAt({ FaceAngleX: -12 }, DETAIL), { partId: 'face' })
+      .addKeyAtCurrentValue(project, editorAt({ FaceAngleX: -12 }), { partId: 'face' })
       .apply(project);
     const b = added.model.bindings[0]!;
     expect(b.keyValues).toEqual([[-12, 0, 30]]);
-    expect(b.keys[0]).toEqual({ coords: [-12], delta: delta(), source: 'manual', locked: false });
+    expect(b.keys[0]).toEqual({ coords: [-12], delta: delta(), source: 'manual', locked: true });
     const values = samples({ FaceAngleX: range(-30, 30, 3) });
     expectSameLook(
       values.map((v) => partLook(project, v)),
@@ -418,7 +419,7 @@ describe('2つのパラメータでの編集', () => {
   it('格子の線が増えるときも見た目が変わらない（必要な点に補助のキーを足す）', () => {
     const project = baseProject([axisBinding()]);
     // x = 15 の列が増える。(15, 0) は代用だと 0 になってしまうので補助のキーが要る
-    const editor = editorAt({ FaceAngleX: 15, FaceAngleY: 30 }, DETAIL);
+    const editor = editorAt({ FaceAngleX: 15, FaceAngleY: 30 });
     expect(keyEditor.transformEdit(project, editor, ['face'], { dRotation: 1 })).toBe('needsKey');
     const added = keyEditor.addKeyAtCurrentValue(project, editor, { partId: 'face' }).apply(project);
     const b = added.model.bindings[0]!;
@@ -428,7 +429,7 @@ describe('2つのパラメータでの編集', () => {
     ]);
     expect(b.keys.find((k) => k.coords[0] === 15 && k.coords[1] === 30)).toMatchObject({
       source: 'manual',
-      locked: false,
+      locked: true,
     });
     expect(b.keys.find((k) => k.coords[0] === 15 && k.coords[1] === 0)).toEqual({
       coords: [15, 0],
@@ -468,12 +469,12 @@ describe('2つのパラメータでの編集', () => {
       { id: 'b-hair', target: { type: 'part', id: 'hair' } },
     );
     const project = baseProject([axisBinding(), global]);
-    const state = editorAt({ FaceAngleY: 30, FaceAngleX: 15 }, DETAIL);
+    const state = editorAt({ FaceAngleY: 30, FaceAngleX: 15 });
     const out = command(keyEditor.transformEdit(project, state, ['face'], { dRotation: 1 })).apply(project);
     const b = out.model.bindings[0]!;
     expect(b.keys.find((k) => k.coords.join() === '15,30')).toMatchObject({
       source: 'manual',
-      locked: false,
+      locked: true,
       delta: delta({ position: { x: 5, y: -10 }, rotation: 3, scale: { x: 1.2, y: 1 } }),
     });
     expect(b.keys.find((k) => k.coords.join() === '15,0')).toMatchObject({

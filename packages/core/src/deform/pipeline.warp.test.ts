@@ -30,7 +30,7 @@ function warpOn(id: string, partId: string): Warp {
 }
 
 describe('createDeformPipeline: ワープを呼ぶ順', () => {
-  it('自身の変形 → 親のワープ → 親の変形 → 祖父のワープ → 祖父の変形。画像パーツ自身のワープは使わない', () => {
+  it('画像自身のワープ → 自身の変形 → 親のワープ → 親の変形 → 祖父のワープ → 祖父の変形', () => {
     calls.length = 0;
     const parts = [
       groupPart('grand', { rotation: 90 }),
@@ -50,18 +50,19 @@ describe('createDeformPipeline: ワープを呼ぶ順', () => {
       warpPoints: { wParent: parentDelta },
     });
 
-    expect(calls.map((c) => c.warpId)).toEqual(['wParent', 'wGrand']);
+    expect(calls.map((c) => c.warpId)).toEqual(['wChild', 'wParent', 'wGrand']);
+    expect(calls[0]!.points).toEqual([1, 0]);
     // (1,0) → 自身の 90度で (0,1) → 親のワープ
-    expect(calls[0]!.points[0]).toBeCloseTo(0, 5);
-    expect(calls[0]!.points[1]).toBeCloseTo(1, 5);
-    expect(calls[0]!.delta).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(calls[1]!.points[0]).toBeCloseTo(0, 5);
+    expect(calls[1]!.points[1]).toBeCloseTo(1001, 5);
+    expect(calls[1]!.delta).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     // ワープで (1000,1) → 親の +(0,5) で (1000,6) → 祖父のワープ（差分なし）
-    expect(calls[1]!.points[0]).toBeCloseTo(1000, 4);
-    expect(calls[1]!.points[1]).toBeCloseTo(6, 4);
-    expect(calls[1]!.delta).toBeUndefined();
+    expect(calls[2]!.points[0]).toBeCloseTo(1000, 4);
+    expect(calls[2]!.points[1]).toBeCloseTo(1006, 4);
+    expect(calls[2]!.delta).toBeUndefined();
     // ワープで (2000,6) → 祖父の 90度で (−6,2000)
     const [x, y] = out.byPartId.child!.positions;
-    expect(x).toBeCloseTo(-6, 3);
+    expect(x).toBeCloseTo(-1006, 3);
     expect(y).toBeCloseTo(2000, 3);
   });
 });

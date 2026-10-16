@@ -1,7 +1,8 @@
 // 通しのテストの道具: VITE_E2E=1 でビルドしたアプリを起動し、WebView2 のリモートデバッグ（CDP）で Playwright からつなぐ
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { existsSync, rmSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { BaseDirectory } from '@tauri-apps/api/path';
 import { fileURLToPath } from 'node:url';
 import { chromium, type Browser, type Page } from 'playwright';
 import type { Services } from '@app/contracts';
@@ -40,6 +41,26 @@ export const RESULTS = join(HERE, 'results');
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export const slash = (p: string) => p.replace(/\\/g, '/');
+
+// 検証用の別identifierでも、起動したアプリ自身の保存先を使う。
+export function appDataDir(page: Page): Promise<string> {
+  return page.evaluate((directory) => {
+    const tauri = (
+      window as unknown as {
+        __TAURI_INTERNALS__: { invoke(command: string, args: { directory: number }): Promise<string> };
+      }
+    ).__TAURI_INTERNALS__;
+    return tauri.invoke('plugin:path|resolve_directory', { directory });
+  }, BaseDirectory.AppData);
+}
+
+export function removeTestAutosave(appData: string, projectId: string): void {
+  if (!appData || !/^[0-9A-HJKMNP-TV-Z]{26}$/.test(projectId)) return;
+  const base = resolve(appData, 'unsaved');
+  const target = resolve(base, projectId);
+  if (dirname(target) !== base) throw new Error('テスト用の自動保存の範囲外');
+  rmSync(target, { recursive: true, force: true });
+}
 
 export interface RunningApp {
   process: ChildProcess;
@@ -94,7 +115,8 @@ export async function launchApp(port = 9333, extraBrowserArgs: string[] = []): P
   await page.evaluate(() => window.__studio.environment.load());
   const kill = () => {
     // WebView2 の子プロセスごと止める
-    if (child.pid) spawnSync('taskkill', ['/F', '/T', '/PID', String(child.pid)], { stdio: 'ignore' });
+    if (exitCode === null && child.pid)
+      spawnSync('taskkill', ['/F', '/T', '/PID', String(child.pid)], { stdio: 'ignore' });
   };
   return {
     process: child,
@@ -109,7 +131,11 @@ export async function launchApp(port = 9333, extraBrowserArgs: string[] = []): P
 }
 
 // 確認のダイアログが出ていれば、その中のボタン（OK かキャンセル）を押す。出ていなければ false
-export async function answerDialog(page: Page, button: 'OK' | 'キャンセル', timeoutMs = 3000): Promise<string | null> {
+export async function answerDialog(
+  page: Page,
+  button: 'OK' | 'キャンセル' | '復元する' | '後で決める' | '自動保存を破棄',
+  timeoutMs = 3000,
+): Promise<string | null> {
   const dialog = page.getByRole('dialog');
   try {
     await dialog.waitFor({ state: 'visible', timeout: timeoutMs });
@@ -117,7 +143,12 @@ export async function answerDialog(page: Page, button: 'OK' | 'キャンセル',
     return null;
   }
   const message = await dialog.locator('.dialog-message').textContent();
-  await dialog.getByRole('button', { name: button }).click();
+  // 既存テストの起動時のキャンセルは、新しい復元ダイアログでは「後で決める」。作業を削除しない。
+  const label =
+    button === 'キャンセル' && (await dialog.getByRole('button', { name: '後で決める', exact: true }).count()) > 0
+      ? '後で決める'
+      : button;
+  await dialog.getByRole('button', { name: label, exact: true }).click();
   return message;
 }
 

@@ -1,0 +1,112 @@
+{
+  "qualityPresets": {
+    "fast": {
+      "steps": 4,
+      "cfgRate": 0.0,
+      "hopSeconds": 0.18,
+      "lookaheadSeconds": 0.08,
+      "historySeconds": 1.5,
+      "generationHistorySeconds": 0.4,
+      "referenceSeconds": 2
+    },
+    "balanced": {
+      "steps": 6,
+      "cfgRate": 0.7,
+      "hopSeconds": 0.24,
+      "lookaheadSeconds": 0.08,
+      "historySeconds": 2.5,
+      "generationHistorySeconds": 0.5,
+      "referenceSeconds": 3
+    },
+    "stable": {
+      "steps": 8,
+      "cfgRate": 0.7,
+      "hopSeconds": 0.3,
+      "lookaheadSeconds": 0.08,
+      "historySeconds": 2.5,
+      "generationHistorySeconds": 0.5,
+      "referenceSeconds": 3
+    },
+    "hq": {
+      "steps": 20,
+      "cfgRate": 0.7,
+      "hopSeconds": 3.0,
+      "lookaheadSeconds": 0.2,
+      "historySeconds": 0.6,
+      "referenceSeconds": 5
+    }
+  },
+  "files": [
+    {
+      "path": "quality_voice/backend.py",
+      "sha256": "350d80332d05c0fb18ae65ec58bdc569248e257ee1c902aba9fee55296fd9a4a"
+    },
+    {
+      "path": "quality_voice/worker.py",
+      "sha256": "6f05bbc4c22f2bf1e3983dcc5af917987e75ffb045f357f43a64fbc282fa0d6d"
+    },
+    {
+      "path": "quality_voice/live.py",
+      "sha256": "397a301e551b4ceccc4a5d174f423a6cfc4b329d8f949943edf2c29db91ab13c"
+    },
+    {
+      "path": "quality_voice/audio_processing.py",
+      "sha256": "17a3655af70414183a079959e16c2fbf4bb4809cef089b3ba73f28d400e951f5"
+    },
+    {
+      "path": "quality_voice/filter_chain.py",
+      "sha256": "f34fb3c53f6c2dcc14b75bc3178e2776a5cd0c8ee14ce12f2f34da4803f35b2f"
+    },
+    {
+      "path": "quality_voice/execution_lock.py",
+      "sha256": "1823bd50fe3706487800418a334a46721381917073237a9e30ce7c7750499a3c"
+    },
+    {
+      "path": "quality_voice/processes.py",
+      "sha256": "d8fa4803ab774fc33dee444a2d0e2aca1913c0cc2b0eb8f6db06ad95f421e5b2"
+    },
+    {
+      "path": "quality_voice/fetch_models.py",
+      "sha256": "6bfa0986f583dc9c504f2136e37019d17a72db2b462060586b3fdf89a819ac87"
+    },
+    {
+      "path": "quality_voice/fetch_realtime_models.py",
+      "sha256": "81273f8436cda3d185d9a713cdfb05a354d80b9253ad362500541e86be28dbe9"
+    },
+    {
+      "path": "quality_voice/requirements.txt",
+      "sha256": "3acc424855f7918ca9f5f540e2db479e51867512b65b6878efae11480c33db53"
+    },
+    {
+      "path": "quality_voice/requirements-lock.txt",
+      "sha256": "1319a2245b891c843b2a9b2f5775eb1c1afd7b34a29acb8d654d0f4bc95b7d34"
+    }
+  ],
+  "sourceRevision": "51383efd921027683c89e5348211d93ff12ac2a8",
+  "version": "VoiceChanger 0.8.0",
+  "speech": {
+    "revision": "5ecdb67327fd37bb2e042aab12ff7391903235d3",
+    "files": [
+      {
+        "path": "quality_voice/speech.py",
+        "sha256": "6f7763b3afd694857cfc45b45aa8f7f89cac75937d29d1e490d370f9eb702348"
+      },
+      {
+        "path": "quality_voice/speech_config.py",
+        "sha256": "1937c794a1db01eb9320669433403f1566b5d18f4f8f3a3002f1969764fa9eb8"
+      },
+      {
+        "path": "quality_voice/speech_worker.py",
+        "sha256": "90dc6ab29dff0ae75a64a28a140348a0947f91651a26a418da92017a35da2850"
+      }
+    ],
+    "model": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+    "version": "VoiceChanger 0.9.0",
+    "fixedSpeaker": {
+      "model": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+      "revision": "fd4b254389122332181a7c3db7f27e918eec64e3",
+      "identity": "Voice conversion reference WAV SHA256 + shared tone/filter profile",
+      "sourceAudit": "speech-stream-source.json"
+    }
+  }
+}

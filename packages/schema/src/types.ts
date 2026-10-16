@@ -12,7 +12,6 @@ export type BlendMode = 'normal' | 'multiply' | 'screen' | 'add';
 export type ParameterGroupId =
   'face' | 'eye' | 'brow' | 'mouth' | 'cheek' | 'body' | 'armL' | 'armR' | 'sway' | 'other';
 export type ModeId = 'modeling' | 'animation' | 'studio';
-export type UiLevel = 'easy' | 'detail';
 
 // ---- Asset ----
 
@@ -85,7 +84,7 @@ export type StandardPartType =
   | 'chest'
   | 'armL'
   | 'armR'
-  // 変形グループ（かんたんセットアップが作る）
+  // 変形グループ（自動セットアップが作る）
   | 'bodyRoot'
   | 'armRootL'
   | 'armRootR'
@@ -158,7 +157,8 @@ export interface ContourLine {
 
 export interface Warp {
   id: Id;
-  partId: Id; // ワープを付ける group パーツ
+  partId: Id; // ワープを付けたパーツ（グループまたは画像）
+  angle?: number; // 格子の向き（ラジアン、boundsの中心まわり）。省略は0
   columns: number;
   rows: number; // 格子の分割数
   bounds: { x: number; y: number; width: number; height: number }; // キャンバス座標
@@ -217,6 +217,11 @@ export interface ParameterKey {
 
 // ---- Model と Project ----
 
+export interface ClosedEyeLine {
+  partId: Id | null; // UVを付けた画像。nullはメッシュの無い旧ファイルのモデル座標（後で付け直せる）
+  points: Vec2[];
+}
+
 export interface Model {
   parts: Part[];
   meshes: Mesh[];
@@ -229,10 +234,10 @@ export interface Model {
   shoulderColliders?: ShoulderCollider[];
   contourLines?: ContourLine[]; // 省略は空。I-068 / schemaVersion 7
   lipSync: LipSync;
-  setupHints: { closedLineL: Vec2[] | null; closedLineR: Vec2[] | null }; // かんたんセットアップ用（閉じた目の線。STEP1で使う）
+  setupHints: { closedLineL: ClosedEyeLine | null; closedLineR: ClosedEyeLine | null };
 }
 export interface Project {
-  schemaVersion: number; // 現在は7（輪郭線。旧版は開くときに移行）
+  schemaVersion: number; // 現在は10（現在の姿勢を始点にするアニメーション）
   id: Id;
   name: string;
   assets: Asset[];
@@ -242,7 +247,7 @@ export interface Project {
   physics: Physics[];
   trackingMappings: TrackingMapping[]; // カスタムの割り当ての一覧（trackingSetup.mode が custom のときに使う）
   trackingSetup: TrackingSetup; // トラッキングの割り当ての使い方と合わせ方（I-042）
-  studio: { scenes: Scene[]; activeSceneId: Id | null; hotkeys: Hotkey[] };
+  studio: { scenes: Scene[]; activeSceneId: Id | null; hotkeys: Hotkey[]; voice?: import('./voice').VoiceSettings };
 }
 
 // ---- Expression ----
@@ -277,6 +282,7 @@ export interface Animation {
   affectedGroups: ParameterGroupId[]; // 空なら自動（トラックのあるグループ）
   restart: 'restart' | 'ignore';
   transition: {
+    startFromCurrent?: boolean; // I-060。スタジオで開始時の姿勢へトラックの変化量を重ねる。省略false
     preset: 'auto' | 'quick' | 'natural' | 'slow' | 'custom';
     blendIn: number;
     blendOut: number; // 秒
@@ -376,6 +382,7 @@ export interface Hotkey {
 // ---- Environment（PCごとの設定でプロジェクトの外に保存） ----
 
 export interface Environment {
+  voice?: import('./voice').VoiceEnvironment;
   cameraDeviceId: string | null;
   cameraCapture: { mode: 'auto' | 'manual'; width: number; height: number; fps: number };
   mirror: boolean;
@@ -394,6 +401,5 @@ export interface Environment {
   expressionMode: 'stack' | 'single';
   // adapterId: Spout2 で描く GPU（アダプターの識別子）。null は自動（既定のアダプター）。STEP3 のカード65
   output: { method: 'window' | 'spout2'; width: number; height: number; fps: number; adapterId: string | null };
-  uiLevel: Record<ModeId, UiLevel>;
   lastProjectDir: string | null;
 }

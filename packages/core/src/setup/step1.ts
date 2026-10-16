@@ -1,4 +1,4 @@
-// カード42 かんたんセットアップの拡張（STEP1）。MVP の計画（planMotions）に、曲面の顔の向き・斜め方向の合成・
+// カード42 自動セットアップの拡張（STEP1）。MVP の計画（planMotions）に、曲面の顔の向き・斜め方向の合成・
 // 曲線のまばたき・目 笑顔・眉・口の形と横幅・体の追従・頬染めを足す。
 // キーは source 'auto'（曲面の ±10・±20 は代表の間の中間キーなので 'generated'）。再実行では manual と locked のキーを残す
 import type { Binding, Mesh, Model, ParameterKey, Part, Vec2 } from '@app/schema';
@@ -8,10 +8,12 @@ import { unionRects, type Rect } from '../generate/bounds';
 import { deepEqual } from '../generate/equal';
 import {
   clean,
+  defaultKey,
   findTransformBindingIndex,
   sameCoord,
   sortedUnique,
   transformDelta,
+  withDefaultOffset,
   type DeltaParts,
   type KeySpec,
 } from '../generate/keys';
@@ -22,7 +24,7 @@ import {
   surfaceInterpolator,
   type SurfaceParameter,
 } from '../generate/surface';
-import { closedLineY, meshSpanAt, normalizeClosedLine } from './closedLine';
+import { closedEyeLinePoints, closedLineY, meshSpanAt, normalizeClosedLine } from './closedLine';
 import { faceTurnCrossTerm, faceWarpOf } from './faceTurn';
 import { blinkMethod, keepOnRerun, type BindingPlan } from './motions';
 import type { BoundsOf } from './pivots';
@@ -60,7 +62,7 @@ export interface Step1Plan {
   transforms: BindingPlan[]; // MVP の計画（閉じた線で置き換えるものを除く）と STEP1 の transform
   partOpacities: ReadonlyMap<string, number>; // 基準の不透明度（Part.opacity）を変えるパーツ（頬染め。I-026）
   points: PointPlan[];
-  // かんたんセットアップが作る頂点・制御点のバインディングか（計画に無く、残すキーも無ければ消す）
+  // 自動セットアップが作る頂点・制御点のバインディングか（計画に無く、残すキーも無ければ消す）
   owns(binding: Binding): boolean;
 }
 
@@ -106,7 +108,7 @@ export function planStep1(
   };
   const transforms: BindingPlan[] = [];
   const points: PointPlan[] = [];
-  const owned = new Map<string, string[][]>(); // 対象の id → かんたんセットアップが作るパラメータの組
+  const owned = new Map<string, string[][]>(); // 対象の id → 自動セットアップが作るパラメータの組
   const own = (id: string, parameterIds: string[]) => owned.set(id, [...(owned.get(id) ?? []), parameterIds]);
   const replaced = new Set<string>(); // MVP の閉じ方を頂点の閉じ方に置き換えるパーツ
 
@@ -176,7 +178,7 @@ export function planStep1(
     const white = rectOf(t.eyeWhite);
 
     // ---- 目 開閉（曲線）。閉じた線があれば、値 0 で上まぶたを線に沿わせ、白目を線へ閉じる ----
-    const line = normalizeClosedLine(model.setupHints[side === 'L' ? 'closedLineL' : 'closedLineR']);
+    const line = normalizeClosedLine(closedEyeLinePoints(model, side));
     const lids = blinkMethod(index, side) === 'lids';
     const lineY = (x: number) => (line ? closedLineY(line, x) : 0);
     let band = 0; // 線に沿わせた上まぶたの帯の厚み（白目を閉じる位置に使う）
@@ -408,15 +410,24 @@ function compareCoords(a: ParameterKey, b: ParameterKey): number {
 
 // 計画の頂点・制御点のバインディングを作り直す。既存のキーのうち manual と locked は残し、同じ位置には新しいキーを作らない。
 // parameterIds の順・divisions は既存のものを使う。内容が同じなら既存をそのまま返す
-function rebuildPointBinding(existing: Binding | undefined, plan: PointPlan, newId: () => string): Binding {
+function rebuildPointBinding(
+  existing: Binding | undefined,
+  plan: PointPlan,
+  model: Model,
+  newId: () => string,
+): Binding {
   const parameterIds = existing ? [...existing.parameterIds] : [...plan.parameterIds];
   const order = (coords: number[]) => parameterIds.map((id) => coords[plan.parameterIds.indexOf(id)]!);
   const kept = (existing?.keys ?? []).filter((k) => keepOnRerun(k) && k.coords.length === parameterIds.length);
+  const origin = defaultKey(
+    existing,
+    parameterIds.map((id) => model.parameters.find((p) => p.id === id)?.default ?? 0),
+  );
   const fresh: ParameterKey[] = [];
   for (const key of plan.keys) {
     const coords = order(key.coords);
     if (kept.some((k) => sameCoords(k.coords, coords))) continue;
-    fresh.push({ coords, delta: key.delta, source: 'auto', locked: false });
+    fresh.push({ coords, delta: withDefaultOffset(key.delta, origin?.delta), source: 'auto', locked: false });
   }
   const keys = [...kept, ...fresh].sort(compareCoords);
   let next: Binding = {
@@ -440,7 +451,7 @@ function rebuildPointBinding(existing: Binding | undefined, plan: PointPlan, new
   return existing && deepEqual(existing, next) ? existing : next;
 }
 
-// 頂点・制御点の計画をバインディングに入れる。計画に無くなった、かんたんセットアップの頂点・制御点のバインディング
+// 頂点・制御点の計画をバインディングに入れる。計画に無くなった、自動セットアップの頂点・制御点のバインディング
 // （owns が true で、残すキーが無いもの）は消す。変わらなければ同じ model を返す
 export function applyPointPlans(
   model: Model,
@@ -459,7 +470,7 @@ export function applyPointPlans(
         b.target.id === plan.target.id &&
         sameSet(b.parameterIds, plan.parameterIds),
     );
-    const binding = rebuildPointBinding(bindings[at], plan, newId);
+    const binding = rebuildPointBinding(bindings[at], plan, model, newId);
     planned.add(binding.id);
     if (at >= 0) bindings[at] = binding;
     else bindings.push(binding);

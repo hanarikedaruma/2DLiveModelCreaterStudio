@@ -155,7 +155,6 @@ describe('カード64: 実画面から左右反転コピーする', () => {
         s.store.load(model);
         s.editor.set({ mode: 'modeling', selectedPartIds: [], activeParameterIds: [], editorParamValues: {} });
       }, project);
-      await page.getByRole('button', { name: '詳細', exact: true }).click();
       const row = page.locator(`[data-part-id="${original.id}"]`);
       await row.click({ button: 'right' });
       await page.getByRole('menuitem', { name: '左右反転コピー', exact: true }).click();

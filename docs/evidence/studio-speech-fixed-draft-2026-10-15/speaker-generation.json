@@ -1,0 +1,30 @@
+[
+  {
+    "rate": 24000,
+    "frames": 61440,
+    "seconds": 2.56,
+    "generationSeconds": 17.289167900002212,
+    "firstPcmSeconds": 1.9190709000031347,
+    "rtf": 6.753581210938364,
+    "codecFrames": 32,
+    "vramMiB": 4340.75,
+    "delivery": "stream",
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+    "chunks": 5,
+    "samePrompt": true
+  },
+  {
+    "rate": 24000,
+    "frames": 86400,
+    "seconds": 3.6,
+    "generationSeconds": 26.736694400002307,
+    "firstPcmSeconds": 2.182476599999063,
+    "rtf": 7.426859555556196,
+    "codecFrames": 45,
+    "vramMiB": 4340.75,
+    "delivery": "stream",
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+    "chunks": 7,
+    "samePrompt": true
+  }
+]

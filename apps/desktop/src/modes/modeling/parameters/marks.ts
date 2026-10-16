@@ -72,7 +72,7 @@ export function activeParameters(model: Model, editor: EditorState): Parameter[]
 }
 
 // 編集中のパラメータの組と同じ組のバインディングに、現在値のキーがあるか。
-// すべてデフォルト値なら基準状態なので、キーがあるとみなす
+// 既定値のキーは、その場で作って編集できるのでキーありとみなす（I-072）
 export function hasKeyAtCurrentValue(model: Model, editor: EditorState): boolean {
   const params = activeParameters(model, editor);
   if (params.every((p) => near(valueOf(p, editor), p.default))) return true;

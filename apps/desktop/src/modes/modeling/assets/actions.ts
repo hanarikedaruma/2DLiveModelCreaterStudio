@@ -1,4 +1,4 @@
-// services を使う操作（取り込み・割り当て・かんたんセットアップ）。コマンドは store を通すので、どれも Undo できる
+// services を使う操作（取り込み・割り当て・自動セットアップ）。コマンドは store を通すので、どれも Undo できる
 import type { Asset } from '@app/schema';
 import type { ImportWarning, Services } from '@app/contracts';
 import type { ImportProgress } from '@app/io';
@@ -112,9 +112,9 @@ export function assignAssets(services: Services, target: SlotTarget, assetIds: r
   services.store.dispatch(assign(target, items, { label: moves ? '割り当ての付け替え' : '割り当て' }));
 }
 
-// [かんたんセットアップ]: plan の command を transaction で実行し、warnings を通知で出す
+// [自動セットアップ]: plan の command を transaction で実行し、warnings を通知で出す
 export function runAutoSetup(services: Services, notify: (message: string) => void): void {
   const { command, warnings } = services.autoSetup.plan(services.store.get());
-  services.store.transaction('かんたんセットアップ', (dispatch) => dispatch(command));
+  services.store.transaction('自動セットアップ', (dispatch) => dispatch(command));
   for (const w of warnings) notify(w);
 }

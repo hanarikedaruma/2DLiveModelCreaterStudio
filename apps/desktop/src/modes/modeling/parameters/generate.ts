@@ -4,6 +4,8 @@
 import type { Binding, Model } from '@app/schema';
 import type { Command, KeyGenerator, ProjectStore } from '@app/contracts';
 import { modelCommand } from '@app/core';
+import { pointsOps } from '../../../services/keyEditor/points';
+import { transformOps } from '../../../services/keyEditor/transform';
 
 export const DEPTH_PARAMETERS = ['FaceAngleX', 'FaceAngleY'] as const;
 export type DepthParameterId = (typeof DEPTH_PARAMETERS)[number];
@@ -271,6 +273,44 @@ export function keysAt(
 
 function withoutValue(values: number[], value: number): number[] {
   return values.filter((v) => Math.abs(v - value) > NEAR);
+}
+
+// 既定値のキーの形だけを基準に戻す。不透明度は I-026 の基準値同期を保つ（I-072）
+function baselineDelta(delta: Binding['keys'][number]['delta']): typeof delta {
+  return Array.isArray(delta)
+    ? pointsOps(delta.length).identity()
+    : { ...transformOps.identity(), opacity: delta.opacity };
+}
+
+export function hasDefaultKeyDifference(model: Model, parameterId: string, partIds: readonly string[] = []): boolean {
+  return resetDefaultKeys(model, parameterId, partIds) !== model;
+}
+
+export function resetDefaultKeys(model: Model, parameterId: string, partIds: readonly string[] = []): Model {
+  const parameter = model.parameters.find((p) => p.id === parameterId);
+  if (!parameter) return model;
+  const scope = partScope(model, partIds);
+  let changed = false;
+  const bindings = model.bindings.map((b) => {
+    if (b.parameterIds.length !== 1 || b.parameterIds[0] !== parameterId || !bindingInScope(model, b, scope)) return b;
+    const keys = b.keys.map((k) => {
+      if (Math.abs((k.coords[0] ?? Infinity) - parameter.default) > NEAR) return k;
+      const delta = baselineDelta(k.delta);
+      const same =
+        Array.isArray(delta) && Array.isArray(k.delta)
+          ? pointsOps(delta.length).same(delta, k.delta)
+          : !Array.isArray(delta) && !Array.isArray(k.delta) && transformOps.same(delta, k.delta);
+      if (same) return k;
+      changed = true;
+      return { ...k, delta, source: 'manual' as const, locked: true };
+    });
+    return keys.every((k, i) => k === b.keys[i]) ? b : { ...b, keys };
+  });
+  return changed ? { ...model, bindings } : model;
+}
+
+export function resetDefaultKeyAt(store: ProjectStore, parameterId: string, partIds: readonly string[] = []): void {
+  store.dispatch(modelCommand('このキーの差を消す', (model) => resetDefaultKeys(model, parameterId, partIds)));
 }
 
 // value のキーを消す。デフォルト値のキー（基準）は消さない。何も変わらなければ同じモデル

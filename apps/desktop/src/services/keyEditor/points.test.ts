@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Binding, Mesh, Project, Vec2, Warp } from '@app/schema';
 import type { Command } from '@app/contracts';
 import { createKeyEditor } from './index';
-import { DETAIL, deepFreeze, editorAt, expectSameLook, projectWith, range, referenceTarget, samples } from './testing';
+import { deepFreeze, editorAt, expectSameLook, projectWith, range, referenceTarget, samples } from './testing';
 
 const keyEditor = createKeyEditor();
 
@@ -65,9 +65,7 @@ describe('基準状態の編集', () => {
     expect(moved.model.bindings).toEqual([]);
 
     const warped = command(
-      keyEditor.pointsEdit(project, editorAt({ MouthOpen: 0 }), { kind: 'warp', warpId: 'w1' }, [
-        { index: 3, d: v(-10, -20) },
-      ]),
+      keyEditor.pointsEdit(project, editorAt({}), { kind: 'warp', warpId: 'w1' }, [{ index: 3, d: v(-10, -20) }]),
     ).apply(project);
     expect(warped.model.warps[0]!.points[3]).toEqual(v(90, 80));
   });
@@ -104,13 +102,13 @@ describe('パラメータの編集中', () => {
       divisions: null,
     };
     const p = baseProject([b]);
-    const editor = editorAt({ EyeBallY: 1, EyeBallX: 1 }, DETAIL);
+    const editor = editorAt({ EyeBallY: 1, EyeBallX: 1 });
     const out = command(keyEditor.pointsEdit(p, editor, target, [{ index: 1, d: v(2, 3) }])).apply(p);
     expect(out.model.bindings[0]!.keys.find((k) => k.coords.join() === '1,1')).toEqual({
       coords: [1, 1],
       delta: [v(0, 0), v(6, 1), v(0, 0), v(0, 0)],
       source: 'manual',
-      locked: false,
+      locked: true,
     });
     expect(out.model.meshes).toBe(p.model.meshes);
     expect(out.model.warps).toBe(p.model.warps);
@@ -148,7 +146,7 @@ describe('パラメータの編集中', () => {
   it('制御点はワープの warpPoints バインディングに記録する', () => {
     const project = baseProject();
     const result = command(
-      keyEditor.pointsEdit(project, editorAt({ EyeBallX: -1 }, DETAIL), { kind: 'warp', warpId: 'w1' }, [
+      keyEditor.pointsEdit(project, editorAt({ EyeBallX: -1 }), { kind: 'warp', warpId: 'w1' }, [
         { index: 0, d: v(-3, 0) },
       ]),
     ).apply(project);
@@ -159,7 +157,7 @@ describe('パラメータの編集中', () => {
       coords: [-1],
       delta: [v(-3, 0), v(0, 0), v(0, 0), v(0, 0)],
       source: 'manual',
-      locked: false,
+      locked: true,
     });
   });
 

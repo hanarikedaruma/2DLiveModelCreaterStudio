@@ -5,7 +5,7 @@ import { useShell } from '../../../shell/context';
 import { useBindEnv, type EnvSlot } from '../canvas/env';
 import { isLockedDeep } from '../canvas/parts';
 import { meshTarget } from '../mesh/meshTool';
-import { activeParams, isBaseState, isPreviewOffBase } from '../../../services/keyEditor/common';
+import { activeParams, isDefaultState, isPreviewOffBase } from '../../../services/keyEditor/common';
 import {
   DEFAULT_FLOW_DYNAMICS,
   curveBakeEditor,
@@ -248,7 +248,7 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
                     disabled={
                       !editable ||
                       !guide.enabled ||
-                      isBaseState(activeParams(project.model, editor)) ||
+                      isDefaultState(activeParams(project.model, editor)) ||
                       isPreviewOffBase(project.model, curveBakeEditor(project, editor, guide.partId))
                     }
                     onClick={() => void curveEditor.bake()}
@@ -279,7 +279,7 @@ export function makeCurvePanel(slot: EnvSlot, curveEditor: CurveEditor): FC {
           </p>
         ) : (
           <button type="button" disabled={!canDraw} onClick={() => setActiveTool(CURVE_TOOL_ID)}>
-            線で曲げるツールにする
+            流線で曲げるツールにする
           </button>
         )}
       </div>

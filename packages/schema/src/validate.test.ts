@@ -144,7 +144,7 @@ function fullProject(): Project {
         },
       ],
       lipSync: { mouthSource: 'micOnly', strength: 'high', vowels: [{ vowel: 'a', values: { MouthOpen: 1 } }] },
-      setupHints: { closedLineL: [{ x: 1, y: 2 }], closedLineR: null },
+      setupHints: { closedLineL: { partId: null, points: [{ x: 1, y: 2 }] }, closedLineR: null },
     },
     expressions: [
       {
@@ -382,7 +382,20 @@ describe('validateEnvironment', () => {
   it('既定値が通り、形が違うとパス付きのエラー', () => {
     const env = createDefaultEnvironment();
     expect(validateEnvironment(env)).toEqual(env);
-    const e = errorOf(() => validateEnvironment({ ...env, uiLevel: { ...env.uiLevel, studio: 'expert' } }));
-    expect(e.issues.map((i) => i.path)).toEqual(['uiLevel.studio']);
+    const e = errorOf(() => validateEnvironment({ ...env, cameraCapture: { ...env.cameraCapture, fps: 0 } }));
+    expect(e.issues.map((i) => i.path)).toEqual(['cameraCapture.fps']);
+  });
+  it('I-088: 旧 uiLevel の値や形にかかわらず捨て、現在の設定を保持する', () => {
+    const env = { ...createDefaultEnvironment(), mirror: false };
+    for (const uiLevel of [
+      { modeling: 'easy', animation: 'detail', studio: 'easy' },
+      { studio: 'expert' },
+      null,
+      'easy',
+    ]) {
+      const parsed = validateEnvironment({ ...env, uiLevel });
+      expect(parsed).toEqual(env);
+      expect(parsed).not.toHaveProperty('uiLevel');
+    }
   });
 });

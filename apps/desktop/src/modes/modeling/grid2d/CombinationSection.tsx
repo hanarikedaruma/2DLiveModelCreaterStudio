@@ -1,10 +1,11 @@
-// 組み合わせの補正（パラメータパネルのセクション、詳細）。任意の2パラメータを選び、
+// 組み合わせの補正（パラメータパネルのセクション）。任意の2パラメータを選び、
 // 各パラメータのキー位置の組み合わせの格子を方向グリッドと同じ方法で編集する（例: 目 開閉 × 目 笑顔）
 import { useState } from 'react';
 import type { Parameter } from '@app/schema';
 import { useEditor, useProject } from '../../../shell/api';
-import { activePair, defaultPair, keyPositions, pairParameters, type ParameterPair } from './grid';
+import { activePair, defaultPair, DIRECTION_PAIR, keyPositions, pairParameters, type ParameterPair } from './grid';
 import { PairGrid } from './PairGrid';
+import { DirectionGridSection } from './DirectionGridSection';
 import './grid2d.css';
 
 function ParameterSelect(props: { label: string; value: string; parameters: Parameter[]; onChange(id: string): void }) {
@@ -31,13 +32,33 @@ export function CombinationSection() {
   const [editor] = useEditor();
   // 最初は編集中の2パラメータの組（方向グリッドから来たときなど）。選んだ組がモデルから消えたら既定の組
   const [chosen, setChosen] = useState<ParameterPair | null>(() => activePair(model, editor));
+  const [view, setView] = useState<'direction' | 'combination'>('direction');
+  const hasDirection = pairParameters(model, DIRECTION_PAIR) !== null;
+  const direction = view === 'direction' && hasDirection;
   const pair = chosen && pairParameters(model, chosen) ? chosen : defaultPair(model);
   const params = pair ? pairParameters(model, pair) : null;
 
   return (
     <div className="grid2d-section">
       <h3 className="grid2d-title">組み合わせの補正</h3>
-      {!pair || !params ? (
+      <div className="grid2d-selects" role="group" aria-label="補正の表示">
+        <button type="button" aria-pressed={direction} disabled={!hasDirection} onClick={() => setView('direction')}>
+          方向グリッド
+        </button>
+        <button
+          type="button"
+          aria-pressed={!direction}
+          onClick={() => {
+            setChosen(activePair(model, editor));
+            setView('combination');
+          }}
+        >
+          任意の組み合わせ
+        </button>
+      </div>
+      {direction ? (
+        <DirectionGridSection />
+      ) : !pair || !params ? (
         <p className="grid2d-hint">パラメータが2つ以上あると、組み合わせを補正できる</p>
       ) : (
         <>

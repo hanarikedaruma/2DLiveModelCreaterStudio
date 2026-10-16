@@ -1,0 +1,9 @@
+{
+  "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+  "referenceCosines": [
+    0.9921875,
+    0.98046875
+  ],
+  "betweenUtterances": 0.984375,
+  "note": "Same model encoder; descriptive metric, not a perceptual identity guarantee."
+}

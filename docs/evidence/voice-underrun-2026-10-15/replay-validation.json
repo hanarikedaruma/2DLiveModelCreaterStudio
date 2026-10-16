@@ -1,0 +1,26 @@
+[
+  {
+    "quality": "fast",
+    "passed": true,
+    "estimatorReplaysBitIdentical": 72,
+    "cpuThreads": 4,
+    "outputPeak": 0.48583003878593445,
+    "disabledReason": ""
+  },
+  {
+    "quality": "balanced",
+    "passed": true,
+    "estimatorReplaysBitIdentical": 84,
+    "cpuThreads": 4,
+    "outputPeak": 0.7180551886558533,
+    "disabledReason": ""
+  },
+  {
+    "quality": "stable",
+    "passed": true,
+    "estimatorReplaysBitIdentical": 88,
+    "cpuThreads": 4,
+    "outputPeak": 0.7150954008102417,
+    "disabledReason": ""
+  }
+]

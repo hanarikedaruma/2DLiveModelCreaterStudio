@@ -11,7 +11,7 @@ export function register(): void {
     id: 'studio.trackingMap',
     panelId: STUDIO_SETTINGS_PANEL,
     order: 13,
-    level: 'detail',
+
     component: TrackingMapSection,
   });
 }

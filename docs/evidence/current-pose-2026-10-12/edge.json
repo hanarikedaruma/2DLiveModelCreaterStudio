@@ -1,0 +1,43 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "before": 18,
+      "start": 18,
+      "middle": 23,
+      "interrupted": 23,
+      "stop": 23,
+      "returned": 18,
+      "legacy": 20,
+      "cutover": 20,
+      "maxStartVertexErrorPx": 0,
+      "maxCutoverVertexErrorPx": 0,
+      "maxMotionPx": 11.499969482421875,
+      "originalTracksUnchanged": true,
+      "previewAndSinkMatched": true,
+      "undoRedo": true,
+      "roundTrip": null
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "before": 18,
+      "start": 18,
+      "middle": 23,
+      "interrupted": 23,
+      "stop": 23,
+      "returned": 18,
+      "legacy": 20,
+      "cutover": 20,
+      "maxStartVertexErrorPx": 0,
+      "maxCutoverVertexErrorPx": 0,
+      "maxMotionPx": 11.499969482421875,
+      "originalTracksUnchanged": true,
+      "previewAndSinkMatched": true,
+      "undoRedo": true,
+      "roundTrip": null
+    }
+  ],
+  "errors": []
+}

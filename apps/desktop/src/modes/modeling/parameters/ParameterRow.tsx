@@ -24,7 +24,7 @@ export function ParameterRow({ parameter, value, active, marks, onToggle, onChan
         title={
           active
             ? '押すとこのパラメータの編集をやめる（値はデフォルト値に戻る）'
-            : '押すとこのパラメータのキーを編集する。Ctrl+クリックで、編集中のパラメータに加える（組み合わせのキー）'
+            : '押すとこのパラメータのキーを編集する（ほかのパラメータの値はデフォルト値に戻る）。Ctrl+クリックで、編集中のパラメータに加える（組み合わせのキー）'
         }
         onClick={(e) => onToggle(e.ctrlKey || e.metaKey)}
       >

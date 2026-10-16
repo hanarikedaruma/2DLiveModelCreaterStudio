@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "backend": "seed-whisper-large",
+  "name": "Original Soft Girl HQ",
+  "sourceRepo": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\seed-vc",
+  "cacheDirectory": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models",
+  "reference": "../voices/original-soft-girl.wav",
+  "steps": 20,
+  "cfgRate": 0.7,
+  "hopSeconds": 3,
+  "lookaheadSeconds": 0.2,
+  "historySeconds": 0.6,
+  "referenceSeconds": 5,
+  "outputGainDb": -3,
+  "seed": 1729,
+  "inputCleanup": {
+    "noiseReduction": 0.85,
+    "speechOnly": true,
+    "speechSensitivity": 40,
+    "noiseLibrary": "../voice-noise.dll",
+    "vadModel": "../models/silero_vad.onnx"
+  },
+  "voiceTone": {
+    "brightnessDb": 0,
+    "bodyDb": 0,
+    "softnessDb": 0
+  },
+  "qualityAccepted": true,
+  "qualityAcceptance": "provisional",
+  "qualityAcceptanceNote": "2026-10-13: 比較サンプルをユーザーが暫定採用し、アプリへの適用を指定。すべての発話や通話条件での音質合格は未判定。",
+  "outputFilters": {
+    "schemaVersion": 1,
+    "enabled": true,
+    "items": [
+      {
+        "id": "default-resonance",
+        "type": "resonance",
+        "name": "電子感・金属音の抑制",
+        "enabled": true,
+        "params": {
+          "strength": 35,
+          "frequencyHz": 1800,
+          "q": 1.2,
+          "sensitivity": 75
+        }
+      },
+      {
+        "id": "default-deesser",
+        "type": "deesser",
+        "name": "高音のザラつき・歯擦音の抑制",
+        "enabled": true,
+        "params": {
+          "strength": 30,
+          "frequencyHz": 5800,
+          "thresholdDb": -40
+        }
+      },
+      {
+        "id": "default-lowpass",
+        "type": "lowpass",
+        "name": "高音を丸める（ローパス）",
+        "enabled": true,
+        "params": {
+          "frequencyHz": 9000
+        }
+      }
+    ]
+  }
+}

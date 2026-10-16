@@ -3,7 +3,7 @@ import type { EditorState, EditorStore } from '@app/contracts';
 export function defaultEditorState(): EditorState {
   return {
     mode: 'modeling',
-    uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
+
     selectedPartIds: [],
     activeParameterIds: [],
     editorParamValues: {},

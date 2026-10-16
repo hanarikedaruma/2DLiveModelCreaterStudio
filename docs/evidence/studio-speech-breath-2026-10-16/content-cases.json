@@ -1,0 +1,7 @@
+[
+  {"file":"qwen-old.wav","expectedTranscripts":["あ、あなたのことが、だ、大好きです。","あなたのことが大好きです。"]},
+  {"file":"qwen-phonetic.wav","expectedTranscripts":["あなたのことがだっ大好き","あなたのことが大好き","あ、あなたのことが、だ、大好き"]},
+  {"file":"cosy-neutral.wav","expectedTranscripts":["あなたのことが大好きです。"]},
+  {"file":"cosy-breath.wav","expectedTranscripts":["あなたのことがだっ大好き","あなたのことが大好き","あなたのことがだっだいすき","あなたのことがだいすき"]},
+  {"file":"cosy-faithful.wav","expectedTranscripts":["あなたのことがだっ大好きです","あなたのことが大好きです","あなたのことがだっだいすきです","あなたのことがだいすきです"]}
+]

@@ -1,0 +1,23 @@
+{
+  "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\projects\\cardigan-bob-20261010\\project.json",
+  "sourceSha256": "1ba78d73cf3c6761f71310b6b3a89de33dfa678912f9cb7a406d54cb8d71cf97",
+  "sourceUnchanged": true,
+  "errors": [],
+  "checks": {
+    "before": 18,
+    "start": 18,
+    "middle": 23,
+    "interrupted": 23,
+    "stop": 23,
+    "returned": 18,
+    "legacy": 20,
+    "cutover": 20,
+    "maxStartVertexErrorPx": 0,
+    "maxCutoverVertexErrorPx": 0,
+    "maxMotionPx": 7.9815673828125,
+    "originalTracksUnchanged": true,
+    "previewAndSinkMatched": true,
+    "undoRedo": true,
+    "roundTrip": null
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "inputAt": 1792121523799,
+  "result": {
+    "state": "stopped",
+    "sessionId": "31525d72346144d3a7ca2eb60817cc5a",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "breathyOnset": 1,
+      "breathyOnsetEligible": 1,
+      "breathyOnsetEndMs": 330,
+      "breathyOnsetMs": 2.704999991692602,
+      "breathyOnsetStartMs": 70,
+      "bufferTargetMs": 1236.7083333333333,
+      "bufferedMs": 0,
+      "codecFrames": 45,
+      "cudaGraph": 1,
+      "dacClockCorrections": 350,
+      "estimatedAudioSeconds": 3.6,
+      "estimatedRtf": 1.2796336093856553,
+      "firstAudioMs": 1849.2220499962568,
+      "firstAudioWallMs": 1792121525718.6,
+      "firstPcmSeconds": 1.013015299991821,
+      "frames": 86400,
+      "generationSeconds": 4.48574039999221,
+      "hesitations": 2,
+      "loadSeconds": 0,
+      "performanceMs": 0.07019999611657113,
+      "predictorGraphReplays": 45,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 1.246038999997836,
+      "seconds": 3.6,
+      "startupBufferMs": 1274.5833333333333,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "あなたのことが大好きです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  }
+}

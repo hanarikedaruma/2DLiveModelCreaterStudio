@@ -1,8 +1,9 @@
 import type { Binding, Vec2, Warp } from '@app/schema';
-import { applyWarp, isUsableWarp, regularWarpPoints } from './warp';
+import { applyWarp, isUsableWarp, regularWarpPoints, warpFromFrame } from './warp';
 
 // セルの境界を動かすと非一様な変形が変わる。元の間隔・境界を残し、
 // 端のセルの双線形の式を外へ延ばすことで、元の格子外も含めて同じ写像を保つ。
+// targetは現在の格子の向きに沿う座標（warpToFrameで求めた入力の外接矩形）。角度0では従来と同じ
 export function refitWarp(
   warp: Warp,
   target: Warp['bounds'],
@@ -22,8 +23,16 @@ export function refitWarp(
   const rows = warp.rows + top + bottom;
   // 誤った巨大な座標の読み込みでも、無制限にメモリを確保しない。
   if (!Number.isSafeInteger(columns) || !Number.isSafeInteger(rows) || (columns + 1) * (rows + 1) > 65536) return null;
-  const nextBounds = { x: bounds.x - left * dx, y: bounds.y - top * dy, width: columns * dx, height: rows * dy };
-  const grid = regularWarpPoints(nextBounds, columns, rows);
+  const axisBounds = { x: bounds.x - left * dx, y: bounds.y - top * dy, width: columns * dx, height: rows * dy };
+  const center = warpFromFrame(warp, {
+    x: axisBounds.x + axisBounds.width / 2,
+    y: axisBounds.y + axisBounds.height / 2,
+  });
+  const nextBounds =
+    (warp.angle ?? 0) === 0
+      ? axisBounds
+      : { ...axisBounds, x: center.x - axisBounds.width / 2, y: center.y - axisBounds.height / 2 };
+  const grid = regularWarpPoints(nextBounds, columns, rows, warp.angle ?? 0);
   const transfer = (values: Vec2[]): Vec2[] => {
     const probes = new Float64Array(grid.flatMap((p) => [p.x, p.y]));
     applyWarp(probes, { ...warp, points: values }, undefined);

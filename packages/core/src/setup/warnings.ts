@@ -41,8 +41,8 @@ export function setupWarnings(model: Model, surfaceFaceTurn = true): string[] {
   for (const side of SIDES) {
     const t = eyeTypes(side);
     const hint = model.setupHints[side === 'L' ? 'closedLineL' : 'closedLineR'];
-    if (!hint || hint.length === 0) continue;
-    if (!normalizeClosedLine(hint)) {
+    if (!hint || hint.points.length === 0) continue;
+    if (!normalizeClosedLine(hint.points)) {
       out.push(`閉じた目の線 ${side} は横の幅が無いため、まばたきは線に沿いません`);
     } else if (blinkMethod(index, side) !== 'lids') {
       out.push(`${names(missing([t.eyeWhite, t.upperLid]))}がないため、閉じた目の線 ${side} は使われません`);

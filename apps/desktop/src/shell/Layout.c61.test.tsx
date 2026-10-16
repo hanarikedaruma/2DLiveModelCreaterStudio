@@ -284,8 +284,8 @@ describe('カード61: 小さいウィンドウの右の列', () => {
     fireEvent.click(screen.getByRole('button', { name: 'メッシュ編集' }));
     act(() => services.editor.set({ selectedPartIds: ['part-eyeWhiteL'] }));
     expect(panels().map(titleOf)).toEqual(['メッシュ', '閉じた目の線', ...RIGHT_PANELS]);
-    // 2026-10-08 CO / カード99: 流れ線も小画面検査の対象にする（線で曲げるツールのときに出る）
-    fireEvent.click(screen.getByRole('button', { name: '線で曲げる' }));
+    // 2026-10-08 CO / カード99: 流れ線も小画面検査の対象にする（流線で曲げるツールのときに出る）
+    fireEvent.click(screen.getByRole('button', { name: '流線で曲げる' }));
     expect(panels().map(titleOf)).toEqual(['流れ線', '閉じた目の線', ...RIGHT_PANELS]);
     for (const p of panels().slice(0, 2)) {
       const name = titleOf(p);
@@ -345,7 +345,7 @@ describe('カード61: 小さいウィンドウの右の列', () => {
       expect(cascaded(body(p), ['overflow', 'overflow-y'], LARGE)?.value).toBe('auto');
     }
     expect(cascaded(right, ['overflow', 'overflow-y'], LARGE)?.value).toBe('auto');
-    // 列の幅は変えない（キャンバスの大きさを変えない）
+    // CSS の既定は280px。I-087の手動変更と窓への調整はlayoutSizes.i087.test.tsxで確認する
     expect(cascaded(right, ['width'], LARGE)?.value).toBe('280px');
   });
 
@@ -379,5 +379,19 @@ describe('カード61: 小さいウィンドウの右の列', () => {
       expect(shrink(p, SMALL)).toBeNull();
     }
     expect(left.getAttribute('tabindex')).toBeNull();
+  });
+
+  it('I-087: 左の列で高さを決めたパネルは縮めず、隣のパネルと重ならずに列全体でスクロールする', () => {
+    localStorage.setItem('live2d-studio.layoutSizes', JSON.stringify({ 'modeling.panel.assets.tray': 1800 }));
+    setup();
+    const left = document.querySelector<HTMLElement>('.shell-area-left')!;
+    const panel = left.querySelector<HTMLElement>('[data-panel-id="assets.tray"]')!;
+    const body = panel.querySelector<HTMLElement>(':scope > .panel-body')!;
+    expect(body.style.height).toBe('1800px');
+    for (const viewport of [SMALL, LARGE]) {
+      expect(shrink(panel, viewport)).toEqual({ property: 'flex-shrink', value: '0' });
+      expect(shrink(body, viewport)).toEqual({ property: 'flex', value: 'none' });
+      expect(cascaded(left, ['overflow', 'overflow-y'], viewport)?.value).toBe('auto');
+    }
   });
 });

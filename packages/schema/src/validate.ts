@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { voiceSettingsSchema, voiceEnvironmentSchema } from './voice';
 import {
   BLEND_MODES,
   BLEND_OPS,
@@ -187,6 +188,7 @@ const warp: z.ZodType<Warp> = z
   .object({
     id,
     partId: id,
+    angle: num.optional(),
     columns: num.int().min(1),
     rows: num.int().min(1),
     bounds: z.object({ x: num, y: num, width: nonNegative, height: nonNegative }),
@@ -405,7 +407,10 @@ const model: z.ZodType<Model> = z
       .optional(),
     contourLines: z.array(contourLine).optional(),
     lipSync,
-    setupHints: z.object({ closedLineL: z.array(vec2).nullable(), closedLineR: z.array(vec2).nullable() }),
+    setupHints: z.object({
+      closedLineL: z.object({ partId: id.nullable(), points: z.array(vec2) }).nullable(),
+      closedLineR: z.object({ partId: id.nullable(), points: z.array(vec2) }).nullable(),
+    }),
   })
   .superRefine((m, ctx) => {
     uniqueIds(m.parts, 'parts', ctx);
@@ -448,6 +453,7 @@ const animation: z.ZodType<Animation> = z.object({
   affectedGroups: z.array(parameterGroupId),
   restart: z.enum(['restart', 'ignore']),
   transition: z.object({
+    startFromCurrent: z.boolean().optional(),
     preset: z.enum(['auto', 'quick', 'natural', 'slow', 'custom']),
     blendIn: nonNegative,
     blendOut: nonNegative,
@@ -570,7 +576,12 @@ export const projectSchema: z.ZodType<Project> = z
     physics: z.array(physics),
     trackingMappings: z.array(trackingMapping),
     trackingSetup,
-    studio: z.object({ scenes: z.array(scene), activeSceneId: id.nullable(), hotkeys: z.array(hotkey) }),
+    studio: z.object({
+      scenes: z.array(scene),
+      activeSceneId: id.nullable(),
+      hotkeys: z.array(hotkey),
+      voice: voiceSettingsSchema.optional(),
+    }),
   })
   .superRefine((p, ctx) => {
     uniqueIds(p.assets, 'assets', ctx);
@@ -579,9 +590,8 @@ export const projectSchema: z.ZodType<Project> = z
     uniqueIds(p.physics, 'physics', ctx);
   });
 
-const uiLevel = z.enum(['easy', 'detail']);
-
 export const environmentSchema: z.ZodType<Environment> = z.object({
+  voice: voiceEnvironmentSchema.optional(),
   cameraDeviceId: z.string().nullable(),
   cameraCapture: z.object({
     mode: z.enum(['auto', 'manual']),
@@ -617,7 +627,7 @@ export const environmentSchema: z.ZodType<Environment> = z.object({
     fps: num.min(1),
     adapterId: z.string().nullable(),
   }),
-  uiLevel: z.object({ modeling: uiLevel, animation: uiLevel, studio: uiLevel }),
+
   lastProjectDir: z.string().nullable(),
 });
 

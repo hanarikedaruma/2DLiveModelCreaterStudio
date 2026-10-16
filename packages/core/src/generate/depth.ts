@@ -71,6 +71,8 @@ export function depthBindings(model: Model, parameterId: FaceAngleParameter, opt
       keep: options.keep,
       generation: 'depth',
       newId: options.newId,
+      defaultCoord: model.parameters.find((p) => p.id === parameterId)?.default ?? 0,
+      opacityBase: part.opacity,
     }),
   );
 }

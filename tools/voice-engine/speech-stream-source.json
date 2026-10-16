@@ -1,0 +1,31 @@
+{
+  "inspectedDate": "2026-10-15",
+  "package": "qwen-tts",
+  "packageVersion": "0.1.1",
+  "transformersVersion": "4.57.3",
+  "model": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+  "modelRevision": "fd4b254389122332181a7c3db7f27e918eec64e3",
+  "runtimeSource": "tools/voice-engine/runtime.json",
+  "modules": [
+    {
+      "path": "qwen_tts/inference/qwen3_tts_model.py",
+      "sha256": "e1da450732857c1f5fe3e36ebab85db2f6dc6a48caaff6973f463384e30275e4"
+    },
+    {
+      "path": "qwen_tts/core/models/modeling_qwen3_tts.py",
+      "sha256": "25c42656bcf810f06ef6bc1839bd7083f3c8cfedac3a147c4060b4262b1c96a0"
+    },
+    {
+      "path": "qwen_tts/inference/qwen3_tts_tokenizer.py",
+      "sha256": "ac2d855022a1bd21d33ab7b267ec952eef71f81d3f8d969a306139ff1a929515"
+    },
+    {
+      "path": "qwen_tts/core/tokenizer_12hz/modeling_qwen3_tts_tokenizer_v2.py",
+      "sha256": "844e8dd8c0182ef9c6463c874631c22ef3c5a4fd1899dd657016164cc5379628"
+    },
+    {
+      "path": "qwen_tts/core/tokenizer_12hz/configuration_qwen3_tts_tokenizer_v2.py",
+      "sha256": "9e30c24394b00cb0366d7da3482b7436468acc1cd3da1a6fe614a1d34653a5e3"
+    }
+  ]
+}

@@ -22,7 +22,7 @@ function project(): Project {
 // jsdom には 2D/WebGL のコンテキストが無いので、何も描かないレンダラーにする
 const renderer: Renderer = { init() {}, setTextures() {}, render() {}, dispose() {} };
 
-async function setup(level: 'easy' | 'detail' = 'detail') {
+async function setup() {
   const services: Services = {
     ...createFakeServices(),
     createRenderer: () => renderer,
@@ -34,7 +34,7 @@ async function setup(level: 'easy' | 'detail' = 'detail') {
   render(<Shell services={services} environment={environment} />);
   await act(async () => {
     services.store.load(project());
-    services.editor.set({ mode: 'studio', uiLevel: { ...services.editor.get().uiLevel, studio: level } });
+    services.editor.set({ mode: 'studio' });
   });
   const store = services.store as ProjectStoreWithHistory;
   const section = () => screen.getByRole('heading', { name: 'トラッキングの割り当て' }).parentElement!;
@@ -49,9 +49,9 @@ beforeEach(() => {
 });
 
 describe('トラッキングの割り当て（I-042）', () => {
-  it('詳細でだけ出る', async () => {
-    await setup('easy');
-    expect(screen.queryByRole('heading', { name: 'トラッキングの割り当て' })).toBeNull();
+  it('I-088: 最初から表示する', async () => {
+    await setup();
+    expect(screen.getByRole('heading', { name: 'トラッキングの割り当て' })).toBeTruthy();
   });
 
   it('標準・カスタム・無効を選べ、カスタムにすると標準の割り当てから編集できる（1回の操作で1回の Undo）', async () => {

@@ -18,6 +18,7 @@ export type ValueRange = [number, number];
 
 // 印と範囲の操作。無ければ印を押して移動するだけ
 export interface KeyActions {
+  resetDefaultKey?: () => void; // 既定値の形に差があるときだけ提供する（I-072）
   toggleLock(value: number): void;
   deleteKey(value: number): void; // その値のキーを消す（STEP3 のカード63）
   moveKey(value: number): void; // その値のキーを別の値へ動かす（動かす先は呼ばれた側で聞く）
@@ -228,15 +229,20 @@ export function KeySlider({
           </button>
           <button
             type="button"
+            disabled={Math.abs(menu.value - defaultValue) <= NEAR && !keyActions.resetDefaultKey}
             onClick={() => {
               setMenu(null);
-              keyActions.deleteKey(menu.value);
+              if (Math.abs(menu.value - defaultValue) <= NEAR) keyActions.resetDefaultKey?.();
+              else keyActions.deleteKey(menu.value);
             }}
           >
-            このキーを消す
+            {Math.abs(menu.value - defaultValue) <= NEAR && keyActions.resetDefaultKey
+              ? 'このキーの差を消す（基準の形に戻す）'
+              : 'このキーを消す'}
           </button>
           <button
             type="button"
+            disabled={Math.abs(menu.value - defaultValue) <= NEAR}
             onClick={() => {
               setMenu(null);
               keyActions.moveKey(menu.value);

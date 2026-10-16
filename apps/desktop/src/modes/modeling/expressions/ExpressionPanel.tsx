@@ -20,7 +20,7 @@ import {
   type ExpressionGroupMode,
   type ExpressionGroupModes,
 } from '@app/core';
-import { DetailDisclosure, useDispatch, useEditor, useProject } from '../../../shell/api';
+import { useDispatch, useEditor, useProject } from '../../../shell/api';
 import {
   addExpressionCommand,
   addExpressionsCommand,
@@ -228,7 +228,7 @@ export function ExpressionPanel() {
           })}
         </section>
       ))}
-      <DetailDisclosure label="合成方法">
+      <>
         <div className="expr-modes">
           {groups.map(({ group, parameters: ps }) => {
             const mode = draft.modes[group.id] ?? 'rule';
@@ -261,7 +261,7 @@ export function ExpressionPanel() {
             すべて置き換える
           </p>
         </div>
-      </DetailDisclosure>
+      </>
       <div className="expr-actions">
         <button type="button" className="primary" onClick={() => commit(draft)}>
           {editing ? '保存' : '登録'}

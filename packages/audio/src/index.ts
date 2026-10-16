@@ -2,3 +2,4 @@
 export * from './source'; // カード37
 export * from './lipsync'; // カード37
 export * from './vowel'; // カード51
+export * from './playback';

@@ -1,0 +1,69 @@
+{
+  "inputAt": 1792131153505,
+  "result": {
+    "state": "stopped",
+    "sessionId": "7efc2ee7fee047fea3307c0dbd1c1391",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "breathyOnset": 1,
+      "breathyOnsetContextMs": 640,
+      "breathyOnsetEligible": 1,
+      "breathyOnsetEndMs": 330,
+      "breathyOnsetMs": 2.794900006847456,
+      "breathyOnsetStartMs": 70,
+      "breathyWordOnset": 1,
+      "breathyWordOnsetEndMs": 1040,
+      "breathyWordOnsetStartMs": 970,
+      "bufferTargetMs": 2855.5833333333335,
+      "bufferedMs": 0,
+      "codecFrames": 45,
+      "cudaGraph": 1,
+      "dacClockCorrections": 429,
+      "estimatedAudioSeconds": 4.352291666666667,
+      "estimatedRtf": 2.2357009582344745,
+      "firstAudioMs": 24256.363499999046,
+      "firstAudioWallMs": 1792131177826.419,
+      "firstPcmSeconds": 12.892898699996294,
+      "frames": 104455,
+      "generationSeconds": 26.087944399987464,
+      "hesitations": 2,
+      "loadSeconds": 0,
+      "performanceMs": 0.13529999705497175,
+      "predictorGraphReplays": 45,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 5.994070801777791,
+      "seconds": 4.352291666666667,
+      "shyDelivery": 1,
+      "shyGapAddedMs": 230,
+      "shyIntroGapMs": 650,
+      "shyProcessingMs": 37.764599997899495,
+      "shyTailBreaths": 3,
+      "shyTailEndMs": 3760,
+      "shyTailStartMs": 3580,
+      "shyTempoRatio": 0.88,
+      "startupBufferMs": 3454.5833333333335,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4011.12451171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "あなたのことが大好きです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  }
+}

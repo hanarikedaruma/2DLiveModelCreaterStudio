@@ -51,7 +51,7 @@ function sampleWithMeshes(): Project {
   });
   return p;
 }
-// fixtures の reference-model（本物のメッシュ・頬・上まぶたの子のまつげがあり、MVP のかんたんセットアップ済み）
+// fixtures の reference-model（本物のメッシュ・頬・上まぶたの子のまつげがあり、MVP の自動セットアップ済み）
 const referenceModel = (): Project => loadProjectJson(JSON.stringify(reference));
 
 const run = (p: Project) => createAutoSetup().plan(p).command.apply(p);
@@ -85,7 +85,10 @@ const pointsAt = (b: Binding | undefined, ...coords: number[]) => keyAt(b, ...co
 
 function withLine(p: Project, side: 'L' | 'R', line: Vec2[] | null): Project {
   const key = side === 'L' ? 'closedLineL' : 'closedLineR';
-  return { ...p, model: { ...p.model, setupHints: { ...p.model.setupHints, [key]: line } } };
+  return {
+    ...p,
+    model: { ...p.model, setupHints: { ...p.model.setupHints, [key]: line ? { partId: null, points: line } : null } },
+  };
 }
 function replaceBinding(p: Project, b: Binding): Project {
   return { ...p, model: { ...p.model, bindings: p.model.bindings.map((q) => (q.id === b.id ? b : q)) } };
@@ -420,7 +423,14 @@ describe('目 開閉（曲線）', () => {
       expect(binding(p, `upperLid${side}`, [`EyeOpen${side}`], 'vertices')).toBeUndefined();
       expect(binding(p, `eyeWhite${side}`, [`EyeOpen${side}`], 'vertices')).toBeUndefined();
     }
-    expect(p.model.bindings.slice(0, ref.model.bindings.length)).toEqual(ref.model.bindings);
+    // 視線のキーは、fixture を作ったあとで量が変わった（I-067 の A13）ので、同じ場所で作り直される
+    const notGaze = (b: Binding) => !b.parameterIds.some((id) => id === 'EyeBallX' || id === 'EyeBallY');
+    expect(p.model.bindings.slice(0, ref.model.bindings.length).filter(notGaze)).toEqual(
+      ref.model.bindings.filter(notGaze),
+    );
+    expect(p.model.bindings.slice(0, ref.model.bindings.length).map((b) => b.id)).toEqual(
+      ref.model.bindings.map((b) => b.id),
+    );
     expect(run(p)).toBe(p);
   });
 
@@ -650,7 +660,8 @@ describe('再実行', () => {
     expect(pointsAt(x, -10)).not.toEqual(pointsAt(firstX, -10));
     expect(createKeyGenerator().regenerate(x, out.model)).toBe(x);
     // 自動のキーは元の値に戻る
-    expect(transformAt(binding(out, 'cheek', ['Cheek']), 1)).toEqual(ZERO);
+    // I-072: 手で直した既定値の形（+7, -7）は、新しく作るキーにも重ねる。不透明度は計画の値
+    expect(transformAt(binding(out, 'cheek', ['Cheek']), 1)).toEqual({ ...ZERO, position: { x: 7, y: -7 } });
     expect(transformAt(binding(out, 'browL', ['BrowYL']), -1)).toEqual(
       transformAt(binding(first, 'browL', ['BrowYL']), -1),
     );

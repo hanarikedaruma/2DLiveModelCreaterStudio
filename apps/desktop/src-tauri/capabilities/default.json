@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "メインウィンドウと出力ウィンドウ（カード22）の権限。グローバルホットキー（カード40）は登録と全部の解除だけを許す",
-  "windows": ["main", "output"],
+  "windows": ["main", "output", "speech-input"],
   "permissions": [
     "core:default",
     "core:webview:allow-create-webview-window",

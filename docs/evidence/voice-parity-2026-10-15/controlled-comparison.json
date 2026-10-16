@@ -1,0 +1,93 @@
+{
+  "passed": false,
+  "sourceSeconds": 6.0,
+  "initializationSeedForComparisonOnly": 1729,
+  "checks": {
+    "SeedModel": true,
+    "Composer": true,
+    "audio_processing.py": true,
+    "filter_chain.py": true,
+    "quality_voice/backend.py": true,
+    "quality_voice/worker.py": true,
+    "quality_voice/live.py": true,
+    "quality_voice/audio_processing.py": true,
+    "quality_voice/filter_chain.py": true,
+    "quality_voice/execution_lock.py": true,
+    "quality_voice/processes.py": true,
+    "quality_voice/fetch_models.py": true,
+    "quality_voice/fetch_realtime_models.py": true,
+    "quality_voice/requirements.txt": true,
+    "quality_voice/requirements-lock.txt": true
+  },
+  "comparisons": [
+    {
+      "quality": "fast",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 8640,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 25344,
+        "jitterSeconds": 0.04
+      },
+      "integratedReady": {
+        "hopFrames": 8640,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 25344,
+        "jitterSeconds": 0.04
+      },
+      "bitIdentical": false,
+      "differenceRms": 0.04715295024434829,
+      "differencePeak": 0.6535016298294067,
+      "originalMaxProcessingMs": 323.3982000965625,
+      "integratedMaxProcessingMs": 319.92060015909374,
+      "outputPeak": 0.4850201904773712,
+      "passed": false
+    },
+    {
+      "quality": "balanced",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 11520,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 31104,
+        "jitterSeconds": 0.04
+      },
+      "integratedReady": {
+        "hopFrames": 11520,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 31104,
+        "jitterSeconds": 0.04
+      },
+      "bitIdentical": false,
+      "differenceRms": 0.09450629279401662,
+      "differencePeak": 1.0915254950523376,
+      "originalMaxProcessingMs": 366.7888999916613,
+      "integratedMaxProcessingMs": 375.7037001196295,
+      "outputPeak": 0.724856972694397,
+      "passed": false
+    },
+    {
+      "quality": "stable",
+      "samples": 288000,
+      "originalReady": {
+        "hopFrames": 14400,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 36864,
+        "jitterSeconds": 0.04
+      },
+      "integratedReady": {
+        "hopFrames": 14400,
+        "lookaheadFrames": 6144,
+        "minimumCaptureFrames": 36864,
+        "jitterSeconds": 0.04
+      },
+      "bitIdentical": false,
+      "differenceRms": 0.025683900226739248,
+      "differencePeak": 0.6064103208482265,
+      "originalMaxProcessingMs": 395.9963999222964,
+      "integratedMaxProcessingMs": 524.8871000949293,
+      "outputPeak": 0.7134711742401123,
+      "passed": false
+    }
+  ]
+}

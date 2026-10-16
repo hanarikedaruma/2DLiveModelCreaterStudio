@@ -1,6 +1,18 @@
 // 閉じた目の線（カード42）。Model.setupHints の closedLineL / closedLineR（キャンバス座標の点の列）を
 // x の関数（折れ線）として使う。メッシュの縦の範囲（上端・下端）もここで求める
-import type { Mesh, Vec2 } from '@app/schema';
+import { baseMeshPositions, mapMeshPoint, type Mesh, type Model, type Vec2 } from '@app/schema';
+
+export function closedEyeLinePoints(model: Model, side: 'L' | 'R'): Vec2[] | null {
+  const line = model.setupHints[side === 'L' ? 'closedLineL' : 'closedLineR'];
+  if (!line) return null;
+  if (line.partId === null) return normalizeClosedLine(line.points);
+  const part = model.parts.find((p) => p.id === line.partId);
+  const mesh = model.meshes.find((m) => m.id === part?.meshId);
+  if (!part || !mesh) return null;
+  const display = baseMeshPositions(model, part.id, mesh.vertices);
+  const points = line.points.map((p) => mapMeshPoint(mesh, mesh.uvs, display, p));
+  return points.every((p): p is Vec2 => p !== null) ? points : null;
+}
 
 const SAME_X = 1e-6;
 

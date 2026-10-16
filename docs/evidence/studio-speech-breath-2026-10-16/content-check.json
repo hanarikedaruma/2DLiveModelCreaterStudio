@@ -1,0 +1,73 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "note": "No expected text, language hint or reference transcript supplied to ASR. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "qwen-old.wav",
+      "sha256": "d71753c83e5d0cdac29238e0143250056adb8e7923ca8ab86a060beda7378e67",
+      "seconds": 3.6,
+      "expectedTranscripts": [
+        "あ、あなたのことが、だ、大好きです。",
+        "あなたのことが大好きです。"
+      ],
+      "transcript": "あ、あなたのことが、だ、大好きです。",
+      "contentMatch": true,
+      "recognitionSeconds": 3.95448669999314
+    },
+    {
+      "file": "qwen-phonetic.wav",
+      "sha256": "0cf61d3e188e9c549c6cfed549ca08bbb76dd97af1b44a29eb0034c5bc76cd19",
+      "seconds": 5.92,
+      "expectedTranscripts": [
+        "あなたのことがだっ大好き",
+        "あなたのことが大好き",
+        "あ、あなたのことが、だ、大好き"
+      ],
+      "transcript": "あなたのことがだっ大好き",
+      "contentMatch": true,
+      "recognitionSeconds": 3.780329500004882
+    },
+    {
+      "file": "cosy-neutral.wav",
+      "sha256": "9006d72ca5fbad588aac19e73e58893f711dd36eb23516923fab1c893a8b40e9",
+      "seconds": 4.8,
+      "expectedTranscripts": [
+        "あなたのことが大好きです。"
+      ],
+      "transcript": "一一个拿发到铺边一只泪血啊我再去发对她吧",
+      "contentMatch": false,
+      "recognitionSeconds": 4.153372099986882
+    },
+    {
+      "file": "cosy-breath.wav",
+      "sha256": "7df8962215751c19ca3308c41782c229f53f1eb6da427299f5a5b9a5f0be4629",
+      "seconds": 13.6,
+      "expectedTranscripts": [
+        "あなたのことがだっ大好き",
+        "あなたのことが大好き",
+        "あなたのことがだっだいすき",
+        "あなたのことがだいすき"
+      ],
+      "transcript": "不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 ",
+      "contentMatch": false,
+      "recognitionSeconds": 10.467967000004137
+    },
+    {
+      "file": "cosy-faithful.wav",
+      "sha256": "771adf4f9ff507f8cb4649df71e5de94af6cbb9d9bf37d60a5ae4db0862cb365",
+      "seconds": 12.8,
+      "expectedTranscripts": [
+        "あなたのことがだっ大好きです",
+        "あなたのことが大好きです",
+        "あなたのことがだっだいすきです",
+        "あなたのことがだいすきです"
+      ],
+      "transcript": "这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 这边不放小眼不放我 ",
+      "contentMatch": false,
+      "recognitionSeconds": 10.165078000005451
+    }
+  ],
+  "allContentMatched": false
+}

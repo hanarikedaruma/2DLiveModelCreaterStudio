@@ -1,0 +1,32 @@
+[
+  {
+    "name": "neutral",
+    "text": "あなたのことが大好きです。",
+    "instruction": "You are a helpful assistant.<|endofprompt|>",
+    "generationSeconds": 7.618237200003932,
+    "seconds": 4.8,
+    "firstPcmSeconds": 3.743909299999359,
+    "vramMiB": 3543.95947265625,
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+  },
+  {
+    "name": "breath",
+    "text": "[breath]あなたのことがぁ…[breath]だっ…[quick_breath]だいすきぃ…[breath]",
+    "instruction": "You are a helpful assistant. Please say a sentence in a very soft voice. Speak Japanese, shy and embarrassed, with tender breathy hesitation, phrase endings fading weakly into breath.<|endofprompt|>",
+    "generationSeconds": 17.16023710000445,
+    "seconds": 13.6,
+    "firstPcmSeconds": 2.086416400008602,
+    "vramMiB": 3543.95947265625,
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+  },
+  {
+    "name": "faithful",
+    "text": "[breath]あなたのことがぁ…[breath]だっ…[quick_breath]大好きですぅ…[breath]",
+    "instruction": "You are a helpful assistant. Please say a sentence in a very soft voice.<|endofprompt|>",
+    "generationSeconds": 16.1557918000035,
+    "seconds": 12.8,
+    "firstPcmSeconds": 2.0001037000038195,
+    "vramMiB": 3543.95947265625,
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+  }
+]

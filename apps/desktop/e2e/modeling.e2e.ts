@@ -80,7 +80,7 @@ afterAll(async () => {
 });
 
 describe('モデリングの通し', () => {
-  it('PSD を取り込み → 割り当て → かんたんセットアップ → 顔の向き → Undo → 保存 → 開き直し', async () => {
+  it('PSD を取り込み → 割り当て → 自動セットアップ → 顔の向き → Undo → 保存 → 開き直し', async () => {
     // 1. セットアップ画面のファイルの入力から PSD を取り込む
     await page.locator('input[type=file]').first().setInputFiles(PSD);
     await page.waitForFunction(() => window.__studio.services.store.get().assets.length === 28, null, {
@@ -104,10 +104,10 @@ describe('モデリングの通し', () => {
     });
     expect(assigned).toEqual({ parts: 28, meshes: 28 });
 
-    // 3. 利用者がたたんでいた場合だけ割り当てのパネルを開き、[かんたんセットアップ] を押す。
+    // 3. 利用者がたたんでいた場合だけ割り当てのパネルを開き、[自動セットアップ] を押す。
     const assignToggle = page.locator('[data-panel-id="assets.assign"] .panel-title button');
     if ((await assignToggle.getAttribute('aria-expanded')) === 'false') await assignToggle.click();
-    await page.getByRole('button', { name: 'かんたんセットアップ' }).click();
+    await page.getByRole('button', { name: '自動セットアップ' }).click();
     await page.waitForFunction(() => window.__studio.services.store.get().model.bindings.length > 0);
     const bindingCount = await page.evaluate(() => window.__studio.services.store.get().model.bindings.length);
 

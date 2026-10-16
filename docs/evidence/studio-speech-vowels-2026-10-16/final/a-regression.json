@@ -1,0 +1,9 @@
+{
+  "sha256": "b99f8b64f2647aa68801cb1f1d938f4d350cd63f610b6c8eeded9c99c6c275d4",
+  "matchesApprovedSample": true,
+  "meta": {
+    "breathyOnset": 1,
+    "breathyOnsetStartMs": 70.0,
+    "breathyOnsetEndMs": 330.0
+  }
+}

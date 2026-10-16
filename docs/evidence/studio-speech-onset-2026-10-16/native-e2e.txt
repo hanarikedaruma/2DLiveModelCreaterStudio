@@ -1,0 +1,14 @@
+
+ RUN  v3.2.7 C:/Users/hanar/.claude/workspace/2DLiveModelCreaterStudio/apps/desktop
+
+ ✓ e2e/speechEmotions.e2e.ts (4 tests) 67675ms
+   ✓ 左の感情ボタンと恥ずかしい読み方 > 両画面で縦並びの感情を共有し、先行合成を感情変更で無効にする  36200ms
+   ✓ 左の感情ボタンと恥ずかしい読み方 > 恥ずかしいを選んで即送信し、固定した声で口ごもり付きの逐次再生を行う  5645ms
+   ✓ 左の感情ボタンと恥ずかしい読み方 > うれしいへ戻すと自動の言い直しを加えず、感情だけを保存する  6977ms
+   ✓ 左の感情ボタンと恥ずかしい読み方 > 全文生成後でも同じ冒頭の息処理と原文の履歴を使う  8454ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  12:31:17
+   Duration  68.50s (transform 137ms, setup 0ms, collect 438ms, tests 67.67s, environment 0ms, prepare 141ms)
+

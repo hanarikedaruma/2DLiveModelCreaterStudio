@@ -90,6 +90,8 @@ describe('I-068: 輪郭線のパレット', () => {
     // 影響幅にかかる「輪郭の線画」が候補に出て、チェックで一緒に動かすパーツになる
     fireEvent.click(panel.getByRole('checkbox', { name: '輪郭の線画' }));
     expect(s.services.store.get().model.contourLines![0]!.withPartIds).toEqual(['art']);
+    // 引く段でなくても、なぞれば線を引けることを案内する（I-076）
+    expect(panel.getByText(/点や線の無い所から輪郭をなぞると、新しい線を引く/)).toBeTruthy();
     // ［線を引く］で引く段になり、案内が出る
     fireEvent.click(panel.getByRole('button', { name: '線を引く' }));
     expect(contourEditor.state.get().drawing).toBe(true);

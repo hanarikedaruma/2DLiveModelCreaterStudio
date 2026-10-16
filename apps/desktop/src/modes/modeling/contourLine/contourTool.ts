@@ -66,6 +66,7 @@ const FIT_NEAR = 3; // 線が目標に届くように直す頂点は、線から
 const nearLine = (p: Vec2, samples: readonly Vec2[]) => distanceToLine(p, samples) <= FIT_NEAR;
 const LINE_HIT = 6;
 const DRAG_THRESHOLD = 3;
+const STROKE_THRESHOLD = 6; // 点や線の無い所をこれより動かしてドラッグすると、新しい線を引く（画面のピクセル。I-076）
 const DOUBLE_CLICK_MS = 400;
 const DOUBLE_CLICK_DISTANCE = 6;
 
@@ -74,7 +75,7 @@ const DOUBLE_CLICK_DISTANCE = 6;
 export interface ContourState {
   lineId: string | null; // パレットで選んでいる線（無ければパーツの最初の線）
   handles: number[]; // 選んだ点
-  drawing: boolean; // ［線を引く］を押してから引き終えるまで
+  drawing: boolean; // ［線を引く］を押してから引き終えるまで（点を順にクリックして引く段。なぞるだけならボタンは要らない）
 }
 
 function createStateStore() {
@@ -219,7 +220,7 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
       }
     | { kind: 'reposition'; screenStart: Vec2; started: boolean; live: LiveEdit; line: ContourLine; index: number }
     | { kind: 'line'; screenStart: Vec2; start: Vec2; lineId: string; sample: number }
-    | { kind: 'empty'; screenStart: Vec2; start: Vec2 };
+    | { kind: 'empty'; screenStart: Vec2; start: Vec2; canStroke: boolean };
 
   const snapshot = (env: ToolEnv): ContourSnapshot => {
     const project = env.services.store.get();
@@ -648,7 +649,13 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
         return;
       }
       lastClick = null;
-      drag = { kind: 'empty', screenStart: e.screenPoint, start: e.canvasPoint };
+      // 点や線の無い所。メッシュとその余白の中からドラッグしたら、そのまま新しい線を引く（流れ線と同じ。I-076）
+      drag = {
+        kind: 'empty',
+        screenStart: e.screenPoint,
+        start: e.canvasPoint,
+        canStroke: inTargetRange(snap, view, e.screenPoint),
+      };
     },
 
     onPointerMove(e) {
@@ -671,6 +678,21 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
         return;
       }
       if (!drag) return;
+      if (drag.kind === 'empty') {
+        const moved = distance(e.screenPoint, drag.screenStart);
+        if (!drag.canStroke || moved < STROKE_THRESHOLD) return;
+        stroke = {
+          points: [drag.start, e.canvasPoint],
+          screenStart: drag.screenStart,
+          screenLength: moved,
+          last: e.screenPoint,
+        };
+        drag = null;
+        clicks = [];
+        state.set({ handles: [] });
+        env.requestRedraw();
+        return;
+      }
       if (drag.kind === 'line') {
         if (distance(e.screenPoint, drag.screenStart) < DRAG_THRESHOLD) return;
         // 線の上をつまんで動かした: そこに点を足してから動かす（点の追加とキーの編集で1回の Undo）
@@ -805,6 +827,8 @@ export function createContourEditor(slot: EnvSlot, options: { now?: () => number
         e.preventDefault();
         if (drag) {
           cancelDrag();
+        } else if (stroke && !state.get().drawing) {
+          stroke = null;
         } else if (state.get().drawing) {
           stroke = null;
           clicks = [];

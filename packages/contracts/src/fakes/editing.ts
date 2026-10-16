@@ -69,8 +69,15 @@ export class FakeKeyGenerator implements KeyGenerator {
 
 // 何も変えないコマンドを返す
 export class FakeAutoSetup implements AutoSetup {
+  blink(_project: Project, _side: 'L' | 'R') {
+    return {
+      command: { label: 'この目のまばたきを作る', apply: (p: Project) => p },
+      reason: null,
+      replacesCustom: false,
+    };
+  }
   plan(_project: Project): { command: Command; warnings: string[] } {
-    return { command: { label: 'かんたんセットアップ', apply: (p) => p }, warnings: [] };
+    return { command: { label: '自動セットアップ', apply: (p) => p }, warnings: [] };
   }
 }
 

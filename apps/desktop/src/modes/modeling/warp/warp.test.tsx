@@ -81,8 +81,6 @@ function regularWarp(columns = 4, rows = 4): Warp {
   return { id: 'w', partId: 'g', columns, rows, bounds: BOUNDS, points };
 }
 
-const DETAIL = { modeling: 'detail', animation: 'easy', studio: 'easy' } as const;
-
 let restoreSize: () => void = () => {};
 beforeEach(() => {
   registry.reset();
@@ -93,8 +91,8 @@ beforeEach(() => {
 });
 afterEach(() => restoreSize());
 
-// 詳細モードでワープ編集ツールにして開く（ワープのパレットは、そのツールのときだけ出るツールのパレット）
-async function open(project: Project, options: { detail?: boolean; select?: string[]; tool?: boolean } = {}) {
+// ワープ編集ツールにして開く（ワープのパレットは、そのツールのときだけ出るツールのパレット）
+async function open(project: Project, options: { select?: string[]; tool?: boolean } = {}) {
   const shell = renderShell(() => ({
     pipeline: createDeformPipeline(),
     evaluator: createBindingEvaluator(),
@@ -107,11 +105,9 @@ async function open(project: Project, options: { detail?: boolean; select?: stri
   act(() =>
     shell.services.editor.set({
       selectedPartIds: options.select ?? ['g'],
-      ...(options.detail === false ? {} : { uiLevel: DETAIL }),
     }),
   );
-  if (options.detail !== false && options.tool !== false)
-    fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
+  if (options.tool !== false) fireEvent.click(screen.getByRole('button', { name: 'ワープ編集' }));
   const store = shell.services.store as ProjectStoreWithHistory;
   const sectionEl = () => document.querySelector<HTMLElement>('[data-section-id="modeling.warp"]');
   const section = () => within(sectionEl()!);
@@ -136,18 +132,18 @@ const activeTool = () =>
     .find((b) => b.getAttribute('aria-pressed') === 'true')?.textContent;
 
 describe('ワープのセクション', () => {
-  it('画像から親グループを選べ、親がなければ1回のUndoで戻せるグループを作れる', async () => {
+  it('画像から親も選べ、親がなくても画像へ直接ワープを追加してUndoできる', async () => {
     const shell = await open(testProject(), { select: ['a'] });
-    fireEvent.click(shell.section().getByRole('button', { name: 'グループ「g」を選ぶ' }));
+    fireEvent.change(shell.section().getByRole('combobox', { name: '対象を変える' }), { target: { value: 'g' } });
     expect(shell.services.editor.get().selectedPartIds).toEqual(['g']);
     act(() => shell.services.editor.set({ selectedPartIds: ['o'] }));
-    fireEvent.click(shell.section().getByRole('button', { name: 'グループを作る' }));
-    const group = shell.store.get().model.parts.find((p) => p.id === shell.services.editor.get().selectedPartIds[0])!;
-    expect(group.kind).toBe('group');
-    expect(shell.store.get().model.parts.find((p) => p.id === 'o')!.parentId).toBe(group.id);
+    const before = shell.store.get();
+    fireEvent.click(shell.section().getByRole('button', { name: 'ワープを追加' }));
+    expect(shell.store.get().model.warps[0]!.partId).toBe('o');
+    expect(shell.store.get().model.parts).toBe(before.model.parts);
     act(() => shell.store.undo());
     expect(shell.store.get().model.parts.find((p) => p.id === 'o')!.parentId).toBeNull();
-    expect(shell.store.get().model.parts.some((p) => p.id === group.id)).toBe(false);
+    expect(shell.store.get()).toBe(before);
   });
 
   it('プレビュー中は格子を追加できず、値を戻す理由を示す', async () => {
@@ -165,11 +161,11 @@ describe('ワープのセクション', () => {
     expect(ctx.texts.join('')).toContain('グループを選ぶ');
   });
 
-  it('パーツの設定には無く、詳細モードでワープ編集ツールのときだけ、色付きのツールのパレットとして上に出る', async () => {
-    const shell = await open(testProject(), { detail: false });
+  it('最初からワープを選べ、ワープ編集ツールのときだけ色付きのパレットとして上に出る', async () => {
+    const shell = await open(testProject(), { tool: false });
     expect(shell.sectionEl()).toBeNull();
-    expect(screen.queryByRole('button', { name: 'ワープ編集' })).toBeNull();
-    act(() => shell.services.editor.set({ uiLevel: DETAIL }));
+    expect(screen.getByRole('button', { name: 'ワープ編集' })).toBeTruthy();
+
     // 選択・変形ツールの間は出ない。パーツの設定にも無い
     expect(shell.sectionEl()).toBeNull();
     const settings = document.querySelector<HTMLElement>('[data-panel-id="partSettings"]')!;
@@ -185,10 +181,10 @@ describe('ワープのセクション', () => {
     expect(document.querySelector('[data-panel-id="warp"]')).toBeNull();
   });
 
-  it('グループでなければ案内、画像パーツの無いグループでは追加できない', async () => {
+  it('画像は直接追加でき、画像パーツの無いグループでは追加できない', async () => {
     const shell = await open(testProject(), { select: ['a'] });
-    expect(shell.section().getByText(/画像を含むグループを選ぶ/)).toBeTruthy();
-    expect(shell.section().queryByRole('button', { name: 'ワープを追加' })).toBeNull();
+    expect(shell.section().getByText(/格子が無い/)).toBeTruthy();
+    expect((shell.section().getByRole('button', { name: 'ワープを追加' }) as HTMLButtonElement).disabled).toBe(false);
     act(() => shell.services.editor.set({ selectedPartIds: ['empty'] }));
     expect((shell.section().getByRole('button', { name: 'ワープを追加' }) as HTMLButtonElement).disabled).toBe(true);
     expect(shell.section().getByText(/子に画像パーツが無い/)).toBeTruthy();
@@ -444,19 +440,19 @@ describe('ワープ編集ツール', () => {
     expect(shell.store.get()).toBe(keyed);
   });
 
-  it('画像パーツを選んでいるときは格子を描かず、ドラッグしても制御点を動かさない（押した所のグループを選ぶ）', async () => {
+  it('画像に格子が無いときは格子を描かず、ドラッグしても形や明示した対象を変えない', async () => {
     const shell = await openWithWarp();
     act(() => shell.services.editor.set({ selectedPartIds: ['a'] }));
     const ctx = new RecordingContext();
     warpEditor.tool.drawOverlay!(ctx.asContext(), shell.canvas.getState().view);
     expect(ctx.named('arc')).toEqual([]);
     expect(ctx.named('moveTo')).toEqual([]);
-    expect(ctx.texts.join('')).toMatch(/画像を含むグループを選ぶ/);
+    expect(ctx.texts.join('')).toMatch(/格子が無い/);
     const before = shell.store.get();
     // a の中（300,400）から押してドラッグする
     shell.ptr.drag({ x: 300, y: 400 }, { x: 340, y: 420 });
     expect(shell.store.get()).toBe(before);
-    expect(shell.services.editor.get().selectedPartIds).toEqual(['g']);
+    expect(shell.services.editor.get().selectedPartIds).toEqual(['a']);
     expect(WARP_TOOL_ID).toBe('modeling.warp');
   });
 });

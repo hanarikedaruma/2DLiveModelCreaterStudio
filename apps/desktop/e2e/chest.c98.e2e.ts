@@ -74,7 +74,6 @@ describe('カード98: 胸の実画面', () => {
             selectedPartIds: ['chest'],
             activeParameterIds: [],
             editorParamValues: {},
-            uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
           });
         },
         { project, pngs },
@@ -89,16 +88,12 @@ describe('カード98: 胸の実画面', () => {
       expect(await parts.getByRole('img', { name: '胸：胸揺れ：ON', exact: true }).count()).toBe(1);
       expect(await parts.getByRole('img', { name: '胸：軸揺れ：ON', exact: true }).count()).toBe(0);
       expect(await settings.getByLabel('胸を揺らす', { exact: true }).isChecked()).toBe(true);
-      const numbers = settings.getByRole('button', { name: '物理の数値', exact: true });
-      if ((await numbers.getAttribute('aria-expanded')) === 'false') await numbers.click();
       const gravity = settings.getByRole('spinbutton', { name: '胸の重力の強さ', exact: true });
       await gravity.fill('0.5');
       await gravity.press('Tab');
       expect(await page.evaluate(() => window.__studio.services.store.get().physics[0]!.bounce!.gravityStrength)).toBe(
         0.5,
       );
-      const pinning = settings.getByRole('button', { name: '胸の固定範囲', exact: true });
-      if ((await pinning.getAttribute('aria-expanded')) === 'false') await pinning.click();
       expect(await settings.getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' }).count()).toBe(1);
       const brightness = await settings
         .getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' })
@@ -144,8 +139,6 @@ describe('カード98: 胸の実画面', () => {
       await page.evaluate((view) => window.__studio.canvas.setView(view), originalView);
       await settings.getByRole('img', { name: '胸の固定点（白丸）と揺れる点（黒丸）' }).scrollIntoViewIfNeeded();
       await page.screenshot({ path: join(OUT, `pinning-${size.width}.png`) });
-      await settings.getByRole('button', { name: '胸の固定範囲', exact: true }).click();
-      await settings.getByRole('button', { name: '物理の数値', exact: true }).click();
       await settings.getByLabel('胸を揺らす', { exact: true }).scrollIntoViewIfNeeded();
       await page.screenshot({ path: join(OUT, `settings-${size.width}.png`) });
       await settings.getByRole('button', { name: '布', exact: true }).click();

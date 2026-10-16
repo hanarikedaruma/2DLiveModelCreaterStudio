@@ -1,0 +1,111 @@
+{
+  "text": "今日は、みんなに大切なことを伝えたいです。いつもそばにいてくれて、ありがとう。みんなのことがすきです。",
+  "runs": [
+    {
+      "name": "natural",
+      "scene": "",
+      "meta": {
+        "rate": 24000,
+        "frames": 184320,
+        "seconds": 7.68,
+        "generationSeconds": 8.794846799995867,
+        "firstPcmSeconds": 0.8988901999982772,
+        "rtf": 1.1451623437494618,
+        "codecFrames": 96,
+        "vramMiB": 4009.49951171875,
+        "delivery": "stream",
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+        "cudaGraph": 1,
+        "predictorGraphReplays": 96,
+        "textEmbeddingOffloadMiB": 593.5,
+        "statefulDecoder": 1
+      },
+      "producerSeconds": [
+        0.9069136999896728,
+        1.6321655999927316,
+        2.3313563999981852,
+        3.0292248999903677,
+        3.724159099991084,
+        4.469190699994215,
+        5.24300729999959,
+        5.946695999999065,
+        6.662886799997068,
+        7.365147899996373,
+        8.084492599999066,
+        8.797696099994937,
+        8.803163099990343
+      ],
+      "old": {
+        "rebuffers": 1,
+        "startSeconds": 1.6800000000000013,
+        "deviceCreatedSeconds": 0.9100000000000006,
+        "outputSeconds": 9.18,
+        "sourceFrames": 368640
+      },
+      "new": {
+        "rebuffers": 0,
+        "startSeconds": 3.0699999999999794,
+        "deviceCreatedSeconds": 3.0299999999999794,
+        "outputSeconds": 7.68,
+        "sourceFrames": 368640
+      },
+      "rms": 0.0608876496553421,
+      "peak": 0.32873934507369995,
+      "sourceFrames": 368640
+    },
+    {
+      "name": "supported",
+      "scene": "大切な気持ちをまっすぐ伝える。息で押さず、お腹で支えるような芯と自然な響きを意識し、重要な言葉は少し丁寧に、ゆっくり置く。声量は会話のまま。参照音声の声質と普段の高さを保つ。怒鳴ったり、低い声を作ったりしない。",
+      "meta": {
+        "rate": 24000,
+        "frames": 199680,
+        "seconds": 8.32,
+        "generationSeconds": 9.582772699999623,
+        "firstPcmSeconds": 0.9397175000049174,
+        "rtf": 1.1517755649038008,
+        "codecFrames": 104,
+        "vramMiB": 4009.49951171875,
+        "delivery": "stream",
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+        "cudaGraph": 1,
+        "predictorGraphReplays": 104,
+        "textEmbeddingOffloadMiB": 593.5,
+        "statefulDecoder": 1
+      },
+      "producerSeconds": [
+        0.9479063000035239,
+        1.653518899998744,
+        2.360033499993733,
+        3.0911936000047717,
+        3.8455807999998797,
+        4.612772299995413,
+        5.311690100003034,
+        6.0147781999985455,
+        6.776880399993388,
+        7.483452700005728,
+        8.184428799999296,
+        8.88815820000309,
+        9.586718299993663,
+        9.59114970000519
+      ],
+      "old": {
+        "rebuffers": 1,
+        "startSeconds": 1.7000000000000013,
+        "deviceCreatedSeconds": 0.9500000000000006,
+        "outputSeconds": 9.75,
+        "sourceFrames": 399360
+      },
+      "new": {
+        "rebuffers": 0,
+        "startSeconds": 3.139999999999978,
+        "deviceCreatedSeconds": 3.099999999999978,
+        "outputSeconds": 8.32,
+        "sourceFrames": 399360
+      },
+      "rms": 0.06925815343856812,
+      "peak": 0.434394508600235,
+      "sourceFrames": 399360
+    }
+  ],
+  "playbackReplayedFromPcm24": true
+}

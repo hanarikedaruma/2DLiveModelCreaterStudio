@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "checks": {
+    "allInstalledFilesMatch": true,
+    "originalRecordedSourcesUnchanged": true,
+    "SeedModelAstMatchesOriginal": true,
+    "filterChainMatchesOriginal": true,
+    "obsoleteGpuWarmAbsent": true
+  },
+  "files": {
+    "host.py": {
+      "sourceSha256": "6d1c4b83528648aa0db717fd99ad0e43b0ff00f42196e69be79a385f057853e5",
+      "installedSha256": "6d1c4b83528648aa0db717fd99ad0e43b0ff00f42196e69be79a385f057853e5",
+      "match": true
+    },
+    "live.py": {
+      "sourceSha256": "b752258fefe2a88f382d4410c414aadb4b7989ed34e4e861cac6f1e0ac4bc2f3",
+      "installedSha256": "b752258fefe2a88f382d4410c414aadb4b7989ed34e4e861cac6f1e0ac4bc2f3",
+      "match": true
+    },
+    "worker.py": {
+      "sourceSha256": "89d68890cba906f60c853a6678e80bb541a0ed676f64f14707e2befc9b48dc67",
+      "installedSha256": "89d68890cba906f60c853a6678e80bb541a0ed676f64f14707e2befc9b48dc67",
+      "match": true
+    },
+    "audio_processing.py": {
+      "sourceSha256": "c9067d9a0c4e81788ecb1d641def8379b0d3bcd5b425a1c84e51aafea655e710",
+      "installedSha256": "c9067d9a0c4e81788ecb1d641def8379b0d3bcd5b425a1c84e51aafea655e710",
+      "match": true
+    },
+    "backend.py": {
+      "sourceSha256": "92c47138af382bc307e2b86088cbaabbf224ce473bed4f67347d55d4cb478f94",
+      "installedSha256": "92c47138af382bc307e2b86088cbaabbf224ce473bed4f67347d55d4cb478f94",
+      "match": true
+    },
+    "filter_chain.py": {
+      "sourceSha256": "f34fb3c53f6c2dcc14b75bc3178e2776a5cd0c8ee14ce12f2f34da4803f35b2f",
+      "installedSha256": "f34fb3c53f6c2dcc14b75bc3178e2776a5cd0c8ee14ce12f2f34da4803f35b2f",
+      "match": true
+    },
+    "realtime_graph.py": {
+      "sourceSha256": "e103eadf3541f4d80955386c8b19e0d4a241678e4050dfa4b09ac5e593637dcb",
+      "installedSha256": "e103eadf3541f4d80955386c8b19e0d4a241678e4050dfa4b09ac5e593637dcb",
+      "match": true
+    },
+    "validate_live.py": {
+      "sourceSha256": "65bb9395860038f9c90c80f10a600a9b61ab9bdced917d64dc47e1974a42caab",
+      "installedSha256": "65bb9395860038f9c90c80f10a600a9b61ab9bdced917d64dc47e1974a42caab",
+      "match": true
+    },
+    "README.md": {
+      "sourceSha256": "c2ceb6af62562f46b1b00f4b4fda4d191dec8bdecc6623bc7e3b7492748844f6",
+      "installedSha256": "c2ceb6af62562f46b1b00f4b4fda4d191dec8bdecc6623bc7e3b7492748844f6",
+      "match": true
+    },
+    "live2d-studio.exe": {
+      "sourceSha256": "6b921530f6483907e451150cb17030bc94c66149caa51e7230cacadf002f54cd",
+      "installedSha256": "6b921530f6483907e451150cb17030bc94c66149caa51e7230cacadf002f54cd",
+      "match": true
+    }
+  },
+  "intentionalProcessingDifferences": [
+    "RNNoise mixing aligned to measured 960-sample delay",
+    "SpeechDetector VAD-only bounded gain",
+    "Composer and final output attenuation-only peak protection",
+    "Post-gain input diagnostics"
+  ]
+}

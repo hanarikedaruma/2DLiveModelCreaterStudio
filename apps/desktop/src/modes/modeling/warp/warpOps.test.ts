@@ -113,7 +113,9 @@ describe('warpBoundsFor', () => {
 
 describe('createWarp', () => {
   it('分割の数の規則的な格子を、余白を足した範囲に作る', () => {
-    const warp = createWarp(project(), 'g', 4, 2, 'w1')!;
+    const p = project();
+    p.model.parts[0]!.rotation = 0;
+    const warp = createWarp(p, 'g', 4, 2, 'w1')!;
     expect(warp).toMatchObject({ id: 'w1', partId: 'g', columns: 4, rows: 2 });
     expect(warp.bounds.x).toBeCloseTo(87.5);
     expect(warp.bounds.y).toBeCloseTo(79);
@@ -134,8 +136,9 @@ describe('createWarp', () => {
     expect(clampDivisions(5.4)).toBe(5);
   });
 
-  it('グループでない・画像パーツが無いときは null', () => {
-    expect(createWarp(project(), 'a', 4, 4, 'w')).toBeNull();
+  it('画像にも付けられ、対象や画像が無いときは null', () => {
+    expect(createWarp(project(), 'a', 4, 4, 'w')).toMatchObject({ partId: 'a' });
+    expect(createWarp(project(), 'missing', 4, 4, 'w')).toBeNull();
     expect(createWarp(project(), 'empty', 4, 4, 'w')).toBeNull();
   });
 });

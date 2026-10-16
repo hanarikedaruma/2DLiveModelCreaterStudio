@@ -1,10 +1,9 @@
 // 「パーツの設定」の物理のセクション（カード50）。画像パーツかグループを1つ選んだときに出す。
-// かんたん: [揺らす]・種類（髪・布・リボン・アクセサリ）・揺れ方（控えめ〜大きめ）・根元の案内・[揺れを試す]。
-// 詳細: spring・damping・gravity・inertia・range・方向・入力を数値で変える（かんたんでは「物理の数値」で一時的に開く）
+// [揺らす]・種類・揺れ方のプリセットと、spring・damping・gravity・inertia・range・方向・入力の数値を表示する。
 import { useState } from 'react';
 import { newId, type Parameter, type Part, type Physics, type Project } from '@app/schema';
 import { bounceReason } from '@app/core';
-import { DetailDisclosure, useDispatch, useEditor, useProject, useServices } from '../../../shell/api';
+import { useDispatch, useEditor, useProject, useServices } from '../../../shell/api';
 import { useConfirmOverwriteCustom } from '../../../shell/level';
 import { partById } from '../canvas/parts';
 import {
@@ -253,9 +252,9 @@ function PhysicsSettings(props: {
 
       {chest && item.bounce && <ChestPinning project={project} part={part} item={item} onError={setError} />}
 
-      <DetailDisclosure label="物理の数値">
+      <>
         <PhysicsNumbers project={project} item={item} update={update} />
-      </DetailDisclosure>
+      </>
     </div>
   );
 }
@@ -439,7 +438,7 @@ function ChestPinning({
     width = Math.max(...xs) - x + 5,
     height = Math.max(...ys) - y + 5;
   return (
-    <DetailDisclosure label="胸の固定範囲">
+    <>
       <svg
         viewBox={`${x} ${y} ${width} ${height}`}
         width="100%"
@@ -501,6 +500,6 @@ function ChestPinning({
           />
         </label>
       ))}
-    </DetailDisclosure>
+    </>
   );
 }

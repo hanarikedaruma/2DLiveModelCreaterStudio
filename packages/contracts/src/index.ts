@@ -13,9 +13,9 @@ import type {
   Parameter,
   Project,
   TransformDelta,
-  UiLevel,
   Vec2,
 } from '@app/schema';
+import type { VoiceService } from './voice';
 
 // ---- 評価の契約 ----
 
@@ -70,6 +70,7 @@ export interface HairFrameContext {
   dt: number;
   frameId: string | number;
   active: boolean;
+  freeze?: boolean; // I-060。停止中も直前の曲がりを保持し、基準線の移動へ追従する
 }
 export interface HairContact {
   id: string;
@@ -147,11 +148,19 @@ export interface FrameContext {
   mixedSoFar: ParamValues; // それまでのレイヤーを合成した値
   // それまでのレイヤーそのもの（合成する前の値と重み。順に並ぶ）。実行部は必ず渡す。省いたら空として扱う（CC-010）
   layersSoFar?: readonly Layer[];
+  previousAnimationPose?: AnimationStartPose | null; // 前の表示フレーム。nullは初回・別作品・時刻逆行。省略時はplayer内部の値
   flags: {
     lipSyncWeight: number;
     physicsActive: boolean;
-    manualPhysicsParameterIds?: readonly string[]; // 実際に再生する手動トラック。該当する胸の2出力を物理で上書きしない
+    manualPhysicsParameterIds?: readonly string[]; // 実際に再生する手動トラック。物理で上書きしない（胸は対になる2軸）
+    freezePhysics?: boolean; // I-060: 停止する物理の直前の出力を保持（時間は進めない）
   }; // 前のレイヤーが後のレイヤーへ伝える値（毎フレームの初期値 1・true・省略）
+}
+export interface AnimationStartPose {
+  projectId: string;
+  values: ParamValues; // アニメーションの層までの合成。表情・トラッキング・前のアニメーションを含む
+  lipSyncOffsets: ParamValues; // そのフレームのlipSyncが実際に足した差（維持OFF時に取り込む）
+  physicsOffsets: ParamValues; // そのフレームのphysicsが実際に足した差（手動の出力へ引き継ぐ）
 }
 export interface LayerProducer {
   id: LayerId;
@@ -193,7 +202,6 @@ export interface ProjectStore {
 }
 export interface EditorState {
   mode: ModeId;
-  uiLevel: Record<ModeId, UiLevel>;
   selectedPartIds: string[];
   activeParameterIds: string[]; // 編集中のパラメータ（0〜2個）
   editorParamValues: ParamValues; // モデリング中のプレビュー値（無いパラメータはデフォルト値）
@@ -271,6 +279,8 @@ export interface AutoSaver {
   start(dir: string): void;
   stop(): void;
   findRecoverable(dir: string): Promise<string | null>;
+  // 表示した復元候補以前の自動保存だけを破棄。本体・素材・新しい世代は残す。
+  discardRecovery(dir: string, expectedPath: string): Promise<'discarded' | 'changed'>;
 }
 
 // ---- メッシュ生成の契約 ----
@@ -296,6 +306,13 @@ export interface KeyGenerator {
 }
 export interface AutoSetup {
   plan(project: Project): { command: Command; warnings: string[] };
+  blink(project: Project, side: 'L' | 'R', images?: BlinkImages): BlinkPlan;
+}
+export type BlinkImages = Record<string, Pick<ImageData, 'width' | 'height' | 'data'>>;
+export interface BlinkPlan {
+  command: Command | null;
+  reason: string | null;
+  replacesCustom: boolean;
 }
 
 // ---- キー編集の契約 ----
@@ -304,15 +321,16 @@ export type TransformChange = {
   dPosition?: Vec2;
   dRotation?: number;
   scaleFactor?: Vec2;
-  // パーツ自身の不透明度（0..1。親は掛けない）をいまの値でこの値にする（I-026）。基準状態では Part.opacity
-  // （不透明度のバインディングのデフォルト値のキーも同じ値にする）、パラメータの編集中はそのバインディングのキー
+  // パーツ自身の不透明度（0..1。親は掛けない）をいまの値でこの値にする（I-026）。未選択か全既定値では Part.opacity
+  // （不透明度のバインディングの既定値キーも同じ値にする）、それ以外ではそのバインディングのキー
   // （不透明度のバインディングにして、ほかの不透明度のバインディングの分を除いた値を記録する）
   opacity?: number;
   dPivot?: Vec2;
 };
 export type PointsTarget = { kind: 'mesh'; meshId: string } | { kind: 'warp'; warpId: string };
 export interface KeyEditor {
-  // EditorState の activeParameterIds と editorParamValues に応じて、基準状態かキーを変えるコマンドを返す
+  // パラメータ未選択なら基準状態、選択中なら既定値もその組のキーを変える（I-072）。
+  // opacity だけは、すべて既定値なら Part.opacity と既定値キーを同期する（I-026）
   transformEdit(
     project: Project,
     editor: EditorState,
@@ -396,6 +414,7 @@ export interface AudioSource {
   onSamples(listener: (samples: Float32Array, sampleRate: number, time: number) => void): () => void;
 }
 export interface LipSyncProducer extends LayerProducer {
+  reset?(): void;
   // id 'lipSync'
   configure(o: {
     mouthSource: 'max' | 'micOnly' | 'cameraOnly';
@@ -490,6 +509,7 @@ export interface Services {
   trackingLayer: TrackingLayerProducer;
   // ここから STEP1（カード26）
   audio: AudioSource;
+  voice: VoiceService;
   lipSync: LipSyncProducer;
   autoBlink: AutoBlink;
   bodyFollow: BodyFollowProducer;
@@ -503,6 +523,8 @@ export interface Services {
   physics: PhysicsEngine;
   vowels: VowelEstimator;
 }
+
+export * from './voice';
 
 // ---- 仮実装 ----
 

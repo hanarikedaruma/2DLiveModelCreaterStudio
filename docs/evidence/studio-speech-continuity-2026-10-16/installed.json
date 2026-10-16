@@ -1,0 +1,71 @@
+{
+  "checkedAt": "2026-10-16T06:46:44.1284830+09:00",
+  "files": [
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\release\\live2d-studio.exe",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+      "sha256": "BA269D2BEFAB12B83D511B830A043316863E8DF2A4803DAE7BE11EC14587AFAE",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech.py",
+      "sha256": "A1E4FB5F8E245877DA9E3018872D5D98B3FA742087DA3BEACBC11474B1B84DF6",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_buffering.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_buffering.py",
+      "sha256": "029B0C47509DCC6B0F086AD2F2AABF87AD0B80359EB2E60E0CCC2424C6FAEC49",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_config.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_config.py",
+      "sha256": "6CDAD923AD83EA59B5932DDE9BBF56874C65F3E174AE381B4C67278D5F694391",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_worker.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_worker.py",
+      "sha256": "B32A0D4E9E7B41382A44EFD0C2F802DA7C80FC500AAD78CB1B15777115B772DC",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\studio_speech.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\studio_speech.py",
+      "sha256": "EF4E701947A1EF7A710B73C71108364F4FBDD1FBB7C1CAD2F97E28F0ADE2C146",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_stream_audio.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_stream_audio.py",
+      "sha256": "7ECDF05D5A12E4226EC3AC2DA1A9F0D3CF2F24BC0546FB6BE59A41C639FAD0A6",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_stream_backend.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_stream_backend.py",
+      "sha256": "BE8D7894EA7E8A073E69A60EF2FDDA69B626BE0E0A8F8D4D737276533E9A4D08",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_decoder.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_decoder.py",
+      "sha256": "F1D030446B64E4455837F7F1A972BB617A10813EAC307C190C5F3E34757EFEBF",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\runtime.json",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\runtime.json",
+      "sha256": "89DE4A5BFA19C2D3EE405DD2A2C13BEE34F3BF4845C757C641D013DD791ED8B5",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\voices\\original-soft-girl.wav",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\voices\\original-soft-girl.wav",
+      "sha256": "DAC5A689FE406465A88B481D085AE4FA0396ADC9BAEDA044C93913DF39ED039D",
+      "match": true
+    }
+  ]
+}

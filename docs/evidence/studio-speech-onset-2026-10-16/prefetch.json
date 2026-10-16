@@ -1,0 +1,49 @@
+{
+  "state": "stopped",
+  "sessionId": "e6e3287007c04abfa8fb4cf8e2368148",
+  "error": "",
+  "mute": true,
+  "bypass": false,
+  "metrics": {
+    "breathyOnset": 1,
+    "breathyOnsetEligible": 1,
+    "breathyOnsetEndMs": 330,
+    "breathyOnsetMs": 2.549399985582568,
+    "breathyOnsetStartMs": 70,
+    "codecFrames": 45,
+    "cudaGraph": 1,
+    "dacClockCorrections": 341,
+    "firstAudioMs": 112.92204999923706,
+    "firstAudioWallMs": 1792121520112.0684,
+    "firstPcmSeconds": 0.9174720000009984,
+    "frames": 86400,
+    "generationSeconds": 4.409533800004283,
+    "hesitations": 2,
+    "loadSeconds": 0,
+    "performanceMs": 0.04780000017490238,
+    "predictorGraphReplays": 45,
+    "prefetchHit": 1,
+    "rate": 24000,
+    "rtf": 1.2248705000011897,
+    "seconds": 3.6,
+    "statefulDecoder": 1,
+    "textEmbeddingOffloadMiB": 593.5,
+    "vramMiB": 4009.49951171875
+  },
+  "converting": false,
+  "conversionOutput": null,
+  "source": "speech",
+  "speech": {
+    "delivery": "stream",
+    "history": [
+      "あなたのことが大好きです"
+    ],
+    "preparation": {
+      "owner": "",
+      "revision": 0,
+      "state": "idle"
+    },
+    "resident": true,
+    "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+  }
+}

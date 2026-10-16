@@ -1,0 +1,33 @@
+{
+  "engine": "original",
+  "muted": true,
+  "requestedSeconds": 10,
+  "seconds": 0.3622675999067724,
+  "state": "running",
+  "error": "\u51fa\u529b\u304c\u8ffd\u3044\u3064\u304d\u307e\u305b\u3093\u3002\u97f3\u58f0\u3092\u505c\u6b62\u3057\u3066\u9045\u5ef6\u30fb\u54c1\u8cea\u8a2d\u5b9a\u3092\u898b\u76f4\u3057\u3066\u304f\u3060\u3055\u3044",
+  "metrics": {
+    "blocks": 2,
+    "underruns": 1,
+    "overflows": 0,
+    "inputStatus": 0,
+    "outputStatus": 0,
+    "inputPeak": 0.003909526392817497,
+    "outputPeak": 0.0,
+    "processingMs": 214.0844000969082,
+    "maxProcessingMs": 214.0844000969082,
+    "streamRtf": 1.1893577783161566,
+    "vramMiB": 1146.140625,
+    "queueFrames": 480,
+    "estimatedMs": 613.9921859345837,
+    "limitedSamples": 0,
+    "runningSeconds": 0.7434857999905944,
+    "maxInputCallbackGapMs": 12.219600146636367,
+    "maxOutputCallbackGapMs": 12.59929989464581,
+    "capturedFrames": 44640,
+    "renderedFrames": 16800,
+    "loadSeconds": 14.29100720002316,
+    "speechProbability": 0.033114850521087646,
+    "speechFraction": 0.0,
+    "starvedFrames": 480
+  }
+}

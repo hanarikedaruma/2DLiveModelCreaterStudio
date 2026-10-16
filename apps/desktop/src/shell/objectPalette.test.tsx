@@ -44,7 +44,7 @@ beforeEach(() => {
     area: 'right',
     title: '詳細のブラシ',
     order: 60,
-    level: 'detail',
+
     component: Body,
     object: { kind: 'tool', when: ({ activeToolId }) => activeToolId === 't.brush' },
   });
@@ -75,9 +75,7 @@ describe('オブジェクトパレット', () => {
     act(() => services.editor.set({ selectedPartIds: ['eye'] }));
     expect(titles()).toEqual(['目', '共通']);
     act(() => canvas.setActiveTool('t.brush'));
-    expect(titles()).toEqual(['ブラシ', '目', '共通']);
-    // 詳細のものは詳細のときだけ
-    act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, modeling: 'detail' } }));
+    // 旧「詳細」のパレットも条件に合えば最初から表示する
     expect(titles()).toEqual(['ブラシ', '詳細のブラシ', '目', '共通']);
     act(() => services.editor.set({ selectedPartIds: [] }));
     expect(titles()).toEqual(['ブラシ', '詳細のブラシ', '共通']);

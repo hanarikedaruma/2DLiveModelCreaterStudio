@@ -25,19 +25,10 @@ export function register(): void {
     area: 'right',
     title: 'ワープ',
     order: 42,
-    level: 'detail',
+
     component: WarpPanel,
     object: { kind: 'tool', when: ({ activeToolId }) => activeToolId === WARP_TOOL_ID },
-    info: {
-      purpose: 'グループ全体に格子を掛け、制御点を動かして中の絵をまとめて曲げる（顔の向き、腕の曲げなど）',
-      steps: [
-        'キャンバスでパーツをクリックし、ワープを付けるグループを選ぶ（格子の付いたいちばん近いグループを選ぶ。替えるときは［対象を変える］）',
-        '格子が無ければ分割を選んで［ワープを追加］',
-        '制御点をドラッグして動かす。何も無い所からのドラッグで囲んで選ぶ（Shift で追加）',
-        'パラメータを編集中なら、その値のキーに記録する',
-        '右クリックで選択を外し、別のグループを選ぶ',
-      ],
-    },
+    info: 'warp',
   });
   registerPanelSection({ id: WARP_SECTION_ID, panelId: WARP_PANEL_ID, component: WarpSection });
 }

@@ -1,0 +1,76 @@
+{
+  "frontend": {
+    "tests": 24,
+    "files": [
+      "src/speechInput/useSpeechDraft.test.tsx",
+      "src/speechInput/host.test.ts",
+      "src/services/voice/service.test.ts",
+      "src/modes/studio/voice/SpeechPanel.test.tsx",
+      "src/modes/studio/voice/VoiceSection.test.tsx"
+    ],
+    "exitCode": 0
+  },
+  "appTypecheck": 0,
+  "e2eTypecheck": 0,
+  "targetedEslint": 0,
+  "targetedPrettier": 0,
+  "pythonTests": 115,
+  "nativeTests": 8,
+  "native": [
+    {
+      "file": "vowel-e.json",
+      "history": [
+        "え、ええんですか。"
+      ],
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "onset": 1,
+      "contextMs": 640,
+      "processingMs": 2.5008999946294352,
+      "rebuffers": 0
+    },
+    {
+      "file": "vowel-i.json",
+      "history": [
+        "い、行きます。"
+      ],
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "onset": 1,
+      "contextMs": 960,
+      "processingMs": 1.9337000121595336,
+      "rebuffers": 0
+    },
+    {
+      "file": "vowel-o.json",
+      "history": [
+        "お、おっきい。"
+      ],
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "onset": 1,
+      "contextMs": 640,
+      "processingMs": 2.5255999935325235,
+      "rebuffers": null
+    },
+    {
+      "file": "vowel-u.json",
+      "history": [
+        "う、うん。"
+      ],
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+      "onset": 1,
+      "contextMs": 640,
+      "processingMs": 1.7690999957267195,
+      "rebuffers": null
+    }
+  ],
+  "approvedARegression": true,
+  "wholeAndStreamBodyPcmIdenticalAllFour": true,
+  "nativeStreamingRebuffers": 0,
+  "notes": [
+    "ASR strict matches 3/4 individual bodies with explicit Japanese language hint; u recognized as nasal ん. No all-content-pass claim.",
+    "Normal onset window 640ms; late onset capped at 1280ms. Example i requires 960ms."
+  ],
+  "productionBuildExitCode": 0,
+  "productionTestHooksAbsent": true,
+  "installedHashesMatched": 13,
+  "gpuAfterTestsMiB": 450
+}

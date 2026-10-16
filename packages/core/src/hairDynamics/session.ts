@@ -13,11 +13,13 @@ type State = {
   v: Point[];
   q: Point[];
   input: Point[];
+  rest: Point[];
   now: number;
   simNow: number;
   frozen: boolean;
   frameId: string | number;
   curve: Point[];
+  displayedCurve: Point[];
   status: 'running' | 'settled';
   contacts?: HairContacts;
   collisionUnresolved: boolean;
@@ -97,11 +99,13 @@ export class HairDynamicsSession implements SessionContract {
         v: normalized.map(() => ({ x: 0, y: 0 })),
         q: normalized.map(copy),
         input,
+        rest: rest.map(copy),
         now: frame.now,
         simNow: frame.now,
         frozen: !frame.active,
         frameId: frame.frameId,
         curve: rest.map(copy),
+        displayedCurve: rest.map(copy),
         status: 'settled',
         contacts,
         collisionUnresolved: false,
@@ -118,7 +122,7 @@ export class HairDynamicsSession implements SessionContract {
     const current = state!;
     if (current.frameId === frame.frameId) {
       return {
-        curve: frame.active ? current.curve : rest,
+        curve: frame.active ? current.curve : frame.freeze ? current.displayedCurve : rest,
         status: frame.active ? current.status : 'frozen',
         collisionUnresolved: current.collisionUnresolved,
       };
@@ -131,6 +135,46 @@ export class HairDynamicsSession implements SessionContract {
       current.previousContactFrame = undefined;
       current.frozen = true;
       current.frameId = frame.frameId;
+      if (frame.freeze) {
+        const carry = (from: Point[], to: Point[], d: Point, i: number) => {
+          const k = Math.min(i, from.length - 2),
+            a = from[k]!,
+            b = from[k + 1]!,
+            c = to[k]!,
+            e = to[k + 1]!;
+          const angle = Math.atan2(e.y - c.y, e.x - c.x) - Math.atan2(b.y - a.y, b.x - a.x);
+          const scale = distance(c, e) / Math.max(1e-9, distance(a, b)),
+            out = rotate(d, angle);
+          return { x: out.x * scale, y: out.y * scale };
+        };
+        current.curve = rest.map((p, i) => {
+          if (along[i]! <= root) return copy(p);
+          const d = carry(
+            current.rest,
+            rest,
+            {
+              x: current.displayedCurve[i]!.x - current.rest[i]!.x,
+              y: current.displayedCurve[i]!.y - current.rest[i]!.y,
+            },
+            i,
+          );
+          return { x: p.x + d.x, y: p.y + d.y };
+        });
+        current.x = current.knots.map((s) => {
+          const p = at(current.curve, along, s);
+          return { x: (p.x - current.origin.x) / current.scale, y: (p.y - current.origin.y) / current.scale };
+        });
+        current.displayedCurve = current.curve.map(copy);
+        current.q = q;
+        current.input = input;
+        current.rest = rest.map(copy);
+        current.v = current.v.map(() => ({ x: 0, y: 0 }));
+        current.now = current.simNow = frame.now;
+        current.contacts = contacts;
+        return { curve: current.curve, status: 'frozen' };
+      }
+      current.displayedCurve = rest.map(copy);
+      current.rest = rest.map(copy);
       return { curve: rest, status: 'frozen' };
     }
     if (current.frozen) {
@@ -217,6 +261,7 @@ export class HairDynamicsSession implements SessionContract {
       current.collisionUnresolved = current.collisionUnresolved || unresolved;
     }
     current.input = input;
+    current.rest = rest.map(copy);
     current.now = frame.now;
     current.frameId = frame.frameId;
     current.contacts = contacts;
@@ -233,6 +278,7 @@ export class HairDynamicsSession implements SessionContract {
       displacement.some((p) => Math.hypot(p.x, p.y) > 0.01) ||
       current.v.some((p) => Math.hypot(p.x, p.y) * current.scale > 0.01);
     current.status = moving ? 'running' : 'settled';
+    current.displayedCurve = current.curve.map(copy);
     return {
       curve: current.curve,
       status: current.status,
@@ -256,6 +302,7 @@ export class HairDynamicsSession implements SessionContract {
       state.x[i] = next;
     });
     state.curve = curve.map(copy);
+    state.displayedCurve = curve.map(copy);
   }
 }
 

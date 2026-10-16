@@ -1,0 +1,21 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "note": "No expected text, language hint or reference transcript supplied to ASR. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "bodies-i-u-e-o-01.wav",
+      "sha256": "5bd1c40aebed8ad1bcbfe80b46f94a77c634f24776781c724d47f4b4f7b9a9f4",
+      "seconds": 7.59,
+      "expectedTranscripts": [
+        "行きます。うん。ええんですか。おっきい。",
+        "いきます。うん。ええんですか。おっきい。"
+      ],
+      "transcript": "いきます。ええんですか?おっきい。",
+      "contentMatch": false,
+      "recognitionSeconds": 3.956535999997868
+    }
+  ],
+  "allContentMatched": false
+}

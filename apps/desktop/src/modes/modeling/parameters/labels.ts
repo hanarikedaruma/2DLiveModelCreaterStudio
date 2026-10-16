@@ -3,6 +3,7 @@ import { previewParameters } from '../../../services/keyEditor/common';
 import type { Parameter, Project } from '@app/schema';
 import type { EditorState } from '@app/contracts';
 import { activeParameters, hasKeyAtCurrentValue, isAutomaticCombination, valueOf } from './marks';
+import { bindingInScope, partScope } from './generate';
 
 interface ResultWords {
   min: string;
@@ -76,7 +77,13 @@ export function editingLabel(project: Project, editor: EditorState): string | nu
     previews.length > 0
       ? `プレビュー: ${previews.map((p) => `${p.name} ＝ ${resultLabel(p, valueOf(p, editor))}`).join('、')}`
       : '';
-  if (params.length === 0) return preview ? `${preview}（パーツは動かせない）` : null;
+  if (params.length === 0) {
+    if (preview) return `${preview}（パーツは動かせない）`;
+    const scope = partScope(project.model, editor.selectedPartIds);
+    return scope && project.model.bindings.some((b) => b.keys.length > 0 && bindingInScope(project.model, b, scope))
+      ? '基準の形を編集中（すべてのキーが一緒に動く）'
+      : null;
+  }
   const parts = params.map((p) => `${p.name} ＝ ${resultLabel(p, valueOf(p, editor))}`);
   const tail = preview ? '　' + preview + '（編集できない）' : '';
   const noKey = !hasKeyAtCurrentValue(project.model, editor);

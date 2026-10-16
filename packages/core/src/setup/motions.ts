@@ -19,7 +19,7 @@ import {
   type StandardIndex,
 } from './standardParts';
 
-// かんたんセットアップが transform の動きを作るパラメータ（MVP・STEP1・STEP2。口 形は頂点なので含めない）
+// 自動セットアップが transform の動きを作るパラメータ（MVP・STEP1・STEP2。口 形は頂点なので含めない）
 export const SETUP_PARAMETER_IDS: readonly string[] = [
   'EyeBallX',
   'EyeBallY',
@@ -48,8 +48,13 @@ export const SETUP_PARAMETER_IDS: readonly string[] = [
 
 // 動きの量
 export const SETUP_MOTION = {
-  eyeBallX: 0.25, // 白目の幅に対する瞳の左右の移動
-  eyeBallY: 0.2, // 白目の高さに対する瞳の上下の移動
+  // 視線（I-067 の A13。ユーザーが手で直したモデルの、瞳と瞳のグループのキーを合わせた動きから）。
+  // 瞳は目尻の側へ大きく、目頭の側へ小さく、上へ大きく、下へ小さく動く。ハイライトは瞳より少なく動く
+  eyeBallOut: 0.23, // 白目の幅に対する、目尻の側への瞳の移動
+  eyeBallIn: 0.14, // 白目の幅に対する、目頭の側への瞳の移動
+  eyeBallUp: 0.25, // 白目の高さに対する、上への瞳の移動
+  eyeBallDown: 0.16, // 白目の高さに対する、下への瞳の移動
+  eyeHighlight: 0.3, // 瞳の移動に対するハイライトの移動
   neckTilt: 9, // FaceAngleZ 30 での首の回転（度）
   headTilt: 21, // FaceAngleZ 30 での頭の回転（度）
   eyeWhiteClosed: 0.08, // 閉じた目の白目の縦の倍率
@@ -112,24 +117,46 @@ export function planMotions(model: Model, boundsOf: BoundsOf): BindingPlan[] {
     return null;
   };
 
-  // 視線: 瞳・ハイライト（瞳が無ければ作らない）
+  // 視線: 瞳・ハイライト（瞳が無ければ作らない）。目尻の向きは、両目があれば画面の外側、片目なら顔の中心から外。
+  // 決まらなければ L を画面の右とみる
+  const eyeRects = new Map(
+    SIDES.map((side) => [side, firstRect([eyeTypes(side).eyeWhite, eyeTypes(side).eyeWhole, eyeTypes(side).iris])]),
+  );
+  const centerX = (r: Rect | null | undefined) => (r ? r.x + r.width / 2 : null);
+  const faceX = centerX(firstRect(['face']));
+  const outwardOf = (side: Side): number => {
+    const own = centerX(eyeRects.get(side));
+    const other = centerX(eyeRects.get(side === 'L' ? 'R' : 'L'));
+    if (own !== null && other !== null && own !== other) return own > other ? 1 : -1;
+    if (own !== null && faceX !== null && own !== faceX) return own > faceX ? 1 : -1;
+    return side === 'L' ? 1 : -1;
+  };
   for (const side of SIDES) {
     const t = eyeTypes(side);
-    const ref = index.has(t.iris) ? firstRect([t.eyeWhite, t.eyeWhole, t.iris]) : null;
+    const ref = index.has(t.iris) ? eyeRects.get(side) : null;
     if (!ref) continue;
-    for (const part of [...index.images(t.iris), ...index.images(t.highlight)]) {
-      add(
-        part,
-        'EyeBallX',
-        'linear',
-        symmetric(1, (s) => ({ x: s * ref.width * SETUP_MOTION.eyeBallX })),
-      );
-      add(
-        part,
-        'EyeBallY',
-        'linear',
-        symmetric(1, (s) => ({ y: -s * ref.height * SETUP_MOTION.eyeBallY })),
-      );
+    const out = outwardOf(side);
+    // 値 s（±1）で、瞳が動く量（右・下が正）
+    const gazeX = (s: number) => s * ref.width * (s === out ? SETUP_MOTION.eyeBallOut : SETUP_MOTION.eyeBallIn);
+    const gazeY = (s: number) => -s * ref.height * (s > 0 ? SETUP_MOTION.eyeBallUp : SETUP_MOTION.eyeBallDown);
+    for (const [parts, k] of [
+      [index.images(t.iris), 1],
+      [index.images(t.highlight), SETUP_MOTION.eyeHighlight],
+    ] as const) {
+      for (const part of parts) {
+        add(
+          part,
+          'EyeBallX',
+          'linear',
+          symmetric(1, (s) => ({ x: gazeX(s) * k })),
+        );
+        add(
+          part,
+          'EyeBallY',
+          'linear',
+          symmetric(1, (s) => ({ y: gazeY(s) * k })),
+        );
+      }
     }
   }
 
@@ -213,7 +240,7 @@ export function keepOnRerun(key: ParameterKey): boolean {
   return key.source === 'manual' || key.locked;
 }
 
-// かんたんセットアップのパラメータの1パラメータ transform バインディングで、残すキーが1つも無いもの
+// 自動セットアップのパラメータの1パラメータ transform バインディングで、残すキーが1つも無いもの
 function isDisposable(binding: Binding): boolean {
   return (
     binding.channel === 'transform' &&
@@ -241,6 +268,7 @@ export function applyMotionPlans(model: Model, plans: readonly BindingPlan[], ne
       newId,
       controlsOpacity: plan.controlsOpacity === true,
       opacityBase: model.parts.find((p) => p.id === plan.partId)?.opacity ?? 1,
+      defaultCoord: model.parameters.find((p) => p.id === plan.parameterId)?.default,
     });
     planned.add(binding.id);
     if (at >= 0) bindings[at] = binding;

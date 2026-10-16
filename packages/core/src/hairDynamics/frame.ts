@@ -54,6 +54,7 @@ export function createHairFrameEvaluator(evaluator: BindingEvaluator, pipeline: 
       params: ParamValues;
       frameId: string | number;
       active: boolean;
+      freeze: boolean;
       epoch: number;
       model: DeformedModel;
     }
@@ -67,6 +68,7 @@ export function createHairFrameEvaluator(evaluator: BindingEvaluator, pipeline: 
           cached.project === project &&
           cached.frameId === context.frameId &&
           cached.active === context.active &&
+          cached.freeze === (context.freeze === true) &&
           cached.epoch === session.epoch &&
           Object.keys(cached.params).length === Object.keys(params).length &&
           Object.entries(params).every(([id, value]) => cached.params[id] === value)
@@ -291,6 +293,7 @@ export function createHairFrameEvaluator(evaluator: BindingEvaluator, pipeline: 
           params: { ...params },
           frameId: context.frameId,
           active: context.active,
+          freeze: context.freeze === true,
           epoch: session.epoch,
           model,
         });

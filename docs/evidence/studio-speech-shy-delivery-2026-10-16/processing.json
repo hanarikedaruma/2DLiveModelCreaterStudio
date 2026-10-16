@@ -1,0 +1,133 @@
+{
+  "style": "shy",
+  "note": "Implementation checks only; no new audition audio was saved.",
+  "approvedIntroSha256": "b99f8b64f2647aa68801cb1f1d938f4d350cd63f610b6c8eeded9c99c6c275d4",
+  "pitchTest": {
+    "inputHz": 240,
+    "outputHz": 239.87225737772786,
+    "inputFrames": 72000,
+    "outputFrames": 81818,
+    "ratio": 0.88
+  },
+  "runs": [
+    {
+      "text": "い、行きます。",
+      "referenceWav": "docs\\evidence\\studio-speech-vowels-2026-10-16\\final\\i-raw-01.wav",
+      "rawSeconds": 2.0,
+      "renderedSeconds": 2.4431666666666665,
+      "wholeAndPacketsIdentical": true,
+      "metrics": {
+        "shyDelivery": 1,
+        "shyTempoRatio": 0.88,
+        "breathyWordOnset": 1,
+        "breathyWordOnsetStartMs": 1450.0,
+        "breathyWordOnsetEndMs": 1500.0,
+        "shyGapAddedMs": 150.0,
+        "shyIntroGapMs": 650.0,
+        "shyTailBreaths": 1,
+        "shyTailStartMs": 1770.0,
+        "shyTailEndMs": 1950.0
+      },
+      "processingMs": [
+        19.499699992593378,
+        31.87009999237489,
+        19.55409999936819,
+        18.8408999965759,
+        17.159900002297945
+      ]
+    },
+    {
+      "text": "う、うん。",
+      "referenceWav": "docs\\evidence\\studio-speech-vowels-2026-10-16\\final\\u-raw-01.wav",
+      "rawSeconds": 1.12,
+      "renderedSeconds": 1.3181666666666667,
+      "wholeAndPacketsIdentical": true,
+      "metrics": {
+        "shyDelivery": 1,
+        "shyTempoRatio": 0.88,
+        "breathyWordOnset": 1,
+        "breathyWordOnsetStartMs": 810.0,
+        "breathyWordOnsetEndMs": 920.0,
+        "shyGapAddedMs": 40.0,
+        "shyIntroGapMs": 650.0,
+        "shyTailBreaths": 1,
+        "shyTailStartMs": 920.0,
+        "shyTailEndMs": 1090.0
+      },
+      "processingMs": [
+        12.73149999906309,
+        29.472700000042096,
+        16.975500009721145,
+        15.542299996013753,
+        15.312000003177673
+      ]
+    },
+    {
+      "text": "え、ええんですか。",
+      "referenceWav": "docs\\evidence\\studio-speech-vowels-2026-10-16\\final\\e-raw-01.wav",
+      "rawSeconds": 2.24,
+      "renderedSeconds": 2.5454583333333334,
+      "wholeAndPacketsIdentical": true,
+      "metrics": {
+        "shyDelivery": 1,
+        "shyTempoRatio": 0.88,
+        "breathyWordOnset": 1,
+        "breathyWordOnsetStartMs": 1020.0,
+        "breathyWordOnsetEndMs": 1140.0,
+        "shyGapAddedMs": 0.0,
+        "shyIntroGapMs": 740.0,
+        "shyTailBreaths": 1,
+        "shyTailStartMs": 1860.0,
+        "shyTailEndMs": 2040.0
+      },
+      "processingMs": [
+        29.26540000771638,
+        48.04080000030808,
+        29.013899998972192,
+        27.200900003663264,
+        29.81279999949038
+      ]
+    },
+    {
+      "text": "お、おっきい。",
+      "referenceWav": "docs\\evidence\\studio-speech-vowels-2026-10-16\\final\\o-raw-01.wav",
+      "rawSeconds": 1.84,
+      "renderedSeconds": 2.3068333333333335,
+      "wholeAndPacketsIdentical": true,
+      "metrics": {
+        "shyDelivery": 1,
+        "shyTempoRatio": 0.88,
+        "breathyWordOnset": 1,
+        "breathyWordOnsetStartMs": 1140.0,
+        "breathyWordOnsetEndMs": 1240.0,
+        "shyGapAddedMs": 190.0,
+        "shyIntroGapMs": 650.0,
+        "shyTailBreaths": 2,
+        "shyTailStartMs": 1680.0,
+        "shyTailEndMs": 1860.0
+      },
+      "processingMs": [
+        25.986299995565787,
+        43.882700003450736,
+        27.935999998589978,
+        26.095100009115413,
+        25.565000003552996
+      ]
+    }
+  ],
+  "approvedAFullShyCheck": {
+    "metrics": {
+      "shyDelivery": 1,
+      "shyTempoRatio": 0.88,
+      "breathyWordOnset": 1,
+      "breathyWordOnsetStartMs": 970.0,
+      "breathyWordOnsetEndMs": 1040.0,
+      "shyGapAddedMs": 230.0,
+      "shyIntroGapMs": 650.0,
+      "shyTailBreaths": 3,
+      "shyTailStartMs": 3580.0,
+      "shyTailEndMs": 3760.0
+    },
+    "wholeAndPacketsIdentical": true
+  }
+}

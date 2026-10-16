@@ -1,0 +1,85 @@
+{
+  "issue": "I-060",
+  "contract": "CC-023",
+  "schemaVersion": 10,
+  "decision": "現在の姿勢を始点に、記録した先頭からの変化量を重ねる",
+  "unit": {
+    "packages": 10,
+    "files": 316,
+    "tests": 2720,
+    "schema": 103,
+    "core": 709,
+    "desktop": 1383,
+    "passed": true,
+    "log": ".cache/i060-tests.log"
+  },
+  "typecheck": {
+    "passed": true,
+    "log": ".cache/i060-typecheck.log"
+  },
+  "eslint": {
+    "passed": true,
+    "log": ".cache/i060-lint.log"
+  },
+  "prettier": {
+    "passed": true,
+    "log": ".cache/i060-prettier.log"
+  },
+  "diffCheck": {
+    "passed": true
+  },
+  "nativeE2e": {
+    "files": 16,
+    "tests": 29,
+    "passed": true,
+    "log": ".cache/i060-native.log"
+  },
+  "browser": {
+    "report": "edge.json",
+    "sizes": [
+      [1440, 1000],
+      [800, 600]
+    ],
+    "errors": []
+  },
+  "native": {
+    "report": "native.json",
+    "logicalSizes": [
+      [1440, 1000],
+      [960, 600]
+    ],
+    "errors": [],
+    "roundTripProjectEqual": true,
+    "log": ".cache/i060-native-retry.log"
+  },
+  "modelCopy": {
+    "report": "model-audit.json",
+    "originalUnchanged": true,
+    "wholeAutoSetupNotRun": true
+  },
+  "playback": {
+    "before": 18,
+    "start": 18,
+    "middle": 23,
+    "stop": 23,
+    "returned": 18,
+    "legacy": 20,
+    "cutover": 20,
+    "maxStartVertexErrorPx": 0,
+    "maxCutoverVertexErrorPx": 0,
+    "originalTracksUnchanged": true,
+    "previewAndSinkMatched": true,
+    "undoRedo": true
+  },
+  "app": {
+    "report": "app-update.json",
+    "installedStartup": "installed-startup.json",
+    "production": true,
+    "hashesMatch": true,
+    "started": true,
+    "debugApiAbsent": true,
+    "errors": []
+  },
+  "mainLockReleased": true,
+  "verificationNote": "全e2e成功後、専用確認の前回再生を停止する処理と時計だけを修正し、専用確認・本番ビルド・配置を再実行。製品コードの変更は無し。"
+}

@@ -1,6 +1,6 @@
 import type { Part, StandardPartType } from '@app/schema';
 
-// かんたんセットアップが作る変形グループ（作る順）
+// 自動セットアップが作る変形グループ（作る順）
 export const GROUP_TYPES = [
   'bodyRoot',
   'armRootL',
@@ -27,7 +27,7 @@ export function imageTypeOf(part: Part): ImageType | null {
   return part.kind === 'image' && type !== null && !isGroupType(type) ? type : null;
 }
 
-// かんたんセットアップの変形グループなら、その種類
+// 自動セットアップの変形グループなら、その種類
 export function groupTypeOf(part: Part): GroupType | null {
   const type = part.standardType;
   return part.kind === 'group' && type !== null && isGroupType(type) ? type : null;

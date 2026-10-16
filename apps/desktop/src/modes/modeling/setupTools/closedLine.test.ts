@@ -41,10 +41,13 @@ describe('strokeToLine', () => {
 });
 
 describe('setClosedLine', () => {
-  const line = [
-    { x: 1, y: 2 },
-    { x: 3, y: 4 },
-  ];
+  const line = {
+    partId: null,
+    points: [
+      { x: 1, y: 2 },
+      { x: 3, y: 4 },
+    ],
+  };
 
   it('片目の線だけを変え、もう片方と入力のプロジェクトはそのまま', () => {
     const p = project();
@@ -60,12 +63,7 @@ describe('setClosedLine', () => {
 
   it('同じ線なら同じプロジェクトを返し（履歴に積まない）、null で消す', () => {
     const once = setClosedLine('R', line).apply(project());
-    expect(
-      setClosedLine(
-        'R',
-        line.map((p) => ({ ...p })),
-      ).apply(once),
-    ).toBe(once);
+    expect(setClosedLine('R', { ...line, points: line.points.map((p) => ({ ...p })) }).apply(once)).toBe(once);
     const clear = setClosedLine('R', null);
     expect(clear.label).toBe(CLEAR_CLOSED_LINE_LABEL);
     const cleared = clear.apply(once);

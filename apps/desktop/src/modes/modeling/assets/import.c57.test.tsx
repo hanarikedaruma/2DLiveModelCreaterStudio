@@ -78,7 +78,9 @@ describe('カード57: 取り込み中の画面', () => {
   it('「取り込みを取り消す」で止まり、素材は増えない', async () => {
     const { services, held, pick } = setup();
     await pick();
-    await screen.findByRole('status', { name: '素材の取り込み' });
+    const status = await screen.findByRole('status', { name: '素材の取り込み' });
+    // 開始直後の表示はWorker生成より先に出る。ここでは起動済みWorkerの停止を確かめる
+    await waitFor(() => expect(status.textContent).toContain('レイヤー 1/3'));
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: '取り込みを取り消す' }));
     });

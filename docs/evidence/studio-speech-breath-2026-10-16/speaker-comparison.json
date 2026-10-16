@@ -1,0 +1,25 @@
+{
+  "note": "CAMPPlus cosine is a diagnostic only, not a listening test or proof of identical voice. Breath and speaking style can influence it.",
+  "runs": [
+    {
+      "name": "qwen-old",
+      "referenceCosine": 0.8333768844604492
+    },
+    {
+      "name": "qwen-phonetic",
+      "referenceCosine": 0.8945808410644531
+    },
+    {
+      "name": "cosy-neutral",
+      "referenceCosine": 0.7854078412055969
+    },
+    {
+      "name": "cosy-breath",
+      "referenceCosine": 0.824189305305481
+    },
+    {
+      "name": "cosy-faithful",
+      "referenceCosine": 0.8285070657730103
+    }
+  ]
+}

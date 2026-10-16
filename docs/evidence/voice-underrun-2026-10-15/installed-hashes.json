@@ -1,0 +1,54 @@
+{
+  "passed": true,
+  "checks": {
+    "SeedModel": true,
+    "Composer": true,
+    "audio_processing.py": true,
+    "filter_chain.py": true,
+    "upstreamFilesUnchanged": true,
+    "installedFilesMatch": true,
+    "obsoleteGpuWarmAbsent": true
+  },
+  "files": {
+    "realtime_graph.py": {
+      "source": "e103eadf3541f4d80955386c8b19e0d4a241678e4050dfa4b09ac5e593637dcb",
+      "installed": "e103eadf3541f4d80955386c8b19e0d4a241678e4050dfa4b09ac5e593637dcb"
+    },
+    "worker.py": {
+      "source": "d77f58edbd336d3c16476be265aa2ffa438d73fcfeedb4c211c224878cbb56f4",
+      "installed": "d77f58edbd336d3c16476be265aa2ffa438d73fcfeedb4c211c224878cbb56f4"
+    },
+    "live.py": {
+      "source": "930b94114988c392f12f26c1e12cc323bcd24ce249e03bb275f6fa536d5f2609",
+      "installed": "930b94114988c392f12f26c1e12cc323bcd24ce249e03bb275f6fa536d5f2609"
+    },
+    "host.py": {
+      "source": "6d1c4b83528648aa0db717fd99ad0e43b0ff00f42196e69be79a385f057853e5",
+      "installed": "6d1c4b83528648aa0db717fd99ad0e43b0ff00f42196e69be79a385f057853e5"
+    },
+    "backend.py": {
+      "source": "92c47138af382bc307e2b86088cbaabbf224ce473bed4f67347d55d4cb478f94",
+      "installed": "92c47138af382bc307e2b86088cbaabbf224ce473bed4f67347d55d4cb478f94"
+    },
+    "README.md": {
+      "source": "c0d8b0db2c1ebd99f329462c08aa5d21aa5affd7a1d25e6d8a81c8203000d7aa",
+      "installed": "c0d8b0db2c1ebd99f329462c08aa5d21aa5affd7a1d25e6d8a81c8203000d7aa"
+    },
+    "validate_live.py": {
+      "source": "b5706f5d9a6f24603b8c168076815893c044389c31183b09058d2fb5f6a38c47",
+      "installed": "b5706f5d9a6f24603b8c168076815893c044389c31183b09058d2fb5f6a38c47"
+    },
+    "validate_realtime_graph.py": {
+      "source": "8d2e04b16cbffe42cdcc5f04f2117a1e725721257f75de7c2b5640d95e973c7d",
+      "installed": "8d2e04b16cbffe42cdcc5f04f2117a1e725721257f75de7c2b5640d95e973c7d"
+    },
+    "upstream.json": {
+      "source": "499d727a1a2f9688ba7eaa72ec507d704fbb56cedab8fbef16c5663c9ec9d5de",
+      "installed": "499d727a1a2f9688ba7eaa72ec507d704fbb56cedab8fbef16c5663c9ec9d5de"
+    },
+    "executable": {
+      "source": "f0285703bdc98b0823b59bde1b07cdee8cf3243e0c84d1d310ccd35c38de3312",
+      "installed": "f0285703bdc98b0823b59bde1b07cdee8cf3243e0c84d1d310ccd35c38de3312"
+    }
+  }
+}

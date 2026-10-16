@@ -146,7 +146,7 @@ const EXPECTED_PARENT: Partial<Record<StandardPartType, StandardPartType | null>
   frontHair: 'headRoot',
 };
 
-describe('かんたんセットアップ（fixtures の sample-model）', () => {
+describe('自動セットアップ（fixtures の sample-model）', () => {
   it('ラベルと警告。推奨パーツがそろっていれば警告は無い', () => {
     const { warnings, command } = autoSetup.plan(base());
     expect(command.label).toBe(AUTO_SETUP_LABEL);
@@ -268,17 +268,27 @@ describe('かんたんセットアップ（fixtures の sample-model）', () => 
     expect([count('EyeOpenL'), count('EyeOpenR'), count('MouthOpen')]).toEqual([3, 3, 3]);
   });
 
-  it('視線: 値 1 で白目の幅×0.25 右へ、高さ×0.2 上へ。−1 で逆', () => {
+  it('視線（I-067 の A13）: 瞳は目尻の側へ白目の幅×0.23、目頭の側へ×0.14、上へ高さ×0.25、下へ×0.16。ハイライトは瞳の 0.3 倍', () => {
     const { project } = run(base());
+    const centerOf = (t: StandardPartType) => {
+      const a = assetOf(project, byType(project, t));
+      return a.offset.x + a.width / 2;
+    };
     for (const t of ['irisL', 'highlightL', 'irisR', 'highlightR'] as const) {
-      const white = assetOf(project, byType(project, t.endsWith('L') ? 'eyeWhiteL' : 'eyeWhiteR'));
+      const side = t.endsWith('L') ? 'L' : 'R';
+      const white = assetOf(project, byType(project, `eyeWhite${side}`));
       expect(white.width).toBe(116);
+      // 画面の外側が目尻
+      const out = centerOf(`eyeWhite${side}`) > centerOf(side === 'L' ? 'eyeWhiteR' : 'eyeWhiteL') ? 1 : -1;
+      const k = t.startsWith('highlight') ? 0.3 : 1;
       const x = bindingOf(project, t, 'EyeBallX');
-      expect(deltaAt(x, 1)).toEqual({ ...ZERO, position: { x: 29, y: 0 } });
-      expect(deltaAt(x, -1)).toEqual({ ...ZERO, position: { x: -29, y: 0 } });
+      expect(deltaAt(x, 1).position.x).toBeCloseTo(116 * (out > 0 ? 0.23 : 0.14) * k, 6);
+      expect(deltaAt(x, -1).position.x).toBeCloseTo(-116 * (out < 0 ? 0.23 : 0.14) * k, 6);
       const y = bindingOf(project, t, 'EyeBallY');
-      expect(deltaAt(y, 1)).toEqual({ ...ZERO, position: { x: 0, y: -16 } });
-      expect(deltaAt(y, -1)).toEqual({ ...ZERO, position: { x: 0, y: 16 } });
+      expect(deltaAt(y, 1).position.y).toBeCloseTo(-white.height * 0.25 * k, 6);
+      expect(deltaAt(y, -1).position.y).toBeCloseTo(white.height * 0.16 * k, 6);
+      expect(deltaAt(x, 1).position.y).toBe(0);
+      expect(deltaAt(y, 1).position.x).toBe(0);
     }
   });
 
@@ -372,7 +382,7 @@ describe('かんたんセットアップ（fixtures の sample-model）', () => 
     expect(iris2.id).toBe(iris.id);
     expect(deltaAt(iris2, 1)).toEqual(manual.delta);
     expect(iris2.keys[2]).toEqual(manual);
-    expect(deltaAt(iris2, -1).position.x).toBe(-50); // 200 × 0.25
+    expect(deltaAt(iris2, -1).position.x).toBeCloseTo(-200 * 0.14, 9); // 目頭の側へ 200 × 0.14（I-067 の A13）
     const lid2 = bindingOf(second, 'upperLidL', 'EyeOpenL')!;
     expect(lid2.keys[0]).toEqual(locked);
     const white2 = bindingOf(second, 'eyeWhiteL', 'EyeOpenL')!;
@@ -441,7 +451,7 @@ describe('かんたんセットアップ（fixtures の sample-model）', () => 
   });
 });
 
-describe('かんたんセットアップ（推奨パーツが足りないとき）', () => {
+describe('自動セットアップ（推奨パーツが足りないとき）', () => {
   it('上まぶたが無ければ警告を出し、目の変形グループを縦に縮める方式にする', () => {
     const { project, warnings } = run(without(base(), 'upperLidL'));
     expect(warnings).toEqual(['上まぶた L がないため、まばたきは目全体を縦に縮める方式になります']);
@@ -469,8 +479,11 @@ describe('かんたんセットアップ（推奨パーツが足りないとき�
       '白目 L がないため、瞳 L は白目の形で切り抜かれず、動く幅は瞳 L の大きさで決めます',
     ]);
     expect(byType(project, 'irisL').mask).toBeNull();
-    // 瞳 L の幅 60 × 0.25 = 15
-    expect(deltaAt(bindingOf(project, 'irisL', 'EyeBallX'), 1).position.x).toBe(15);
+    // 瞳 L の幅 60 で決める（目尻の側へ 60 × 0.23、目頭の側へ 60 × 0.14）
+    const gaze = bindingOf(project, 'irisL', 'EyeBallX');
+    const amounts = [deltaAt(gaze, 1).position.x, -deltaAt(gaze, -1).position.x].sort((a, b) => a - b);
+    expect(amounts[0]).toBeCloseTo(60 * 0.14, 6);
+    expect(amounts[1]).toBeCloseTo(60 * 0.23, 6);
     const blinks = project.model.bindings.filter((b) => b.parameterIds[0] === 'EyeOpenL');
     expect(blinks.map((b) => b.target.id)).toEqual([byType(project, 'eyeGroupL').id]);
   });

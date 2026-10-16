@@ -10,17 +10,9 @@ import {
 } from './environment';
 import { emitAppEvent, onAppEvent } from './events';
 import { isTypingTarget, matchesShortcut } from './keys';
-import { byOrder, visibleAt } from './registry';
+import { byOrder } from './registry';
 
-describe('registry の出し分け', () => {
-  it('detail は詳細のときだけ、easy はかんたんのときだけ、both・省略は常に', () => {
-    expect(visibleAt('detail', 'easy')).toBe(false);
-    expect(visibleAt('detail', 'detail')).toBe(true);
-    expect(visibleAt('easy', 'detail')).toBe(false);
-    expect(visibleAt('both', 'easy')).toBe(true);
-    expect(visibleAt(undefined, 'detail')).toBe(true);
-  });
-
+describe('registry の順序', () => {
   it('order 順。同じなら登録順', () => {
     const items = [{ id: 'a', order: 2 }, { id: 'b' }, { id: 'c', order: -1 }, { id: 'd', order: 2 }];
     expect(byOrder(items).map((i) => i.id)).toEqual(['c', 'b', 'a', 'd']);
@@ -102,10 +94,10 @@ describe('環境設定（environment.json）', () => {
     const store = createEnvironmentStore(fileEnvironmentStorage(fs, dir));
     await store.load();
     store.set({ mirror: false, silenceThreshold: -40 });
-    store.set({ uiLevel: { modeling: 'detail', animation: 'easy', studio: 'easy' } });
+    store.set({});
     await store.flush();
     const saved = JSON.parse(await fs.readText(`${dir}/environment.json`));
-    expect(saved).toMatchObject({ mirror: false, silenceThreshold: -40, uiLevel: { modeling: 'detail' } });
+    expect(saved).toMatchObject({ mirror: false, silenceThreshold: -40 });
 
     // 別のストアで読み直すと同じ値
     const again = createEnvironmentStore(fileEnvironmentStorage(fs, dir));

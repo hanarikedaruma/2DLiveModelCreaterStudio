@@ -1,0 +1,105 @@
+[
+  {
+    "text": "こんにちは。今日もよろしくね。",
+    "inputToSendMs": 18,
+    "inputToFirstAudioMs": 3119.748291015625,
+    "state": {
+      "state": "stopped",
+      "sessionId": "7d663d90a5f44c0d81afab1e2abd63d4",
+      "error": "",
+      "mute": true,
+      "bypass": false,
+      "metrics": {
+        "bufferTargetMs": 1425.125,
+        "bufferedMs": 0,
+        "codecFrames": 32,
+        "cudaGraph": 1,
+        "estimatedAudioSeconds": 2.969934640522876,
+        "estimatedRtf": 1.488826968754893,
+        "firstAudioMs": 3077.021500006318,
+        "firstAudioWallMs": 1792100698648.7483,
+        "firstPcmSeconds": 1.2491983999934746,
+        "frames": 61440,
+        "generationSeconds": 3.9335023000021465,
+        "loadSeconds": 0,
+        "predictorGraphReplays": 32,
+        "rate": 24000,
+        "rebuffers": 0,
+        "rtf": 1.5365243359383385,
+        "seconds": 2.56,
+        "startupBufferMs": 1914.5833333333333,
+        "statefulDecoder": 1,
+        "textEmbeddingOffloadMiB": 593.5,
+        "vramMiB": 4009.49951171875
+      },
+      "converting": false,
+      "conversionOutput": null,
+      "source": "speech",
+      "speech": {
+        "delivery": "stream",
+        "history": [
+          "こんにちは。今日もよろしくね。"
+        ],
+        "preparation": {
+          "owner": "",
+          "revision": 0,
+          "state": "idle"
+        },
+        "resident": true,
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+      }
+    }
+  },
+  {
+    "text": "明日は晴れるかな。楽しみだね。",
+    "inputToSendMs": 23,
+    "inputToFirstAudioMs": 3083.033203125,
+    "state": {
+      "state": "stopped",
+      "sessionId": "9bcd5ffcb0554dbe82ad0ff9c387b070",
+      "error": "",
+      "mute": true,
+      "bypass": false,
+      "metrics": {
+        "bufferTargetMs": 1374.5833333333333,
+        "bufferedMs": 0,
+        "codecFrames": 42,
+        "cudaGraph": 1,
+        "estimatedAudioSeconds": 2.7022222222222223,
+        "estimatedRtf": 1.5201119999937875,
+        "firstAudioMs": 3026.8000500053167,
+        "firstAudioWallMs": 1792100704346.0332,
+        "firstPcmSeconds": 1.1547919000004183,
+        "frames": 80640,
+        "generationSeconds": 5.117745499999728,
+        "loadSeconds": 0,
+        "predictorGraphReplays": 42,
+        "rate": 24000,
+        "rebuffers": 0,
+        "rtf": 1.5231385416665857,
+        "seconds": 3.36,
+        "startupBufferMs": 1914.5833333333333,
+        "statefulDecoder": 1,
+        "textEmbeddingOffloadMiB": 593.5,
+        "vramMiB": 4009.49951171875
+      },
+      "converting": false,
+      "conversionOutput": null,
+      "source": "speech",
+      "speech": {
+        "delivery": "stream",
+        "history": [
+          "こんにちは。今日もよろしくね。",
+          "明日は晴れるかな。楽しみだね。"
+        ],
+        "preparation": {
+          "owner": "",
+          "revision": 0,
+          "state": "idle"
+        },
+        "resident": true,
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+      }
+    }
+  }
+]

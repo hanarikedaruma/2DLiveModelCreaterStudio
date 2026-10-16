@@ -28,6 +28,7 @@ import { register as registerPhysics } from './modeling/physics'; // カード50
 import { register as registerPeriodic } from './studio/periodic'; // カード48
 import { register as registerVowels } from './modeling/vowels'; // カード51
 import { register as registerTrackingMap } from './studio/trackingMap'; // I-042
+import { register as registerVoice } from './studio/voice';
 
 export function registerModes(): void {
   registerCanvasEdit(); // カード18
@@ -35,7 +36,7 @@ export function registerModes(): void {
   registerParameters(); // カード19
   registerStructure(); // カード20
   registerMeshEdit(); // カード21
-  registerCurveGuide(); // カード99: 線で曲げる・重力
+  registerCurveGuide(); // カード99: 流線で曲げる・重力
   registerContourLine(); // I-068: 輪郭線で整える
   registerStudio(); // カード22
   registerStudioProducers(); // カード36
@@ -59,4 +60,5 @@ export function registerModes(): void {
   registerPeriodic(); // カード48
   registerVowels(); // カード51
   registerTrackingMap(); // I-042
+  registerVoice();
 }

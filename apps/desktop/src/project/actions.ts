@@ -68,6 +68,12 @@ export function loadReportMessages(report: LoadReport): string[] {
 
 const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
+export const RECOVERY_CHOICES = [
+  { value: 'restore', label: '復元する' },
+  { value: 'later', label: '後で決める' },
+  { value: 'discard', label: '自動保存を破棄' },
+] as const;
+
 export function createProjectActions(deps: {
   services: Services;
   environment: EnvironmentStore;
@@ -118,6 +124,13 @@ export function createProjectActions(deps: {
     projectDir: string | null,
     savedState: Project | null,
   ) {
+    if (
+      ['loading', 'priming', 'running', 'stopping'].includes(services.voice.state().state) ||
+      services.voice.state().converting
+    )
+      await services.voice.stop();
+    if (services.voice.state().speech.history.length) await services.voice.clearSpeechHistory();
+    services.voice.setProjectDirectory(projectDir);
     autoSaver.stop();
     await Promise.all(Object.entries(assetPngs).map(([id, png]) => assets.put(id, png)));
     store.load(project);
@@ -141,6 +154,7 @@ export function createProjectActions(deps: {
     const project = store.get();
     const wasUnsaved = dir === null;
     try {
+      if (project.studio.voice) await services.voice.persistReferences(target, project.studio.voice.profile);
       await io.save(target, project, projectAssetPngs(project), { skipAssetIds: missingNow(project) });
       await platform.writePendingBackgrounds?.(target);
     } catch (e) {
@@ -148,6 +162,7 @@ export function createProjectActions(deps: {
       return;
     }
     dir = target;
+    services.voice.setProjectDirectory(target);
     saved = project;
     environment.set({ lastProjectDir: target });
     await startAutosave(project);
@@ -212,6 +227,7 @@ export function createProjectActions(deps: {
     },
 
     async recoverOnStartup() {
+      autoSaver.stop(); // 全候補の確認が終わるまで、現在の空のプロジェクトを自動保存しない
       const candidates: { dir: string; saved: boolean }[] = [];
       const last = environment.get().lastProjectDir;
       if (last && (await fs.exists(last))) candidates.push({ dir: last, saved: true });
@@ -220,27 +236,42 @@ export function createProjectActions(deps: {
         for (const name of await fs.list(root)) candidates.push({ dir: `${root}/${name}`, saved: false });
       }
       for (const c of candidates) {
-        const path = await autoSaver.findRecoverable(c.dir).catch(() => null);
-        if (!path || !canLoadAutosave(io)) continue;
-        let loaded: LoadedProject;
-        try {
-          loaded = await io.loadAutosave(path);
-        } catch (e) {
-          dialogs.notify(`自動保存を読めなかった: ${errorText(e)}`);
-          continue;
-        }
-        const ok = await dialogs.confirm(
-          `前回、保存していない変更が残っています（${loaded.project.name}）。復元しますか？`,
-        );
-        if (!ok) continue;
-        try {
-          // 復元したものはまだ保存していないので、変更ありの状態にする
-          await loadIntoApp(loaded.project, loaded.assetPngs, c.saved ? c.dir : null, null);
-          dialogs.notify('前回の作業を復元した');
-          afterLoad(loaded.report);
-          return true;
-        } catch (e) {
-          dialogs.notify(`復元できなかった: ${errorText(e)}`);
+        // 破棄への返答中に候補が変わっていた場合は、同じ保存先を取り直す。
+        for (;;) {
+          const path = await autoSaver.findRecoverable(c.dir).catch(() => null);
+          if (!path || !canLoadAutosave(io)) break;
+          let loaded: LoadedProject;
+          try {
+            loaded = await io.loadAutosave(path);
+          } catch (e) {
+            dialogs.notify(`自動保存を読めなかった: ${errorText(e)}`);
+            break;
+          }
+          const choice = await dialogs.choose(
+            `前回、保存していない変更が残っています（${loaded.project.name}）。復元しますか？\n「自動保存を破棄」を選ぶと、この作業の自動保存を消します。`,
+            RECOVERY_CHOICES,
+          );
+          if (choice === 'discard') {
+            try {
+              const result = await autoSaver.discardRecovery(c.dir, path);
+              if (result === 'changed') continue;
+              dialogs.notify('自動保存を破棄した');
+            } catch (e) {
+              dialogs.notify(`自動保存を破棄できなかった: ${errorText(e)}`);
+            }
+            break;
+          }
+          if (choice !== 'restore') break;
+          try {
+            // 復元したものはまだ保存していないので、変更ありの状態にする
+            await loadIntoApp(loaded.project, loaded.assetPngs, c.saved ? c.dir : null, null);
+            dialogs.notify('前回の作業を復元した');
+            afterLoad(loaded.report);
+            return true;
+          } catch (e) {
+            dialogs.notify(`復元できなかった: ${errorText(e)}`);
+          }
+          break;
         }
       }
       await startAutosave(store.get());

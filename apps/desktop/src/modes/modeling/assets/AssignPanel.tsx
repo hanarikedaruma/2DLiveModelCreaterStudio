@@ -146,9 +146,9 @@ export function AssignPanel() {
       </details>
       <div className="assign-footer">
         <button type="button" className="primary" onClick={() => runAutoSetup(services, notify)}>
-          かんたんセットアップ
+          自動セットアップ
         </button>
-        <p className="am-dim am-hint">★ は推奨の枠。割り当てたら [かんたんセットアップ] で動きを付ける</p>
+        <p className="am-dim am-hint">★ は推奨の枠。割り当てたら [自動セットアップ] で動きを付ける</p>
       </div>
     </div>
   );

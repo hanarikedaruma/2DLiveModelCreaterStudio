@@ -1,0 +1,53 @@
+{
+  "sha256": "194810E8F85E3797DD85872C9C7F8606ADE56AEDB2C5B03F09A86907DD08F26F",
+  "executable": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+  "files": [
+    {
+      "file": "speech.py",
+      "sha256": "4313498AEA9A03A2BC1F802258905792DAF75FA08BB2BEB8938D9B9A99E3E5AA",
+      "matches": true
+    },
+    {
+      "file": "speech_config.py",
+      "sha256": "53D10275A7E76C148F5B991932426CE85B0833DE11E28B50770A637210228EBA",
+      "matches": true
+    },
+    {
+      "file": "speech_worker.py",
+      "sha256": "24BA417972B15FA7B18AA242983C01C5767F5C38BD7EC013DB0BACE8035387CE",
+      "matches": true
+    },
+    {
+      "file": "speech_stream_backend.py",
+      "sha256": "CA2E2844C908B80DF46B4E18818D7FC213DDD7D656A036A722E00C0378373C94",
+      "matches": true
+    },
+    {
+      "file": "speech_stream_audio.py",
+      "sha256": "7ECDF05D5A12E4226EC3AC2DA1A9F0D3CF2F24BC0546FB6BE59A41C639FAD0A6",
+      "matches": true
+    },
+    {
+      "file": "speech_stream_protocol.py",
+      "sha256": "F6CF565D2B2DBA652048A929F1089FBE59A33A0C50D94FA5A3AEB92861D7C1D3",
+      "matches": true
+    },
+    {
+      "file": "speech-stream-source.json",
+      "sha256": "E079B640BA18C5156129A23CAF6611BE4E290B2711BE55CE21B15200C2E0CE59",
+      "matches": true
+    },
+    {
+      "file": "studio_speech.py",
+      "sha256": "4550C8F4B7379FEEE6E674D62CFC1C711B988C44A8C787B21EF5A781478AEF9F",
+      "matches": true
+    },
+    {
+      "file": "host.py",
+      "sha256": "539AA85DDCC1EC69D546FBA0D05BF9596C98F79250606E211A8DB87834946858",
+      "matches": true
+    }
+  ],
+  "matches": true,
+  "date": "2026-10-15T21:54:33.2152860+09:00"
+}

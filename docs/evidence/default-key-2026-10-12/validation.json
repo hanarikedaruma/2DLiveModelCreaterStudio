@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-12",
+  "issue": "I-072",
+  "contract": "CC-020",
+  "schemaVersion": 7,
+  "unit": {
+    "packages": 10,
+    "files": 309,
+    "tests": 2676,
+    "desktopFiles": 167,
+    "desktopTests": 1371,
+    "coreFiles": 67,
+    "coreTests": 682,
+    "newTests": 17,
+    "status": "passed",
+    "logs": [
+      ".cache/i072-tests.log",
+      ".cache/i072-desktop-final.log",
+      ".cache/i072-key-final.log",
+      ".cache/i072-help-final.log"
+    ]
+  },
+  "typecheck": "passed",
+  "lint": "passed",
+  "prettier": "passed",
+  "nativeE2e": {
+    "files": 16,
+    "tests": 29,
+    "status": "passed",
+    "log": ".cache/i072-native.log"
+  },
+  "browser": "edge.json",
+  "native": "native.json",
+  "installed": "app-update.json",
+  "installedStartup": "installed-startup.json",
+  "appUpdate": "completed",
+  "userProjectsChanged": false
+}

@@ -1,8 +1,9 @@
 // 曲面の生成方式（カード31）。顔の向きに合わせて、ワープの制御点を球面に沿って動かす
 import type { Binding, Model, ParameterKey, Vec2, Warp } from '@app/schema';
+import { warpToFrame } from '../deform/warp';
 import { generateBetweenKeys, linearInterpolator, type Interpolator } from './between';
 import { deepEqual } from './equal';
-import { clean, keyCoord, sameCoord, sortKeys, sortedUnique } from './keys';
+import { clean, defaultKey, keyCoord, sameCoord, sortKeys, sortedUnique, withDefaultOffset } from './keys';
 
 export type SurfaceParameter = 'FaceAngleX' | 'FaceAngleY';
 
@@ -27,14 +28,20 @@ export function generateSurfaceKeys(warp: Warp, parameterId: SurfaceParameter, v
   const r = SURFACE_RADIUS_RATIO * Math.max(width, height);
   return values.map((value) => {
     const theta = (((value / 30) * SURFACE_MAX_ANGLE) / 180) * Math.PI;
-    return warp.points.map((p) => {
+    return warp.points.map((point) => {
       if (theta === 0 || !(r > 0)) return { x: 0, y: 0 };
+      const p = warpToFrame(warp, point);
+      const angle = warp.angle ?? 0,
+        c = Math.cos(angle),
+        s = Math.sin(angle);
       if (parameterId === 'FaceAngleX') {
         const u = clamp1((p.x - cx) / r);
-        return { x: clean(r * (Math.sin(Math.asin(u) + theta) - u)), y: 0 };
+        const d = r * (Math.sin(Math.asin(u) + theta) - u);
+        return { x: clean(c * d), y: clean(s * d) };
       }
       const u = clamp1((cy - p.y) / r);
-      return { x: 0, y: clean(-r * (Math.sin(Math.asin(u) + theta) - u)) };
+      const d = -r * (Math.sin(Math.asin(u) + theta) - u);
+      return { x: clean(-s * d), y: clean(c * d) };
     });
   });
 }
@@ -89,12 +96,18 @@ export function surfaceInterpolator(warp: Warp, parameterId: SurfaceParameter): 
 export function surfaceBinding(binding: Binding, model: Model): Binding {
   const target = surfaceTarget(binding, model);
   if (!target) return binding;
-  const locked = binding.keys.filter((k) => k.locked);
+  const origin = defaultKey(binding, [model.parameters.find((p) => p.id === target.parameterId)?.default ?? 0]);
+  const locked = binding.keys.filter((k) => k.locked || (k === origin && k.source === 'manual'));
   const deltas = generateSurfaceKeys(target.warp, target.parameterId, SURFACE_ANCHOR_VALUES);
   const anchors: ParameterKey[] = [];
   SURFACE_ANCHOR_VALUES.forEach((value, i) => {
     if (locked.some((k) => sameCoord(keyCoord(k), value))) return;
-    anchors.push({ coords: [value], delta: deltas[i]!, source: 'auto', locked: false });
+    anchors.push({
+      coords: [value],
+      delta: withDefaultOffset(deltas[i]!, origin?.delta),
+      source: 'auto',
+      locked: false,
+    });
   });
   const keys = sortKeys([...locked, ...anchors]);
   const seeded: Binding = { ...binding, keyValues: [sortedUnique(keys.map(keyCoord))], keys };

@@ -1,0 +1,14 @@
+{
+  "exe": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+  "debugHook": false,
+  "inputs": 4,
+  "outputs": 4,
+  "panelSeparated": true,
+  "independentCollapse": true,
+  "audioHeight": 316,
+  "width": {
+    "width": 244,
+    "scroll": 244
+  },
+  "errors": []
+}

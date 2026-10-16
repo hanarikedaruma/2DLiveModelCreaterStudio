@@ -4,7 +4,7 @@
 // 設定は services.trackingLayer に渡す。アプリイベント 'recalibrate'（ホットキー）でキャリブレーションを始める
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { TRACKING_PRESETS, type TrackingPreset, type TrackingPresetName, type TrackingTuning } from '@app/tracking';
-import { DetailDisclosure, onAppEvent, presetOf, useDialogs, useEnvironment, useServices } from '../../../shell/api';
+import { onAppEvent, presetOf, useDialogs, useEnvironment, useServices } from '../../../shell/api';
 import { useConfirmOverwriteCustom } from '../../../shell/level';
 import { RECALIBRATE_EVENT } from '../../../hotkeys/actions';
 import { studioRuntime } from '../runtime';
@@ -144,7 +144,7 @@ export function CalibrationSection() {
         )}
       </div>
       <p className="studio-note">安定は動きの遅れが少し増えます</p>
-      <DetailDisclosure label="動きの数値">
+      <>
         <div className="calibration-tuning">
           {TUNING_FIELDS.map((f) => (
             <TuningInput
@@ -165,7 +165,7 @@ export function CalibrationSection() {
             />
           ))}
         </div>
-      </DetailDisclosure>
+      </>
 
       <label className="studio-check calibration-eyes">
         <input type="checkbox" checked={env.eyeTracking} onChange={(e) => setEnv({ eyeTracking: e.target.checked })} />

@@ -68,7 +68,7 @@ export function setBlend(animation: Animation, patch: Partial<BlendValues>): Ani
 
 export type TransitionOptions = Pick<
   Transition,
-  'curve' | 'blendMode' | 'keepLipSync' | 'keepPhysics' | 'returnToTracking'
+  'curve' | 'blendMode' | 'keepLipSync' | 'keepPhysics' | 'returnToTracking' | 'startFromCurrent'
 >;
 
 // カーブ・合成方法・リップシンクを維持・物理演算を維持・トラッキングに戻る

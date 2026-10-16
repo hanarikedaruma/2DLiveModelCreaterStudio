@@ -4,7 +4,7 @@
 // シーンを切り替えたときの表情はシーンの見張り（scenes/watcher.ts）が適用する
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { Expression } from '@app/schema';
-import { DetailDisclosure, useDispatch, useEnvironment, useProject, useServices } from '../../../shell/api';
+import { useDispatch, useEnvironment, useProject, useServices } from '../../../shell/api';
 import { updateExpressionCommand } from '../../modeling/expressions/commands';
 import { expressionBinding, type ExpressionCardMode } from './binding';
 import './expressions.css';
@@ -140,18 +140,18 @@ export function ExpressionCards() {
         いまの表情: {names.length > 0 ? names.join('＋') : 'なし'}
       </p>
       {expressions.length > 0 && (
-        <DetailDisclosure label="カードの押し方">
+        <>
           <CardModeSetting mode={mode} />
-        </DetailDisclosure>
+        </>
       )}
       {expressions.length > 0 && (
-        <DetailDisclosure label="フェードの秒数">
+        <>
           <div className="sexpr-fades">
             {expressions.map((e) => (
               <FadeRow key={e.id} expression={e} />
             ))}
           </div>
-        </DetailDisclosure>
+        </>
       )}
     </div>
   );

@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "dropUnderToast": true,
+      "undo": true,
+      "escape": true,
+      "clickAfterDrag": true
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "dropUnderToast": true,
+      "undo": true,
+      "escape": true,
+      "clickAfterDrag": true
+    }
+  ],
+  "errors": []
+}

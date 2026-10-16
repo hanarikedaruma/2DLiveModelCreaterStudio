@@ -1,0 +1,195 @@
+{
+  "checks": [
+    {
+      "shape": [
+        1,
+        80,
+        232
+      ],
+      "maximumDifference": 0.0,
+      "bitIdentical": true
+    }
+  ],
+  "results": [
+    {
+      "mode": "original",
+      "processingMs": 682.1673000231385,
+      "rtf": 0.37730492257916953,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 1
+    },
+    {
+      "mode": "original",
+      "processingMs": 156.38360008597374,
+      "rtf": 0.08649535402985273,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 2
+    },
+    {
+      "mode": "original",
+      "processingMs": 151.78329986520112,
+      "rtf": 0.08395094019092982,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 3
+    },
+    {
+      "mode": "original",
+      "processingMs": 152.5131999514997,
+      "rtf": 0.08435464599087372,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 4
+    },
+    {
+      "mode": "original",
+      "processingMs": 160.72009992785752,
+      "rtf": 0.0888938605795672,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 5
+    },
+    {
+      "mode": "graph",
+      "processingMs": 397.6620000321418,
+      "rtf": 0.21994579647795454,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 6
+    },
+    {
+      "mode": "graph",
+      "processingMs": 82.06479996442795,
+      "rtf": 0.045389822989174745,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 7
+    },
+    {
+      "mode": "graph",
+      "processingMs": 95.50259984098375,
+      "rtf": 0.05282223442532287,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 8
+    },
+    {
+      "mode": "graph",
+      "processingMs": 77.76769995689392,
+      "rtf": 0.04301310838323779,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 9
+    },
+    {
+      "mode": "graph",
+      "processingMs": 75.77240001410246,
+      "rtf": 0.04190951328213632,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 10
+    },
+    {
+      "mode": "graph",
+      "processingMs": 71.9395000487566,
+      "rtf": 0.03978954648714413,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 11
+    },
+    {
+      "mode": "graph",
+      "processingMs": 69.75160003639758,
+      "rtf": 0.03857942479889247,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 12
+    },
+    {
+      "mode": "graph",
+      "processingMs": 74.89169994369149,
+      "rtf": 0.04142240041133379,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 13
+    },
+    {
+      "mode": "graph",
+      "processingMs": 73.59130005352199,
+      "rtf": 0.040703152684470126,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 14
+    },
+    {
+      "mode": "graph",
+      "processingMs": 76.32120000198483,
+      "rtf": 0.04221305309844294,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 15
+    },
+    {
+      "mode": "graph",
+      "processingMs": 76.85160008259118,
+      "rtf": 0.0425064159748845,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 16
+    },
+    {
+      "mode": "graph",
+      "processingMs": 80.86879993788898,
+      "rtf": 0.04472831854971736,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 17
+    },
+    {
+      "mode": "graph",
+      "processingMs": 79.9670999404043,
+      "rtf": 0.04422959067500237,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 18
+    },
+    {
+      "mode": "graph",
+      "processingMs": 89.12919997237623,
+      "rtf": 0.04929712387852667,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 19
+    },
+    {
+      "mode": "graph",
+      "processingMs": 72.11549999192357,
+      "rtf": 0.0398868915884533,
+      "peak": 3.8146139559103176e-05,
+      "vramMiB": 1146.140625,
+      "nativeRate": 22050,
+      "calls": 20
+    }
+  ]
+}

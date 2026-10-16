@@ -1,0 +1,99 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "note": "No expected text, language hint or reference transcript supplied to ASR. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "../../docs/evidence/studio-speech-breath-2026-10-16/cosy-neutral.wav",
+      "sha256": "9006d72ca5fbad588aac19e73e58893f711dd36eb23516923fab1c893a8b40e9",
+      "seconds": 4.8,
+      "expectedTranscripts": [
+        "あなたのことが大好きです。"
+      ],
+      "transcript": "一一个拿发到铺边一只泪血啊我再去发对她吧",
+      "contentMatch": false,
+      "recognitionSeconds": 5.814516200000071
+    },
+    {
+      "file": "cosy-probe/fp32-instruct-whole.wav",
+      "sha256": "6023bfe8dc2378b296fe45dd1f3353712e99d72d7cfeaf84464f5fdac94cbd30",
+      "seconds": 4.8,
+      "expectedTranscripts": [
+        "あなたのことが大好きです。"
+      ],
+      "transcript": " 예예가 나와딴 구독, 유튜브, 구독 부탁드립니다!",
+      "contentMatch": false,
+      "recognitionSeconds": 4.16160380000656
+    },
+    {
+      "file": "../../docs/evidence/studio-speech-breath-2026-10-16/qwen-old.wav",
+      "sha256": "d71753c83e5d0cdac29238e0143250056adb8e7923ca8ab86a060beda7378e67",
+      "seconds": 3.6,
+      "expectedTranscripts": [
+        "あ、あなたのことが、だ、大好きです。",
+        "あなたのことが大好きです。"
+      ],
+      "transcript": "あ、あなたのことが、だ、大好きです。",
+      "contentMatch": true,
+      "recognitionSeconds": 3.8295400999923004
+    },
+    {
+      "file": "cosy-corrected/neutral.wav",
+      "sha256": "80cf89408fa1dbfe3d7bcf100b70118db53aae209ca63bd7b6f6b488af13d318",
+      "seconds": 1.8,
+      "expectedTranscripts": [
+        "あなたのことが大好きです。"
+      ],
+      "transcript": "あなたのことが多好きです",
+      "contentMatch": false,
+      "recognitionSeconds": 3.5640425000019604
+    },
+    {
+      "file": "cosy-corrected/breath.wav",
+      "sha256": "86480b826f1cd52afb74deac7cc008f25c21e363368c2bc1e6003eaa9a63ee91",
+      "seconds": 4.64,
+      "expectedTranscripts": [
+        "あなたのことがだっ大好き",
+        "あなたのことが大好き",
+        "あなたのことがだっだいすき",
+        "あなたのことがだいすき",
+        "あなたのことがだ大好き",
+        "あなたのことが大大好き"
+      ],
+      "transcript": "あなたのことかな?大好き",
+      "contentMatch": false,
+      "recognitionSeconds": 3.7229234000114957
+    },
+    {
+      "file": "cosy-corrected/faithful.wav",
+      "sha256": "b3d8019a301058ba21adcdebb4a04090ab1a22ee2a145c8a8ce467529451dc8f",
+      "seconds": 5.28,
+      "expectedTranscripts": [
+        "あなたのことがだっ大好きです",
+        "あなたのことが大好きです",
+        "あなたのことがだっだいすきです",
+        "あなたのことがだいすきです",
+        "あなたのことがだ大好きです",
+        "あなたのことが大大好きです"
+      ],
+      "transcript": "あだとろことが… ざっ…だすきです",
+      "contentMatch": false,
+      "recognitionSeconds": 3.918793100005132
+    },
+    {
+      "file": "../../docs/evidence/studio-speech-breath-2026-10-16/cosy-breath.wav",
+      "sha256": "7df8962215751c19ca3308c41782c229f53f1eb6da427299f5a5b9a5f0be4629",
+      "seconds": 13.6,
+      "expectedTranscripts": [
+        "あなたのことがだっ大好き",
+        "あなたのことが大好き",
+        "あなたのことがだいすき"
+      ],
+      "transcript": "不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 不 ",
+      "contentMatch": false,
+      "recognitionSeconds": 9.610069699992891
+    }
+  ],
+  "allContentMatched": false
+}

@@ -184,7 +184,7 @@ function outputOf(p: Pendulum, range: number, pending: number): number {
   return (theta > range ? range : theta < -range ? -range : theta) / range;
 }
 
-// ctx.flags.physicsActive が false の間は null を返し、状態はそのまま保つ（時間も進めない）。
+// ctx.flags.physicsActive が false の間は時間を進めない。freezePhysics は直前の表示出力を保持し、通常は null。
 // 戻ったフレームは、止めていた間の入力の変化を揺れにしない。同じ出力パラメータの項目が複数あれば、あとの項目の値。
 // 出力パラメータがプロジェクトに無い項目は計算しない
 export function createPhysicsEngine(): PhysicsEngineWithState {
@@ -194,6 +194,7 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
   let pending = 0; // まだ積分していない時間（秒。PHYSICS_STEP 未満）
   let resync = false;
   let paramIndex: { list: Parameter[]; byId: Map<string, Parameter> } | null = null;
+  let lastLayer: { projectId: string; layer: Layer } | null = null;
 
   function parametersById(list: Parameter[]): ReadonlyMap<string, Parameter> {
     if (paramIndex?.list !== list) {
@@ -212,6 +213,7 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
       chest.reset();
       pending = 0;
       resync = false;
+      lastLayer = null;
     },
 
     pendulums(physicsId) {
@@ -225,6 +227,19 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
       if (!ctx.flags.physicsActive) {
         resync = true;
         chest.reset();
+        if (ctx.flags.freezePhysics && lastLayer?.projectId === ctx.project.id) {
+          const manual = new Set(ctx.flags.manualPhysicsParameterIds ?? []);
+          const outputs = new Set(
+            ctx.project.physics.flatMap((p) => [p.outputParameterId, p.verticalOutputParameterId]).filter(Boolean),
+          );
+          const values = Object.fromEntries(
+            Object.entries(lastLayer.layer.values).filter(([id]) => outputs.has(id) && !manual.has(id)),
+          );
+          const layer = Object.keys(values).length ? { ...lastLayer.layer, values } : null;
+          lastLayer = layer ? { projectId: ctx.project.id, layer } : null;
+          return layer;
+        }
+        lastLayer = null; // 非表示になった揺れを、後の実験再生で復活させない
         return null;
       }
       const params = parametersById(ctx.project.model.parameters);
@@ -339,7 +354,14 @@ export function createPhysicsEngine(): PhysicsEngineWithState {
         }
       }
       resync = false;
-      return seen.size > 0 ? { id: 'physics', weight: 1, values, blend } : null;
+      for (const id of manual) {
+        delete values[id];
+        delete blend[id];
+      }
+      const layer: Layer | null =
+        seen.size > 0 && Object.keys(values).length > 0 ? { id: 'physics', weight: 1, values, blend } : null;
+      lastLayer = layer ? { projectId: ctx.project.id, layer } : null;
+      return layer;
     },
   };
 }

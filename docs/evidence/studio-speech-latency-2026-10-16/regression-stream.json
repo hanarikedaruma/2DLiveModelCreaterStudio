@@ -1,0 +1,51 @@
+{
+  "state": {
+    "state": "stopped",
+    "sessionId": "179a48f179564bd89112396db26be949",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "bufferedMs": 0,
+      "codecFrames": 49,
+      "cudaGraph": 1,
+      "firstAudioMs": 2264.113300010562,
+      "firstPcmSeconds": 0.5869568999914918,
+      "frames": 94080,
+      "generationSeconds": 5.060122099996079,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 49,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 1.2908474744887957,
+      "seconds": 3.92,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "こんにちは。今日は何をして遊ぼうか。"
+      ],
+      "preparation": {
+        "owner": "672783e0-0d36-4219-8f29-87c3fd7faf0b",
+        "revision": 6,
+        "state": "generating"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  "frames": 551,
+  "nonzero": 0,
+  "finite": true,
+  "monotonic": true,
+  "phases": [
+    "loading",
+    "priming",
+    "running"
+  ]
+}

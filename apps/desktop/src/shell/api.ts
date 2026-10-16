@@ -4,12 +4,12 @@ import { createElement, useCallback, useMemo, useSyncExternalStore, type JSX } f
 import type { Environment, ModeId, Project, Vec2 } from '@app/schema';
 import type { Command, DeformedModel, EditorState, Services, ViewTransform } from '@app/contracts';
 import { useShell } from './context';
-import { byOrder, registry, visibleAt } from './registry';
+import { byOrder, registry } from './registry';
+import type { Dialogs } from './dialogs';
 
 export { emitAppEvent, onAppEvent } from './events';
-// かんたん/詳細の部品（カード26）
+// 数値に対応するプリセットを調べる（カード26）
 export { presetOf } from './presets';
-export { DetailDisclosure } from './DetailDisclosure';
 
 // ---- パネル・セクション・中央・セットアップ画面・メニュー ----
 
@@ -32,12 +32,12 @@ export interface PanelDef {
   area: 'left' | 'right' | 'bottom';
   title: string;
   order?: number;
-  level?: 'easy' | 'detail' | 'both';
   component: React.FC;
   // 指定すると「オブジェクトパレット」になり、when が true の間だけ列のいちばん上に色付きで出す。
   // kind は札（ツール / パーツ）。省略は常に出す「共通パレット」。when は描き直しのたびに呼ぶので軽くする
   object?: { kind: 'tool' | 'part'; when(context: PanelContext): boolean };
-  info?: PanelInfo;
+  // ⓘ の外部テキストのID。既存の登録形式も移行中は受け付ける（CC-017）。
+  info?: string | PanelInfo;
 }
 export function registerPanel(def: PanelDef): void {
   registry.addPanel(def);
@@ -47,7 +47,6 @@ export interface SectionDef {
   id: string;
   panelId: string;
   order?: number;
-  level?: 'easy' | 'detail' | 'both';
   component: React.FC;
 }
 // パネルの中の <PanelSections panelId=… /> に入る
@@ -57,10 +56,7 @@ export function registerPanelSection(def: SectionDef): void {
 
 export function PanelSections(props: { panelId: string }): JSX.Element {
   const snapshot = useSyncExternalStore(registry.subscribe, registry.get);
-  const [editor] = useEditor();
-  const panel = snapshot.panels.find((p) => p.id === props.panelId);
-  const uiLevel = editor.uiLevel[panel?.mode ?? editor.mode];
-  const sections = byOrder(snapshot.sections.filter((s) => s.panelId === props.panelId && visibleAt(s.level, uiLevel)));
+  const sections = byOrder(snapshot.sections.filter((s) => s.panelId === props.panelId));
   return createElement(
     'div',
     { className: 'panel-sections' },
@@ -113,8 +109,6 @@ export interface CanvasTool {
   id: string;
   label: string;
   cursor?: string;
-  // かんたん/詳細のどちらでツールのボタンを出すか（パネル・セクションの level と同じ。省略は both）
-  level?: 'easy' | 'detail' | 'both';
   // false ならツールバーにボタンを出さない（パーツ専用のツールなど、パレットのボタンから切り替えるもの）
   toolbar?: boolean;
   // 対象の要るツール。対象が無い間は、枠が案内の帯・選べるものの点線の囲み・クリックでの選択を受け持ち、
@@ -196,11 +190,10 @@ export function useEnvironment(): [Environment, (patch: Partial<Environment>) =>
   return [env, environment.set];
 }
 
-export function useDialogs(): {
-  confirm(message: string): Promise<boolean>;
-  notify(message: string): void;
-  prompt(message: string, initial?: string): Promise<string | null>;
-} {
+export function useDialogs(): Dialogs {
   const { dialogs } = useShell();
-  return useMemo(() => ({ confirm: dialogs.confirm, notify: dialogs.notify, prompt: dialogs.prompt }), [dialogs]);
+  return useMemo(
+    () => ({ confirm: dialogs.confirm, notify: dialogs.notify, prompt: dialogs.prompt, choose: dialogs.choose }),
+    [dialogs],
+  );
 }

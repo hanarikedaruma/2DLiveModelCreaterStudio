@@ -1,4 +1,4 @@
-// スタジオの設定（studioSettings）の「リップシンク」（カード37）。マイクの選択・開始、無音とみなす音量、
+// マイク・音声パネルの「リップシンク」（カード37）。マイクの選択・開始、無音とみなす音量、
 // 口の動き（控えめ / 標準 / 大きめ）、カメラの口との関係（大きい方 / マイクのみ / カメラのみ）。
 // マイクとしきい値は Environment（この PC の設定）、ほかは project.model.lipSync に保存する
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
@@ -42,6 +42,8 @@ export function LipSyncSection() {
     lipSyncBinding.bind({ audio: services.audio, lipSync: services.lipSync });
   }, [services]);
   const { status, level } = useSyncExternalStore(lipSyncBinding.subscribe, lipSyncBinding.state);
+  const voiceState = useSyncExternalStore(services.voice.subscribe, services.voice.state);
+  const usingVoice = ['loading', 'priming', 'running', 'stopping'].includes(voiceState.state);
 
   // マイクの一覧。許可の前は名前が空なので、開始できたら取り直す
   const [devices, setDevices] = useState<{ id: string; label: string }[]>([]);
@@ -72,8 +74,8 @@ export function LipSyncSection() {
   const [draft, setDraft] = useState<number | null>(null);
   const threshold = draft ?? env.silenceThreshold;
   useEffect(() => {
-    lipSyncBinding.setSilenceThreshold(threshold);
-  }, [threshold]);
+    if (!usingVoice) lipSyncBinding.setSilenceThreshold(threshold);
+  }, [threshold, usingVoice]);
   const sliderRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const input = sliderRef.current;
@@ -107,6 +109,7 @@ export function LipSyncSection() {
         <span>マイク</span>
         <select
           value={micDeviceId ?? ''}
+          disabled={usingVoice}
           onChange={(e) => {
             const id = e.target.value || null;
             setEnv({ microphoneDeviceId: id });
@@ -128,6 +131,7 @@ export function LipSyncSection() {
         <button
           type="button"
           className={status === 'stopped' ? 'primary' : undefined}
+          disabled={usingVoice}
           onClick={() => (status === 'stopped' ? void start(micDeviceId) : lipSyncBinding.stopMicrophone())}
         >
           {status === 'stopped' ? 'マイクをオン' : 'マイクをオフ'}
@@ -137,10 +141,17 @@ export function LipSyncSection() {
         </span>
       </div>
 
+      {usingVoice && (
+        <p className="studio-note">
+          AI音声の出力に連動中。無音の調整は［音声・リップシンク］の［口の動き］で行います。
+        </p>
+      )}
+
       <label className="lipsync-threshold">
         <span>無音とみなす音量</span>
         <input
           ref={sliderRef}
+          disabled={usingVoice}
           type="range"
           min={THRESHOLD_MIN_DB}
           max={THRESHOLD_MAX_DB}

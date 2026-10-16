@@ -62,6 +62,31 @@ function shiftDrag(root: HTMLElement, from: number, to: number) {
 }
 
 describe('KeySlider の印', () => {
+  it('既定値に差があるときは、削除の代わりに差を消す操作を出す（I-072）', () => {
+    const resetDefaultKey = vi.fn();
+    setup({
+      keyActions: {
+        toggleLock: vi.fn(),
+        deleteKey: vi.fn(),
+        moveKey: vi.fn(),
+        lockRange: vi.fn(),
+        regenerateRange: vi.fn(),
+        resetDefaultKey,
+      },
+    });
+    fireEvent.contextMenu(mark(0));
+    const menu = screen.getByRole('group', { name: 'キー 0 の操作' });
+    expect((within(menu).getByRole('button', { name: '別の値へ動かす…' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(within(menu).getByRole('button', { name: 'このキーの差を消す（基準の形に戻す）' }));
+    expect(resetDefaultKey).toHaveBeenCalledOnce();
+  });
+
+  it('差がない既定値キーは削除も移動もできない（I-072）', () => {
+    setup();
+    fireEvent.contextMenu(mark(0));
+    const menu = screen.getByRole('group', { name: 'キー 0 の操作' });
+    expect((within(menu).getByRole('button', { name: 'このキーを消す' }) as HTMLButtonElement).disabled).toBe(true);
+  });
   it('印を押すとその値へ移動する（吸い付きを通さない）', () => {
     const { onChange } = setup();
     fireEvent.click(mark(-10));

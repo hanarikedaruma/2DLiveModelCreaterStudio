@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-10-16T10:41:24.9957738+09:00",
+  "files": [
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\release\\live2d-studio.exe",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+      "sha256": "80E16989CB555985179696E35C78E674AC7888958B4B85A00881D6E59483343D",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech.py",
+      "sha256": "DD93CE66BD85D2A47856851A738BA64942CD8F9A16A9F94E33C445AE28FAB95C",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_delivery.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_delivery.py",
+      "sha256": "AEA117B1907704EEBB1610B988367E80851BB69E96B6638A09AF006F1FEE3941",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_buffering.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_buffering.py",
+      "sha256": "029B0C47509DCC6B0F086AD2F2AABF87AD0B80359EB2E60E0CCC2424C6FAEC49",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_config.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_config.py",
+      "sha256": "D0F222FC3C3EB91F2E1D14EE199C95905549BEAE14F4901F1F484FEB3F2562AF",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_worker.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_worker.py",
+      "sha256": "9E0AE5B9080BEA8DAF15FF2D085CA96191726233CCE01F7B7666234DDAE56E22",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\studio_speech.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\studio_speech.py",
+      "sha256": "4520FAF829DC84029F034EF81068ECABD4E5F809A6C4075DEB14DAC5683439A6",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_stream_audio.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_stream_audio.py",
+      "sha256": "7ECDF05D5A12E4226EC3AC2DA1A9F0D3CF2F24BC0546FB6BE59A41C639FAD0A6",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_stream_backend.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_stream_backend.py",
+      "sha256": "EE51FA262BB4EFEC6E89495AC0B880496AFCAFC1CA35D33100D1C6F5F39BA523",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\speech_decoder.py",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\speech_decoder.py",
+      "sha256": "F1D030446B64E4455837F7F1A972BB617A10813EAC307C190C5F3E34757EFEBF",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\runtime.json",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\runtime.json",
+      "sha256": "89DE4A5BFA19C2D3EE405DD2A2C13BEE34F3BF4845C757C641D013DD791ED8B5",
+      "match": true
+    },
+    {
+      "source": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\tools\\voice-engine\\voices\\original-soft-girl.wav",
+      "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\voice-engine\\voices\\original-soft-girl.wav",
+      "sha256": "DAC5A689FE406465A88B481D085AE4FA0396ADC9BAEDA044C93913DF39ED039D",
+      "match": true
+    }
+  ]
+}

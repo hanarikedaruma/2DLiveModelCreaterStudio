@@ -152,6 +152,7 @@
 /* 生成方式（詳細モード） */
 .parameter-generation {
   display: flex;
+  flex: 1;
   align-items: center;
   gap: 6px;
 }

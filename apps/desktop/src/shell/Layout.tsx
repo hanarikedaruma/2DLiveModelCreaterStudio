@@ -1,9 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { useEditor, useProject, type PanelContext, type PanelDef } from './api';
 import { CanvasHost } from './canvas/CanvasHost';
 import { useShell } from './context';
 import { Header } from './Header';
 import { panelsFor, registry } from './registry';
+import { getInfoText } from '../help/infoTexts';
+import { InfoContent } from '../help/InfoButton';
+import {
+  clampSize,
+  fitColumnWidths,
+  LayoutSizesProvider,
+  useElementSize,
+  useLayoutSizes,
+  useResizableSize,
+} from './layoutSizes';
+import { Splitter } from './splitter';
 
 function useRegistry() {
   return useSyncExternalStore(registry.subscribe, registry.get);
@@ -35,50 +46,6 @@ function useCollapsedPanels(): [Set<string>, (id: string) => void] {
       return next;
     });
   return [collapsed, toggle];
-}
-
-// 右の列で、境目のドラッグで高さを決めたパネルの中身の高さ（px。I-064）。決めていないパネルは中身に合わせる。
-// たたみと同じく見ている人ごとの好みで、保存できない環境では覚えない
-const HEIGHTS_KEY = 'live2d-studio.panelHeights';
-const PANEL_MIN_HEIGHT = 60;
-const PANEL_MAX_HEIGHT = 4000;
-const PANEL_HEIGHT_STEP = 16;
-
-const clampPanelHeight = (h: number) => Math.round(Math.min(PANEL_MAX_HEIGHT, Math.max(PANEL_MIN_HEIGHT, h)));
-
-function readHeights(): Record<string, number> {
-  try {
-    const raw: unknown = JSON.parse(localStorage.getItem(HEIGHTS_KEY) ?? '{}');
-    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return {};
-    const heights: Record<string, number> = {};
-    for (const [id, h] of Object.entries(raw)) {
-      if (typeof h === 'number' && Number.isFinite(h)) heights[id] = clampPanelHeight(h);
-    }
-    return heights;
-  } catch {
-    return {};
-  }
-}
-
-// height が null なら決めた高さを外す（中身に合わせる）
-function usePanelHeights(): [Record<string, number>, (id: string, height: number | null) => void] {
-  const [heights, setHeights] = useState(readHeights);
-  const setHeight = useCallback(
-    (id: string, height: number | null) =>
-      setHeights((prev) => {
-        const next = { ...prev };
-        if (height === null) delete next[id];
-        else next[id] = clampPanelHeight(height);
-        try {
-          localStorage.setItem(HEIGHTS_KEY, JSON.stringify(next));
-        } catch {
-          // 覚えられなくても動作は続ける
-        }
-        return next;
-      }),
-    [],
-  );
-  return [heights, setHeight];
 }
 
 // 条件に合うオブジェクトパレットの id。プロジェクト・エディタ・キャンバス（ツール）のどれかが変わるたびに
@@ -116,100 +83,22 @@ function useShownObjectPanels(panels: PanelDef[]): Set<string> {
 
 const OBJECT_TAG = { tool: 'ツール', part: 'パーツ' } as const;
 
-// パネルの下の境目。上下にドラッグすると中身の高さを決め、ダブルクリックで中身に合わせる（決めた高さを外す）。
-// ドラッグ中は onDrag で見た目だけを変え、離したときに onResize で決める（押しただけでは高さを決めない）
-function PanelResizer({
-  title,
-  height,
-  bodyRef,
-  onDrag,
-  onResize,
-}: {
-  title: string;
-  height: number | undefined;
-  bodyRef: React.RefObject<HTMLDivElement | null>;
-  onDrag(height: number | null): void;
-  onResize(height: number | null): void;
-}) {
-  const [dragging, setDragging] = useState(false);
-  const endDragRef = useRef<(() => void) | null>(null);
-  useEffect(() => () => endDragRef.current?.(), []);
-  // 今の中身の高さ。決めていなければ、中身に合わせた実際の高さから始める
-  const current = () => height ?? bodyRef.current?.getBoundingClientRect().height ?? PANEL_MIN_HEIGHT;
-
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    endDragRef.current?.();
-    const drag = { pointerId: e.pointerId, startY: e.clientY, from: current(), to: null as number | null };
-    const move = (ev: PointerEvent) => {
-      if (ev.pointerId !== drag.pointerId) return;
-      // 押したときの小さなぶれ（ダブルクリックの途中など）では、まだ高さを決めない
-      if (drag.to === null && Math.abs(ev.clientY - drag.startY) < 2) return;
-      drag.to = clampPanelHeight(drag.from + ev.clientY - drag.startY);
-      onDrag(drag.to);
-    };
-    const end = (commit: boolean) => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', cancel);
-      endDragRef.current = null;
-      setDragging(false);
-      onDrag(null);
-      if (commit && drag.to !== null) onResize(drag.to);
-    };
-    const up = (ev: PointerEvent) => {
-      if (ev.pointerId === drag.pointerId) end(true);
-    };
-    const cancel = (ev: PointerEvent) => {
-      if (ev.pointerId === drag.pointerId) end(false);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', cancel);
-    endDragRef.current = () => end(false);
-    setDragging(true);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-    e.preventDefault();
-    const step = (e.key === 'ArrowUp' ? -1 : 1) * (e.shiftKey ? 4 : 1) * PANEL_HEIGHT_STEP;
-    onResize(current() + step);
-  };
-
-  return (
-    <div
-      className={dragging ? 'panel-resize dragging' : 'panel-resize'}
-      role="separator"
-      aria-orientation="horizontal"
-      aria-label={`「${title}」の高さ`}
-      aria-valuemin={PANEL_MIN_HEIGHT}
-      aria-valuemax={PANEL_MAX_HEIGHT}
-      aria-valuenow={height}
-      aria-valuetext={height === undefined ? '中身に合わせる' : `${height}px`}
-      tabIndex={0}
-      title="ドラッグか ↑↓ キーで高さを変える。ダブルクリックで中身に合わせる"
-      onPointerDown={onPointerDown}
-      onDoubleClick={() => onResize(null)}
-      onKeyDown={onKeyDown}
-    />
-  );
-}
-
 function Panel({
   panel: p,
   collapsed,
   onToggle,
   height,
   onResize,
+  width,
+  children,
 }: {
   panel: PanelDef;
   collapsed: boolean;
   onToggle(): void;
-  // 右の列の共通パレットだけが渡す（オブジェクトパレット・左と下の列は高さを決めない）
   height?: number;
   onResize?(height: number | null): void;
+  width?: number;
+  children?: ReactNode;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
@@ -217,13 +106,19 @@ function Panel({
   // ドラッグ中に高さだけが変わるたびに中身まで描き直さないよう、中身の要素は作り直さない
   const content = useMemo(() => <p.component />, [p.component]);
   const infoId = `panel-info-${p.id}`;
+  const info = typeof p.info === 'string' ? getInfoText(p.info) : p.info;
   const bodyHeight = dragHeight ?? height;
   const sized = !collapsed && bodyHeight !== undefined;
   const className = ['panel', p.object ? 'object' : null, collapsed ? 'collapsed' : null, sized ? 'sized' : null]
     .filter(Boolean)
     .join(' ');
   return (
-    <div className={className} data-panel-id={p.id} data-object={p.object?.kind}>
+    <div
+      className={className}
+      data-panel-id={p.id}
+      data-object={p.object?.kind}
+      style={width === undefined ? undefined : { width, flex: 'none' }}
+    >
       <h2 className="panel-title">
         <button type="button" className="panel-toggle" aria-expanded={!collapsed} onClick={onToggle}>
           <span className="panel-caret" aria-hidden="true">
@@ -250,12 +145,7 @@ function Panel({
       </h2>
       {p.info && infoOpen && (
         <div className="panel-info" id={infoId} role="note" aria-label={`「${p.title}」の説明`}>
-          <p className="panel-info-purpose">{p.info.purpose}</p>
-          <ol className="panel-info-steps">
-            {p.info.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
+          <InfoContent info={info} />
         </div>
       )}
       {/* たたんでも中身は外さない（パネルが表示中のあいだツールに services を渡す部品があるため） */}
@@ -263,55 +153,114 @@ function Panel({
         {content}
       </div>
       {onResize && !collapsed && (
-        <PanelResizer title={p.title} height={height} bodyRef={bodyRef} onDrag={setDragHeight} onResize={onResize} />
+        <Splitter
+          label={`「${p.title}」の高さ`}
+          axis="y"
+          value={height}
+          current={() => height ?? bodyRef.current?.getBoundingClientRect().height ?? 60}
+          min={60}
+          max={4000}
+          className="panel-resize"
+          onPreview={setDragHeight}
+          onCommit={onResize}
+        />
       )}
+      {children}
     </div>
   );
 }
 
 function Area({
   area,
+  panels,
   collapsed,
   toggle,
+  width,
+  height,
 }: {
   area: PanelDef['area'];
+  panels: PanelDef[];
   collapsed: ReadonlySet<string>;
   toggle(id: string): void;
+  width?: number;
+  height?: number;
 }) {
-  const snapshot = useRegistry();
   const [editor] = useEditor();
-  const [heights, setHeight] = usePanelHeights();
-  const panels = panelsFor(snapshot, editor.mode, area, editor.uiLevel[editor.mode]);
-  const shown = useShownObjectPanels(panels);
-  // オブジェクトパレット（ツール → パーツ）を上に、共通パレットをその下に並べる
-  const ordered = [
-    ...panels.filter((p) => p.object?.kind === 'tool' && shown.has(p.id)),
-    ...panels.filter((p) => p.object?.kind === 'part' && shown.has(p.id)),
-    ...panels.filter((p) => !p.object),
-  ];
-  if (ordered.length === 0) return null;
+  const sizes = useLayoutSizes();
+  const measured = useElementSize<HTMLElement>();
+  if (panels.length === 0) return null;
   return (
     <aside
       className={`shell-area shell-area-${area}`}
       data-area={area}
+      ref={measured.ref}
+      style={area === 'bottom' ? { height } : { width }}
       aria-label={area === 'right' ? '右のパネル' : undefined}
       tabIndex={area === 'right' ? 0 : undefined}
     >
-      {ordered.map((p) => {
-        // 右の列の共通パレットは、境目のドラッグで高さを決められる（I-064）
-        const resizable = area === 'right' && !p.object;
+      {panels.map((p, index) => {
+        const id = `${editor.mode}.panel.${p.id}`;
+        if (area === 'bottom')
+          return (
+            <BottomPanel
+              key={p.id}
+              panel={p}
+              collapsed={collapsed.has(p.id)}
+              onToggle={() => toggle(p.id)}
+              available={measured.width || 800}
+              count={panels.length}
+              last={index === panels.length - 1}
+            />
+          );
         return (
           <Panel
             key={p.id}
             panel={p}
             collapsed={collapsed.has(p.id)}
             onToggle={() => toggle(p.id)}
-            height={resizable ? heights[p.id] : undefined}
-            onResize={resizable ? (h) => setHeight(p.id, h) : undefined}
+            height={sizes.values[id]}
+            onResize={(h) => sizes.set(id, h)}
           />
         );
       })}
     </aside>
+  );
+}
+
+function BottomPanel({
+  panel,
+  collapsed,
+  onToggle,
+  available,
+  count,
+  last,
+}: {
+  panel: PanelDef;
+  collapsed: boolean;
+  onToggle(): void;
+  available: number;
+  count: number;
+  last: boolean;
+}) {
+  const size = useResizableSize(`${panel.mode}.bottom.${panel.id}.width`);
+  const max = Math.max(200, available - (count - 1) * 200);
+  const width = clampSize(size.value ?? available / count, 200, max);
+  return (
+    <Panel panel={panel} collapsed={collapsed} onToggle={onToggle} width={last ? undefined : width}>
+      {!last && (
+        <Splitter
+          label={`「${panel.title}」の幅`}
+          axis="x"
+          value={width}
+          current={() => width}
+          min={200}
+          max={max}
+          className="bottom-panel-resize"
+          onPreview={size.preview}
+          onCommit={size.commit}
+        />
+      )}
+    </Panel>
   );
 }
 
@@ -329,23 +278,128 @@ function Center() {
   );
 }
 
-export function Layout() {
+function LayoutBody() {
   const [editor] = useEditor();
+  const snapshot = useRegistry();
+  const shown = useShownObjectPanels(snapshot.panels.filter((p) => p.mode === editor.mode));
+  const inArea = (area: PanelDef['area']) => {
+    const panels = panelsFor(snapshot, editor.mode, area);
+    return [
+      ...panels.filter((p) => p.object?.kind === 'tool' && shown.has(p.id)),
+      ...panels.filter((p) => p.object?.kind === 'part' && shown.has(p.id)),
+      ...panels.filter((p) => !p.object),
+    ];
+  };
+  const leftPanels = inArea('left');
+  const rightPanels = inArea('right');
+  const bottomPanels = inArea('bottom');
+  const left = useResizableSize(`${editor.mode}.column.left`);
+  const right = useResizableSize(`${editor.mode}.column.right`);
+  const bottom = useResizableSize(`${editor.mode}.bottom.height`);
+  const { reset } = useLayoutSizes();
+  const measured = useElementSize<HTMLDivElement>();
+  const width = measured.width || window.innerWidth;
+  const height = measured.height || window.innerHeight - 42;
+  const [leftWidth, rightWidth] = fitColumnWidths(
+    width,
+    leftPanels.length ? (left.value ?? 280) : 0,
+    rightPanels.length ? (right.value ?? 280) : 0,
+  );
+  const leftMax = Math.max(200, Math.min(560, width - 320 - (rightPanels.length ? 200 : 0)));
+  const rightMax = Math.max(200, Math.min(560, width - 320 - leftWidth));
+  const bottomMax = Math.max(120, Math.min(Math.floor(height * 0.6), height - 200));
+  const bottomHeight = clampSize(bottom.value ?? 220, 120, bottomMax);
   // 全列で1つの一覧を持つ。列ごとに保存すると他の列の変更を上書きしてしまう（I-066）。
   const [collapsed, toggle] = useCollapsedPanels();
   return (
     <div className="shell" data-mode={editor.mode}>
-      <Header />
-      <div className="shell-body">
-        <Area area="left" collapsed={collapsed} toggle={toggle} />
+      <Header onResetLayout={reset} />
+      <div className="shell-body" ref={measured.ref}>
+        <Area
+          key={`${editor.mode}.left`}
+          area="left"
+          panels={leftPanels}
+          collapsed={collapsed}
+          toggle={toggle}
+          width={leftWidth}
+        />
+        {leftPanels.length > 0 && (
+          <div className="column-boundary">
+            <Splitter
+              key={`${editor.mode}.left`}
+              label="左の列の幅"
+              axis="x"
+              value={leftWidth}
+              current={() => leftWidth}
+              min={200}
+              max={leftMax}
+              onPreview={left.preview}
+              onCommit={left.commit}
+            />
+          </div>
+        )}
         <div className="shell-center-column">
           <main className="shell-center">
             <Center />
           </main>
-          <Area area="bottom" collapsed={collapsed} toggle={toggle} />
+          {bottomPanels.length > 0 && (
+            <div className="row-boundary">
+              <Splitter
+                key={`${editor.mode}.bottom`}
+                label="下の列の高さ"
+                axis="y"
+                direction={-1}
+                value={bottomHeight}
+                current={() => bottomHeight}
+                min={120}
+                max={bottomMax}
+                onPreview={bottom.preview}
+                onCommit={bottom.commit}
+              />
+            </div>
+          )}
+          <Area
+            key={`${editor.mode}.bottom`}
+            area="bottom"
+            panels={bottomPanels}
+            collapsed={collapsed}
+            toggle={toggle}
+            height={bottomHeight}
+          />
         </div>
-        <Area area="right" collapsed={collapsed} toggle={toggle} />
+        {rightPanels.length > 0 && (
+          <div className="column-boundary">
+            <Splitter
+              key={`${editor.mode}.right`}
+              label="右の列の幅"
+              axis="x"
+              direction={-1}
+              value={rightWidth}
+              current={() => rightWidth}
+              min={200}
+              max={rightMax}
+              onPreview={right.preview}
+              onCommit={right.commit}
+            />
+          </div>
+        )}
+        <Area
+          key={`${editor.mode}.right`}
+          area="right"
+          panels={rightPanels}
+          collapsed={collapsed}
+          toggle={toggle}
+          width={rightWidth}
+        />
       </div>
     </div>
+  );
+}
+
+export function Layout() {
+  return (
+    <LayoutSizesProvider>
+      <LayoutBody />
+    </LayoutSizesProvider>
   );
 }

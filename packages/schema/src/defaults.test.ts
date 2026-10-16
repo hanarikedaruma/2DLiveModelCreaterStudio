@@ -7,7 +7,7 @@ describe('createEmptyProject', () => {
   it('MVP の標準パラメータと全パラメータグループ入り', () => {
     const p = createEmptyProject('はじめて');
     expect(p.name).toBe('はじめて');
-    expect(p.schemaVersion).toBe(7);
+    expect(p.schemaVersion).toBe(11);
     expect(p.model.parameters.map((x) => x.id)).toEqual([
       'FaceAngleX',
       'FaceAngleY',
@@ -118,6 +118,7 @@ describe('ensureStandardParameters', () => {
 describe('createDefaultEnvironment', () => {
   it('カード05の既定値', () => {
     expect(createDefaultEnvironment()).toEqual({
+      voice: { inputDeviceId: null, outputDeviceId: null, inputGainDb: 0, silenceThreshold: -50 },
       cameraDeviceId: null,
       cameraCapture: { mode: 'auto', width: 640, height: 480, fps: 60 },
       mirror: true,
@@ -131,7 +132,7 @@ describe('createDefaultEnvironment', () => {
       bodyFollowStrength: 'standard',
       expressionMode: 'stack',
       output: { method: 'window', width: 1920, height: 1080, fps: 60, adapterId: null },
-      uiLevel: { modeling: 'easy', animation: 'easy', studio: 'easy' },
+
       lastProjectDir: null,
     });
   });

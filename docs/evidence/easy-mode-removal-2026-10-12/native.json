@@ -1,0 +1,58 @@
+{
+  "identifier": "jp.co.globalsystems.live2dstudio.verification-i088-20261012",
+  "work": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\i088-ui-1791778358953",
+  "checks": [
+    {
+      "legacyEnvironmentAfterRestart": true
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "modes": [
+        {
+          "mode": "modeling",
+          "warp": true,
+          "generation": true,
+          "multipleMask": true,
+          "autoSetup": true,
+          "directionAndCombination": true
+        },
+        {
+          "mode": "animation",
+          "transitionNumbers": true,
+          "affectedGroups": true
+        },
+        {
+          "mode": "studio",
+          "trackingMap": true,
+          "motionNumbers": true
+        }
+      ]
+    },
+    {
+      "width": 960,
+      "height": 600,
+      "modes": [
+        {
+          "mode": "modeling",
+          "warp": true,
+          "generation": true,
+          "multipleMask": true,
+          "autoSetup": true,
+          "directionAndCombination": true
+        },
+        {
+          "mode": "animation",
+          "transitionNumbers": true,
+          "affectedGroups": true
+        },
+        {
+          "mode": "studio",
+          "trackingMap": true,
+          "motionNumbers": true
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

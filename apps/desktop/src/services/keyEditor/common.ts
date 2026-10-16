@@ -47,8 +47,13 @@ export function activeParams(model: Model, editor: EditorState): ActiveParam[] {
   return out;
 }
 
-// 編集中のパラメータが無いか、すべてデフォルト値なら基準状態を編集する（デフォルト値のキーは差分 0 のまま）
+// パラメータを選んでいないときだけ、すべてのキーに共通の基準状態を編集する（I-072）
 export function isBaseState(params: ActiveParam[]): boolean {
+  return params.length === 0;
+}
+
+// 不透明度の基準編集と、流れ線の焼き込みの制限では、選択中でも既定値かを区別する
+export function isDefaultState(params: ActiveParam[]): boolean {
   return params.every((p) => near(p.value, p.default));
 }
 
@@ -84,10 +89,6 @@ export function isCombinationGridPoint(model: Model, params: ActiveParam[]): boo
         }),
     )
   );
-}
-
-export function isEasy(editor: EditorState): boolean {
-  return editor.uiLevel.modeling === 'easy';
 }
 
 // ---- バインディングとキー ----
@@ -157,7 +158,7 @@ export function replaceBinding(model: Model, binding: Binding): Model {
   return { ...model, bindings: model.bindings.map((b) => (b.id === binding.id ? binding : b)) };
 }
 
-// 新しいバインディング（keyValues は [デフォルト値, 現在値] の昇順。デフォルト値のキーは差分 0）
+// 既定値で作る場合は現在のキー1つだけ。それ以外は差分0の既定値キーも作る
 function createBinding<D extends Delta>(
   id: string,
   target: BindingTarget,
@@ -172,7 +173,9 @@ function createBinding<D extends Delta>(
     ...(target.vertexSpace ? { vertexSpace: target.vertexSpace } : {}),
     parameterIds: params.map((p) => p.id),
     keyValues: params.map((p) => withKeyValue([p.default], p.value)),
-    keys: [{ coords: params.map((p) => p.default), delta: ops.identity(), source: 'auto', locked: false }, current],
+    keys: isDefaultState(params)
+      ? [current]
+      : [{ coords: params.map((p) => p.default), delta: ops.identity(), source: 'auto', locked: false }, current],
     generation: 'linear',
     divisions: null,
   };
@@ -181,7 +184,6 @@ function createBinding<D extends Delta>(
 export interface KeySpec<D extends Delta> {
   target: BindingTarget;
   params: ActiveParam[]; // 基準状態でないこと
-  easy: boolean;
   newBindingId: string; // バインディングを作るときの id（apply を純粋にするため先に決めておく）
   ops: DeltaOps<D>;
   // バインディングごとに差分の扱い方を変えるとき（不透明度のバインディング。I-026）。無ければ ops。
@@ -194,7 +196,7 @@ const opsOf = <D extends Delta>(spec: KeySpec<D>, binding: Binding | undefined):
 
 // 現在値のキーの差分を edit で変える。格子上の組み合わせは補間したキーをその場で足す
 export function editKey<D extends Delta>(model: Model, spec: KeySpec<D>, edit: (d: D) => D): Model | 'needsKey' {
-  const { target, params, easy } = spec;
+  const { target, params } = spec;
   const binding = findBinding(model, target, params);
   const ops = opsOf(spec, binding);
   if (!binding) {
@@ -202,7 +204,7 @@ export function editKey<D extends Delta>(model: Model, spec: KeySpec<D>, edit: (
       coords: params.map((p) => p.value),
       delta: edit(ops.identity()),
       source: 'manual',
-      locked: easy,
+      locked: true,
     };
     return { ...model, bindings: [...model.bindings, createBinding(spec.newBindingId, target, params, ops, current)] };
   }
@@ -210,18 +212,18 @@ export function editKey<D extends Delta>(model: Model, spec: KeySpec<D>, edit: (
   const index = keyIndexAt(binding, coords);
   const key = binding.keys[index];
   if (!key) {
-    if (!isCombinationGridPoint(model, params)) return 'needsKey';
+    if (!isDefaultState(params) && !isCombinationGridPoint(model, params)) return 'needsKey';
     // addKey は格子の線が増えたときの補助キーも作るので、ほかのマスの見た目を保てる
     return editKey(addKey(model, spec), spec, edit);
   }
   const keys = binding.keys.slice();
-  keys[index] = { ...key, delta: edit(ops.read(key.delta)), source: 'manual', locked: easy || key.locked };
+  keys[index] = { ...key, delta: edit(ops.read(key.delta)), source: 'manual', locked: true };
   return replaceBinding(model, { ...binding, keyValues: withKeyValues(binding.keyValues, coords), keys });
 }
 
 // 現在値にキーを足す。差分は前後のキーから補間するので見た目は変わらない。すでにあれば何もしない
 export function addKey<D extends Delta>(model: Model, spec: KeySpec<D>): Model {
-  const { target, params, easy } = spec;
+  const { target, params } = spec;
   const binding = findBinding(model, target, params);
   const ops = opsOf(spec, binding);
   if (!binding) {
@@ -230,7 +232,7 @@ export function addKey<D extends Delta>(model: Model, spec: KeySpec<D>): Model {
       coords: params.map((p) => p.value),
       delta: ops.identity(),
       source: 'manual',
-      locked: easy,
+      locked: true,
     };
     return { ...model, bindings: [...model.bindings, createBinding(spec.newBindingId, target, params, ops, current)] };
   }
@@ -240,7 +242,7 @@ export function addKey<D extends Delta>(model: Model, spec: KeySpec<D>): Model {
 
   const keyValues = withKeyValues(binding.keyValues, coords);
   const added: ParameterKey[] = [
-    { coords, delta: sampleBinding(binding, coords, defaults, ops), source: 'manual', locked: easy },
+    { coords, delta: sampleBinding(binding, coords, defaults, ops), source: 'manual', locked: true },
   ];
   if (binding.parameterIds.length >= 2) {
     added.push(...supportKeys(binding, keyValues, coords, defaults, added, ops));

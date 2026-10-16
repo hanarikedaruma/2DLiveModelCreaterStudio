@@ -11,7 +11,7 @@ beforeEach(() => {
   register();
 });
 describe('取り込みの進捗画面（カード57）', () => {
-  it('取り込み中も詳細の切り替えができ、取り消すと素材を確定しない', async () => {
+  it('取り込み中もモードを切り替えられ、取り消すと素材を確定しない', async () => {
     const fake = new FakeImporter();
     let release!: () => void;
     const waiting = new Promise<void>((resolve) => {
@@ -32,8 +32,9 @@ describe('取り込みの進捗画面（カード57）', () => {
     await waitFor(() =>
       expect(screen.getByRole('status', { name: '素材の取り込み' }).textContent).toContain('face.png'),
     );
-    fireEvent.click(screen.getByRole('button', { name: '詳細' }));
-    expect(services.editor.get().uiLevel.modeling).toBe('detail');
+    fireEvent.click(screen.getByRole('tab', { name: 'アニメーション' }));
+    expect(services.editor.get().mode).toBe('animation');
+    fireEvent.click(screen.getByRole('tab', { name: 'モデリング' }));
     fireEvent.click(screen.getByRole('button', { name: '取り込みを取り消す' }));
     release();
     await waitFor(() => expect(screen.queryByRole('status', { name: '素材の取り込み' })).toBeNull());

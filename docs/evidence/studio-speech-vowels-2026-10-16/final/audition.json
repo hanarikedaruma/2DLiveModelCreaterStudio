@@ -1,0 +1,27 @@
+{
+  "file": "vowels-i-u-e-o-01.wav",
+  "sha256": "cdee4cb13fd986568fabf8f045aeaa6d6df359a295df9bc0c1a360a3c091516e",
+  "seconds": 8.7,
+  "order": [
+    {
+      "text": "い、行きます。",
+      "startSeconds": 0.0,
+      "endSeconds": 2.0
+    },
+    {
+      "text": "う、うん。",
+      "startSeconds": 2.5,
+      "endSeconds": 3.62
+    },
+    {
+      "text": "え、ええんですか。",
+      "startSeconds": 4.12,
+      "endSeconds": 6.36
+    },
+    {
+      "text": "お、おっきい。",
+      "startSeconds": 6.86,
+      "endSeconds": 8.700000000000001
+    }
+  ]
+}

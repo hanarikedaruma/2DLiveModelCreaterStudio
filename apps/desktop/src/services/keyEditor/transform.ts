@@ -9,7 +9,7 @@ import {
   editKey,
   findBinding,
   isBaseState,
-  isEasy,
+  isDefaultState,
   keyIndexAt,
   replaceBinding,
   sampleBinding,
@@ -132,12 +132,11 @@ function hasKeyChange(change: TransformChange): boolean {
 
 const baseOpacityOf = (model: Model, partId: string) => model.parts.find((p) => p.id === partId)?.opacity ?? 1;
 
-function partSpec(model: Model, partId: string, params: ActiveParam[], editor: EditorState): KeySpec<TransformDelta> {
+function partSpec(model: Model, partId: string, params: ActiveParam[]): KeySpec<TransformDelta> {
   const base = baseOpacityOf(model, partId);
   return {
     target: { type: 'part', id: partId, channel: 'transform' },
     params,
-    easy: isEasy(editor),
     newBindingId: newId(),
     ops: transformOps,
     // 不透明度のバインディングでは、足すキー・格子の代用の opacity も絶対値で求める
@@ -202,7 +201,7 @@ export function transformEdit(
   const moves = hasKeyChange(keyChange);
 
   // バインディングを作るときの id はここで決めておく（apply を純粋にする）
-  const specs = ids.map((id) => partSpec(model, id, params, editor));
+  const specs = ids.map((id) => partSpec(model, id, params));
   const run = (m: Model): Model | 'needsKey' => {
     let out = m;
     for (const spec of specs) {
@@ -212,9 +211,14 @@ export function transformEdit(
         out = next;
       }
       if (opacity !== undefined) {
-        const next = editOpacityKey(out, spec, editor, opacity);
-        if (next === 'needsKey') return 'needsKey';
-        out = next;
+        if (isDefaultState(params)) {
+          // I-026 の不透明度だけは既定値で Part.opacity と各既定値キーを同期する
+          out = baseTransformCommand([spec.target.id], { opacity }).apply({ ...project, model: out }).model;
+        } else {
+          const next = editOpacityKey(out, spec, editor, opacity);
+          if (next === 'needsKey') return 'needsKey';
+          out = next;
+        }
       }
     }
     return out;
@@ -230,6 +234,6 @@ export function addTransformKey(project: Project, editor: EditorState, partId: s
   const model = project.model;
   const params = activeParams(model, editor);
   if (isBaseState(params) || !model.parts.some((p) => p.id === partId)) return noop('キーの追加');
-  const spec = partSpec(model, partId, params, editor);
+  const spec = partSpec(model, partId, params);
   return modelCommand('キーの追加', (m) => addKey(m, spec));
 }

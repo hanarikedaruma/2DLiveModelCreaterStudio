@@ -1,0 +1,10 @@
+{
+  "source": "Synthetic 180Hz sine, amplitude 2, 1 second at 48kHz",
+  "oldHardClipFlatSamples": 33960,
+  "newGuardFlatSamples": 3758,
+  "steadyShapeRelativeResidual": 0.009370085783302784,
+  "outputPeak": 0.8912509679794312,
+  "attenuationDb": 7.0205998950916175,
+  "extraBufferedSamples": 0,
+  "actualVoiceListeningNotMeasured": true
+}

@@ -22,7 +22,7 @@ export interface GridCell {
   b: number;
 }
 
-// center = 両方デフォルト値（基準状態）、axis = 片方だけデフォルト値（1パラメータの編集）、combined = 組み合わせ（補正）
+// center = 両方の既定値のキー、axis = 片方だけデフォルト値（1パラメータの編集）、combined = 組み合わせ（補正）
 export type CellKind = 'center' | 'axis' | 'combined';
 // auto = 補正のキーが無い（差分の和で動く）、corrected = 補正のキーがある
 export type CellStatus = 'auto' | 'corrected';

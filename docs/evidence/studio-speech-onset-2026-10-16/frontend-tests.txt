@@ -1,0 +1,15 @@
+
+ RUN  v3.2.7 C:/Users/hanar/.claude/workspace/2DLiveModelCreaterStudio/apps/desktop
+
+ ✓ src/speechInput/useSpeechDraft.test.tsx (3 tests) 29ms
+ ✓ src/services/voice/service.test.ts (12 tests) 142ms
+ ✓ src/speechInput/host.test.ts (1 test) 75ms
+ ✓ src/modes/studio/voice/VoiceSection.test.tsx (3 tests) 382ms
+ ✓ src/modes/studio/voice/SpeechPanel.test.tsx (5 tests) 1046ms
+   ✓ 配信するモデルのチャット読み上げ > 左の感情を選んで入力すると、その感情で先行合成し、変更後の感情で送信する  527ms
+
+ Test Files  5 passed (5)
+      Tests  24 passed (24)
+   Start at  12:30:33
+   Duration  10.10s (transform 2.56s, setup 5.40s, collect 10.51s, tests 1.67s, environment 15.51s, prepare 2.47s)
+

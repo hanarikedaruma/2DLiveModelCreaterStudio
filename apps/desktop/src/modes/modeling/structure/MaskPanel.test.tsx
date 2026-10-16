@@ -51,8 +51,7 @@ async function setup(project = maskProject(), overrides: Partial<Services> = {})
   });
   const panel = () => within(document.querySelector<HTMLElement>('[data-panel-id="partSettings"]')!);
   const select = (id: string) => act(() => services.editor.set({ selectedPartIds: [id] }));
-  const detail = () =>
-    act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, modeling: 'detail' } }));
+
   const maskOf = (id: string) => services.store.get().model.parts.find((p) => p.id === id)!.mask;
   const sources = () => panel().getByRole('group', { name: 'マスク元' });
   const sourceNames = () =>
@@ -61,13 +60,13 @@ async function setup(project = maskProject(), overrides: Partial<Services> = {})
       .map((el) => el.parentElement!.textContent);
   const source = (name: string) => within(sources()).getByRole('checkbox', { name }) as HTMLInputElement;
   const invert = () => panel().getByRole('checkbox', { name: '反転（範囲の外を表示）' }) as HTMLInputElement;
-  return { services, initial: project, pngs, panel, select, detail, maskOf, sources, sourceNames, source, invert };
+  return { services, initial: project, pngs, panel, select, maskOf, sources, sourceNames, source, invert };
 }
 
 describe('詳細: 複数のマスク元と反転', () => {
   it('マスク元の一覧（チェック）と [反転] と説明を出す。ドロップダウンは出さない', async () => {
-    const { panel, select, detail, sourceNames, invert } = await setup();
-    detail();
+    const { panel, select, sourceNames, invert } = await setup();
+
     select('iris');
     expect(panel().queryByLabelText('マスク')).toBeNull();
     expect(panel().queryByRole('button', { name: /複数のマスク元・反転/ })).toBeNull();
@@ -81,8 +80,8 @@ describe('詳細: 複数のマスク元と反転', () => {
   });
 
   it('ほかのパーツでも、自身と子孫と画像でないパーツは出ない', async () => {
-    const { panel, select, detail, sourceNames } = await setup();
-    detail();
+    const { panel, select, sourceNames } = await setup();
+
     select('hair');
     expect(sourceNames()).toEqual(['ハイライト', '瞳', '白目', '顔']);
     select('hl');
@@ -94,8 +93,8 @@ describe('詳細: 複数のマスク元と反転', () => {
   });
 
   it('複数選び、反転すると保存され、外すと「なし」に戻る', async () => {
-    const { panel, select, detail, maskOf, source, invert } = await setup();
-    detail();
+    const { panel, select, maskOf, source, invert } = await setup();
+
     select('iris');
     fireEvent.click(source('白目'));
     fireEvent.click(source('前髪'));
@@ -120,8 +119,8 @@ describe('詳細: 複数のマスク元と反転', () => {
 
   it('マスク元にできるパーツが無ければそう出す', async () => {
     const one = makeProject({ assets: [makeAsset('A')], parts: [makePart('only', { name: 'だけ', assetId: 'A' })] });
-    const { panel, select, detail } = await setup(one);
-    detail();
+    const { panel, select } = await setup(one);
+
     select('only');
     expect(panel().getByText('マスク元にできる画像パーツが無い')).toBeTruthy();
     expect(
@@ -133,8 +132,8 @@ describe('詳細: 複数のマスク元と反転', () => {
 
   it('保存したプロジェクトを読み直しても、複数・反転の設定が残る', async () => {
     const io = createProjectIO(new MemoryFileSystem());
-    const { services, pngs, select, detail, source, invert } = await setup(maskProject(), { io });
-    detail();
+    const { services, pngs, select, source, invert } = await setup(maskProject(), { io });
+
     select('iris');
     fireEvent.click(source('白目'));
     fireEvent.click(source('顔'));
@@ -148,8 +147,8 @@ describe('詳細: 複数のマスク元と反転', () => {
   });
 
   it('1回の操作ごとに Undo で戻る', async () => {
-    const { services, initial, select, detail, maskOf, source, invert } = await setup();
-    detail();
+    const { services, initial, select, maskOf, source, invert } = await setup();
+
     select('iris');
     fireEvent.click(source('白目'));
     fireEvent.click(source('顔'));
@@ -169,55 +168,36 @@ describe('詳細: 複数のマスク元と反転', () => {
   });
 });
 
-describe('かんたん: ドロップダウンと、一時的に開く詳細', () => {
-  it('マスク元を1つ選ぶドロップダウンはそのまま。「複数のマスク元・反転」を開くと一覧と [反転] が出る', async () => {
+describe('I-088: 常に表示するマスクの設定', () => {
+  it('単一選択欄は外し、複数のマスク元と反転を直接操作できる。全部外すとなしに戻る', async () => {
     const { panel, select, maskOf, sourceNames, source, invert } = await setup();
     select('iris');
-    const dropdown = () => panel().getByLabelText('マスク') as HTMLSelectElement;
-    expect([...dropdown().options].map((o) => o.textContent)).toEqual(['なし', '前髪', '白目', '顔']);
-    expect(panel().queryByRole('group', { name: 'マスク元' })).toBeNull();
-
-    fireEvent.change(dropdown(), { target: { value: 'white' } });
-    expect(maskOf('iris')).toEqual({ sourcePartIds: ['white'], inverted: false });
-
-    fireEvent.click(panel().getByRole('button', { name: /複数のマスク元・反転/ }));
+    expect(panel().queryByRole('combobox', { name: 'マスク' })).toBeNull();
     expect(sourceNames()).toEqual(['前髪', '白目', '顔']);
-    expect(source('白目').checked).toBe(true);
+    fireEvent.click(source('白目'));
     fireEvent.click(source('顔'));
-    expect(maskOf('iris')).toEqual({ sourcePartIds: ['white', 'face'], inverted: false });
-    // 2つ以上のときは「複数」と出す（選べない項目）
-    expect(dropdown().value).toBe('__multiple__');
-    expect(dropdown().selectedOptions[0]!.textContent).toBe('複数（2個）');
-    expect(dropdown().selectedOptions[0]!.disabled).toBe(true);
-
-    // 反転は閉じても分かるように出す
-    expect(panel().queryByText('反転している（範囲の外を表示）')).toBeNull();
     fireEvent.click(invert());
     expect(maskOf('iris')).toEqual({ sourcePartIds: ['white', 'face'], inverted: true });
-    expect(panel().getByText('反転している（範囲の外を表示）')).toBeTruthy();
-
-    // ドロップダウンで1つ選び直すと、反転は保ってマスク元を1つにする
-    fireEvent.change(dropdown(), { target: { value: 'hair' } });
-    expect(maskOf('iris')).toEqual({ sourcePartIds: ['hair'], inverted: true });
-    expect(dropdown().value).toBe('hair');
-    fireEvent.change(dropdown(), { target: { value: '' } });
+    fireEvent.click(source('白目'));
+    fireEvent.click(source('顔'));
     expect(maskOf('iris')).toBeNull();
+    expect(invert().disabled).toBe(true);
   });
 
-  it('詳細で設定した複数・反転は、かんたんに戻しても消えない', async () => {
-    const { services, panel, select, detail, maskOf, source, invert } = await setup();
-    detail();
+  it('複数・反転の設定は選択を変えて戻しても表示と値が残る', async () => {
+    const { select, maskOf, source, invert } = await setup();
     select('iris');
     fireEvent.click(source('白目'));
     fireEvent.click(source('前髪'));
     fireEvent.click(invert());
-    act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, modeling: 'easy' } }));
+    select('face');
+    select('iris');
     expect(maskOf('iris')).toEqual({ sourcePartIds: ['white', 'hair'], inverted: true });
-    expect((panel().getByLabelText('マスク') as HTMLSelectElement).value).toBe('__multiple__');
-    expect(panel().getByText('反転している（範囲の外を表示）')).toBeTruthy();
+    expect(source('白目').checked).toBe(true);
+    expect(source('前髪').checked).toBe(true);
+    expect(invert().checked).toBe(true);
   });
 });
-
 describe('描画への反映', () => {
   let restoreSize: () => void = () => {};
   beforeEach(() => {
@@ -229,7 +209,7 @@ describe('描画への反映', () => {
     const shell = renderCanvasShell();
     await openSample(shell, fixtureProject());
     const { services, canvas, renderer } = shell;
-    act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, modeling: 'detail' } }));
+
     act(() => services.editor.set({ selectedPartIds: ['part-irisL'] }));
     const panel = within(document.querySelector<HTMLElement>('[data-panel-id="partSettings"]')!);
     const sources = within(panel.getByRole('group', { name: 'マスク元' }));

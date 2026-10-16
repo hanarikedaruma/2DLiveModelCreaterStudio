@@ -186,6 +186,61 @@ describe('I-068: 輪郭線を引く', () => {
     expect(s.notify).toHaveBeenCalledWith(expect.stringMatching(/流れ線/));
   });
 
+  it('［線を引く］を押さなくても、点や線の無い所からなぞると新しい線を引く（I-076）', () => {
+    const s = setup(faceProject(), null);
+    expect(s.editor.state.get().drawing).toBe(false);
+    s.drag({ x: 150, y: 120 }, { x: 150, y: 280 }, {}, [{ x: 150, y: 200 }]);
+    const first = s.line()!;
+    for (const p of first.points) expect(p.x).toBeCloseTo(0.25, 6);
+    expect(s.editor.state.get()).toMatchObject({ drawing: false, lineId: first.id });
+    expect(s.store.undoLabel()).toBe('輪郭線を引く');
+
+    // 線があっても、線から離れた所からなぞれば2本目になる。最初の線は変わらない
+    s.drag({ x: 250, y: 120 }, { x: 250, y: 280 }, {}, [{ x: 250, y: 200 }]);
+    const lines = s.store.get().model.contourLines!;
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toEqual(first);
+    for (const p of lines[1]!.points) expect(p.x).toBeCloseTo(0.75, 6);
+    expect(s.editor.state.get().lineId).toBe(lines[1]!.id);
+  });
+
+  it('クリックだけ・小さな動き・メッシュの余白より外からのドラッグでは線を引かない。なぞる途中の Esc でやめる', () => {
+    const s = setup(faceProject(), null);
+    s.tick();
+    s.click({ x: 200, y: 200 });
+    s.drag({ x: 200, y: 200 }, { x: 203, y: 201 });
+    s.drag({ x: 400, y: 120 }, { x: 400, y: 280 });
+    expect(s.store.get().model.contourLines ?? []).toHaveLength(0);
+
+    s.editor.tool.onPointerDown!({
+      canvasPoint: { x: 150, y: 120 },
+      screenPoint: { x: 150, y: 120 },
+      button: 0,
+      shiftKey: false,
+      ctrlKey: false,
+      altKey: false,
+    });
+    s.editor.tool.onPointerMove!({
+      canvasPoint: { x: 150, y: 200 },
+      screenPoint: { x: 150, y: 200 },
+      button: 0,
+      shiftKey: false,
+      ctrlKey: false,
+      altKey: false,
+    });
+    s.key('Escape');
+    s.editor.tool.onPointerUp!({
+      canvasPoint: { x: 150, y: 280 },
+      screenPoint: { x: 150, y: 280 },
+      button: 0,
+      shiftKey: false,
+      ctrlKey: false,
+      altKey: false,
+    });
+    expect(s.store.get().model.contourLines ?? []).toHaveLength(0);
+    expect(s.services.editor.get().selectedPartIds).toEqual(['face']);
+  });
+
   it('なぞった線から点を選ぶ: 曲線がなぞった線から外れない数だけ置く', () => {
     const arc = Array.from({ length: 120 }, (_, i) => {
       const a = (Math.PI * i) / 119;

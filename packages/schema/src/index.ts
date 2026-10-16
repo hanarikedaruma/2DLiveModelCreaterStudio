@@ -1,4 +1,8 @@
 export type * from './types';
+export * from './voice';
+export * from './geometryAffine';
+export * from './geometryWarp';
+export { mapMeshPoint, baseMeshPositions, attachClosedEyeLine } from './closedEyeLine';
 export { newId } from './ids';
 export * from './rules';
 export {

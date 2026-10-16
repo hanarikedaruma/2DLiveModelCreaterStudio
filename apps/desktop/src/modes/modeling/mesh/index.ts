@@ -29,17 +29,7 @@ export function register(): void {
     component: MeshPanel,
     // メッシュ編集ツールの設定なので、そのツールのときだけ出す（ツールのパレット）
     object: { kind: 'tool', when: ({ activeToolId }) => activeToolId === MESH_TOOL_ID },
-    info: {
-      purpose:
-        '画像パーツに網（メッシュ）を張り、頂点を動かして形を細かく曲げる。パラメータを編集中なら、その値のキーに記録する',
-      steps: [
-        'キャンバスで画像パーツをクリックして選ぶ',
-        'メッシュが無ければ［自動生成］',
-        '頂点をドラッグして動かす。何も無い所からのドラッグで囲んで選ぶ（Shift で追加）',
-        'ダブルクリックで頂点を追加、Delete で削除',
-        '右クリックで選択を外し、別のパーツを選ぶ',
-      ],
-    },
+    info: 'mesh',
   });
   registerPanelSection({
     id: MESH_DENSITY_SECTION_ID,

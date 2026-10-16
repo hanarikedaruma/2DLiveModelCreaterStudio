@@ -1,0 +1,219 @@
+[
+  {
+    "state": "stopped",
+    "sessionId": "72aaf1f65df648b2830fb1437fcd9eb1",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "codecFrames": 28,
+      "cudaGraph": 1,
+      "firstAudioMs": 2974.39319999516,
+      "firstAudioWallMs": 1792097044164.6,
+      "firstPcmSeconds": 0.988083700009156,
+      "frames": 53760,
+      "generationSeconds": 2.906781500001671,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 28,
+      "prefetchHit": 0,
+      "rate": 24000,
+      "rtf": 1.2976703125007458,
+      "seconds": 2.24,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "whole",
+      "history": [
+        "みんなのことがすきです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  {
+    "state": "stopped",
+    "sessionId": "f4af5b6cb4454f57b0fcd0af592314a8",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "codecFrames": 21,
+      "cudaGraph": 1,
+      "firstAudioMs": 2373.445099979639,
+      "firstAudioWallMs": 1792097048902.2175,
+      "firstPcmSeconds": 1.011732600003597,
+      "frames": 40320,
+      "generationSeconds": 2.297964099998353,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 21,
+      "prefetchHit": 0,
+      "rate": 24000,
+      "rtf": 1.3678357738085436,
+      "seconds": 1.68,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "whole",
+      "history": [
+        "みんなのことがすきです",
+        "みんなのことがすきです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  {
+    "state": "stopped",
+    "sessionId": "b3383a64e27c4356980200874e342875",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "codecFrames": 21,
+      "cudaGraph": 1,
+      "firstAudioMs": 2321.6261000037193,
+      "firstAudioWallMs": 1792097052998.118,
+      "firstPcmSeconds": 0.9747675999969942,
+      "frames": 40320,
+      "generationSeconds": 2.235775699999067,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 21,
+      "prefetchHit": 0,
+      "rate": 24000,
+      "rtf": 1.3308188690470637,
+      "seconds": 1.68,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "whole",
+      "history": [
+        "みんなのことがすきです",
+        "みんなのことがすきです",
+        "みんなのことがすきです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  {
+    "state": "stopped",
+    "sessionId": "ea23511371eb4c5abc149432137ae062",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "bufferedMs": 0,
+      "codecFrames": 28,
+      "cudaGraph": 1,
+      "firstAudioMs": 1780.1713999956846,
+      "firstAudioWallMs": 1792097056588.13,
+      "firstPcmSeconds": 0.9673242999997456,
+      "frames": 53760,
+      "generationSeconds": 2.881988499997533,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 28,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 1.28660200892747,
+      "seconds": 2.24,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "みんなのことがすきです",
+        "みんなのことがすきです",
+        "みんなのことがすきです",
+        "みんなのことがすきです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  },
+  {
+    "state": "stopped",
+    "sessionId": "11868e9cda71472c9d8ed80bd5b10301",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "bufferedMs": 0,
+      "codecFrames": 28,
+      "cudaGraph": 1,
+      "firstAudioMs": 1717.4575000107288,
+      "firstAudioWallMs": 1792097060647.7986,
+      "firstPcmSeconds": 0.9168929999868852,
+      "frames": 53760,
+      "generationSeconds": 2.845321299988427,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 28,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 1.270232723209119,
+      "seconds": 2.24,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "みんなのことがすきです",
+        "みんなのことがすきです",
+        "みんなのことがすきです",
+        "みんなのことがすきです",
+        "みんなのことがすきです"
+      ],
+      "preparation": {
+        "owner": "",
+        "revision": 0,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  }
+]

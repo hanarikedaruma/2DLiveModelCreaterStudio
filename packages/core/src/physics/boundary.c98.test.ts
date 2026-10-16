@@ -114,7 +114,7 @@ describe('胸の固定範囲と生成の保護', () => {
     expect(new Set(outputs).size).toBe(4);
     expect(setupChest(next, () => `id${++n}`)).toBe(next);
   });
-  it('かんたんセットアップの計画には作れない理由を表示する', () => {
+  it('自動セットアップの計画には作れない理由を表示する', () => {
     const p = chestFixture();
     p.physics = [];
     p.model.parts[2]!.meshId = null;

@@ -150,7 +150,12 @@ describe('projectLoaded でつなぐ', () => {
   it('registerProject がつなぐ（起動時のプロジェクトに STEP1 と STEP2 の標準パラメータが表の順に並ぶ）', () => {
     const services = createFakeServices();
     services.store.load(mvpProject());
-    const dialogs = { confirm: vi.fn(async () => true), prompt: vi.fn(async () => null), notify: vi.fn() };
+    const dialogs = {
+      choose: async () => null,
+      confirm: vi.fn(async () => true),
+      prompt: vi.fn(async () => null),
+      notify: vi.fn(),
+    };
     const actions = registerProject(services, createEnvironmentStore(memoryEnvironmentStorage()), dialogs);
     expect(ids(services.store.get())).toEqual(standardParametersFor('step2').map((p) => p.id));
     expect(actions.isDirty()).toBe(false);
@@ -166,7 +171,12 @@ describe('開く・新規の流れ（カード23 の ProjectActions。STEP1 と�
     const services: Services = { ...base, fs, io: createProjectIO(fs) };
     // project/index.ts の registerProject と同じ順でつなぐ
     offs.push(connectStep1Params(services.store), connectStep2Params(services.store));
-    const dialogs = { confirm: vi.fn(async () => true), prompt: vi.fn(async () => '新しい'), notify: vi.fn() };
+    const dialogs = {
+      choose: async () => null,
+      confirm: vi.fn(async () => true),
+      prompt: vi.fn(async () => '新しい'),
+      notify: vi.fn(),
+    };
     const actions = createProjectActions({
       services,
       environment: createEnvironmentStore(memoryEnvironmentStorage()),

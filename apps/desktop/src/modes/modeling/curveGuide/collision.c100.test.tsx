@@ -155,7 +155,7 @@ describe('髪ごとの肩の設定と編集', () => {
       s.services.store.load(p);
       s.services.editor.set({ selectedPartIds: ['hair'] });
     });
-    fireEvent.click(screen.getByRole('button', { name: '線で曲げる' }));
+    fireEvent.click(screen.getByRole('button', { name: '流線で曲げる' }));
     const toggle = await screen.findByRole('checkbox', { name: '肩に当てる（衝突判定）' });
     expect((toggle as HTMLInputElement).checked).toBe(false);
     fireEvent.click(screen.getByRole('checkbox', { name: '左肩に当てる' }));

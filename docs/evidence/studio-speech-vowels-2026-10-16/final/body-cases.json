@@ -1,0 +1,34 @@
+[
+  {
+    "file": "i-body-01.wav",
+    "expectedTranscripts": [
+      "行きます。",
+      "いきます。"
+    ]
+  },
+  {
+    "file": "u-body-01.wav",
+    "expectedTranscripts": [
+      "うん。"
+    ]
+  },
+  {
+    "file": "e-body-01.wav",
+    "expectedTranscripts": [
+      "ええんですか。"
+    ]
+  },
+  {
+    "file": "o-body-01.wav",
+    "expectedTranscripts": [
+      "おっきい。"
+    ]
+  },
+  {
+    "file": "bodies-i-u-e-o-02.wav",
+    "expectedTranscripts": [
+      "行きます。うん。ええんですか。おっきい。",
+      "いきます。うん。ええんですか。おっきい。"
+    ]
+  }
+]

@@ -1,0 +1,109 @@
+{
+  "device": "cpu",
+  "model": "C:\\Users\\hanar\\.claude\\workspace\\liverVoiceChanger\\external\\quality-models\\hub\\models--openai--whisper-small\\snapshots\\973afd24965f72e36ca33b3055d56a652f456b4d",
+  "processor": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\speech-content-check\\whisper-tokenizer",
+  "note": "No expected text, language hint or reference transcript supplied to ASR. Automatic recognition can err; matching is not proof of natural acting or identical voice.",
+  "runs": [
+    {
+      "file": "i-raw-01.wav",
+      "sha256": "245c3ef74e91b91cf5be4570761643c1bfd314f55140378980703d0d25459288",
+      "seconds": 2.0,
+      "expectedTranscripts": [
+        "行きます。",
+        "いきます。",
+        "い、行きます。",
+        "い、いきます。"
+      ],
+      "transcript": "い、いきます",
+      "contentMatch": true,
+      "recognitionSeconds": 5.463333099993179
+    },
+    {
+      "file": "i-airy-01.wav",
+      "sha256": "18482034013a53a4715ad84a7a6c93bba88b3c374ba519a954b312a85cb318d7",
+      "seconds": 2.0,
+      "expectedTranscripts": [
+        "行きます。",
+        "いきます。",
+        "い、行きます。",
+        "い、いきます。"
+      ],
+      "transcript": "ひっ、いきます",
+      "contentMatch": false,
+      "recognitionSeconds": 4.442250899999635
+    },
+    {
+      "file": "u-raw-01.wav",
+      "sha256": "f4343c6ead17c3ecaa9dadf5240ad2f49178296d1d04e96e13af5fff6c8e8543",
+      "seconds": 1.28,
+      "expectedTranscripts": [
+        "うん。",
+        "う、うん。"
+      ],
+      "transcript": "え",
+      "contentMatch": false,
+      "recognitionSeconds": 4.647344600001816
+    },
+    {
+      "file": "u-airy-01.wav",
+      "sha256": "857b6a1e08aef7f9be6c2f4f679916135ec774d14603672d434db9e2de0a49bf",
+      "seconds": 1.28,
+      "expectedTranscripts": [
+        "うん。",
+        "う、うん。"
+      ],
+      "transcript": " You",
+      "contentMatch": false,
+      "recognitionSeconds": 4.439884799998254
+    },
+    {
+      "file": "e-raw-01.wav",
+      "sha256": "669ebce5014346fa0868082fbf3171f4877805c885eba9c9237ef7d8586295fc",
+      "seconds": 2.24,
+      "expectedTranscripts": [
+        "ええんですか。",
+        "え、ええんですか。"
+      ],
+      "transcript": "え? 永遠ですか?",
+      "contentMatch": false,
+      "recognitionSeconds": 5.313311499994597
+    },
+    {
+      "file": "e-airy-01.wav",
+      "sha256": "da2cc909d5ab83f8d0206dd0367bb6b914105d6cb463859a5394c05925c40903",
+      "seconds": 2.24,
+      "expectedTranscripts": [
+        "ええんですか。",
+        "え、ええんですか。"
+      ],
+      "transcript": "へぇ、ええんですか?",
+      "contentMatch": false,
+      "recognitionSeconds": 4.713557900002343
+    },
+    {
+      "file": "o-raw-01.wav",
+      "sha256": "c63c0fa9b23dcf2a53e489cfa1aa9d3f283ed230683506483ddf14782de9ec69",
+      "seconds": 1.84,
+      "expectedTranscripts": [
+        "おっきい。",
+        "お、おっきい。"
+      ],
+      "transcript": "お、おっきい",
+      "contentMatch": true,
+      "recognitionSeconds": 4.594230800008518
+    },
+    {
+      "file": "o-airy-01.wav",
+      "sha256": "3454a6acee5258bc4e8bd61f2ee0916b56fdc3b114ad8c1d0dc6e275d9e65398",
+      "seconds": 1.84,
+      "expectedTranscripts": [
+        "おっきい。",
+        "お、おっきい。"
+      ],
+      "transcript": "ふっ、おっきい",
+      "contentMatch": false,
+      "recognitionSeconds": 4.501615200002561
+    }
+  ],
+  "allContentMatched": false
+}

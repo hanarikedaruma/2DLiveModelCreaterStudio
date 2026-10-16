@@ -4,7 +4,7 @@ import { rectOfAsset } from '../generate/bounds';
 import { deepEqual } from '../generate/equal';
 import { withDrawOrder } from './drawOrder';
 import { withFaceWarp, withHeadWarp } from './faceTurn';
-import { headMeshIds, isHeadPoseBinding, planHeadPose } from './headPose';
+import { headMeshIds, isHeadPoseBinding, planHeadPose, withEyeWarps } from './headPose';
 import { faceTurnBindings, headPoseBlockReason, headTurnBlockReason, planHeadTurn } from './headTurn';
 import { buildHierarchy } from './hierarchy';
 import { applyMasksAndDepth } from './masksDepth';
@@ -14,8 +14,9 @@ import { applyPointPlans, planStep1 } from './step1';
 import { planStep2 } from './step2';
 import { setupWarnings } from './warnings';
 import { setupChest } from './chest';
+import { planBlink } from './blink';
 
-export const AUTO_SETUP_LABEL = 'かんたんセットアップ';
+export const AUTO_SETUP_LABEL = '自動セットアップ';
 
 export interface AutoSetupOptions {
   // 顔の向きの作り方。head-pose = 共通の姿勢から顔・髪・耳を個別に変形する（I-039 の根本改善）、
@@ -25,6 +26,7 @@ export interface AutoSetupOptions {
 
 export function createAutoSetup(options: AutoSetupOptions = {}): AutoSetup {
   return {
+    blink: planBlink,
     plan(project) {
       // 新しい id は plan ごとに覚えておき、同じ入力には同じ id を使う（apply を純粋にする）
       const pool: string[] = [];
@@ -75,7 +77,7 @@ function pooledIds(pool: string[], project: Project): () => string {
   };
 }
 
-// かんたんセットアップの本体。何も変わらなければ同じ参照を返す
+// 自動セットアップの本体。何も変わらなければ同じ参照を返す
 export function runAutoSetup(
   project: Project,
   nextId: () => string,
@@ -104,10 +106,12 @@ export function runAutoSetup(
   const surfaceFaceTurn = !headTurn && !headPose && options.faceTurn !== 'depth';
   if (surfaceFaceTurn) model = withFaceWarp(model, boundsOf, nextId);
   if (headTurn && !blocked) model = withHeadWarp(model, boundsOf, nextId);
+  // 共通の姿勢の方式では、目のグループに遠近のワープを足す（I-067 の A8。すでにあるワープはそのまま使う）
+  if (headPose && !blocked) model = withEyeWarps(model, boundsOf, nextId);
   const plan = planStep1(model, planMotions(model, boundsOf), boundsOf, surfaceFaceTurn);
   const posePlan = headPose && !blocked ? planHeadPose(model, boundsOf) : null;
   const headPoints = headTurn && !blocked ? planHeadTurn(model) : (posePlan?.points ?? []);
-  // 共通の姿勢の方式では、それまでの方式の自動のキー（顔・頭のワープ、頭の頂点の顔の向き）を作り直す対象にする
+  // 共通の姿勢の方式では、それまでの方式の自動のキー（顔・頭のワープ、頭と首の頂点・目のワープの顔の向き）を作り直す対象にする
   const poseMeshes = headPose && !blocked ? headMeshIds(model) : new Set<string>();
   const oldTurns = new Set(headPose && !blocked ? faceTurnBindings(model, true).map((b) => b.id) : []);
   // 手動の旧顔ワープがある場合は、他軸の自動キーも含め旧顔の向きを一式残す。
@@ -139,5 +143,12 @@ export function runAutoSetup(
     nextId,
   );
   const next = deepEqual(model, project.model) ? project : { ...project, model };
-  return setupChest(next, nextId, warnings);
+  let result = setupChest(next, nextId, warnings);
+  for (const side of ['L', 'R'] as const) {
+    const line = result.model.setupHints[side === 'L' ? 'closedLineL' : 'closedLineR'];
+    if (!line || line.partId === null) continue;
+    const blink = planBlink(result, side, undefined, nextId);
+    if (blink.command && !blink.replacesCustom) result = blink.command.apply(result);
+  }
+  return deepEqual(result, project) ? project : result;
 }

@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-12",
+  "issues": ["I-079", "I-078"],
+  "contract": "CC-021",
+  "schemaVersion": 8,
+  "unit": {
+    "packages": 10,
+    "files": 312,
+    "tests": 2692,
+    "schemaTests": 100,
+    "coreTests": 692,
+    "desktopTests": 1375,
+    "newTests": 16,
+    "status": "passed",
+    "logs": [".cache/i078-tests.log", ".cache/i078-desktop-final.log"]
+  },
+  "typecheck": "passed",
+  "lint": "passed",
+  "prettier": "passed",
+  "nativeE2e": {
+    "files": 16,
+    "tests": 29,
+    "status": "passed",
+    "log": ".cache/i078-native.log"
+  },
+  "browser": "edge.json",
+  "native": "native.json",
+  "modelAudit": "model-audit.json",
+  "installed": "app-update.json",
+  "installedStartup": "installed-startup.json",
+  "userProjectsChanged": false
+}

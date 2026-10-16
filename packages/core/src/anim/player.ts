@@ -1,10 +1,9 @@
-// アニメーションの再生と遷移（カード47）。再生中のアニメーションごとに重み w(t) を持ち、開始は blendIn 秒で 0 → 1、
-// 終了（ループでなければ終わりの時刻、または stop）は blendOut 秒で 1 → 0 にする。レイヤーは override
-// （遷移の blendMode が addToTracking なら顔・体の角度は add）で weight = w(t)。ミキサーがその時点の合成結果
-// （mixedSoFar）から混ぜるので、開始は現在の状態から始まり、終了は最新のトラッキングへ戻る。
-// 再生中に別のアニメーションを始めたら、古いものは下げ、新しいものは上げる（同時に複数のレイヤーを返す）
+// アニメーションの再生と遷移（カード47・I-060）。通常は記録値へ blendIn で混ぜる。
+// startFromCurrent は直前の表示姿勢を取り、記録値の先頭からの差を重ねる。blendIn は差に掛ける。
+// 終了・stop は blendOut で最新の入力へ戻る。途中の切替は前の再生を下げ、新しい再生を上に重ねる。
 import type { Animation, BlendOp, Parameter, ParameterGroupId, Project } from '@app/schema';
-import type { AnimationPlayer, FrameContext, Layer, ParamValues } from '@app/contracts';
+import type { AnimationPlayer, AnimationStartPose, FrameContext, Layer, ParamValues } from '@app/contracts';
+import { createParameterMixer } from '../mix';
 
 export type AnimationKeyframe = Animation['tracks'][number]['keyframes'][number];
 
@@ -135,6 +134,70 @@ interface Playback {
   animationId: string;
   start: number; // ミリ秒。アニメーションの時刻 0
   fade: { start: number; from: number } | null; // 下げ始めた時刻と、そのときの重み
+  anchor: { values: ParamValues; lower: ParamValues; first: ParamValues; ids: string[] } | null;
+}
+
+function captureAnchor(animation: Animation, ctx: FrameContext, pose: AnimationStartPose | null): Playback['anchor'] {
+  if (!animation.transition.startFromCurrent || animation.periodic) return null;
+  const parameters = ctx.project.model.parameters;
+  const first = animationValuesAt(animation, parameters, 0);
+  const ids = new Set(
+    animation.tracks.filter((t) => t.keyframes.length && Object.hasOwn(first, t.parameterId)).map((t) => t.parameterId),
+  );
+  const physicsIds = new Set<string>();
+  for (const item of ctx.project.physics) {
+    const pair = [item.outputParameterId, item.verticalOutputParameterId].filter((id): id is string => !!id);
+    if (pair.some((id) => ids.has(id)))
+      for (const id of pair) {
+        ids.add(id);
+        physicsIds.add(id);
+      }
+  }
+  if (!animation.transition.keepLipSync) for (const id of Object.keys(pose?.lipSyncOffsets ?? {})) ids.add(id);
+  const values: ParamValues = {};
+  const lower: ParamValues = {};
+  for (const p of parameters) {
+    if (!ids.has(p.id)) continue;
+    const base = pose?.values[p.id] ?? ctx.mixedSoFar[p.id] ?? p.default;
+    const lip = animation.transition.keepLipSync ? 0 : (pose?.lipSyncOffsets[p.id] ?? 0);
+    const physics = physicsIds.has(p.id) ? (pose?.physicsOffsets[p.id] ?? 0) : 0;
+    values[p.id] = clamp(Number.isFinite(base + lip + physics) ? base + lip + physics : p.default, p.min, p.max);
+    lower[p.id] = ctx.mixedSoFar[p.id] ?? p.default;
+    first[p.id] ??= p.default;
+  }
+  return { values, lower, first, ids: Object.keys(values) };
+}
+
+function motionWeight(animation: Animation, playback: Playback, now: number): number {
+  const rise = ms(animation.transition.blendIn);
+  return curveAt(animation.transition.curve, rise <= 0 ? 1 : (now - playback.start) / rise);
+}
+
+function playbackLayer(
+  animation: Animation,
+  parameters: Parameter[],
+  playback: Playback,
+  now: number,
+  lower: ParamValues,
+): Layer | null {
+  const weight = weightAt(animation, playback, now);
+  if (!playback.anchor) return layerAt(animation, parameters, localTime(animation, playback, now), weight);
+  const at = animationValuesAt(animation, parameters, localTime(animation, playback, now));
+  const values: ParamValues = {};
+  for (const p of parameters) {
+    if (!playback.anchor.ids.includes(p.id)) continue;
+    const delta = (at[p.id] ?? playback.anchor.first[p.id]!) - playback.anchor.first[p.id]!;
+    const live =
+      animation.transition.blendMode === 'addToTracking' && animationAddsToTracking(p)
+        ? (lower[p.id] ?? p.default) - playback.anchor.lower[p.id]!
+        : 0;
+    values[p.id] = clamp(
+      playback.anchor.values[p.id]! + live + delta * motionWeight(animation, playback, now),
+      p.min,
+      p.max,
+    );
+  }
+  return Object.keys(values).length ? { id: 'animation', weight, values } : null;
 }
 
 type Pending = { kind: 'play' | 'stop'; id: string; now: number } | { kind: 'stopAll'; now: number };
@@ -182,7 +245,7 @@ function weightAt(animation: Animation | undefined, playback: Playback, t: numbe
     return playback.fade.from * (1 - curveAt(transition.curve, progress));
   }
   const rise = ms(transition.blendIn);
-  return curveAt(transition.curve, rise <= 0 ? 1 : (t - playback.start) / rise);
+  return playback.anchor ? 1 : curveAt(transition.curve, rise <= 0 ? 1 : (t - playback.start) / rise);
 }
 
 function finished(animation: Animation | undefined, playback: Playback, t: number): boolean {
@@ -201,6 +264,9 @@ export function createAnimationPlayer(): AnimationPlayer {
   let playbacks: Playback[] = []; // 古い順。上げている・保っているもの（fade が null）は最大1つ
   let pending: Pending[] = [];
   let current: string[] = []; // playing() の結果
+  let lastPose: AnimationStartPose | null = null;
+  let projectId: string | null = null;
+  const mixer = createParameterMixer();
 
   function beginFade(project: Project, playback: Playback, t: number) {
     if (playback.fade) return;
@@ -218,7 +284,7 @@ export function createAnimationPlayer(): AnimationPlayer {
     }
   }
 
-  function run(project: Project, command: Pending, t: number) {
+  function run(project: Project, command: Pending, t: number, ctx: FrameContext, pose: AnimationStartPose | null) {
     settle(project, t);
     if (command.kind === 'stopAll') {
       for (const playback of playbacks) beginFade(project, playback, t);
@@ -235,7 +301,7 @@ export function createAnimationPlayer(): AnimationPlayer {
     if (playing && animation.restart === 'ignore') return;
     // 割り込み・最初からの再開始: 再生中のものは下げ、新しく最初から上げる
     for (const playback of playbacks) beginFade(project, playback, t);
-    playbacks.push({ animationId: id, start: t, fade: null });
+    playbacks.push({ animationId: id, start: t, fade: null, anchor: captureAnchor(animation, ctx, pose) });
   }
 
   return {
@@ -255,11 +321,22 @@ export function createAnimationPlayer(): AnimationPlayer {
     playing: () => [...current],
     produce(ctx: FrameContext): Layer[] | null {
       const { project, now } = ctx;
-      for (const command of pending) run(project, command, Number.isFinite(command.now) ? command.now : now);
+      if (projectId !== null && projectId !== project.id) {
+        playbacks = [];
+        lastPose = null;
+      }
+      projectId = project.id;
+      const previous = ctx.previousAnimationPose === undefined ? lastPose : ctx.previousAnimationPose;
+      const pose = previous?.projectId === project.id ? previous : null;
+      for (const command of pending) run(project, command, Number.isFinite(command.now) ? command.now : now, ctx, pose);
       pending = [];
       for (const playback of playbacks) {
         // 時刻が戻った
-        if (now < playback.start) playback.start = now;
+        if (now < playback.start) {
+          playback.start = now;
+          const animation = findAnimation(project, playback.animationId);
+          if (playback.anchor) playback.anchor = animation ? captureAnchor(animation, ctx, null) : null;
+        }
         if (playback.fade && now < playback.fade.start) playback.fade.start = now;
       }
       settle(project, now);
@@ -279,15 +356,18 @@ export function createAnimationPlayer(): AnimationPlayer {
         // 後のレイヤーへ伝える。リップシンクは (1 − w) を掛け（重なれば積）、物理演算は再生の間止める
         if (!animation.transition.keepLipSync)
           ctx.flags.lipSyncWeight = clamp(ctx.flags.lipSyncWeight * (1 - weight), 0, 1);
-        if (!animation.transition.keepPhysics) ctx.flags.physicsActive = false;
+        if (!animation.transition.keepPhysics) {
+          ctx.flags.physicsActive = false;
+          if (playback.anchor) ctx.flags.freezePhysics = true;
+        }
         if (weight <= 0) continue;
-        const layer = layerAt(animation, parameters, localTime(animation, playback, now), weight);
+        const layer = playbackLayer(animation, parameters, playback, now, ctx.mixedSoFar);
         if (layer) {
           layers.push(layer);
           const explicit = animation.tracks
             .filter(
               (track) =>
-                chestOutputs.has(track.parameterId) &&
+                (playback.anchor !== null || chestOutputs.has(track.parameterId)) &&
                 track.keyframes.length > 0 &&
                 Object.hasOwn(layer.values, track.parameterId),
             )
@@ -298,6 +378,12 @@ export function createAnimationPlayer(): AnimationPlayer {
             ];
         }
       }
+      lastPose = {
+        projectId: project.id,
+        values: mixer.mix(parameters, [{ id: 'tracking', weight: 1, values: ctx.mixedSoFar }, ...layers]),
+        lipSyncOffsets: {},
+        physicsOffsets: {},
+      };
       return layers.length > 0 ? layers : null;
     },
   };

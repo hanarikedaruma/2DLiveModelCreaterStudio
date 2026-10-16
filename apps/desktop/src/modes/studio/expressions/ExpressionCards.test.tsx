@@ -79,8 +79,7 @@ const card = (name: string) =>
 const pressed = (name: string) => card(name).getAttribute('aria-pressed');
 // カードの右上の順番の印（無ければ null）
 const order = (name: string) => card(name).querySelector('.sexpr-card-order')?.textContent ?? null;
-const toDetail = (services: Services) =>
-  act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, studio: 'detail' } }));
+
 const press = (name: string, now = 0) => {
   const clock = vi.spyOn(performance, 'now').mockReturnValue(now);
   act(() => {
@@ -158,12 +157,9 @@ describe('スタジオの「表情」パネル', () => {
     expect(tick(64)).toMatchObject({ MouthForm: 0, BrowFormL: 0 });
   });
 
-  it('詳細モードの「1つずつ切り替え」で、押した表情だけにする（STEP1 の動き）。設定はこの PC に覚える', async () => {
+  it('「1つずつ切り替え」を最初から使えて、押した表情だけにする。設定はこの PC に覚える', async () => {
     const { services, environment, storage } = await setup({ services: { expressions: new FakeExpressions() } });
-    // かんたんでは「カードの押し方」を開いたときだけ出す
-    expect(panel().queryByRole('checkbox', { name: '1つずつ切り替え' })).toBeNull();
-    expect(panel().getByRole('button', { name: /カードの押し方/ })).toBeTruthy();
-    toDetail(services);
+
     const single = panel().getByRole('checkbox', { name: '1つずつ切り替え' }) as HTMLInputElement;
     expect(single.checked).toBe(false);
     press('笑顔');
@@ -191,15 +187,14 @@ describe('スタジオの「表情」パネル', () => {
     press('怒り');
     expect(services.expressions.actives()).toEqual([]);
 
-    // かんたんに戻しても設定は残る（表示を隠すだけ）
-    act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, studio: 'easy' } }));
-    expect(panel().queryByRole('checkbox', { name: '1つずつ切り替え' })).toBeNull();
+    // 操作後も選んだ設定と欄を保つ
+    expect(panel().getByRole('checkbox', { name: '1つずつ切り替え' })).toBeTruthy();
     press('笑顔');
     press('怒り');
     expect(services.expressions.actives()).toEqual(['angry']);
 
     // 戻すと重ねる
-    toDetail(services);
+
     act(() => {
       fireEvent.click(panel().getByRole('checkbox', { name: '1つずつ切り替え' }));
     });
@@ -276,10 +271,10 @@ describe('スタジオの「表情」パネル', () => {
     expect(expressions.active()).toBeNull();
   });
 
-  it('詳細モードで、表情ごとのフェードの秒数を変えられる（0〜10 秒。Undo）', async () => {
-    const { services, store } = await setup();
-    expect(panel().queryByRole('group', { name: '「笑顔」のフェード' })).toBeNull(); // かんたんでは隠す
-    act(() => services.editor.set({ uiLevel: { ...services.editor.get().uiLevel, studio: 'detail' } }));
+  it('表情ごとのフェードの秒数を最初から変えられる（0〜10 秒。Undo）', async () => {
+    const { store } = await setup();
+    expect(panel().getByRole('group', { name: '「笑顔」のフェード' })).toBeTruthy();
+
     const fade = within(panel().getByRole('group', { name: '「笑顔」のフェード' }));
     const fadeIn = fade.getByRole('spinbutton', { name: 'フェードイン' }) as HTMLInputElement;
     const fadeOut = fade.getByRole('spinbutton', { name: 'フェードアウト' }) as HTMLInputElement;

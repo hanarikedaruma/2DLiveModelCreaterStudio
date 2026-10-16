@@ -33,11 +33,18 @@ export function AnimationButtons() {
                 type="button"
                 className="sanim-button"
                 aria-pressed={on}
-                title={on ? 'もう一度押すとやめる' : '押すと再生する'}
+                title={
+                  on
+                    ? 'もう一度押すとやめる'
+                    : a.transition.startFromCurrent
+                      ? '現在の姿勢へ記録した動きの変化量を重ねて再生する'
+                      : '押すと再生する'
+                }
                 onClick={() => animationBinding.toggle(a.id, performance.now())}
               >
                 <span className="sanim-button-name">{a.name}</span>
                 {a.loop && <span className="sanim-button-tag">ループ</span>}
+                {a.transition.startFromCurrent && <span className="sanim-button-tag">今の姿勢から</span>}
               </button>
             );
           })}

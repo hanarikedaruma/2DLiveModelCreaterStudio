@@ -3,7 +3,14 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { DeformedModel } from '@app/contracts';
 import { emitAppEvent } from '../../../shell/events';
 import { registry } from '../../../shell/registry';
-import { GHOST_OPACITY, copyTinted, drawGhost, freezeDeformed } from '../../../shell/canvas/ghost';
+import {
+  GHOST_OPACITY,
+  copyTinted,
+  drawGhost,
+  freezeDeformed,
+  ghostTint,
+  readGhostStyle,
+} from '../../../shell/canvas/ghost';
 import { register } from './index';
 import { openSample, renderShell, stubSize } from './testUtils';
 
@@ -50,6 +57,7 @@ beforeEach(() => {
 afterEach(() => {
   restoreSize();
   HTMLCanvasElement.prototype.getContext = originalGetContext;
+  localStorage.removeItem('live2d-studio.ghostStyle');
 });
 
 const ghostButton = () => screen.getByRole('button', { name: '透かし' });
@@ -171,5 +179,56 @@ describe('I-070: 透かし', () => {
     expect(draw.args).toEqual([target, 0, 0, 60, 40]);
     expect(draw.alpha).toBe(GHOST_OPACITY);
     expect(calls.find((c) => c.op === 'setTransform')!.args).toEqual([1, 0, 0, 1, 0, 0]);
+  });
+});
+
+describe('I-082: 透かしの濃さと色', () => {
+  // 重ね描きで最後に透かしを重ねたときの濃さと、透かしの絵を染めた色
+  const lastGhostDraw = (overlay: HTMLCanvasElement) =>
+    recorder(overlay)
+      .calls.filter((c) => c.op === 'drawImage')
+      .at(-1);
+  const tintOf = (image: HTMLCanvasElement) =>
+    recorder(image)
+      .calls.filter((c) => c.op === 'set:fillStyle')
+      .at(-1)?.args[0];
+
+  it('透かしを出している間だけ、横に濃さと色の選択を出す', async () => {
+    const shell = renderShell();
+    await openSample(shell);
+    expect(screen.queryByRole('slider', { name: '透かしの濃さ' })).toBeNull();
+    fireEvent.click(ghostButton());
+    const slider = screen.getByRole('slider', { name: '透かしの濃さ' }) as HTMLInputElement;
+    expect(slider.value).toBe(String(Math.round(GHOST_OPACITY * 100)));
+    expect(screen.getByRole('button', { name: '透かしの色: 青' }).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(ghostButton());
+    expect(screen.queryByRole('slider', { name: '透かしの濃さ' })).toBeNull();
+  });
+
+  it('濃さを変えると重ねる濃さが、色を変えると染める色が変わる。選んだものは覚えて次も使う', async () => {
+    const shell = renderShell();
+    await openSample(shell);
+    const overlay = screen.getByTestId('canvas-overlay') as HTMLCanvasElement;
+    fireEvent.click(ghostButton());
+    await waitFor(() => expect(lastGhostDraw(overlay)?.alpha).toBe(GHOST_OPACITY));
+    const image = lastGhostDraw(overlay)!.args[0] as HTMLCanvasElement;
+    expect(tintOf(image)).toBe(ghostTint('blue'));
+
+    fireEvent.change(screen.getByRole('slider', { name: '透かしの濃さ' }), { target: { value: '80' } });
+    await waitFor(() => expect(lastGhostDraw(overlay)?.alpha).toBe(0.8));
+    expect(screen.getByText('80%')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: '透かしの色: 赤' }));
+    await waitFor(() => expect(tintOf(image)).toBe(ghostTint('red')));
+    expect(screen.getByRole('button', { name: '透かしの色: 赤' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button', { name: '透かしの色: 青' }).getAttribute('aria-pressed')).toBe('false');
+    expect(readGhostStyle()).toEqual({ opacity: 0.8, color: 'red' });
+  });
+
+  it('壊れた保存値は既定に戻し、範囲の外の濃さは範囲に収める', () => {
+    localStorage.setItem('live2d-studio.ghostStyle', '{broken');
+    expect(readGhostStyle()).toEqual({ opacity: GHOST_OPACITY, color: 'blue' });
+    localStorage.setItem('live2d-studio.ghostStyle', JSON.stringify({ opacity: 5, color: 'pink' }));
+    expect(readGhostStyle()).toEqual({ opacity: 0.9, color: 'blue' });
   });
 });

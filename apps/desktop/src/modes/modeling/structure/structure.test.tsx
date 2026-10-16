@@ -345,18 +345,18 @@ describe('マスク', () => {
     expect(screen.getByText('ほかのカードの設定')).toBeTruthy();
 
     fireEvent.click(treeRow('eyeL'));
-    const select = screen.getByLabelText('マスク') as HTMLSelectElement;
+    const sources = within(screen.getByRole('group', { name: 'マスク元' }));
     // 自身は除き、前面から順
-    expect([...select.options].map((o) => o.textContent)).toEqual(['なし', '前髪', '顔']);
-    fireEvent.change(select, { target: { value: 'face' } });
+    expect(sources.getAllByRole('checkbox').map((el) => el.parentElement!.textContent)).toEqual(['前髪', '顔']);
+    fireEvent.click(sources.getByRole('checkbox', { name: '顔' }));
     expect(partOf(services, 'eyeL')!.mask).toEqual({ sourcePartIds: ['face'], inverted: false });
-    expect((screen.getByLabelText('マスク') as HTMLSelectElement).value).toBe('face');
-    fireEvent.change(screen.getByLabelText('マスク'), { target: { value: '' } });
+    expect(sources.getByRole('checkbox', { name: '顔' })).toHaveProperty('checked', true);
+    fireEvent.click(sources.getByRole('checkbox', { name: '顔' }));
     expect(partOf(services, 'eyeL')!.mask).toBeNull();
 
     // グループにはマスクを出さない
     fireEvent.click(treeRow('head'));
-    expect(screen.queryByLabelText('マスク')).toBeNull();
+    expect(screen.queryByRole('group', { name: 'マスク元' })).toBeNull();
     expect(screen.getByText('ほかのカードの設定')).toBeTruthy();
   });
 });
@@ -368,7 +368,7 @@ describe('Undo', () => {
     fireEvent.click(within(treeRow('face') as HTMLElement).getByRole('button', { name: '顔：表示中（押すと隠す）' }));
     openMenu('face', 'コピー');
     fireEvent.click(treeRow('eyeL'));
-    fireEvent.change(screen.getByLabelText('マスク'), { target: { value: 'face' } });
+    fireEvent.click(within(screen.getByRole('group', { name: 'マスク元' })).getByRole('checkbox', { name: '顔' }));
     openMenu('hair', '削除');
     fireEvent.click(screen.getByRole('tab', { name: '描画順' }));
     dragTo(orderRow('face'), orderRow('eyeL'));

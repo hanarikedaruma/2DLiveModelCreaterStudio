@@ -1,0 +1,143 @@
+{
+  "sendMs": 139,
+  "speaker": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d",
+  "ready": {
+    "state": {
+      "state": "stopped",
+      "sessionId": null,
+      "error": "",
+      "mute": true,
+      "bypass": false,
+      "metrics": {
+        "blocks": 0,
+        "capturedFrames": 0,
+        "estimatedMs": 0,
+        "inputPeak": 0,
+        "inputStatus": 0,
+        "limitedSamples": 0,
+        "maxInputCallbackGapMs": 0,
+        "maxOutputCallbackGapMs": 0,
+        "maxProcessingMs": 0,
+        "outputPeak": 0,
+        "outputStatus": 0,
+        "overflows": 0,
+        "processingMs": 0,
+        "queueFrames": 0,
+        "renderedFrames": 0,
+        "runningSeconds": 0,
+        "streamRtf": 0,
+        "underruns": 0,
+        "vramMiB": 0
+      },
+      "converting": false,
+      "conversionOutput": null,
+      "source": "microphone",
+      "speech": {
+        "delivery": "whole",
+        "history": [],
+        "preparation": {
+          "owner": "00a0d301-0a81-44bf-a399-e14a07ad75f8",
+          "revision": 3,
+          "state": "ready"
+        },
+        "resident": true,
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+      }
+    },
+    "capture": {
+      "frames": 0,
+      "nonzero": 0
+    }
+  },
+  "first": {
+    "state": {
+      "state": "stopped",
+      "sessionId": "da65de9e79194a45b5615e622380528a",
+      "error": "",
+      "mute": true,
+      "bypass": false,
+      "metrics": {
+        "codecFrames": 50,
+        "cudaGraph": 1,
+        "firstAudioMs": 98.82320000231266,
+        "firstAudioWallMs": 1792097019914.2026,
+        "firstPcmSeconds": 2.7915754999994533,
+        "frames": 96000,
+        "generationSeconds": 6.7793248999951174,
+        "loadSeconds": 12.935008400003426,
+        "predictorGraphReplays": 50,
+        "prefetchHit": 1,
+        "rate": 24000,
+        "rtf": 1.6948312249987794,
+        "seconds": 4,
+        "statefulDecoder": 1,
+        "textEmbeddingOffloadMiB": 593.5,
+        "vramMiB": 4009.49951171875
+      },
+      "converting": false,
+      "conversionOutput": null,
+      "source": "speech",
+      "speech": {
+        "delivery": "whole",
+        "history": [
+          "こんにちは。同じ声でお話しします。"
+        ],
+        "preparation": {
+          "owner": "",
+          "revision": 0,
+          "state": "idle"
+        },
+        "resident": true,
+        "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+      }
+    },
+    "capture": {
+      "frames": 398,
+      "nonzero": 0
+    }
+  },
+  "second": {
+    "state": "stopped",
+    "sessionId": "6951368be3464c07aa3e942dba7098e4",
+    "error": "",
+    "mute": true,
+    "bypass": false,
+    "metrics": {
+      "bufferedMs": 0,
+      "codecFrames": 41,
+      "cudaGraph": 1,
+      "firstAudioMs": 1794.7343000024557,
+      "firstAudioWallMs": 1792097026109.7517,
+      "firstPcmSeconds": 1.0120318999979645,
+      "frames": 78720,
+      "generationSeconds": 4.253349399994477,
+      "loadSeconds": 0,
+      "predictorGraphReplays": 41,
+      "prefetchHit": 1,
+      "rate": 24000,
+      "rebuffers": 0,
+      "rtf": 1.2967528658519747,
+      "seconds": 3.28,
+      "statefulDecoder": 1,
+      "textEmbeddingOffloadMiB": 593.5,
+      "vramMiB": 4009.49951171875
+    },
+    "converting": false,
+    "conversionOutput": null,
+    "source": "speech",
+    "speech": {
+      "delivery": "stream",
+      "history": [
+        "こんにちは。同じ声でお話しします。",
+        "次の文章でも、同じ声で話します。"
+      ],
+      "preparation": {
+        "owner": "00a0d301-0a81-44bf-a399-e14a07ad75f8",
+        "revision": 8,
+        "state": "idle"
+      },
+      "resident": true,
+      "speakerKey": "dac5a689fe406465a88b481d085ae4fa0396adc9baeda044c93913df39ed039d"
+    }
+  }
+}

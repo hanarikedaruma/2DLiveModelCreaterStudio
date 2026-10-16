@@ -2,7 +2,7 @@
 import { newId, type Model, type Project, type Vec2 } from '@app/schema';
 import type { Command, EditorState, PointsTarget } from '@app/contracts';
 import { modelCommand } from '@app/core';
-import { activeParams, addKey, editKey, isBaseState, isEasy, type BindingTarget, type DeltaOps } from './common';
+import { activeParams, addKey, editKey, isBaseState, type BindingTarget, type DeltaOps } from './common';
 
 const ZERO: Vec2 = { x: 0, y: 0 };
 const same = (a: number, b: number) => Math.abs(a - b) <= 1e-9;
@@ -121,7 +121,6 @@ export function pointsEdit(
   const spec = {
     target: resolved.binding,
     params,
-    easy: isEasy(editor),
     newBindingId: newId(),
     ops: pointsOps(resolved.count),
   };
@@ -143,7 +142,6 @@ export function addPointsKey(project: Project, editor: EditorState, target: Poin
   const spec = {
     target: resolved.binding,
     params,
-    easy: isEasy(editor),
     newBindingId: newId(),
     ops: pointsOps(resolved.count),
   };

@@ -1,0 +1,133 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "tools": {
+        "workflow": [
+          {
+            "kind": "image",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 1.39px",
+            "alignmentUndo": true
+          },
+          {
+            "kind": "group",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 1.39px",
+            "alignmentUndo": true
+          }
+        ],
+        "ownWarpTools": [
+          {
+            "tool": "選択・変形",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          },
+          {
+            "tool": "メッシュ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          },
+          {
+            "tool": "輪郭線で整える",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          },
+          {
+            "tool": "ワープ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          }
+        ]
+      }
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "tools": {
+        "workflow": [
+          {
+            "kind": "image",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 3.81px",
+            "alignmentUndo": true
+          },
+          {
+            "kind": "group",
+            "directAdd": true,
+            "partsCount": 2,
+            "restAligned": true,
+            "identityBeforeEdit": true,
+            "actualDrag": true,
+            "keyTiltFollows": true,
+            "errorText": "確認した4姿勢の最大ずれ: 3.81px",
+            "alignmentUndo": true
+          }
+        ],
+        "ownWarpTools": [
+          {
+            "tool": "選択・変形",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          },
+          {
+            "tool": "メッシュ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          },
+          {
+            "tool": "輪郭線で整える",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          },
+          {
+            "tool": "ワープ編集",
+            "endpointMaxMovementPx": 0,
+            "baseUnchanged": true,
+            "defaultKeyLocked": true,
+            "resetAndUndo": true,
+            "roundTrip": null
+          }
+        ]
+      }
+    }
+  ],
+  "errors": []
+}

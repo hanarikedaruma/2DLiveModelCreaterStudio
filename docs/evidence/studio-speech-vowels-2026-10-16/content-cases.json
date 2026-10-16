@@ -1,0 +1,62 @@
+[
+  {
+    "expectedTranscripts": [
+      "行きます。",
+      "いきます。",
+      "い、行きます。",
+      "い、いきます。"
+    ],
+    "file": "i-raw-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "行きます。",
+      "いきます。",
+      "い、行きます。",
+      "い、いきます。"
+    ],
+    "file": "i-airy-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "うん。",
+      "う、うん。"
+    ],
+    "file": "u-raw-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "うん。",
+      "う、うん。"
+    ],
+    "file": "u-airy-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "ええんですか。",
+      "え、ええんですか。"
+    ],
+    "file": "e-raw-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "ええんですか。",
+      "え、ええんですか。"
+    ],
+    "file": "e-airy-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "おっきい。",
+      "お、おっきい。"
+    ],
+    "file": "o-raw-01.wav"
+  },
+  {
+    "expectedTranscripts": [
+      "おっきい。",
+      "お、おっきい。"
+    ],
+    "file": "o-airy-01.wav"
+  }
+]

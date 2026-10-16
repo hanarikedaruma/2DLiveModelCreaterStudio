@@ -1,0 +1,22 @@
+[
+  {
+    "vowel": "i",
+    "bodyPcmIdentical": true,
+    "startMs": 810.0
+  },
+  {
+    "vowel": "u",
+    "bodyPcmIdentical": true,
+    "startMs": 170.0
+  },
+  {
+    "vowel": "e",
+    "bodyPcmIdentical": true,
+    "startMs": 290.0
+  },
+  {
+    "vowel": "o",
+    "bodyPcmIdentical": true,
+    "startMs": 500.0
+  }
+]

@@ -10,6 +10,7 @@ import { createCanvasController } from './canvas/controller';
 import { createEnvironmentStore, memoryEnvironmentStorage } from './environment';
 import { registry } from './registry';
 import { Shell } from './Shell';
+import { LAYOUT_SIZES_KEY } from './layoutSizes';
 
 const HEIGHTS_KEY = 'live2d-studio.panelHeights';
 const COLLAPSED_KEY = 'live2d-studio.collapsedPanels';
@@ -56,7 +57,12 @@ function setup() {
   const panel = (id: string) => document.querySelector<HTMLElement>(`[data-panel-id="${id}"]`)!;
   const body = (id: string) => panel(id).querySelector<HTMLElement>(':scope > .panel-body')!;
   const handle = (title: string) => screen.getByRole('separator', { name: `「${title}」の高さ` });
-  const saved = () => JSON.parse(localStorage.getItem(HEIGHTS_KEY) ?? 'null') as Record<string, number> | null;
+  const saved = () =>
+    Object.fromEntries(
+      Object.entries(JSON.parse(localStorage.getItem(LAYOUT_SIZES_KEY) ?? '{}') as Record<string, number>)
+        .filter(([id]) => id.startsWith('modeling.panel.'))
+        .map(([id, value]) => [id.slice('modeling.panel.'.length), value]),
+    );
   return { services, canvas, view, panel, body, handle, saved };
 }
 
@@ -78,15 +84,20 @@ function drag(handle: HTMLElement, from: number, to: number, end: 'pointerUp' | 
 }
 
 describe('右の列のパネルの高さ（I-064）', () => {
-  it('境目は右の列の開いた共通パレットにだけ出す（オブジェクトパレット・たたんだパネル・左の列には出さない）', () => {
+  it('I-087: 左・右・オブジェクトの開いたパネルに境目を出し、たたんだパネルには出さない', () => {
     const { canvas } = setup();
     act(() => canvas.setActiveTool('t.brush'));
     expect(screen.getAllByRole('separator').map((s) => s.getAttribute('aria-label'))).toEqual([
+      '「左」の高さ',
+      '左の列の幅',
+      '右の列の幅',
+      '「ブラシ」の高さ',
       '「共通」の高さ',
       '「共通2」の高さ',
     ]);
     fireEvent.click(screen.getByRole('button', { name: '共通2' }));
-    expect(screen.getAllByRole('separator').map((s) => s.getAttribute('aria-label'))).toEqual(['「共通」の高さ']);
+    expect(screen.queryByRole('separator', { name: '「共通2」の高さ' })).toBeNull();
+    expect(screen.getByRole('separator', { name: '「共通」の高さ' })).toBeTruthy();
   });
 
   it('初めは中身に合わせ、境目をドラッグすると中身の高さを決める。離したときに覚える', () => {
@@ -108,7 +119,7 @@ describe('右の列のパネルの高さ（I-064）', () => {
     // ドラッグ中は見た目だけ変え、まだ覚えない。中身は描き直さない
     expect(body('common').style.height).toBe('250px');
     expect(panel('common').classList.contains('sized')).toBe(true);
-    expect(saved()).toBeNull();
+    expect(saved()).toEqual({});
     const rendersWhileDragging = commonRenders;
     act(() => {
       fireEvent.pointerMove(window, { pointerId: 1, clientY: 130 });
@@ -136,11 +147,11 @@ describe('右の列のパネルの高さ（I-064）', () => {
     layoutBody(body('common'), 200);
     drag(handle('共通'), 100, 100);
     expect(panel('common').classList.contains('sized')).toBe(false);
-    expect(saved()).toBeNull();
+    expect(saved()).toEqual({});
     drag(handle('共通'), 100, 180, 'pointerCancel');
     expect(panel('common').classList.contains('sized')).toBe(false);
     expect(body('common').style.height).toBe('');
-    expect(saved()).toBeNull();
+    expect(saved()).toEqual({});
   });
 
   it('決めた高さからさらにドラッグでき、最低 60px・最大 4000px で止まる', () => {
@@ -208,6 +219,7 @@ describe('右の列のパネルの高さ（I-064）', () => {
     expect(first.body('common2').style.height).toBe('60px');
     first.view.unmount();
     for (const broken of ['[1, 2]', '{', 'null']) {
+      localStorage.removeItem(LAYOUT_SIZES_KEY);
       localStorage.setItem(HEIGHTS_KEY, broken);
       const { view, body } = setup();
       expect({ broken, heights: [body('common').style.height, body('common2').style.height] }).toEqual({
@@ -218,7 +230,7 @@ describe('右の列のパネルの高さ（I-064）', () => {
     }
   });
 
-  it('オブジェクトパレットには、保存した高さがあっても掛けない', () => {
+  it('古い形式のオブジェクトの高さは、以前と同じく掛けず移行しない', () => {
     localStorage.setItem(HEIGHTS_KEY, JSON.stringify({ tool: 300 }));
     const { canvas, panel, body } = setup();
     act(() => canvas.setActiveTool('t.brush'));

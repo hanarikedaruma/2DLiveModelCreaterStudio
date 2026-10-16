@@ -146,7 +146,8 @@ export function createDeformPipeline(): DeformPipeline {
           vertexDelta = undefined;
         }
         let positions = new Float32Array(n * 2);
-        let pending: Affine = matrixOf(part);
+        const ownWarps = warpsOf.get(part.id);
+        let pending: Affine = ownWarps ? IDENTITY : matrixOf(part);
         let filled = false;
         // ここまでの変形（行列にまとめてある）を点に掛ける
         const flush = () => {
@@ -165,8 +166,7 @@ export function createDeformPipeline(): DeformPipeline {
           }
           pending = IDENTITY;
         };
-        for (let anc = parentOf(part); anc; anc = parentOf(anc)) {
-          const warps = warpsOf.get(anc.id);
+        const applyWarps = (warps: Warp[] | undefined) => {
           if (warps) {
             flush();
             for (const w of warps) {
@@ -186,6 +186,13 @@ export function createDeformPipeline(): DeformPipeline {
               applyWarp(positions, w, warpDelta);
             }
           }
+        };
+        if (ownWarps) {
+          applyWarps(ownWarps);
+          pending = matrixOf(part);
+        }
+        for (let anc = parentOf(part); anc; anc = parentOf(anc)) {
+          applyWarps(warpsOf.get(anc.id));
           pending = multiplyAffine(matrixOf(anc), pending);
         }
         flush();

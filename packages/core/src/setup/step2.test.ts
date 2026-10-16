@@ -21,7 +21,7 @@ import { STEP2_MOTION } from './step2';
 // プロジェクトを開いたときにアプリ（step2Params）が足すのと同じく、STEP2 の標準パラメータを足す
 const withStep2 = (p: Project): Project => ({ ...p, model: ensureStandardParameters(p.model, 'step2') });
 const sampleModel = (): Project => loadProjectJson(JSON.stringify(sample));
-// fixtures の reference-model（本物のメッシュがあり、胴体の子にボタンなど。MVP のかんたんセットアップ済み）
+// fixtures の reference-model（本物のメッシュがあり、胴体の子にボタンなど。MVP の自動セットアップ済み）
 const referenceModel = (): Project => loadProjectJson(JSON.stringify(reference));
 
 // 画像パーツに 3×3 の格子のメッシュを付ける（変形した位置を手で確かめやすい）
@@ -204,8 +204,15 @@ describe('呼吸・腕のキー（fixtures の sample-model）', () => {
     expect(deltaAt(binding(p, 'neckRoot', 'Breath'), 1).position.y).toBeCloseTo(-1320 * 0.006, 9);
     expect(deltaAt(binding(p, 'armRootL', 'ArmL'), 1)).toEqual({ ...ZERO, rotation: -30 });
     expect(deltaAt(binding(p, 'armRootR', 'ArmR'), 1)).toEqual({ ...ZERO, rotation: 30 });
-    // MVP のバインディングは変わらず、新しいものは後ろに足される
-    expect(p.model.bindings.slice(0, ref.model.bindings.length)).toEqual(ref.model.bindings);
+    // MVP のバインディングは変わらず、新しいものは後ろに足される（視線のキーは、fixture を作ったあとで量が変わった
+    // （I-067 の A13）ので、同じ場所で作り直される）
+    const notGaze = (b: Binding) => !b.parameterIds.some((id) => id === 'EyeBallX' || id === 'EyeBallY');
+    expect(p.model.bindings.slice(0, ref.model.bindings.length).filter(notGaze)).toEqual(
+      ref.model.bindings.filter(notGaze),
+    );
+    expect(p.model.bindings.slice(0, ref.model.bindings.length).map((b) => b.id)).toEqual(
+      ref.model.bindings.map((b) => b.id),
+    );
     expect(step2Bindings(p)).toHaveLength(4);
 
     const base = deformAt(p);

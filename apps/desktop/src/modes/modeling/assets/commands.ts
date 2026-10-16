@@ -50,7 +50,7 @@ function parentOf(model: Model, part: Part): Part | undefined {
   return part.parentId === null ? undefined : model.parts.find((p) => p.id === part.parentId);
 }
 
-// 「その他」の枠になるパーツ。standardType が null で、根にあるか、変形グループ（かんたんセットアップが作る）の下にある
+// 「その他」の枠になるパーツ。standardType が null で、根にあるか、変形グループ（自動セットアップが作る）の下にある
 export function isFreeSlotPart(model: Model, part: Part): boolean {
   if (part.standardType !== null) return false;
   const parent = parentOf(model, part);

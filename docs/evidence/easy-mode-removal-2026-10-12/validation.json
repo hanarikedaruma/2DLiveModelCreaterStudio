@@ -1,0 +1,167 @@
+{
+  "contract": "CC-019",
+  "unit": {
+    "packages": 10,
+    "files": 307,
+    "tests": 2659,
+    "results": [
+      {
+        "files": 11,
+        "tests": 98
+      },
+      {
+        "files": 1,
+        "tests": 13
+      },
+      {
+        "files": 10,
+        "tests": 51
+      },
+      {
+        "files": 10,
+        "tests": 72
+      },
+      {
+        "files": 19,
+        "tests": 168
+      },
+      {
+        "files": 7,
+        "tests": 59
+      },
+      {
+        "files": 15,
+        "tests": 154
+      },
+      {
+        "files": 2,
+        "tests": 8
+      },
+      {
+        "files": 66,
+        "tests": 678
+      },
+      {
+        "files": 166,
+        "tests": 1358
+      }
+    ]
+  },
+  "native": {
+    "full": {
+      "files": 16,
+      "passed": 28,
+      "failed": 1,
+      "remaining": "最初のマイクデータの到着を待たずに1秒を測定"
+    },
+    "step1Retry": {
+      "passed": 4,
+      "failed": 0,
+      "microphoneLevelsPerSecond": 100
+    },
+    "finalCases": [
+      {
+        "file": "e2e/recovery.e2e.ts",
+        "tests": 1,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/tracking.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/diagnostics.c67.e2e.ts",
+        "tests": 1,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/autoblink.c66.e2e.ts",
+        "tests": 1,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/psdReload.c62.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/panelCollapse.i066.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/step2.e2e.ts",
+        "tests": 1,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/chest.c98.e2e.ts",
+        "tests": 3,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/flowSway.c100.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/recovery.c58.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/modeling.e2e.ts",
+        "tests": 1,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/diagnostics.e2e.ts",
+        "tests": 1,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/mirrorCopy.c64.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/curveGuide.c99.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/swayBadge.c99.e2e.ts",
+        "tests": 2,
+        "passed": true,
+        "run": "full"
+      },
+      {
+        "file": "e2e/step1.e2e.ts",
+        "tests": 4,
+        "passed": true,
+        "run": "step1Retry"
+      }
+    ],
+    "verifiedFiles": 16,
+    "verifiedTests": 29
+  },
+  "typecheck": "全パッケージ・e2e成功",
+  "eslint": "全体成功",
+  "prettier": "全体成功",
+  "diffCheck": "成功"
+}

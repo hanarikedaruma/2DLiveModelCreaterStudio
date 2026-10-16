@@ -1,0 +1,75 @@
+
+ RUN  v3.2.7 C:/Users/hanar/.claude/workspace/2DLiveModelCreaterStudio/apps/desktop
+
+ × e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > 両画面で縦並びの感情を共有し、先行合成を感情変更で無効にする 180003ms
+   → Test timed out in 180000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ × e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > 恥ずかしいを選んで即送信し、固定した声で口ごもり付きの逐次再生を行う 27580ms
+   → expected +0 to be 1 // Object.is equality
+ ✓ e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > うれしいへ戻すと自動の言い直しを加えず、感情だけを保存する 28739ms
+ × e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > 全文生成後でも同じ冒頭の息処理と原文の履歴を使う 26434ms
+   → expected +0 to be 1 // Object.is equality
+ ✓ e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > iの言い出しを息に近づけ、本文と固定話者を保つ 25879ms
+ ✓ e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > uの言い出しを息に近づけ、本文と固定話者を保つ 14135ms
+ ✓ e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > eの言い出しを息に近づけ、本文と固定話者を保つ 22069ms
+ ✓ e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > oの言い出しを息に近づけ、本文と固定話者を保つ 17369ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > 両画面で縦並びの感情を共有し、先行合成を感情変更で無効にする
+Error: Test timed out in 180000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ e2e/speechEmotions.e2e.ts:66:3
+     64| 
+     65| describe('左の感情ボタンと恥ずかしい読み方', () => {
+     66|   it('両画面で縦並びの感情を共有し、先行合成を感情変更で無効にする', async () => {
+       |   ^
+     67|     const page = app.page;
+     68|     await input.getByRole('button', { name: '恥ずかしい', exact: true }).cl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > 恥ずかしいを選んで即送信し、固定した声で口ごもり付きの逐次再生を行う
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ e2e/speechEmotions.e2e.ts:154:41
+    152|     expect(result.error).toBe('');
+    153|     expect(result.metrics.hesitations).toBe(2);
+    154|     expect(result.metrics.breathyOnset).toBe(1);
+       |                                         ^
+    155|     expect(result.metrics.performanceMs).toBeLessThan(10);
+    156|     expect(result.metrics.rebuffers).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  e2e/speechEmotions.e2e.ts > 左の感情ボタンと恥ずかしい読み方 > 全文生成後でも同じ冒頭の息処理と原文の履歴を使う
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ e2e/speechEmotions.e2e.ts:221:41
+    219|     expect(result.error).toBe('');
+    220|     expect(result.speech.delivery).toBe('whole');
+    221|     expect(result.metrics.breathyOnset).toBe(1);
+       |                                         ^
+    222|     expect(result.metrics.shyDelivery).toBe(1);
+    223|     expect(result.metrics.shyTailBreaths).toBeGreaterThanOrEqual(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed (8)
+   Start at  15:02:06
+   Duration  357.53s (transform 175ms, setup 0ms, collect 532ms, tests 356.44s, environment 0ms, prepare 199ms)
+

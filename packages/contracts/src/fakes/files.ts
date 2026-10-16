@@ -195,4 +195,7 @@ export class FakeAutoSaver implements AutoSaver {
   async findRecoverable(_dir: string): Promise<string | null> {
     return null;
   }
+  async discardRecovery(_dir: string, _expectedPath: string): Promise<'discarded' | 'changed'> {
+    return 'changed'; // 復元候補を持たない代替実装なので、候補を取り直す
+  }
 }
