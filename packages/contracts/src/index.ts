@@ -21,6 +21,7 @@ import type { VoiceService } from './voice';
 
 export type ParamValues = Record<string, number>;
 export interface TargetDeltas {
+  arms?: import('./arms').ArmRigEvaluation; // AT-08。共通評価が生成し、共通変形が1回適用する
   transforms: Record<string, TransformDelta>; // partId → 合成済みの差分（opacity は使わない。1 のまま）
   vertices: Record<string, Float32Array>; // meshId → [dx0, dy0, dx1, dy1, ...]
   modelVertices?: Record<string, Float32Array>; // meshId → 祖先の変換後に足すモデル座標の差分
@@ -377,6 +378,7 @@ export interface CameraCaptureStats {
   warning: string | null;
 }
 export interface TrackingSource {
+  readonly body?: import('./arms').BodyTrackingCapability; // 段階導入。無しは腕非対応、顔の契約は不変
   listDevices(): Promise<{ id: string; label: string }[]>;
   configureCapture(settings: Environment['cameraCapture']): void;
   captureStats(): CameraCaptureStats | null;
@@ -490,6 +492,7 @@ export interface VowelEstimator {
 // ---- サービスのまとめ ----
 
 export interface Services {
+  arms?: import('./arms').ArmService; // AT-12で接続。AT-11はFakeArmServiceを注入する
   store: ProjectStore;
   editor: EditorStore;
   assets: AssetRepository;
@@ -525,6 +528,7 @@ export interface Services {
 }
 
 export * from './voice';
+export * from './arms';
 
 // ---- 仮実装 ----
 

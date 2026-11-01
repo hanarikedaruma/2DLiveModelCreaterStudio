@@ -1,0 +1,36 @@
+{
+  "stamp": "2026-11-01T01-08-36-653Z",
+  "sourceVersion": "AT-04 CL v1",
+  "runs": [
+    {
+      "forceCpu": false,
+      "steps": [],
+      "pageErrors": [],
+      "start": {
+        "status": {
+          "generation": 2,
+          "pose": {
+            "state": "ready",
+            "delegate": "GPU",
+            "reason": null
+          },
+          "hands": {
+            "state": "ready",
+            "delegate": "GPU",
+            "reason": null
+          },
+          "poseFps": null,
+          "handFps": null,
+          "droppedFrames": 0,
+          "staleResults": 0
+        },
+        "readyMs": 4859.299999952316
+      },
+      "networkHosts": [
+        "config.edge.skype.com",
+        "at01.localhost"
+      ],
+      "mediaPipeExternalRequests": []
+    }
+  ]
+}

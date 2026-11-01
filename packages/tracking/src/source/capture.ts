@@ -37,6 +37,8 @@ export class CaptureSession {
     settings: Settings,
     private readonly changed: () => void,
     private readonly now: () => number = () => performance.now(),
+    // true の間は自動の選択で小さい映像（幅640未満）を試さない。腕・手の推定で手が小さくなりすぎるため（AT-04）
+    private readonly preferLarge: () => boolean = () => false,
   ) {
     this.requested = { ...settings };
     const actual = track.getSettings();
@@ -182,6 +184,7 @@ export class CaptureSession {
     const requested = this.requested;
     while (this.candidate < AUTO_SIZES.length) {
       const size = AUTO_SIZES[this.candidate++]!;
+      if (this.preferLarge() && size.width < AUTO_CAPTURE.width) continue;
       try {
         if (await this.apply(captureConstraints({ ...AUTO_CAPTURE, ...size }), true)) return;
         return;

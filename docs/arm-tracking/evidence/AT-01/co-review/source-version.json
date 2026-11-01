@@ -1,0 +1,7 @@
+{
+  "source": "prototypes/arm-tracking/inference/src/main.ts",
+  "before": "7F3F0C11C7D51364CA10C41765DB8BACD51BCEC8F40BF8B0B546694E7D7547EE",
+  "after": "7F3F0C11C7D51364CA10C41765DB8BACD51BCEC8F40BF8B0B546694E7D7547EE",
+  "unchanged": true,
+  "vitestExit": 1
+}

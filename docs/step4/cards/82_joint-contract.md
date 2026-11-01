@@ -6,6 +6,8 @@
 
 候補: #3（I-053）。完成条件: P4 の土台。
 
+2026-10-31: 分割腕の追従に必要な契約は [AT-03](../../arm-tracking/cards/03-contracts.md)、制約と共通評価は [AT-06](../../arm-tracking/cards/06-constrained-ik.md)・[AT-08](../../arm-tracking/cards/08-rig-evaluation.md) に具体化した。今回の初版と、1枚腕を含む汎用の関節対応は区別する。共有ファイルの編集は [専用計画](../../arm-tracking/README.md) で調整する。
+
 ## 目的
 
 カード76 で選んだ関節の方式を、保存の形・評価・変形の流れへの組み込み口として決めて作る。道具と画面はカード89。

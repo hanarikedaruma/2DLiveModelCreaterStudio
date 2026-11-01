@@ -1,0 +1,15 @@
+[package]
+name = "at01-host"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# AT-01 の試作専用。製品のビルド（apps/desktop/src-tauri）には登録しない。
+# 版はアプリの Cargo.lock と同じ wry・tao に固定し、オフラインで作れるようにする。
+[dependencies]
+wry = { version = "=0.57.0", features = ["devtools"] }
+tao = "=0.37.1"
+serde_json = "1"
+
+[profile.release]
+debug = false

@@ -1,0 +1,206 @@
+{
+  "stamp": "2026-11-01T01-09-34-298Z",
+  "sourceVersion": "AT-04 CL v1",
+  "runs": [
+    {
+      "forceCpu": false,
+      "steps": [
+        {
+          "name": "normal",
+          "perSecond": {
+            "faces": 29.666666666666668,
+            "pose": 29.666666666666668,
+            "hands": 29.666666666666668,
+            "poseDetected": 0,
+            "handsDetected": 0
+          },
+          "status": {
+            "generation": 2,
+            "pose": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "hands": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "poseFps": 29,
+            "handFps": 29,
+            "droppedFrames": 28,
+            "staleResults": 2
+          },
+          "capture": {
+            "mode": "auto",
+            "state": "selecting",
+            "width": 1280,
+            "height": 720,
+            "requestedFps": 60,
+            "nominalFps": 30,
+            "maxFps": 30,
+            "cameraFps": null,
+            "trackingFps": null,
+            "warning": null
+          },
+          "workers": 1
+        },
+        {
+          "name": "light",
+          "perSecond": {
+            "faces": 29.666666666666668,
+            "pose": 29.666666666666668,
+            "hands": 15,
+            "poseDetected": 0,
+            "handsDetected": 0
+          },
+          "status": {
+            "generation": 3,
+            "pose": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "hands": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "poseFps": 29.5,
+            "handFps": 15,
+            "droppedFrames": 0,
+            "staleResults": 1
+          },
+          "capture": {
+            "mode": "auto",
+            "state": "ready",
+            "width": 640,
+            "height": 480,
+            "requestedFps": 60,
+            "nominalFps": 30,
+            "maxFps": 30,
+            "cameraFps": null,
+            "trackingFps": null,
+            "warning": null
+          }
+        },
+        {
+          "name": "off-0",
+          "perSecond": {
+            "faces": 30,
+            "pose": 0,
+            "hands": 0,
+            "poseDetected": 0,
+            "handsDetected": 0
+          },
+          "status": {
+            "generation": 4,
+            "pose": {
+              "state": "off",
+              "delegate": null,
+              "reason": null
+            },
+            "hands": {
+              "state": "off",
+              "delegate": null,
+              "reason": null
+            },
+            "poseFps": null,
+            "handFps": null,
+            "droppedFrames": 0,
+            "staleResults": 0
+          },
+          "capture": {
+            "mode": "auto",
+            "state": "ready",
+            "width": 640,
+            "height": 480,
+            "requestedFps": 60,
+            "nominalFps": 30,
+            "maxFps": 30,
+            "cameraFps": null,
+            "trackingFps": null,
+            "warning": null
+          },
+          "workers": 0
+        },
+        {
+          "name": "off-1",
+          "perSecond": {
+            "faces": 30,
+            "pose": 0,
+            "hands": 0,
+            "poseDetected": 0,
+            "handsDetected": 0
+          },
+          "status": {
+            "generation": 6,
+            "pose": {
+              "state": "off",
+              "delegate": null,
+              "reason": null
+            },
+            "hands": {
+              "state": "off",
+              "delegate": null,
+              "reason": null
+            },
+            "poseFps": null,
+            "handFps": null,
+            "droppedFrames": 0,
+            "staleResults": 0
+          },
+          "capture": {
+            "mode": "auto",
+            "state": "ready",
+            "width": 640,
+            "height": 480,
+            "requestedFps": 60,
+            "nominalFps": 30,
+            "maxFps": 30,
+            "cameraFps": 29.673590504451038,
+            "trackingFps": 29.673590504451038,
+            "warning": "映像は29.7 fps（要求60）。機器・照明・PC負荷を確認"
+          },
+          "workers": 0
+        }
+      ],
+      "pageErrors": [],
+      "start": {
+        "status": {
+          "generation": 2,
+          "pose": {
+            "state": "ready",
+            "delegate": "GPU",
+            "reason": null
+          },
+          "hands": {
+            "state": "ready",
+            "delegate": "GPU",
+            "reason": null
+          },
+          "poseFps": null,
+          "handFps": null,
+          "droppedFrames": 1,
+          "staleResults": 0
+        },
+        "readyMs": 1228.6999999284744
+      },
+      "networkHosts": [
+        "config.edge.skype.com",
+        "at01.localhost"
+      ],
+      "mediaPipeExternalRequests": []
+    },
+    {
+      "forceCpu": true,
+      "steps": [],
+      "pageErrors": [],
+      "networkHosts": [
+        "config.edge.skype.com",
+        "at01.localhost"
+      ],
+      "mediaPipeExternalRequests": []
+    }
+  ]
+}

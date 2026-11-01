@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "schemaVersion": 12,
+  "version": "AT-03 CO v3",
+  "sha256": {
+    "packages/schema/src/arms.ts": "722d5139d6ae45901146777ade41bc6933ed739c0fd354b6d11e08108ea78088",
+    "packages/schema/src/arms.co.test.ts": "b6c63e646799d786211230aa21b1a627df18d14574e21c4865e903e35e9513f6",
+    "packages/schema/src/types.ts": "a4ad2ab3c5ea6b506b7de42b04d074b0a3b24db3d98b43a92d3f72dc7956a8a1",
+    "packages/schema/src/validate.ts": "7390cd9aaefc9719260858107be3e5f5154c6c0af7abbb508ee147fdcf560d8a",
+    "packages/schema/src/migrate.ts": "8ebf13954efb82a24264357c1fac86cca6d4f691cd07c26bc7e97dcfb7490694",
+    "packages/schema/src/index.ts": "0fa34a4cd07fe1eddbec6497c2a4185bc7218de5a37857aa585d6c7a964b3ff3",
+    "packages/contracts/src/arms.ts": "d3bde6d5dc498e4cbc61be9698becf150d15b1607edb6b80f38bb20ba238a057",
+    "packages/contracts/src/index.ts": "43074f177aa4b1d26cfbff09665849ec11e8124a25a195600aa97a1eb382a079",
+    "packages/contracts/src/fakes/arms.ts": "5f5f0f3dc06ac1f5ffafc0fac23caefc12c9523546e153852e079a650afcc20c",
+    "packages/contracts/src/fakes/arms.co.test.ts": "0e672f8c6e2fa8743ff897a054f1fdfdb3fb33110827bfc3c9605d3cbdeead00",
+    "packages/contracts/src/fakes/index.ts": "bd8bc1ce7ca38445a9ed592b7d698a7bb8720283056c8440154d446b9d217ef9",
+    "packages/io/src/project/repair.ts": "18e9c66192440390321f73badcdbe4e91bf1b542e5df959a581755ba0893f59f",
+    "packages/io/src/project/arms.co.test.ts": "5f2ae65d8438bc4a0eb6c70ca3fe5f2cb539dfc3e85e32078edd47ac32731674",
+    "packages/schema/src/defaults.ts": "2d874b80f22660c1bb5a8551af23afe8ac6f827d1a3bc1ce58a752abf8d1a821",
+    "packages/schema/src/defaults.test.ts": "6920d95293ab71c769c47732f8a73ed4df6eddb6506db617ad9b850f6de541ba",
+    "apps/desktop/src/modes/animation/SettingsPanel.test.tsx": "4d63ef0148447c6e40922d61c4c8202532315a08b147dde7b34e48f566df9839",
+    "apps/desktop/src/modes/studio/arms/ArmsSection.test.tsx": "9d2494c468880424be834a9bbff30aac71c220ce851542b763fc8b0c214e0009"
+  }
+}

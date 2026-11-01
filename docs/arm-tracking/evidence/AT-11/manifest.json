@@ -1,0 +1,29 @@
+{
+  "version": "AT-11 CL v2",
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "dependsOn": "AT-03 CO v1、AT-05 CL v1",
+  "notes": "apps/desktop/src/dev/index.tsx は開発用の確認の入口（メニュー1項目と import 1行）だけを足した。契約への追加3つ（settings・cancelCalibration・diagnostics）はCOへ依頼中で、画面側の service.ts に同じ形を置いている。v2（2026-11-01）：service.ts の診断の型を契約（AT-03 CO v3）の型へ差し替え（動きは同じ）。ArmsSection.test.tsx はCOが契約に合わせて移行した版",
+  "sha256": {
+    "apps/desktop/src/dev/index.tsx": "cef64413c090efe79816fe0c60f8279ad3a0c94e21ba8ee03cbb997d3537c055",
+    "apps/desktop/src/modes/studio/arms/ArmCalibrationDialog.tsx": "308bb8194c29ce2ff1723ba554dded569af117abeaa8f3dd277dbbdf0c2d1817",
+    "apps/desktop/src/modes/studio/arms/ArmsSection.test.tsx": "9d2494c468880424be834a9bbff30aac71c220ce851542b763fc8b0c214e0009",
+    "apps/desktop/src/modes/studio/arms/ArmsSection.tsx": "02cce9aa4b99c42001afc5ee1fac1416a0fec0dac67c84192e2edd606caee1b0",
+    "apps/desktop/src/modes/studio/arms/Skeleton.tsx": "e10010392db41ae4f7dafe19eafd8694dc8268e18cda269de2e81572b61198d5",
+    "apps/desktop/src/modes/studio/arms/arms.css": "1e3eae3c9cd15819295bdb4c6d699721a7b463af1c4507cf97ede9f70508fd54",
+    "apps/desktop/src/modes/studio/arms/demoService.test.ts": "971a4bbf3526acb5942299f0ed85702da8845fb7ea2df7dbedca711d437e4340",
+    "apps/desktop/src/modes/studio/arms/demoService.ts": "90dbd4fdc9b3f7a17b2216d9179c5d3c3fd1fa0a16a1bc63017636cfcdbb7af8",
+    "apps/desktop/src/modes/studio/arms/flow.test.ts": "80a0774523e0e7491425ea958914c3233d2e1c4bb3a24791401f179090476a2d",
+    "apps/desktop/src/modes/studio/arms/flow.ts": "6b335fa70cd410bc2b29e715ac32b2498177dcbc354c8796fb874086b7471a19",
+    "apps/desktop/src/modes/studio/arms/index.ts": "6e1c37ce15a0736870a8a5c7efe80bfe8a5b5890136632005e8908790bd43199",
+    "apps/desktop/src/modes/studio/arms/labels.ts": "0b210c0033d83556e819a5bd3b9219d881856389aa57bdc5ae801ba92c8f2808",
+    "apps/desktop/src/modes/studio/arms/points.test.ts": "cf2fe86a9a6ad772370cbbffbbfb2205dd8d237459a9d39a8c3f4165a6550baa",
+    "apps/desktop/src/modes/studio/arms/points.ts": "3289fb4d7971c15d8fde72c80e6532a8a10a316090ac65fbbb28c695eebe0663",
+    "apps/desktop/src/modes/studio/arms/readiness.test.ts": "9b934ec1255100a6297924fa0bc2af7fe9f5fe3545c68df7dac3ae9ac733e6d2",
+    "apps/desktop/src/modes/studio/arms/readiness.ts": "5fec8155d756dfb7e38e8f6021d63c064a16d88fa3b66971207ca4a697200543",
+    "apps/desktop/src/modes/studio/arms/service.ts": "33ac828c1f22d10378a158ed8a55f7b2db625c9480feccc1904d08a299c8704b",
+    "apps/desktop/src/modes/studio/arms/testService.ts": "49c18379d2f8f204caa551555c755b591c94990d3852474c539df9154f18e9da",
+    "docs/arm-tracking/AT-11-studio-ui-design.md": "0e0e32f1e5f76058938f352559c83fffcc5c81e98ab2067643f4cc9bc1c7ebd1"
+  }
+}

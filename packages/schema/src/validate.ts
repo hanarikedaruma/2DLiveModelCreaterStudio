@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { armRigSchema, armTrackingSettingsSchema, armCalibrationSchema } from './arms';
 import { voiceSettingsSchema, voiceEnvironmentSchema } from './voice';
 import {
   BLEND_MODES,
@@ -376,6 +377,7 @@ function uniqueIds<T extends { id: string }>(items: T[], path: string, ctx: z.Re
 
 const model: z.ZodType<Model> = z
   .object({
+    armRigs: z.array(armRigSchema).optional(),
     parts: z.array(part),
     meshes: z.array(mesh),
     warps: z.array(warp),
@@ -566,6 +568,7 @@ const hotkey: z.ZodType<Hotkey> = z.object({
 
 export const projectSchema: z.ZodType<Project> = z
   .object({
+    armTracking: armTrackingSettingsSchema.optional(),
     schemaVersion: num.int(),
     id,
     name: z.string(),
@@ -591,6 +594,7 @@ export const projectSchema: z.ZodType<Project> = z
   });
 
 export const environmentSchema: z.ZodType<Environment> = z.object({
+  armCalibration: armCalibrationSchema.nullable().optional(),
   voice: voiceEnvironmentSchema.optional(),
   cameraDeviceId: z.string().nullable(),
   cameraCapture: z.object({

@@ -1,0 +1,21 @@
+{
+  "version": "AT-07 CL v1",
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "dependsOn": "AT-03 CO v1、AT-05 CL v1",
+  "notes": "packages/tracking/src/index.ts は AT-05 CL v1 の内容に AT-07 の export 行を1行足したもの",
+  "sha256": {
+    "packages/tracking/src/hands/classifier.test.ts": "410c270e329ed2e9ff1954b2cad79353b5e2ecacea5c4ae1dd3a1e8d40464294",
+    "packages/tracking/src/hands/classifier.ts": "2e23e907b8a2393fc0916a96519e102b2e598affd4497d66943a14b315449d31",
+    "packages/tracking/src/hands/features.ts": "f9da340869f5023ef705f1e4d3540dd3454000a05d44b08b5829d1906d0316a7",
+    "packages/tracking/src/hands/fixtures.ts": "01fe270de764d27258ea89bd10064dd05f04d99ea014c5d17ac3e738516a735c",
+    "packages/tracking/src/hands/fixtures/at01-shapes.json": "7f414586f153553f75f1c9e51d3b6f74ec2ec7585b27ee2bb496c2ae586aad4b",
+    "packages/tracking/src/hands/index.ts": "50fe87bf39d5ab65660db82c02003a8e4b20decf71ce2509d0a4a5a2cd2ab99a",
+    "packages/tracking/src/hands/regression.test.ts": "a7fc2e0ee1bc9dd3a0c83e4a7a267bb34c297f877e4fbb779a9e43304d6911f2",
+    "packages/tracking/src/hands/synthetic.ts": "882c3890793f8b6f998cdba09fc26e87c95b8d1f5fb25ed62758b9d0f6c52cab",
+    "packages/tracking/src/hands/tracker.test.ts": "0a3c250b0f844dd214c5124286018baecb4cb01b6f2f0f39c18de190be5c0305",
+    "packages/tracking/src/hands/tracker.ts": "dd422468afe4ab97301cea19b17526097671d863706b846a82dbc1070b6ec288",
+    "packages/tracking/src/index.ts": "04d7e36cbab4ee1254942cc9a5da8c33f64abbab0feafba75e1a5826332b5663"
+  }
+}

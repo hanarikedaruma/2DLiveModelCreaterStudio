@@ -26,7 +26,7 @@ describe('向きのあるワープの保存（I-078/I-079）', () => {
   it('7→8では既存格子・キーを変えず、角度の省略をそのまま保つ', () => {
     const p = { ...project(), schemaVersion: 7 },
       loaded = loadProjectJson(JSON.stringify(p));
-    expect(loaded.schemaVersion).toBe(11);
+    expect(loaded.schemaVersion).toBe(12);
     expect(loaded.model.warps).toEqual(p.model.warps);
     expect(Object.hasOwn(loaded.model.warps[0]!, 'angle')).toBe(false);
   });

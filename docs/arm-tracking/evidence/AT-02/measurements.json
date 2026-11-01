@@ -1,0 +1,67 @@
+{
+  "kind": "CO実装者の補助測定。CLの独立確認・実機性能・実素材の評価を含まない。",
+  "units": { "length": "px in prototype model space; world lengths include parent scale", "angle": "degrees" },
+  "maxBoneLengthErrorPx": 4.263256414560601e-14,
+  "maxWristAttachmentErrorPx": 0,
+  "minHandTransformDeterminant": 0.7224999999999978,
+  "wave": {
+    "frames": 601,
+    "fps": 60,
+    "maxDegreesPerFrame": {
+      "shoulder": 0.6271707796060042,
+      "elbow": 1.0452846326766831,
+      "wrist": 2.6132115816917056,
+      "handRotation": 3.1067658578637154
+    }
+  },
+  "restToPoint": {
+    "frames": 121,
+    "fps": 60,
+    "maxDegreesPerFrame": {
+      "shoulder": 1.024905092592597,
+      "elbow": 0.1499861111111116,
+      "wrist": 0,
+      "handRotation": 0.8749189814814997
+    }
+  },
+  "pointToFacePeace": {
+    "frames": 121,
+    "fps": 60,
+    "maxDegreesPerFrame": {
+      "shoulder": 0.24997685185185503,
+      "elbow": 1.6248495370370435,
+      "wrist": 0.374965277777779,
+      "handRotation": 1.4998611111111195
+    }
+  },
+  "targetExamples": [
+    {
+      "target": { "x": 1000, "y": -1000 },
+      "pose": { "shoulder": 143.36, "elbow": 0, "wrist": 0 },
+      "error": 1319.2132561058959,
+      "limited": true,
+      "reason": "可動域を優先：目標への誤差あり"
+    },
+    {
+      "target": { "x": -1000, "y": 1000 },
+      "pose": { "shoulder": -25, "elbow": 0, "wrist": 0 },
+      "error": 1128.4953988627706,
+      "limited": true,
+      "reason": "可動域を優先：目標への誤差あり"
+    },
+    {
+      "target": { "x": 78, "y": 240 },
+      "pose": { "shoulder": -24.6, "elbow": 145, "wrist": 0 },
+      "error": 68.62545224012861,
+      "limited": true,
+      "reason": "可動域を優先：目標への誤差あり"
+    },
+    {
+      "target": { "x": 95.35298564401783, "y": 145.64162308757102 },
+      "pose": { "shoulder": 110, "elbow": 130, "wrist": 0 },
+      "error": 0,
+      "limited": false,
+      "reason": "目標付近"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "bytes": 89240,
+  "hosts": {
+    "at01.localhost": 13,
+    "at01-netcheck.invalid": 4
+  },
+  "external": ["at01-netcheck.invalid"],
+  "netErrors": {
+    "-105": 5,
+    "-102": 3,
+    "-130": 5,
+    "-3": 2
+  }
+}

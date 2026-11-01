@@ -1,0 +1,12 @@
+{
+  "browser": "isolated headless Edge",
+  "viewportSizes": [
+    [1440, 1000],
+    [800, 600]
+  ],
+  "screenshots": ["preview-1440x1000.png", "preview-800x600.png"],
+  "checks": ["表示・横はみ出し", "手形切替", "親の回転・倍率", "手振りの再生・停止", "手首ドラッグ"],
+  "pageErrors": [],
+  "previewSha256": "34b0c126ecb904ee97c3c76260a6638030d28d62ad095d3e2a43041a78a87a29",
+  "checkScriptSha256": "dc1daa88fd66574418c3adcbc35f60ff9d31c339b62924664825cad925828154"
+}

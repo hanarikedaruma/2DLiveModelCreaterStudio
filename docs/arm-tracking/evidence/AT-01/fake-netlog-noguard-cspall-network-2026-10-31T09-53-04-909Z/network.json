@@ -1,0 +1,14 @@
+{
+  "bytes": 91193,
+  "hosts": {
+    "at01.localhost": 13,
+    "edge.microsoft.com": 4
+  },
+  "external": ["edge.microsoft.com"],
+  "netErrors": {
+    "-105": 5,
+    "-102": 3,
+    "-130": 5,
+    "-3": 2
+  }
+}

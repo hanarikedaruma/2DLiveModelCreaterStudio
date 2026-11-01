@@ -3,6 +3,13 @@ import type { CurveGuideResult, DeformPipeline, DeformedModel, DrawItem, TargetD
 import { IDENTITY, applyAffine, isIdentity, multiplyAffine, partAffine, type Affine } from './affine';
 import { applyWarp } from './warp';
 import { evaluateCurveGuide } from './curveGuide';
+import { armOwnedParts } from '../joint/evaluate';
+
+function jointRotation(pivot: { x: number; y: number }, degrees: number): Affine {
+  const a = Math.cos((degrees * Math.PI) / 180),
+    b = Math.sin((degrees * Math.PI) / 180);
+  return { a, b, c: -b, d: a, e: pivot.x - a * pivot.x + b * pivot.y, f: pivot.y - b * pivot.x - a * pivot.y };
+}
 
 function own<T>(record: Record<string, T>, id: string): T | undefined {
   return Object.hasOwn(record, id) ? record[id] : undefined;
@@ -70,11 +77,59 @@ export function createDeformPipeline(): DeformPipeline {
 
   return {
     deform(model: Model, deltas: TargetDeltas): DeformedModel {
-      if (!acyclicChecked.has(model.parts)) {
-        assertAcyclic(model.parts);
-        acyclicChecked.add(model.parts);
+      const arms = deltas.arms;
+      const armGates = { ...arms?.opacityGates };
+      const brokenRigs = new Set(arms?.issues.filter((i) => i.code === 'cycle').map((i) => i.rigId));
+      const brokenGroups = new Set(
+        (model.armRigs ?? []).filter((r) => brokenRigs.has(r.id)).flatMap((r) => Object.values(r.groups)),
+      );
+      // 壊れた腕の循環だけを評価用の写しで外す。保存データと無関係な部分は変えない。
+      const effectiveParts = brokenGroups.size
+        ? model.parts.map((p) => (brokenGroups.has(p.id) ? { ...p, parentId: null } : p))
+        : model.parts;
+      if (!acyclicChecked.has(effectiveParts)) {
+        assertAcyclic(effectiveParts);
+        acyclicChecked.add(effectiveParts);
       }
-      const parts = new Map(model.parts.map((p) => [p.id, p]));
+      const parts = new Map(effectiveParts.map((p) => [p.id, p]));
+      const joints = new Map(arms?.joints.map((j) => [j.partId, j]));
+      const attachments = new Map<string, { matrix: Affine; wrist: string }>();
+      for (const hand of arms?.hands ?? []) {
+        const matrix = jointRotation(hand.from, hand.rotation);
+        matrix.e += hand.to.x - hand.from.x;
+        matrix.f += hand.to.y - hand.from.y;
+        for (const id of hand.partIds) {
+          const rig = model.armRigs?.find((r) => Object.values(r.hands).some((h) => h.partIds.includes(id)));
+          if (rig) attachments.set(id, { matrix, wrist: rig.groups.wrist });
+        }
+      }
+      // 公開の変形APIへ外部から差分が渡されても、反転や頂点変形で腕の制約を迂回しない。
+      for (const rig of model.armRigs ?? []) {
+        const owned = armOwnedParts(model, rig),
+          affected = new Set(owned);
+        for (let id = rig.parentPartId; id !== null && !affected.has(id); id = parts.get(id)?.parentId ?? null)
+          affected.add(id);
+        if (
+          [...affected].some((id) => {
+            const p = parts.get(id),
+              d = own(deltas.transforms, id);
+            if (
+              d &&
+              (![d.scale.x, d.scale.y, d.rotation, d.position.x, d.position.y].every(Number.isFinite) ||
+                d.scale.x <= 0 ||
+                Math.abs(d.scale.x - d.scale.y) > 1e-6)
+            )
+              return true;
+            return (
+              owned.includes(id) &&
+              p?.meshId &&
+              (deltas.vertices[p.meshId]?.some((v) => v !== 0) ||
+                deltas.modelVertices?.[p.meshId]?.some((v) => v !== 0))
+            );
+          })
+        )
+          for (const id of owned) armGates[id] = 0;
+      }
       const meshes = new Map(model.meshes.map((m) => [m.id, m]));
       const warpsOf = new Map<string, Warp[]>();
       for (const w of model.warps) {
@@ -93,7 +148,13 @@ export function createDeformPipeline(): DeformPipeline {
       const matrices = new Map<string, Affine>();
       const matrixOf = (part: Part): Affine => {
         let m = matrices.get(part.id);
-        if (!m) matrices.set(part.id, (m = partAffine(part, own<TransformDelta>(deltas.transforms, part.id))));
+        if (!m) {
+          const joint = joints.get(part.id);
+          m = joint
+            ? jointRotation(joint.pivot, joint.rotation)
+            : partAffine(part, own<TransformDelta>(deltas.transforms, part.id));
+          matrices.set(part.id, m);
+        }
         return m;
       };
 
@@ -105,7 +166,10 @@ export function createDeformPipeline(): DeformPipeline {
         const parent = parentOf(part);
         const up = parent ? chainOf(parent) : { visible: true, opacity: 1 };
         const keyed = deltas.opacities ? own(deltas.opacities, part.id) : undefined;
-        c = { visible: up.visible && part.visible, opacity: up.opacity * (keyed ?? part.opacity) };
+        c = {
+          visible: up.visible && part.visible,
+          opacity: up.opacity * (keyed ?? part.opacity) * (armGates[part.id] ?? 1),
+        };
         chains.set(part.id, c);
         return c;
       };
@@ -192,6 +256,8 @@ export function createDeformPipeline(): DeformPipeline {
           pending = matrixOf(part);
         }
         for (let anc = parentOf(part); anc; anc = parentOf(anc)) {
+          const attachment = attachments.get(part.id);
+          if (attachment?.wrist === anc.id) pending = multiplyAffine(attachment.matrix, pending);
           applyWarps(warpsOf.get(anc.id));
           pending = multiplyAffine(matrixOf(anc), pending);
         }

@@ -36,7 +36,7 @@ describe('登録の設定', () => {
       p = s.store.get();
     await io.save('/i060', p, {});
     const loaded = await io.load('/i060');
-    expect(loaded.project.schemaVersion).toBe(11);
+    expect(loaded.project.schemaVersion).toBe(12);
     expect(loaded.project.animations[0]!.transition.startFromCurrent).toBe(true);
     expect(loaded.project.animations[0]!.tracks).toEqual(p.animations[0]!.tracks);
   });

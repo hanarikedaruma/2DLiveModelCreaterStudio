@@ -21,6 +21,7 @@ export interface MediaDevicesLike {
 // requestVideoFrameCallback が渡すフレームの情報のうち使うところ
 export interface VideoFrameInfo {
   presentedFrames: number; // 表示したフレームの通し番号（同じフレームを2度推定しないために使う）
+  captureTime?: number; // カメラが撮った時刻（ページの時計の ms）。WebView2 のカメラでは入る。無ければ通知の時刻を使う
 }
 
 // カメラの映像を流す先。推定には image を渡す

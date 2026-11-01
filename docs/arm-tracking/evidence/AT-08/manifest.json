@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "schemaVersion": 12,
+  "version": "AT-08 CO v1",
+  "sha256": {
+    "packages/core/src/joint/evaluate/evaluate.co.test.ts": "c94f67a15fc627d4800f32d191dd8d66499849869784a2f5836eab9e9318372e",
+    "packages/core/src/joint/evaluate/evaluate.ts": "9a3eb9e12c00426a39f70cdf1bd0384bb05212c8a1a364346bd9c7db301cfc5b",
+    "packages/core/src/joint/evaluate/index.ts": "a2834a19f564b3a7b983fbd415f2275b7722af542ad46ab4709a76279ab31e4c",
+    "packages/core/src/joint/evaluate/testing.ts": "76ddabb2e3054c275674d917ec283227fa953fd24fba92589c89806d40503b5b",
+    "packages/core/src/eval/evaluator.ts": "3d5c0d878f60bd43026fa54e920eee45c9eb17353f1e164fb6974dd282c6ca74",
+    "packages/core/src/deform/pipeline.ts": "f20f0111c98dc801b6682e03a648f8c1f2124baea0980d16a50b8b574bca4df4",
+    "packages/contracts/src/index.ts": "43074f177aa4b1d26cfbff09665849ec11e8124a25a195600aa97a1eb382a079",
+    "fixtures/scripts/generate-arm-tracking.ts": "454bbd1ac2609745c021d3ef1d604d2ace8d04244a4d91c9f0c28fea107a5b4d",
+    "fixtures/package.json": "d214581745a55c1e5f21ae74e36d8f30659cad490f7a4721efeeff125b48a8ac",
+    "fixtures/arm-tracking/assets/arm-tech.png": "3bee559c590995c55034cf72a3144c540bc1f4eed2280e8f9b9a57e4f2c2991f",
+    "fixtures/arm-tracking/bent-reference.json": "e18f51d0069a3b2aee8160b16e62f21e412c998c82482da8515526dc800d0687",
+    "fixtures/arm-tracking/missing-left.json": "7385a09f51dc5b6715df997967074b1ef72a4239d11bd8835627bdfdbe5bf92e",
+    "fixtures/arm-tracking/no-rig.json": "87b7688a5c2fb8b4aaf3abfde5cef56d226b664643d7434648f210b2ccb30e41",
+    "fixtures/arm-tracking/preview.png": "512537df3b4dc30cbbc25c5a9bfb2a8caff89205c44a1d7e1a30868da6f148e0",
+    "fixtures/arm-tracking/project.json": "dc822644ee0e809b6ea79797bff12972bf956114c2a07d5ac81774ba2245ed1c",
+    "fixtures/arm-tracking/README.md": "378bc55a8fea2b2a9224f8e55dc31c173a7d9a78267a0f4c3dd26617823b7a89",
+    "packages/core/src/index.ts": "c99de8dd90d27101f608cc9a139c29df011c109b411d9e38c8df2cfc2130aee5"
+  }
+}

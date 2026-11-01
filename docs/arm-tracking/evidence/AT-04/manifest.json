@@ -1,0 +1,31 @@
+{
+  "version": "AT-04 CL v1",
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "dependsOn": "AT-03 CO v1（docs/arm-tracking/evidence/AT-03/manifest.json）",
+  "sha256": {
+    "packages/tracking/src/source/body/assets.ts": "ff2ff262987875d3bd6a23eda651feeca20a75ea6d9dfff0dfc55bc9ae83b536",
+    "packages/tracking/src/source/body/guard.ts": "dfb26ac3dc902c1fccd8c1890405008aeed4b8c6d0d9acd051b484deb6f7276b",
+    "packages/tracking/src/source/body/protocol.ts": "f98e87aac8563bcdc9117939f8f5192f4e5c9803244761029df37eb71d3df5c8",
+    "packages/tracking/src/source/body/tracker.ts": "f24a6ad6bd41a4241a84e29b964da46bfff1732890e234eeeb7a21dae00075ed",
+    "packages/tracking/src/source/body/worker.ts": "708412fee61bb5f4fd5c8babe9130835a715a1867b1b17f2962356bb03911cdc",
+    "packages/tracking/src/source/body/workerCore.ts": "d8636e050376f8668ed18d185287ddd05d7636097d23e027d7c32ba824246a23",
+    "packages/tracking/src/source/body/vite-env.d.ts": "1b73e013af22c3bcc9e548c9f46e1f7d0e63df3c45ca32c5e96825aa8f76c18d",
+    "packages/tracking/src/source/body/guard.test.ts": "2d91e26fa702d8fb9855890d6770f9b596ddcd2e42e824b0a626017c8502090e",
+    "packages/tracking/src/source/body/workerCore.test.ts": "49f13a26063674f38461a543e096fac8e9fda255a8f577d4cfd3f67c678f38aa",
+    "packages/tracking/src/source/body/tracker.test.ts": "a5adb2fc42e7a6c06230330c3a3272bcf33bb2c9d6402f39098f7748f521202f",
+    "packages/tracking/src/source/body/source.test.ts": "9724df799c5f31a6932bfffd6e5f722d4cad66b2e6f9b676f0a5df459e16e662",
+    "packages/tracking/src/source/body/capture.test.ts": "0f641f82b363499493708a0785c43775b2c7db9e5230ebad925bc569615d351b",
+    "packages/tracking/src/source/source.ts": "a9c028ab5345f660eba28c13de2e21b76ebae3eb0fef5aa8a4e8a92f99c4f83d",
+    "packages/tracking/src/source/camera.ts": "ef03e4b5d17df2358103f17108fcf195e07622403db4c6c6fa7293ef3a24d166",
+    "packages/tracking/src/source/capture.ts": "1d3067a39d94663fa0a9e06935f5cdaeaf8f26c8dcf4524b50fdc1f3bfa56da2",
+    "packages/tracking/assets/pose_landmarker_lite.task": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+    "packages/tracking/assets/gesture_recognizer.task": "97952348cf6a6a4915c2ea1496b4b37ebabc50cbbf80571435643c455f2b0482",
+    "packages/tracking/assets/MODELS.md": "2b1e924e97699f7e0c18a9e38fb8c319a00a9a5b83019a47fc0188954b55a42f",
+    "prototypes/arm-tracking/at04-check/main.ts": "ca6b81c553445ea9d0a654516d1a82998edbb629647afdcb9b36ac72f9f2825a",
+    "prototypes/arm-tracking/at04-check/run.mjs": "f04aa29d287c93b2f6408830849ffea3b2ce04f4ac9f2f41e1a70a5b97ffda4b",
+    "prototypes/arm-tracking/at04-check/vite.config.mjs": "fa84df0bef8c7ccbe8c79f3e7b8f36a64124bb3dbac4171bb2aa80cb54a94d8a",
+    "prototypes/arm-tracking/at04-check/index.html": "66c82c6c0e862e289af122a97dd3ae0ac6144610040f8293f33c8c687bfd7df8"
+  }
+}

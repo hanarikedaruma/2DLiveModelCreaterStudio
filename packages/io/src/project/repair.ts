@@ -1,5 +1,5 @@
 // 開くときに直すもの（STEP3 のカード58）。検証は通るが、参照が切れているもの
-import type { Project } from '@app/schema';
+import { defaultArmTrackingSettings, inspectArmRigs, type Project } from '@app/schema';
 
 export interface RepairResult {
   project: Project;
@@ -10,6 +10,51 @@ export interface RepairResult {
 // 外した物理を指すパーツの physicsId も外す
 export function repairProject(project: Project): RepairResult {
   const repairs: string[] = [];
+  const armIssues = inspectArmRigs(project.model).filter((i) => i.severity === 'error');
+  if (armIssues.length) {
+    const invalid = new Set(armIssues.map((i) => i.rigId));
+    const sides = new Set(armIssues.map((i) => i.side));
+    const settings = project.armTracking ?? defaultArmTrackingSettings();
+    const rigs = project.model.armRigs!.map((r) => (invalid.has(r.id) && r.enabled ? { ...r, enabled: false } : r));
+    const changed =
+      rigs.some((r, i) => r !== project.model.armRigs![i]) || [...sides].some((s) => settings.sides[s].enabled);
+    if (changed) {
+      for (const side of sides)
+        repairs.push(
+          `腕 ${side} を無効にした: ${[...new Set(armIssues.filter((i) => i.side === side).map((i) => i.message))].join('・')}`,
+        );
+      project = {
+        ...project,
+        model: { ...project.model, armRigs: rigs },
+        ...(project.armTracking
+          ? {
+              armTracking: {
+                ...settings,
+                sides: {
+                  L: sides.has('L') ? { ...settings.sides.L, enabled: false } : settings.sides.L,
+                  R: sides.has('R') ? { ...settings.sides.R, enabled: false } : settings.sides.R,
+                },
+              },
+            }
+          : {}),
+      };
+    }
+  }
+  if (project.armTracking) {
+    const settings = project.armTracking;
+    for (const side of ['L', 'R'] as const) {
+      if (settings.sides[side].enabled && !project.model.armRigs?.some((r) => r.side === side && r.enabled)) {
+        repairs.push(`使用できるリグが無い腕 ${side} の追従をOFFにした`);
+        project = {
+          ...project,
+          armTracking: {
+            ...project.armTracking!,
+            sides: { ...project.armTracking!.sides, [side]: { ...settings.sides[side], enabled: false } },
+          },
+        };
+      }
+    }
+  }
   const colliders = project.model.shoulderColliders?.filter(
     (c) =>
       project.model.parts.some((p) => p.id === c.partId && p.kind === 'image' && p.meshId === c.meshId) &&

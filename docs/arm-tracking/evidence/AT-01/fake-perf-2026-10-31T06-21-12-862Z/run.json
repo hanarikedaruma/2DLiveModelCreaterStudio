@@ -1,0 +1,4438 @@
+{
+  "suite": "perf",
+  "label": "fake",
+  "csp": "html",
+  "browserArgs": ["--remote-debugging-port=9341", "--use-fake-device-for-media-stream=fps=30"],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "brands": [
+      {
+        "brand": "Chromium",
+        "version": "156"
+      },
+      {
+        "brand": "Microsoft Edge",
+        "version": "156"
+      },
+      {
+        "brand": "Not:A-Brand",
+        "version": "8"
+      },
+      {
+        "brand": "Microsoft Edge WebView2",
+        "version": "156"
+      }
+    ],
+    "hardwareConcurrency": 16,
+    "devicePixelRatio": 1.25,
+    "viewport": {
+      "width": 1440,
+      "height": 844
+    },
+    "webgl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4050 Laptop GPU (0x000028A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "videoFrame": true,
+    "offscreenCanvas": true,
+    "worker": true,
+    "origin": "http://at01.localhost"
+  },
+  "manifest": {
+    "commit": "6c3e78c552896f75037dce4226f48da222257994",
+    "host": "28f814dc65776a108aa7ef50f091885f7804e3df80c66142bc112ccda2eab176",
+    "dist": {
+      "gesture_recognizer.task": "97952348cf6a6a4915c2ea1496b4b37ebabc50cbbf80571435643c455f2b0482",
+      "index.html": "557955402ef8e84c30007a2e5e9cd918adefd13946327354bf860724b5d62f8e",
+      "pose_landmarker_full.task": "5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1",
+      "pose_landmarker_lite.task": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+      "assets/face_landmarker-y6w30NYK.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "assets/index-BtNGWT7w.js": "df8989649d03fc0e9e2bf4430c631e02c9c922c37193ffe5e6eb3eb73ace3e1e",
+      "assets/vision_bundle-9zIsgJJP.js": "2ea0be7b51a795825e828eeaf757b3f571dd38fb377f1780d307e2714af3d7a8",
+      "assets/vision_bundle-C_wuZTxH.js": "1e5fb30e62692ac31f25e4d30d62ce2dc5c7e493e8077523524450dc465eb038",
+      "assets/vision_wasm_internal-DfxxaBYC.js": "e170ee67dd4e16c1a6fcd8840a206687e5a59b22c20e4a902bc445b095454d73",
+      "assets/vision_wasm_internal-DuEsUYlF.wasm": "8da277a733926eacd0474b8704b36742d6ec3231c57a860c5b889dff8f1df886",
+      "assets/vision_wasm_module_internal-ByE7dwxA.js": "da8934057f147b622e82cfb4c0dbd85461c598e268588b5a8ba9ca963a8ff82d",
+      "assets/vision_wasm_module_internal-WYnc_Af7.wasm": "2dabd8e23c60984628beb7bb338764c81a08e6837145273f59578684b5d53c1b",
+      "assets/worker-kR9toRC3.js": "8c90188d604e2c7185c2c9026e0abfcb4c5bf4227916c98401ef2c6aee206c08"
+    }
+  },
+  "results": [
+    {
+      "name": "A-face",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": false,
+        "hands": false
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": false,
+          "hands": false,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "off",
+          "error": null,
+          "ready": null
+        },
+        "net": [],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:21:33.442Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": false,
+          "hands": false,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "off",
+          "error": null,
+          "ready": null
+        },
+        "net": [],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15016.5,
+        "camera": {
+          "fps": 29.967036260113872,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.5,
+            "p95": 6.600000000000364,
+            "max": 7.299999999999272
+          },
+          "captureSource": "captureTime",
+          "sentFps": 0,
+          "createMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          }
+        },
+        "face": {
+          "fps": 29.967036260113872,
+          "inferMs": {
+            "count": 450,
+            "p50": 10.850000023841858,
+            "p95": 21.009999990463246,
+            "max": 30.800000071525574
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 14.65000002384113,
+            "p95": 26.16500001311341,
+            "max": 35.20000007152521
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "detectedRatio": null
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "queueMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "resultPostMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 128.45882721354948,
+          "intervalMs": {
+            "count": 1928,
+            "p50": 7,
+            "p95": 13.900000000001455,
+            "max": 34.599999999998545
+          },
+          "p99IntervalMs": 20.899999999999636,
+          "slowFrames": 9,
+          "slowRatio": 0.00466804979253112,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 701.63671875,
+        "privateMB": 558.23828125
+      }
+    },
+    {
+      "name": "B-face-pose",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": false
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": false,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 310.60000002384186,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:21:56.110Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": false,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 310.60000002384186,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15007.299999952316,
+        "camera": {
+          "fps": 29.98540710197236,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.599999999998545,
+            "p95": 6.599999999998545,
+            "max": 15.900000000001455
+          },
+          "captureSource": "captureTime",
+          "sentFps": 26.72032943975759,
+          "createMs": {
+            "count": 401,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.2999999523162842
+          }
+        },
+        "face": {
+          "fps": 29.98540710197236,
+          "inferMs": {
+            "count": 450,
+            "p50": 12.600000023841858,
+            "p95": 21.510000002384178,
+            "max": 28.800000071525574
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 17,
+            "p95": 25.655000028609717,
+            "max": 34.00000002384331
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 26.72032943975759,
+          "inferMs": {
+            "count": 401,
+            "p50": 11.100000023841858,
+            "p95": 19.59999990463257,
+            "max": 24.5
+          },
+          "ageAtArrivalMs": {
+            "count": 401,
+            "p50": 19.59999997615523,
+            "p95": 28.20000007152703,
+            "max": 36.20000007152703
+          },
+          "captureToDisplayMs": {
+            "count": 401,
+            "p50": 20.900000047680805,
+            "p95": 30.20000007152703,
+            "max": 51.10000004768517
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 401,
+            "p50": 0.1998535394668579,
+            "p95": 0.2998535633087158,
+            "max": 0.39985358715057373
+          },
+          "queueMs": {
+            "count": 401,
+            "p50": 0,
+            "p95": 0.09999990463256836,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 401,
+            "p50": 1.800146460533142,
+            "p95": 9.000146508216858,
+            "max": 20.100146532058716
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 121.65206841845648,
+          "intervalMs": {
+            "count": 1825,
+            "p50": 7,
+            "p95": 14,
+            "max": 27.80000000000291
+          },
+          "p99IntervalMs": 20.900000000001455,
+          "slowFrames": 5,
+          "slowRatio": 0.0027397260273972603,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 938.42578125,
+        "privateMB": 790.8203125
+      }
+    },
+    {
+      "name": "C-normal",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 445.40000009536743,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 392.8000000715256,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:22:19.513Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 445.40000009536743,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 392.8000000715256,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15000.700000047684,
+        "camera": {
+          "fps": 29.99860006523493,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.7999999999956344,
+            "p95": 6.700000000004366,
+            "max": 7.400000000001455
+          },
+          "captureSource": "captureTime",
+          "sentFps": 26.065450278904127,
+          "createMs": {
+            "count": 392,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.19999992847442627
+          }
+        },
+        "face": {
+          "fps": 29.99860006523493,
+          "inferMs": {
+            "count": 450,
+            "p50": 14.150000035762787,
+            "p95": 25.154999971389767,
+            "max": 32.10000002384186
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 18.999999988078343,
+            "p95": 28.830000032184373,
+            "max": 37.50000002384331
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 26.065450278904127,
+          "inferMs": {
+            "count": 391,
+            "p50": 11.099999904632568,
+            "p95": 19.44999998807907,
+            "max": 32.39999997615814
+          },
+          "ageAtArrivalMs": {
+            "count": 391,
+            "p50": 27.600000023841858,
+            "p95": 54.55000005960392,
+            "max": 88.09999999999854
+          },
+          "captureToDisplayMs": {
+            "count": 391,
+            "p50": 31.20000007152703,
+            "p95": 60.49999998807834,
+            "max": 98.70000007152703
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 26.065450278904127,
+          "inferMs": {
+            "count": 391,
+            "p50": 10.299999952316284,
+            "p95": 14.599999964237213,
+            "max": 30.299999952316284
+          },
+          "ageAtArrivalMs": {
+            "count": 391,
+            "p50": 27.600000023841858,
+            "p95": 54.55000005960392,
+            "max": 88.09999999999854
+          },
+          "captureToDisplayMs": {
+            "count": 391,
+            "p50": 31.20000007152703,
+            "p95": 60.49999998807834,
+            "max": 98.70000007152703
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 391,
+            "p50": 0.09990239143371582,
+            "p95": 0.19990241527557373,
+            "max": 0.4999023675918579
+          },
+          "queueMs": {
+            "count": 391,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 391,
+            "p50": 1.200097680091858,
+            "p95": 6.100097596645355,
+            "max": 17.900097608566284
+          },
+          "mainDropped": 1,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 111.03923386263149,
+          "intervalMs": {
+            "count": 1665,
+            "p50": 7,
+            "p95": 20.900000000001455,
+            "max": 28.099999999998545
+          },
+          "p99IntervalMs": 27.700000000004366,
+          "slowFrames": 22,
+          "slowRatio": 0.013213213213213212,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": {
+        "page": {
+          "type": "probe",
+          "violated": true,
+          "directive": "connect-src",
+          "error": "Failed to fetch"
+        },
+        "worker": {
+          "type": "probe",
+          "violated": false,
+          "directive": null,
+          "error": "Failed to fetch"
+        }
+      },
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1067.2421875,
+        "privateMB": 928.7421875
+      }
+    },
+    {
+      "name": "D-lite-hands15",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 15
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 15,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 345.60000002384186,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 315.39999997615814,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:22:42.914Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 15,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 345.60000002384186,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 315.39999997615814,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15000.5,
+        "camera": {
+          "fps": 29.99900003333222,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.599999999991269,
+            "p95": 6.655000000001014,
+            "max": 7.19999999999709
+          },
+          "captureSource": "captureTime",
+          "sentFps": 26.46578447385087,
+          "createMs": {
+            "count": 397,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.20000004768371582
+          }
+        },
+        "face": {
+          "fps": 29.99900003333222,
+          "inferMs": {
+            "count": 450,
+            "p50": 12.400000035762787,
+            "p95": 23.600000023841858,
+            "max": 30.399999976158142
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 16.69999999999709,
+            "p95": 28.855000023842145,
+            "max": 38.59999997615523
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 26.399120029332355,
+          "inferMs": {
+            "count": 397,
+            "p50": 10.800000071525574,
+            "p95": 17.799999952316284,
+            "max": 27
+          },
+          "ageAtArrivalMs": {
+            "count": 397,
+            "p50": 23.500000071522663,
+            "p95": 32.54000003814872,
+            "max": 54.900000047680805
+          },
+          "captureToDisplayMs": {
+            "count": 397,
+            "p50": 25.199999976161052,
+            "p95": 51.1399999857007,
+            "max": 71.09999997615523
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 11.066297790073664,
+          "inferMs": {
+            "count": 167,
+            "p50": 12.199999928474426,
+            "p95": 14.809999990463254,
+            "max": 24.800000071525574
+          },
+          "ageAtArrivalMs": {
+            "count": 167,
+            "p50": 27.800000071525574,
+            "p95": 41.25000001430596,
+            "max": 54.900000047680805
+          },
+          "captureToDisplayMs": {
+            "count": 167,
+            "p50": 31.600000023841858,
+            "p95": 53.479999976156975,
+            "max": 67.4000000476808
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 397,
+            "p50": -3.400146484375,
+            "p95": -3.300146460533142,
+            "max": -3.200146436691284
+          },
+          "queueMs": {
+            "count": 397,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 397,
+            "p50": 4.900146484375,
+            "p95": 11.92014648914337,
+            "max": 22.600146532058716
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 119.17464721103325,
+          "intervalMs": {
+            "count": 1787,
+            "p50": 7,
+            "p95": 20.80000000000291,
+            "max": 34.70000000001164
+          },
+          "p99IntervalMs": 21,
+          "slowFrames": 9,
+          "slowRatio": 0.005036373810856184,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1082.37109375,
+        "privateMB": 951.140625
+      }
+    },
+    {
+      "name": "E-pose-full",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "poseModel": "full"
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "full",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 407,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 376.5,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:23:06.170Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "full",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 407,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 376.5,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15006,
+        "camera": {
+          "fps": 29.854724776755965,
+          "captureToCallbackMs": {
+            "count": 448,
+            "p50": 3.5,
+            "p95": 8.095000000001157,
+            "max": 36
+          },
+          "captureSource": "captureTime",
+          "sentFps": 25.38984406237505,
+          "createMs": {
+            "count": 381,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.19999992847442627
+          }
+        },
+        "face": {
+          "fps": 29.854724776755965,
+          "inferMs": {
+            "count": 448,
+            "p50": 14.949999988079071,
+            "p95": 29.39499997496604,
+            "max": 51.700000047683716
+          },
+          "ageMs": {
+            "count": 448,
+            "p50": 19.300000047689537,
+            "p95": 41.660000040531294,
+            "max": 63.200000047683716
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 25.323204051712647,
+          "inferMs": {
+            "count": 380,
+            "p50": 11.799999952316284,
+            "p95": 19.705000042915344,
+            "max": 37.39999997615814
+          },
+          "ageAtArrivalMs": {
+            "count": 380,
+            "p50": 28.85000004768517,
+            "p95": 57.025000026220376,
+            "max": 75.99999997616396
+          },
+          "captureToDisplayMs": {
+            "count": 380,
+            "p50": 34.39999998807616,
+            "p95": 79.32500004888135,
+            "max": 112.5
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 25.323204051712647,
+          "inferMs": {
+            "count": 380,
+            "p50": 11.199999988079071,
+            "p95": 17.404999977350236,
+            "max": 30.100000023841858
+          },
+          "ageAtArrivalMs": {
+            "count": 380,
+            "p50": 28.85000004768517,
+            "p95": 57.025000026220376,
+            "max": 75.99999997616396
+          },
+          "captureToDisplayMs": {
+            "count": 380,
+            "p50": 34.39999998807616,
+            "p95": 79.32500004888135,
+            "max": 112.5
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 380,
+            "p50": -3.399999976158142,
+            "p95": -3.299999952316284,
+            "max": -3.1999999284744263
+          },
+          "queueMs": {
+            "count": 380,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 380,
+            "p50": 4.799999952316284,
+            "p95": 11.40999997854233,
+            "max": 27.40000009536743
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 105.30317176621226,
+          "intervalMs": {
+            "count": 1579,
+            "p50": 7,
+            "p95": 21,
+            "max": 48.60000000000582
+          },
+          "p99IntervalMs": 34.80000000000291,
+          "slowFrames": 59,
+          "slowRatio": 0.037365421152628246,
+          "longTasks": 1,
+          "longTaskMs": 54
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1127.87109375,
+        "privateMB": 990.67578125
+      }
+    },
+    {
+      "name": "F-worker-cpu",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "delegate": "CPU",
+        "fallback": false
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "CPU",
+          "fallback": false,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "CPU",
+                "loadMs": 314.5,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "CPU",
+                "loadMs": 322.5,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:23:29.706Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "CPU",
+          "fallback": false,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "CPU",
+                "loadMs": 314.5,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "CPU",
+                "loadMs": 322.5,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15003.899999976158,
+        "camera": {
+          "fps": 29.792254014003714,
+          "captureToCallbackMs": {
+            "count": 447,
+            "p50": 3.3999999999941792,
+            "p95": 6.87000000001717,
+            "max": 11.39999999999418
+          },
+          "captureSource": "captureTime",
+          "sentFps": 13.863062270498373,
+          "createMs": {
+            "count": 404,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.20000004768371582
+          }
+        },
+        "face": {
+          "fps": 29.792254014003714,
+          "inferMs": {
+            "count": 447,
+            "p50": 11.899999976158142,
+            "p95": 21.04000000953674,
+            "max": 28.800000071525574
+          },
+          "ageMs": {
+            "count": 447,
+            "p50": 15.600000023841858,
+            "p95": 25.899999976158142,
+            "max": 40.80000004768954
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 13.863062270498373,
+          "inferMs": {
+            "count": 209,
+            "p50": 25.600000023841858,
+            "p95": 39.499999976158136,
+            "max": 59.60000002384186
+          },
+          "ageAtArrivalMs": {
+            "count": 209,
+            "p50": 91.69999997616105,
+            "p95": 139.5399999952293,
+            "max": 189.50000007153722
+          },
+          "captureToDisplayMs": {
+            "count": 209,
+            "p50": 96.4000000476808,
+            "p95": 150.79999999998836,
+            "max": 192.09999997616978
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 13.929711608337307,
+          "inferMs": {
+            "count": 209,
+            "p50": 38.700000047683716,
+            "p95": 64.35999994277954,
+            "max": 71.39999997615814
+          },
+          "ageAtArrivalMs": {
+            "count": 209,
+            "p50": 91.69999997616105,
+            "p95": 139.5399999952293,
+            "max": 189.50000007153722
+          },
+          "captureToDisplayMs": {
+            "count": 209,
+            "p50": 96.4000000476808,
+            "p95": 150.79999999998836,
+            "max": 192.09999997616978
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 209,
+            "p50": -3.399951219558716,
+            "p95": -3.299951195716858,
+            "max": -3.1999512910842896
+          },
+          "queueMs": {
+            "count": 209,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 209,
+            "p50": 4.699951171875,
+            "p95": 16.119951200485225,
+            "max": 25.69995129108429
+          },
+          "mainDropped": 195,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 122.45197242997493,
+          "intervalMs": {
+            "count": 1837,
+            "p50": 7,
+            "p95": 14,
+            "max": 34.70000000001164
+          },
+          "p99IntervalMs": 20.964000000003132,
+          "slowFrames": 10,
+          "slowRatio": 0.005443658138268917,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1006.1015625,
+        "privateMB": 861.11328125
+      }
+    },
+    {
+      "name": "G-imagebitmap",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "transfer": "imagebitmap"
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "imagebitmap",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 317.89999997615814,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 341.60000002384186,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:23:52.972Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "imagebitmap",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 317.89999997615814,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 341.60000002384186,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15002,
+        "camera": {
+          "fps": 29.99600053326223,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.5,
+            "p95": 6.800000000004365,
+            "max": 18.5
+          },
+          "captureSource": "captureTime",
+          "sentFps": 29.462738301559792,
+          "createMs": {
+            "count": 443,
+            "p50": 12.899999976158142,
+            "p95": 23.760000061988823,
+            "max": 38.90000009536743
+          }
+        },
+        "face": {
+          "fps": 29.99600053326223,
+          "inferMs": {
+            "count": 450,
+            "p50": 12.5,
+            "p95": 23.699999994039537,
+            "max": 38.300000071525574
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 17.100000023841858,
+            "p95": 28.610000039335855,
+            "max": 48.599999976169784
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 29.462738301559792,
+          "inferMs": {
+            "count": 442,
+            "p50": 11.199999928474426,
+            "p95": 18.994999998807906,
+            "max": 31.899999976158142
+          },
+          "ageAtArrivalMs": {
+            "count": 442,
+            "p50": 49.55000002383895,
+            "p95": 65.48500004886445,
+            "max": 92.6000000476779
+          },
+          "captureToDisplayMs": {
+            "count": 442,
+            "p50": 52.500000047672074,
+            "p95": 76.38499997973413,
+            "max": 127.00000002383604
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 29.462738301559792,
+          "inferMs": {
+            "count": 442,
+            "p50": 10.5,
+            "p95": 21.28500006794929,
+            "max": 34.10000002384186
+          },
+          "ageAtArrivalMs": {
+            "count": 442,
+            "p50": 49.55000002383895,
+            "p95": 65.48500004886445,
+            "max": 92.6000000476779
+          },
+          "captureToDisplayMs": {
+            "count": 442,
+            "p50": 52.500000047672074,
+            "p95": 76.38499997973413,
+            "max": 127.00000002383604
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 442,
+            "p50": -6.800097703933716,
+            "p95": -6.700097680091858,
+            "max": -6.300097703933716
+          },
+          "queueMs": {
+            "count": 442,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 442,
+            "p50": 8.900097727775574,
+            "p95": 20.09509776830673,
+            "max": 37.300097703933716
+          },
+          "mainDropped": 1,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 116.04100115374112,
+          "intervalMs": {
+            "count": 1740,
+            "p50": 7,
+            "p95": 14.10000000000582,
+            "max": 41.70000000001164
+          },
+          "p99IntervalMs": 27.800000000017462,
+          "slowFrames": 24,
+          "slowRatio": 0.013793103448275862,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1065.6328125,
+        "privateMB": 945.7734375
+      }
+    },
+    {
+      "name": "H-normal-noload",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 0,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 0,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 293.2999999523163,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 296.7000000476837,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:24:16.118Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 0,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 293.2999999523163,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 296.7000000476837,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15002.199999928474,
+        "camera": {
+          "fps": 29.995600645381707,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.6000000000058208,
+            "p95": 6.7999999999883585,
+            "max": 10.39999999999418
+          },
+          "captureSource": "captureTime",
+          "sentFps": 25.929530335674407,
+          "createMs": {
+            "count": 389,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.20000004768371582
+          }
+        },
+        "face": {
+          "fps": 29.995600645381707,
+          "inferMs": {
+            "count": 450,
+            "p50": 12.199999928474426,
+            "p95": 25.155000036954874,
+            "max": 34.10000002384186
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 17.6999999761465,
+            "p95": 29.5,
+            "max": 39.60000000000582
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 25.862873445351337,
+          "inferMs": {
+            "count": 389,
+            "p50": 11.399999976158142,
+            "p95": 14.200000047683716,
+            "max": 18
+          },
+          "ageAtArrivalMs": {
+            "count": 389,
+            "p50": 25.5,
+            "p95": 32.62000001430278,
+            "max": 63.099999976169784
+          },
+          "captureToDisplayMs": {
+            "count": 389,
+            "p50": 29.200000071519753,
+            "p95": 54.18000003338092,
+            "max": 92.60000000000582
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 25.862873445351337,
+          "inferMs": {
+            "count": 389,
+            "p50": 9.600000023841858,
+            "p95": 13.200000047683716,
+            "max": 18
+          },
+          "ageAtArrivalMs": {
+            "count": 389,
+            "p50": 25.5,
+            "p95": 32.62000001430278,
+            "max": 63.099999976169784
+          },
+          "captureToDisplayMs": {
+            "count": 389,
+            "p50": 29.200000071519753,
+            "p95": 54.18000003338092,
+            "max": 92.60000000000582
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 389,
+            "p50": -6.800146460533142,
+            "p95": -6.700146436691284,
+            "max": -6.500146508216858
+          },
+          "queueMs": {
+            "count": 389,
+            "p50": 0,
+            "p95": 0.09999990463256836,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 389,
+            "p50": 7.100146412849426,
+            "p95": 7.760146498680111,
+            "max": 23.600146412849426
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 121.70804740278366,
+          "intervalMs": {
+            "count": 1825,
+            "p50": 7,
+            "p95": 20.79999999998836,
+            "max": 34.79999999998836
+          },
+          "p99IntervalMs": 21,
+          "slowFrames": 12,
+          "slowRatio": 0.006575342465753425,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1064.21875,
+        "privateMB": 941.78515625
+      }
+    },
+    {
+      "name": "I-720p-face",
+      "config": {
+        "deviceId": null,
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": false,
+        "hands": false
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 1280,
+          "height": 720,
+          "fps": 30,
+          "face": true,
+          "pose": false,
+          "hands": false,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 1280,
+          "height": 720,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "off",
+          "error": null,
+          "ready": null
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184276.7998535633,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184287.09985351562,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:24:38.449Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 1280,
+          "height": 720,
+          "fps": 30,
+          "face": true,
+          "pose": false,
+          "hands": false,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 1280,
+          "height": 720,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "off",
+          "error": null,
+          "ready": null
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184276.7998535633,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184287.09985351562,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15004.399999976158,
+        "camera": {
+          "fps": 29.924555463778187,
+          "captureToCallbackMs": {
+            "count": 449,
+            "p50": 3.7999999999883585,
+            "p95": 7,
+            "max": 10.699999999982538
+          },
+          "captureSource": "captureTime",
+          "sentFps": 0,
+          "createMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          }
+        },
+        "face": {
+          "fps": 29.924555463778187,
+          "inferMs": {
+            "count": 449,
+            "p50": 6.800000071525574,
+            "p95": 17.5000000476837,
+            "max": 30
+          },
+          "ageMs": {
+            "count": 449,
+            "p50": 11.599999976169784,
+            "p95": 22.260000014316752,
+            "max": 37.20000002384768
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "detectedRatio": null
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "queueMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "resultPostMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 131.91063687895965,
+          "intervalMs": {
+            "count": 1978,
+            "p50": 7,
+            "p95": 13.89999999999418,
+            "max": 34.89999999999418
+          },
+          "p99IntervalMs": 20.800000000017462,
+          "slowFrames": 3,
+          "slowRatio": 0.0015166835187057635,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 746.62109375,
+        "privateMB": 621.4453125
+      }
+    },
+    {
+      "name": "J-720p-normal",
+      "config": {
+        "deviceId": null,
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 1280,
+          "height": 720,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 1280,
+          "height": 720,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 396.40000009536743,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 433.89999997615814,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184276.7998535633,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184287.09985351562,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:25:01.885Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 1280,
+          "height": 720,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 1280,
+          "height": 720,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 396.40000009536743,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 433.89999997615814,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184276.7998535633,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184287.09985351562,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15022.799999952316,
+        "camera": {
+          "fps": 29.954469206900736,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.5,
+            "p95": 6.800000000004365,
+            "max": 7.400000000023283
+          },
+          "captureSource": "captureTime",
+          "sentFps": 28.090635567360245,
+          "createMs": {
+            "count": 422,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          }
+        },
+        "face": {
+          "fps": 29.954469206900736,
+          "inferMs": {
+            "count": 450,
+            "p50": 11,
+            "p95": 20.899999976158142,
+            "max": 29.199999928474426
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 15.300000047689537,
+            "p95": 25.855000019073483,
+            "max": 35.39999999999418
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 28.0240700802338,
+          "inferMs": {
+            "count": 422,
+            "p50": 11.299999952316284,
+            "p95": 19.399999976158142,
+            "max": 26.5
+          },
+          "ageAtArrivalMs": {
+            "count": 422,
+            "p50": 26.400000059613376,
+            "p95": 44.079999976168615,
+            "max": 59.000000047672074
+          },
+          "captureToDisplayMs": {
+            "count": 422,
+            "p50": 31.950000011915108,
+            "p95": 52.6999999761465,
+            "max": 75.70000007151975
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 28.090635567360245,
+          "inferMs": {
+            "count": 422,
+            "p50": 9.599999904632568,
+            "p95": 12.600000023841858,
+            "max": 25
+          },
+          "ageAtArrivalMs": {
+            "count": 422,
+            "p50": 26.400000059613376,
+            "p95": 44.079999976168615,
+            "max": 59.000000047672074
+          },
+          "captureToDisplayMs": {
+            "count": 422,
+            "p50": 31.950000011915108,
+            "p95": 52.6999999761465,
+            "max": 75.70000007151975
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 422,
+            "p50": -10.299951195716858,
+            "p95": -10.199951171875,
+            "max": -9.999951243400574
+          },
+          "queueMs": {
+            "count": 422,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 422,
+            "p50": 10.599951267242432,
+            "p95": 14.69995129108429,
+            "max": 32.29995119571686
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 118.80818870789444,
+          "intervalMs": {
+            "count": 1784,
+            "p50": 7,
+            "p95": 14,
+            "max": 27.900000000023283
+          },
+          "p99IntervalMs": 20.900000000023283,
+          "slowFrames": 9,
+          "slowRatio": 0.005044843049327354,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1075.359375,
+        "privateMB": 1025.62890625
+      }
+    },
+    {
+      "name": "K-720p-lite",
+      "config": {
+        "deviceId": null,
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 15
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 1280,
+          "height": 720,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 15,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 1280,
+          "height": 720,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 336.60000002384186,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 347.1999999284744,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184276.7998535633,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184287.09985351562,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 230044.40004885197,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 230052.40004885197,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:25:25.025Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 1280,
+          "height": 720,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 15,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 1280,
+          "height": 720,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 336.60000002384186,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 347.1999999284744,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 44438.79985356331,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "connect-src",
+            "at": 60702.800000071526,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 65989,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68034.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 68043.99990236759,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91175.39985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 91185.89985346794,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114830.80000007153,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 114843.5,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138145.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 138151.0000487566,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161281.99990224838,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 161293.39990234375,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184276.7998535633,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 184287.09985351562,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 230044.40004885197,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 230052.40004885197,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 15011.100000023842,
+        "camera": {
+          "fps": 29.977816415804657,
+          "captureToCallbackMs": {
+            "count": 450,
+            "p50": 3.5,
+            "p95": 7,
+            "max": 12.89999999999418
+          },
+          "captureSource": "captureTime",
+          "sentFps": 28.378999540295077,
+          "createMs": {
+            "count": 426,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.19999992847442627
+          }
+        },
+        "face": {
+          "fps": 29.977816415804657,
+          "inferMs": {
+            "count": 450,
+            "p50": 11.399999976158142,
+            "p95": 21.420000034570677,
+            "max": 40.40000009536743
+          },
+          "ageMs": {
+            "count": 450,
+            "p50": 15.750000011918019,
+            "p95": 26.419999997624817,
+            "max": 42.20000007151975
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 28.378999540295077,
+          "inferMs": {
+            "count": 426,
+            "p50": 11.75,
+            "p95": 20.30000004172325,
+            "max": 31.200000047683716
+          },
+          "ageAtArrivalMs": {
+            "count": 426,
+            "p50": 24.250000047686626,
+            "p95": 41.35000002979359,
+            "max": 64.20000002384768
+          },
+          "captureToDisplayMs": {
+            "count": 426,
+            "p50": 27.099999976169784,
+            "p95": 53.35000004173344,
+            "max": 80.3000000238535
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 11.591422347444468,
+          "inferMs": {
+            "count": 174,
+            "p50": 11.399999976158142,
+            "p95": 15.599999946355819,
+            "max": 23.100000023841858
+          },
+          "ageAtArrivalMs": {
+            "count": 174,
+            "p50": 28.44999999999709,
+            "p95": 48.63500004767993,
+            "max": 64.20000002384768
+          },
+          "captureToDisplayMs": {
+            "count": 174,
+            "p50": 42.400000023830216,
+            "p95": 55.7450000715311,
+            "max": 80.3000000238535
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 426,
+            "p50": -10.399951219558716,
+            "p95": -10.299951195716858,
+            "max": -9.999951243400574
+          },
+          "queueMs": {
+            "count": 426,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 426,
+            "p50": 12.499951243400574,
+            "p95": 17.149951189756393,
+            "max": 35.499951243400574
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 114.38703613590474,
+          "intervalMs": {
+            "count": 1716,
+            "p50": 7,
+            "p95": 14,
+            "max": 41.69999999998254
+          },
+          "p99IntervalMs": 21,
+          "slowFrames": 14,
+          "slowRatio": 0.008158508158508158,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 1107.9921875,
+        "privateMB": 1034.67578125
+      }
+    },
+    {
+      "name": "net-after-stop",
+      "net": [
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 44438.79985356331,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "from": "page",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "connect-src",
+          "at": 60702.800000071526,
+          "blocked": true
+        },
+        {
+          "type": "net",
+          "from": "page",
+          "url": "http://127.0.0.1:9/at01-csp-probe-page",
+          "method": "connect-src",
+          "at": 65989,
+          "blocked": true
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 68034.39990234375,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 68043.99990236759,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 91175.39985346794,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 91185.89985346794,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 114830.80000007153,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 114843.5,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 138145.0000487566,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 138151.0000487566,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 161281.99990224838,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 161293.39990234375,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 184276.7998535633,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 184287.09985351562,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 230044.40004885197,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 230052.40004885197,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 253483.30004882812,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 253493.60004878044,
+          "blocked": true,
+          "from": "worker"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "warning: W1031 06:21:14.360000 2196592 face_landmarker_graph.cc:180] Sets FaceBlendshapesGraph acceleration to xnnpack by default.",
+    "warning: W1031 06:21:14.384999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:21:37.039000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:22:00.055000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:22:00.387000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:22:00.448999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:22:01.535000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:22:01.536000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:22:01.582000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "error: Connecting to 'https://odml.pa.googleapis.com/v1/log' violates the following Content Security Policy directive: \"connect-src 'self' ipc: http://ipc.localhost\". The action has been blocked.",
+    "error: Fetch API cannot load https://odml.pa.googleapis.com/v1/log. Refused to connect because it violates the document's Content Security Policy.",
+    "error: Connecting to 'http://127.0.0.1:9/at01-csp-probe-page' violates the following Content Security Policy directive: \"connect-src 'self' ipc: http://ipc.localhost\". The action has been blocked.",
+    "error: Fetch API cannot load http://127.0.0.1:9/at01-csp-probe-page. Refused to connect because it violates the document's Content Security Policy.",
+    "warning: W1031 06:22:23.545999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:22:23.824999 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:22:23.862000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:22:24.848000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:22:24.848999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:22:24.892999 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:22:46.756999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:22:47.087000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:22:47.135000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:22:48.294000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:22:48.295000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:22:48.334000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:23:10.312000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:23:10.635000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:23:10.768000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:10.788999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:23:10.844000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:10.860000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:10.862000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:10.863000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:10.903000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:23:33.576000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:23:33.867000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:23:33.916999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:23:34.870000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:34.870000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:34.913999 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:23:56.744999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:23:56.991000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:23:57.041999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:23:57.883000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:57.883000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:23:57.928999 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:24:42.364999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:24:42.683000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:24:42.798000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:24:43.788999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:24:43.788999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:24:43.839000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:24:43.871000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:25:05.564000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:25:05.854000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:25:05.911000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:25:06.923000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:25:06.923000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:25:06.960000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 06:25:07.694000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX."
+  ]
+}

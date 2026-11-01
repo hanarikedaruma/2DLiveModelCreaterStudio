@@ -28,7 +28,7 @@ describe('保存と読み込み', () => {
     expect(await fs.list(`${DIR}/assets`)).toEqual(project.assets.map((a) => `${a.id}.png`).sort());
     const text = await fs.readText(`${DIR}/project.json`);
     expect(text).toBe(projectToJson(project));
-    expect(text.startsWith('{\n  "schemaVersion": 11,')).toBe(true);
+    expect(text.startsWith('{\n  "schemaVersion": 12,')).toBe(true);
   });
 
   it('保存先のフォルダが無ければ途中のフォルダも作る（unsaved/<id>/ など）', async () => {

@@ -223,6 +223,7 @@ export interface ClosedEyeLine {
 }
 
 export interface Model {
+  armRigs?: import('./arms').ArmRig[]; // 省略はリグ無し。AT-03 / schemaVersion 12
   parts: Part[];
   meshes: Mesh[];
   warps: Warp[];
@@ -237,7 +238,8 @@ export interface Model {
   setupHints: { closedLineL: ClosedEyeLine | null; closedLineR: ClosedEyeLine | null };
 }
 export interface Project {
-  schemaVersion: number; // 現在は10（現在の姿勢を始点にするアニメーション）
+  schemaVersion: number; // 現在は12（腕・手のリグと追従設定）
+  armTracking?: import('./arms').ArmTrackingSettings; // 省略は両側OFF
   id: Id;
   name: string;
   assets: Asset[];
@@ -382,6 +384,7 @@ export interface Hotkey {
 // ---- Environment（PCごとの設定でプロジェクトの外に保存） ----
 
 export interface Environment {
+  armCalibration?: import('./arms').ArmCalibration | null; // 省略は未校正
   voice?: import('./voice').VoiceEnvironment;
   cameraDeviceId: string | null;
   cameraCapture: { mode: 'auto' | 'manual'; width: number; height: number; fps: number };

@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "schemaVersion": 12,
+  "version": "AT-10 CO v2",
+  "sha256": {
+    "packages/core/src/setup/arms/commands.co.test.ts": "4eb694fc66fb5792de3d59832293e0d1af8606a038b1eb49c391cb77439f118c",
+    "packages/core/src/setup/arms/commands.ts": "53469cba8f4b5c1885427ac480052266b36cc5c06eb001897a15a08bc936209d",
+    "packages/core/src/setup/arms/index.ts": "731bfc33c7090b5d9c2dbe322cf0c1236c25419bd904df5ebd9986e478610be2",
+    "packages/core/src/setup/arms/protect.ts": "d49f7aae7cb784f3840a437fca496bf978fc9f33886da95524ae0ba2cbe6c4da",
+    "packages/core/src/setup/autoSetup.ts": "9f34872110d114ba77689298972073de2670cd05dbb7dfa03762be63d7b597dc",
+    "packages/core/src/setup/index.ts": "f4488383581ade4d10639d86e46c4a956f81d9e1bfebfb0e43732caecc74aefd",
+    "apps/desktop/src/modes/modeling/arms/ArmPanel.co.test.tsx": "e00514375865d6de2e851761274e80441e418df6b59068e13dfbaa51d31a585a",
+    "apps/desktop/src/modes/modeling/arms/ArmPanel.tsx": "f8a1b0a2d7b7f3bb3c0b10bb49af059361fbb167b966b1529e43391032d82297",
+    "apps/desktop/src/modes/modeling/arms/arms.css": "f67a87e82a4f656733b79e96f566c26994fed752e3bbf9df1e82766e45b2fd20",
+    "apps/desktop/src/modes/modeling/arms/index.ts": "db5ef92293a6f6b8f3afbe44ac45c347eb8adb9fdfbedec9c17db67cea92a34a",
+    "apps/desktop/src/modes/modeling/arms/tool.ts": "96254e3f82265d21ec797db666bf73b1f9726d31c67518130e91c91bf0c22ab2",
+    "apps/desktop/src/modes/index.ts": "bf9fcc1c654a708cb574f2ca72876bfa027692a83d8fc698b8814e4ffe5128b4",
+    "prototypes/arm-tracking/at10-check/run.mjs": "e81f384323df033e71006a48081352e6168f979a1eabdc739e171cb2eefeab8f",
+    "packages/core/src/index.ts": "c99de8dd90d27101f608cc9a139c29df011c109b411d9e38c8df2cfc2130aee5"
+  },
+  "notes": "CL指摘2件（自動セットアップの新素材順・クリックだけの関節移動）を修正。手首基準角の指定、指方向の初期値、腕以外の確認値保護も追加。CLの独立試験は期待値を変更せず再実行。"
+}

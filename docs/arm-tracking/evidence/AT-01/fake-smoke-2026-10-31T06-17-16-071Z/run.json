@@ -1,0 +1,1825 @@
+{
+  "suite": "smoke",
+  "label": "fake",
+  "csp": "html",
+  "browserArgs": ["--remote-debugging-port=9341", "--use-fake-device-for-media-stream"],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "brands": [
+      {
+        "brand": "Chromium",
+        "version": "156"
+      },
+      {
+        "brand": "Microsoft Edge",
+        "version": "156"
+      },
+      {
+        "brand": "Not:A-Brand",
+        "version": "8"
+      },
+      {
+        "brand": "Microsoft Edge WebView2",
+        "version": "156"
+      }
+    ],
+    "hardwareConcurrency": 16,
+    "devicePixelRatio": 1.25,
+    "viewport": {
+      "width": 1440,
+      "height": 844
+    },
+    "webgl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4050 Laptop GPU (0x000028A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "videoFrame": true,
+    "offscreenCanvas": true,
+    "worker": true,
+    "origin": "http://at01.localhost"
+  },
+  "manifest": {
+    "commit": "6c3e78c552896f75037dce4226f48da222257994",
+    "host": "28f814dc65776a108aa7ef50f091885f7804e3df80c66142bc112ccda2eab176",
+    "dist": {
+      "gesture_recognizer.task": "97952348cf6a6a4915c2ea1496b4b37ebabc50cbbf80571435643c455f2b0482",
+      "index.html": "b5c54b660e03f207c7f06adc46bae18b104ac3e2b4617ac6b9d1accb1fca4822",
+      "pose_landmarker_full.task": "5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1",
+      "pose_landmarker_lite.task": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+      "assets/face_landmarker-y6w30NYK.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "assets/index-DJCBGD-g.js": "09c73d646111115fd9186ffdef02ed7766a061b33b84aceb1373e55c5b601683",
+      "assets/vision_bundle-9zIsgJJP.js": "2ea0be7b51a795825e828eeaf757b3f571dd38fb377f1780d307e2714af3d7a8",
+      "assets/vision_bundle-C_wuZTxH.js": "1e5fb30e62692ac31f25e4d30d62ce2dc5c7e493e8077523524450dc465eb038",
+      "assets/vision_wasm_internal-DfxxaBYC.js": "e170ee67dd4e16c1a6fcd8840a206687e5a59b22c20e4a902bc445b095454d73",
+      "assets/vision_wasm_internal-DuEsUYlF.wasm": "8da277a733926eacd0474b8704b36742d6ec3231c57a860c5b889dff8f1df886",
+      "assets/vision_wasm_module_internal-ByE7dwxA.js": "da8934057f147b622e82cfb4c0dbd85461c598e268588b5a8ba9ca963a8ff82d",
+      "assets/vision_wasm_module_internal-WYnc_Af7.wasm": "2dabd8e23c60984628beb7bb338764c81a08e6837145273f59578684b5d53c1b",
+      "assets/worker-4r53UV0l.js": "0c7c984c86c77e22b60b03ac56005cfbfa3901836ccbe62a0705c6a111abc8e2"
+    }
+  },
+  "results": [
+    {
+      "name": "normal",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 3291.600000023842,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.5,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:17:31.795Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 3291.600000023842,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.5,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3009.2999999523163,
+        "camera": {
+          "fps": 4.319941514706406,
+          "captureToCallbackMs": {
+            "count": 13,
+            "p50": 16.600000000000364,
+            "p95": 43.699999999998894,
+            "max": 49.69999999999891
+          },
+          "captureSource": "captureTime",
+          "sentFps": 0,
+          "createMs": {
+            "count": 13,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          }
+        },
+        "face": {
+          "fps": 4.6522447081453615,
+          "inferMs": {
+            "count": 14,
+            "p50": 71.20000004768372,
+            "p95": 628.7550000071521,
+            "max": 1352.3999999761581
+          },
+          "ageMs": {
+            "count": 14,
+            "p50": 82.64999996423694,
+            "p95": 671.254999966621,
+            "max": 1376.699999904633
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "detectedRatio": null
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "queueMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "resultPostMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "mainDropped": 14,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 9.61230374879846,
+          "intervalMs": {
+            "count": 24,
+            "p50": 17.350000000000364,
+            "p95": 230.2449999999998,
+            "max": 1356.0999999999995
+          },
+          "p99IntervalMs": 1098.5919999999992,
+          "slowFrames": 10,
+          "slowRatio": 0.4166666666666667,
+          "longTasks": 8,
+          "longTaskMs": 2281
+        }
+      },
+      "probe": {
+        "page": {
+          "type": "probe",
+          "violated": true,
+          "directive": "connect-src",
+          "error": "Failed to fetch"
+        },
+        "worker": {
+          "type": "probe",
+          "violated": false,
+          "directive": null,
+          "error": "Failed to fetch"
+        }
+      },
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 857.51171875,
+        "privateMB": 808.35546875
+      }
+    },
+    {
+      "name": "gpu-fail",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "simulate": "gpu-fail"
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "gpu-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "unavailable",
+          "error": "GPU: INTERNAL: Service \"kGpuService\", required by node mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__inferencecalculator__mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__InferenceCalculator, was not provided and cannot be created: emscripten_webgl_create_context() returned error 0; StartRun failed; StartGraph failed\n=== Source Location Trace: ===\nthird_party/mediapipe/framework/calculator_graph.cc:737\nthird_party/mediapipe/framework/calculator_graph.cc:768\nthird_party/mediapipe/framework/calculator_graph.cc:637\nresearch/drishti/app/pursuit/wasm/graph_utils.cc:108\n / CPU: ModuleFactory not set. / GPU: ModuleFactory not set. / CPU: ModuleFactory not set.",
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": null,
+                "loadMs": 265.2000000476837,
+                "errors": [
+                  "GPU: INTERNAL: Service \"kGpuService\", required by node mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__inferencecalculator__mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__InferenceCalculator, was not provided and cannot be created: emscripten_webgl_create_context() returned error 0; StartRun failed; StartGraph failed\n=== Source Location Trace: ===\nthird_party/mediapipe/framework/calculator_graph.cc:737\nthird_party/mediapipe/framework/calculator_graph.cc:768\nthird_party/mediapipe/framework/calculator_graph.cc:637\nresearch/drishti/app/pursuit/wasm/graph_utils.cc:108\n",
+                  "CPU: ModuleFactory not set."
+                ]
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.3999999761581421,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:17:40.600Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "gpu-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "unavailable",
+          "error": "GPU: INTERNAL: Service \"kGpuService\", required by node mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__inferencecalculator__mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__InferenceCalculator, was not provided and cannot be created: emscripten_webgl_create_context() returned error 0; StartRun failed; StartGraph failed\n=== Source Location Trace: ===\nthird_party/mediapipe/framework/calculator_graph.cc:737\nthird_party/mediapipe/framework/calculator_graph.cc:768\nthird_party/mediapipe/framework/calculator_graph.cc:637\nresearch/drishti/app/pursuit/wasm/graph_utils.cc:108\n / CPU: ModuleFactory not set. / GPU: ModuleFactory not set. / CPU: ModuleFactory not set.",
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": null,
+                "loadMs": 265.2000000476837,
+                "errors": [
+                  "GPU: INTERNAL: Service \"kGpuService\", required by node mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__inferencecalculator__mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__InferenceCalculator, was not provided and cannot be created: emscripten_webgl_create_context() returned error 0; StartRun failed; StartGraph failed\n=== Source Location Trace: ===\nthird_party/mediapipe/framework/calculator_graph.cc:737\nthird_party/mediapipe/framework/calculator_graph.cc:768\nthird_party/mediapipe/framework/calculator_graph.cc:637\nresearch/drishti/app/pursuit/wasm/graph_utils.cc:108\n",
+                  "CPU: ModuleFactory not set."
+                ]
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.3999999761581421,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3001.899999976158,
+        "camera": {
+          "fps": 18.987974283104936,
+          "captureToCallbackMs": {
+            "count": 57,
+            "p50": 3.100000000002183,
+            "p95": 7.019999999999708,
+            "max": 7.100000000002183
+          },
+          "captureSource": "captureTime",
+          "sentFps": 0,
+          "createMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          }
+        },
+        "face": {
+          "fps": 18.987974283104936,
+          "inferMs": {
+            "count": 57,
+            "p50": 12.600000023841858,
+            "p95": 25.74000000953674,
+            "max": 31.40000009536743
+          },
+          "ageMs": {
+            "count": 57,
+            "p50": 16.29999992847297,
+            "p95": 29.639999995232202,
+            "max": 34.5
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "detectedRatio": null
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "queueMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "resultPostMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 125.06269854539383,
+          "intervalMs": {
+            "count": 374,
+            "p50": 7,
+            "p95": 14,
+            "max": 34.79999999999927
+          },
+          "p99IntervalMs": 27.800000000000253,
+          "slowFrames": 5,
+          "slowRatio": 0.013368983957219251,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 829.5078125,
+        "privateMB": 779.90234375
+      }
+    },
+    {
+      "name": "gesture-fail",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "simulate": "gesture-fail"
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "gesture-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 273.7999999523163,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.5,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:17:48.220Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "gesture-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 273.7999999523163,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.5,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3004.4000000953674,
+        "camera": {
+          "fps": 19.97070962524812,
+          "captureToCallbackMs": {
+            "count": 60,
+            "p50": 2.900000000001455,
+            "p95": 6.709999999997126,
+            "max": 10.69999999999709
+          },
+          "captureSource": "captureTime",
+          "sentFps": 19.97070962524812,
+          "createMs": {
+            "count": 60,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          }
+        },
+        "face": {
+          "fps": 19.97070962524812,
+          "inferMs": {
+            "count": 60,
+            "p50": 15.199999988079071,
+            "p95": 22.175000023841854,
+            "max": 27.799999952316284
+          },
+          "ageMs": {
+            "count": 60,
+            "p50": 19.44999998807907,
+            "p95": 27.544999977348922,
+            "max": 32.19999990463111
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 19.97070962524812,
+          "inferMs": {
+            "count": 60,
+            "p50": 12.200000047683716,
+            "p95": 19.605000019073486,
+            "max": 23
+          },
+          "ageAtArrivalMs": {
+            "count": 60,
+            "p50": 21.14999990463184,
+            "p95": 29.164999999998688,
+            "max": 34.39999995231483
+          },
+          "captureToDisplayMs": {
+            "count": 60,
+            "p50": 22.30000000000109,
+            "p95": 30.57499997258055,
+            "max": 35.79999992847297
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 60,
+            "p50": -0.09995114803314209,
+            "p95": 0.00004887580871582031,
+            "max": 0.10004878044128418
+          },
+          "queueMs": {
+            "count": 60,
+            "p50": 0,
+            "p95": 0.0049999952316281335,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 60,
+            "p50": 2.049951136112213,
+            "p95": 10.404951101541519,
+            "max": 12.299951195716858
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 121.43047771550566,
+          "intervalMs": {
+            "count": 364,
+            "p50": 7,
+            "p95": 14.08499999999876,
+            "max": 34.69999999999709
+          },
+          "p99IntervalMs": 20.900000000001455,
+          "slowFrames": 2,
+          "slowRatio": 0.005494505494505495,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 904.75,
+        "privateMB": 839.1640625
+      }
+    },
+    {
+      "name": "worker-fail",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "simulate": "worker-fail"
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "worker-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "unavailable",
+          "error": "Worker を読み込めない",
+          "ready": null
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 28524.60004878044,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:17:55.543Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "worker-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "unavailable",
+          "error": "Worker を読み込めない",
+          "ready": null
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 28524.60004878044,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3002.899999976158,
+        "camera": {
+          "fps": 19.980685337665715,
+          "captureToCallbackMs": {
+            "count": 60,
+            "p50": 3.349999999998545,
+            "p95": 7.009999999999854,
+            "max": 7.299999999999272
+          },
+          "captureSource": "captureTime",
+          "sentFps": 0,
+          "createMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          }
+        },
+        "face": {
+          "fps": 19.980685337665715,
+          "inferMs": {
+            "count": 60,
+            "p50": 12.150000035762787,
+            "p95": 21.67499999999999,
+            "max": 29
+          },
+          "ageMs": {
+            "count": 60,
+            "p50": 16.04999997615778,
+            "p95": 26.93999994993209,
+            "max": 37.59999995231556
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "detectedRatio": null
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "queueMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "resultPostMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 130.44203502919083,
+          "intervalMs": {
+            "count": 391,
+            "p50": 7,
+            "p95": 13.900000000001455,
+            "max": 34.70000000000073
+          },
+          "p99IntervalMs": 20.810000000002404,
+          "slowFrames": 1,
+          "slowRatio": 0.0025575447570332483,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 796.6640625,
+        "privateMB": 698.51953125
+      }
+    },
+    {
+      "name": "transfer-fail",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "simulate": "transfer-fail"
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "transfer-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 466.2000000476837,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.2999999523162842,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 28524.60004878044,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:18:03.288Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "transfer-fail"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 466.2000000476837,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.2999999523162842,
+                "errors": ["GPU: ModuleFactory not set.", "CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 28524.60004878044,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3001.6999999284744,
+        "camera": {
+          "fps": 19.98867308572799,
+          "captureToCallbackMs": {
+            "count": 60,
+            "p50": 3,
+            "p95": 6.709999999997307,
+            "max": 7.200000000004366
+          },
+          "captureSource": "captureTime",
+          "sentFps": 19.322383982870388,
+          "createMs": {
+            "count": 60,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.20000004768371582
+          }
+        },
+        "face": {
+          "fps": 19.98867308572799,
+          "inferMs": {
+            "count": 60,
+            "p50": 16.750000059604645,
+            "p95": 22.529999995231627,
+            "max": 25.600000023841858
+          },
+          "ageMs": {
+            "count": 60,
+            "p50": 19.1499999880798,
+            "p95": 27.759999907015295,
+            "max": 32.79999992847297
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 19.322383982870388,
+          "inferMs": {
+            "count": 58,
+            "p50": 11.849999964237213,
+            "p95": 20.17500007152557,
+            "max": 23.700000047683716
+          },
+          "ageAtArrivalMs": {
+            "count": 58,
+            "p50": 21.19999995231774,
+            "p95": 29.74999999284664,
+            "max": 34.89999995231483
+          },
+          "captureToDisplayMs": {
+            "count": 58,
+            "p50": 22.49999995231701,
+            "p95": 31.219999985694084,
+            "max": 36.79999992847297
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 58,
+            "p50": -0.20014643669128418,
+            "p95": -0.10014641284942627,
+            "max": -0.10014641284942627
+          },
+          "queueMs": {
+            "count": 58,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 58,
+            "p50": 2.050146520137787,
+            "p95": 10.590146493911742,
+            "max": 12.400146484375
+          },
+          "mainDropped": 0,
+          "transferErrors": 2,
+          "stale": 0
+        },
+        "render": {
+          "fps": 123.67195093340496,
+          "intervalMs": {
+            "count": 369,
+            "p50": 7,
+            "p95": 14,
+            "max": 21
+          },
+          "p99IntervalMs": 20.900000000001455,
+          "slowFrames": 0,
+          "slowRatio": 0,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 934.421875,
+        "privateMB": 849.2421875
+      }
+    },
+    {
+      "name": "cpu",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "delegate": "CPU",
+        "fallback": false
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "CPU",
+          "fallback": false,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "CPU",
+                "loadMs": 480.09999990463257,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.30000007152557373,
+                "errors": ["CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 28524.60004878044,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 43642.39985346794,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:18:11.164Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "CPU",
+          "fallback": false,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 20
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "CPU",
+                "loadMs": 480.09999990463257,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": null,
+                "loadMs": 0.30000007152557373,
+                "errors": ["CPU: ModuleFactory not set."]
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [
+          {
+            "type": "net",
+            "from": "page",
+            "url": "http://127.0.0.1:9/at01-csp-probe-page",
+            "method": "connect-src",
+            "at": 10459.099999904633,
+            "blocked": true
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 13297.099853515625,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 28524.60004878044,
+            "blocked": true,
+            "from": "worker"
+          },
+          {
+            "type": "net",
+            "url": "https://odml.pa.googleapis.com/v1/log",
+            "method": "POST",
+            "at": 43642.39985346794,
+            "blocked": true,
+            "from": "worker"
+          }
+        ],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3006.1999999284744,
+        "camera": {
+          "fps": 19.9587519131886,
+          "captureToCallbackMs": {
+            "count": 60,
+            "p50": 2.9499999999970896,
+            "p95": 6.714999999997234,
+            "max": 7.400000000001455
+          },
+          "captureSource": "captureTime",
+          "sentFps": 19.9587519131886,
+          "createMs": {
+            "count": 60,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          }
+        },
+        "face": {
+          "fps": 19.9587519131886,
+          "inferMs": {
+            "count": 60,
+            "p50": 12.050000011920929,
+            "p95": 23.755000048875807,
+            "max": 33.199999928474426
+          },
+          "ageMs": {
+            "count": 60,
+            "p50": 14.499999964238668,
+            "p95": 27.94499997615821,
+            "max": 41.19999990463111
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 19.9587519131886,
+          "inferMs": {
+            "count": 60,
+            "p50": 26.80000001192093,
+            "p95": 38.630000019073485,
+            "max": 40.700000047683716
+          },
+          "ageAtArrivalMs": {
+            "count": 60,
+            "p50": 31.54999992847661,
+            "p95": 42.34999990582327,
+            "max": 47.89999995231483
+          },
+          "captureToDisplayMs": {
+            "count": 60,
+            "p50": 36.49999995231701,
+            "p95": 47.949999928474384,
+            "max": 72.7999999761596
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 0,
+          "inferMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "ageAtArrivalMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "captureToDisplayMs": {
+            "count": 0,
+            "p50": null,
+            "p95": null,
+            "max": null
+          },
+          "anyHandRatio": null,
+          "twoHandsRatio": null
+        },
+        "worker": {
+          "transferMs": {
+            "count": 60,
+            "p50": -0.10014641284942627,
+            "p95": 0.004853606224059774,
+            "max": 0.1998535394668579
+          },
+          "queueMs": {
+            "count": 60,
+            "p50": 0,
+            "p95": 0,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 60,
+            "p50": 0.40014636516571045,
+            "p95": 1.800146460533142,
+            "max": 3.8001463413238525
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 129.77048305310922,
+          "intervalMs": {
+            "count": 389,
+            "p50": 7,
+            "p95": 13.900000000001455,
+            "max": 34.80000000000291
+          },
+          "p99IntervalMs": 20.900000000001455,
+          "slowFrames": 2,
+          "slowRatio": 0.005141388174807198,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": null,
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 944.40234375,
+        "privateMB": 848.47265625
+      }
+    },
+    {
+      "name": "net-after-stop",
+      "net": [
+        {
+          "type": "net",
+          "from": "page",
+          "url": "http://127.0.0.1:9/at01-csp-probe-page",
+          "method": "connect-src",
+          "at": 10459.099999904633,
+          "blocked": true
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 13297.099853515625,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 28524.60004878044,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 43642.39985346794,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 51559.69985353947,
+          "blocked": true,
+          "from": "worker"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "warning: W1031 06:17:24.064000 2196592 face_landmarker_graph.cc:180] Sets FaceBlendshapesGraph acceleration to xnnpack by default.",
+    "warning: W1031 06:17:24.123000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:17:27.556999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: Connecting to 'http://127.0.0.1:9/at01-csp-probe-page' violates the following Content Security Policy directive: \"connect-src 'self' ipc: http://ipc.localhost\". The action has been blocked.",
+    "error: Fetch API cannot load http://127.0.0.1:9/at01-csp-probe-page. Refused to connect because it violates the document's Content Security Policy.",
+    "warning: W1031 06:17:36.512000 2196592 gl_context_webgl.cc:116] Creating a context with WebGL 2 failed: UNKNOWN: emscripten_webgl_create_context() returned error 0\n=== Source Location Trace: ===\nthird_party/mediapipe/gpu/gl_context_webgl.cc:92",
+    "warning: W1031 06:17:36.512999 2196592 gl_context_webgl.cc:117] Fall back on WebGL 1.",
+    "warning: W1031 06:17:36.513999 2196592 gl_context_webgl.cc:116] Creating a context with WebGL 2 failed: UNKNOWN: emscripten_webgl_create_context() returned error 0\n=== Source Location Trace: ===\nthird_party/mediapipe/gpu/gl_context_webgl.cc:92",
+    "warning: W1031 06:17:36.513999 2196592 gl_context_webgl.cc:117] Fall back on WebGL 1.",
+    "warning: W1031 06:17:36.515000 2196592 gl_context_webgl.cc:116] Creating a context with WebGL 2 failed: UNKNOWN: emscripten_webgl_create_context() returned error 0\n=== Source Location Trace: ===\nthird_party/mediapipe/gpu/gl_context_webgl.cc:92",
+    "warning: W1031 06:17:36.515000 2196592 gl_context_webgl.cc:117] Fall back on WebGL 1.",
+    "error: E1031 06:17:36.515000 2196592 gl_graph_runner_internal.cc:255] StartGraph failed: INTERNAL: Service \"kGpuService\", required by node mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__inferencecalculator__mediapipe_tasks_vision_pose_landmarker_poselandmarkergraph__mediapipe_tasks_vision_pose_detector_posedetectorgraph__mediapipe_tasks_core_inferencesubgraph__InferenceCalculator, was not provided and cannot be created: emscripten_webgl_create_context() returned error 0; StartRun failed\n=== Source Location Trace: ===\nthird_party/mediapipe/framework/calculator_graph.cc:737\nthird_party/mediapipe/framework/calculator_graph.cc:768\nthird_party/mediapipe/framework/calculator_graph.cc:637\nresearch/drishti/app/pursuit/wasm/graph_utils.cc:108",
+    "warning: W1031 06:17:44.160000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:17:59.233999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:18:07.078000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:18:07.273999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:18:07.307000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+  ]
+}

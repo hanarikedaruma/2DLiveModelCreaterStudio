@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "schemaVersion": 12,
+  "version": "AT-06 CO v1",
+  "sha256": {
+    "packages/core/src/joint/math/constraints.ts": "339be214dd6f89d2221a83a215e83af86a3f1b7aa2eb36d9d9900cf2b496ed5a",
+    "packages/core/src/joint/math/index.ts": "f48a2e3973c521981443cb249f3c47fda37ff331dbacb872710128d90c25ac93",
+    "packages/core/src/joint/math/kinematics.co.test.ts": "83790b6ea8b8e7ef50baca6d7ea34cc6d8e8f84862adf6fc00843dca89c46bf2",
+    "packages/core/src/joint/math/kinematics.ts": "8f9cd7d3e648a0f4bf9cbbe2b22fd46e089efe8fe2575efb7729c1ddd6e5d481",
+    "packages/core/src/index.ts": "c99de8dd90d27101f608cc9a139c29df011c109b411d9e38c8df2cfc2130aee5"
+  }
+}

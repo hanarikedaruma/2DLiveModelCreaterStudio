@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "schemaVersion": 12,
+  "version": "AT-10 CO v1",
+  "sha256": {
+    "packages/core/src/setup/arms/commands.co.test.ts": "c9b87e45f0aaf9e95c1a15ab8236434fdbe11d47d03d93e9f5cda3fc5fe26a62",
+    "packages/core/src/setup/arms/commands.ts": "5414e6c5d0693e5923e16b51f31ce9111ff0586d54955f9fd757a6d5367ef759",
+    "packages/core/src/setup/arms/index.ts": "731bfc33c7090b5d9c2dbe322cf0c1236c25419bd904df5ebd9986e478610be2",
+    "packages/core/src/setup/arms/protect.ts": "bd03c7f686ad83fabbbb81c3ccf97d2a2e5a5cb7354e0754157e392953134c94",
+    "packages/core/src/setup/autoSetup.ts": "9f34872110d114ba77689298972073de2670cd05dbb7dfa03762be63d7b597dc",
+    "packages/core/src/setup/index.ts": "f4488383581ade4d10639d86e46c4a956f81d9e1bfebfb0e43732caecc74aefd",
+    "apps/desktop/src/modes/modeling/arms/ArmPanel.co.test.tsx": "0d4ebc1e8e1917be37fb19a5d7c6c00652d28d7973d41f65d3d8adcfd5b1a10f",
+    "apps/desktop/src/modes/modeling/arms/ArmPanel.tsx": "b44e23742559621dd23bfcdde0a10d7a427937c57314a01ddf8511750e66967b",
+    "apps/desktop/src/modes/modeling/arms/arms.css": "f67a87e82a4f656733b79e96f566c26994fed752e3bbf9df1e82766e45b2fd20",
+    "apps/desktop/src/modes/modeling/arms/index.ts": "db5ef92293a6f6b8f3afbe44ac45c347eb8adb9fdfbedec9c17db67cea92a34a",
+    "apps/desktop/src/modes/modeling/arms/tool.ts": "10ad002e7fb988a59c1f0f14c96e057f4f5e72a0b78866abbe0014446d48d4a1",
+    "apps/desktop/src/modes/index.ts": "bf9fcc1c654a708cb574f2ca72876bfa027692a83d8fc698b8814e4ffe5128b4",
+    "prototypes/arm-tracking/at10-check/run.mjs": "b0eb755e89b4f5452c8ffbbd55ad0f1082f9b2296043fb193e680c02652bac76",
+    "packages/core/src/index.ts": "c99de8dd90d27101f608cc9a139c29df011c109b411d9e38c8df2cfc2130aee5"
+  }
+}

@@ -7,7 +7,7 @@ describe('createEmptyProject', () => {
   it('MVP の標準パラメータと全パラメータグループ入り', () => {
     const p = createEmptyProject('はじめて');
     expect(p.name).toBe('はじめて');
-    expect(p.schemaVersion).toBe(11);
+    expect(p.schemaVersion).toBe(12);
     expect(p.model.parameters.map((x) => x.id)).toEqual([
       'FaceAngleX',
       'FaceAngleY',
@@ -123,6 +123,7 @@ describe('createDefaultEnvironment', () => {
       cameraCapture: { mode: 'auto', width: 640, height: 480, fps: 60 },
       mirror: true,
       calibration: null,
+      armCalibration: null,
       microphoneDeviceId: null,
       silenceThreshold: -50,
       trackingPreset: 'standard',

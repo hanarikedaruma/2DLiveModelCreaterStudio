@@ -1,0 +1,209 @@
+{
+  "suite": "guided",
+  "label": "camera",
+  "fake": false,
+  "csp": "html",
+  "browserArgs": ["--remote-debugging-port=9341"],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "brands": [
+      {
+        "brand": "Chromium",
+        "version": "156"
+      },
+      {
+        "brand": "Microsoft Edge",
+        "version": "156"
+      },
+      {
+        "brand": "Not:A-Brand",
+        "version": "8"
+      },
+      {
+        "brand": "Microsoft Edge WebView2",
+        "version": "156"
+      }
+    ],
+    "hardwareConcurrency": 16,
+    "devicePixelRatio": 1.25,
+    "viewport": {
+      "width": 1440,
+      "height": 844
+    },
+    "webgl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4050 Laptop GPU (0x000028A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "videoFrame": true,
+    "offscreenCanvas": true,
+    "worker": true,
+    "origin": "http://at01.localhost"
+  },
+  "manifest": {
+    "commit": "6c3e78c552896f75037dce4226f48da222257994",
+    "host": "28f814dc65776a108aa7ef50f091885f7804e3df80c66142bc112ccda2eab176",
+    "dist": {
+      "gesture_recognizer.task": "97952348cf6a6a4915c2ea1496b4b37ebabc50cbbf80571435643c455f2b0482",
+      "index.html": "435a0913be41522f4c905d6999b9b405babb283ee79eca3ac4074cf6211c6440",
+      "pose_landmarker_full.task": "5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1",
+      "pose_landmarker_lite.task": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+      "assets/face_landmarker-y6w30NYK.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "assets/index-DZzo-XcO.js": "1cf62832bf1d511c6132ffb4a4d6d990db6b57ea8c6ecab58ec93dc9c4cf0f52",
+      "assets/vision_bundle-9zIsgJJP.js": "2ea0be7b51a795825e828eeaf757b3f571dd38fb377f1780d307e2714af3d7a8",
+      "assets/vision_bundle-C_wuZTxH.js": "1e5fb30e62692ac31f25e4d30d62ce2dc5c7e493e8077523524450dc465eb038",
+      "assets/vision_wasm_internal-DfxxaBYC.js": "e170ee67dd4e16c1a6fcd8840a206687e5a59b22c20e4a902bc445b095454d73",
+      "assets/vision_wasm_internal-DuEsUYlF.wasm": "8da277a733926eacd0474b8704b36742d6ec3231c57a860c5b889dff8f1df886",
+      "assets/vision_wasm_module_internal-ByE7dwxA.js": "da8934057f147b622e82cfb4c0dbd85461c598e268588b5a8ba9ca963a8ff82d",
+      "assets/vision_wasm_module_internal-WYnc_Af7.wasm": "2dabd8e23c60984628beb7bb338764c81a08e6837145273f59578684b5d53c1b",
+      "assets/worker-ohMFTcpQ.js": "59a7ae62eee9f67def4c1d5c03358a1d4332c47f68df7ecd803db20870c9d996"
+    }
+  },
+  "results": [
+    {
+      "name": "at01-guided-2026-10-31T07-35-51-857Z.json",
+      "saved": true,
+      "steps": 19,
+      "frames": 2516
+    },
+    {
+      "name": "status",
+      "running": true,
+      "config": {
+        "deviceId": "c9fd7cbd1feb345ba8ae721e098c60b762efb15b9617fc41116e81a47a817cd9",
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30,
+        "poseHz": 30,
+        "poseModel": "lite",
+        "delegate": "GPU",
+        "fallback": true,
+        "transfer": "videoframe",
+        "load": 120,
+        "overlay": true,
+        "mirrorPreview": true,
+        "simulate": "none",
+        "splitPost": true,
+        "workers": 1,
+        "handDelegate": null
+      },
+      "camera": {
+        "label": "HD Webcam eMeet C980 Pro (328f:1912)",
+        "width": 640,
+        "height": 480,
+        "frameRate": 30
+      },
+      "worker": {
+        "state": "ready",
+        "error": null,
+        "ready": {
+          "tasks": [
+            {
+              "name": "pose",
+              "delegate": "GPU",
+              "loadMs": 549.1000000238419,
+              "errors": []
+            },
+            {
+              "name": "gesture",
+              "delegate": "GPU",
+              "loadMs": 500.39999997615814,
+              "errors": []
+            }
+          ]
+        },
+        "lanes": [
+          {
+            "kind": "body",
+            "state": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 549.1000000238419,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 500.39999997615814,
+                "errors": []
+              }
+            ]
+          }
+        ]
+      },
+      "net": [
+        {
+          "type": "net",
+          "from": "page",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "connect-src",
+          "at": 62955.299999952316,
+          "blocked": true
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 64757,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 65294.200000047684,
+          "blocked": true,
+          "from": "worker"
+        }
+      ],
+      "shapes": [
+        {
+          "type": "shape",
+          "task": "pose",
+          "keys": {
+            "landmark": ["x", "y", "z", "visibility"],
+            "world": ["x", "y", "z", "visibility"]
+          },
+          "visibility": {
+            "min": 0.027376487851142883,
+            "max": 0.999966025352478,
+            "count": 33
+          }
+        },
+        {
+          "type": "shape",
+          "task": "gesture",
+          "keys": {
+            "landmark": ["x", "y", "z", "visibility"],
+            "world": ["x", "y", "z", "visibility"],
+            "handedness": ["score", "index", "categoryName", "displayName"],
+            "gesture": ["score", "index", "categoryName", "displayName"]
+          },
+          "visibility": {
+            "min": 0,
+            "max": 0,
+            "count": 21
+          }
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "warning: W1031 07:35:49.249999 2196592 face_landmarker_graph.cc:180] Sets FaceBlendshapesGraph acceleration to xnnpack by default.",
+    "warning: W1031 07:35:49.296000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 07:35:51.241999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 07:35:51.671000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 07:35:51.743000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 07:35:53.281999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 07:35:53.281999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 07:35:53.360999 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "warning: W1031 07:35:53.455000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "error: Connecting to 'https://odml.pa.googleapis.com/v1/log' violates the following Content Security Policy directive: \"connect-src 'self' ipc: http://ipc.localhost\". The action has been blocked.",
+    "error: Fetch API cannot load https://odml.pa.googleapis.com/v1/log. Refused to connect because it violates the document's Content Security Policy."
+  ]
+}

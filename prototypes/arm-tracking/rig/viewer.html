@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AT-02 腕と手の動きの見本</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #eef3f6;
+        color: #183346;
+        font-family: 'Yu Gothic UI', Meiryo, sans-serif;
+      }
+      main {
+        max-width: 1320px;
+        margin: auto;
+        padding: 24px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+      }
+      p {
+        line-height: 1.65;
+        margin: 8px 0;
+      }
+      .muted {
+        color: #526779;
+        font-size: 13px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 310px;
+        gap: 20px;
+        margin-top: 18px;
+      }
+      .stage,
+      aside {
+        border: 1px solid #cbd8e0;
+        border-radius: 14px;
+        background: #fff;
+        padding: 16px;
+      }
+      svg {
+        width: 100%;
+        background: #f7fafb;
+        border-radius: 10px;
+        touch-action: none;
+      }
+      .legend {
+        display: flex;
+        gap: 24px;
+        font-weight: bold;
+      }
+      .left {
+        color: #087f8c;
+      }
+      .right {
+        color: #b95624;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      select,
+      button {
+        font: inherit;
+        padding: 8px;
+        border: 1px solid #9db2bf;
+        border-radius: 6px;
+        background: white;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+        background: #183346;
+        color: #fff;
+      }
+      label {
+        display: block;
+        margin: 8px 0;
+        font-size: 14px;
+      }
+      input[type='range'] {
+        display: block;
+        width: 100%;
+        accent-color: #087f8c;
+      }
+      label output {
+        float: right;
+        font-variant-numeric: tabular-nums;
+      }
+      fieldset {
+        border: 1px solid #d9e3e9;
+        border-radius: 8px;
+        margin: 0 0 14px;
+        padding: 10px 14px;
+      }
+      legend {
+        font-weight: bold;
+        font-size: 14px;
+      }
+      #status {
+        display: block;
+        white-space: pre-line;
+        font-size: 13px;
+        line-height: 1.7;
+        min-height: 72px;
+      }
+      @media (max-width: 850px) {
+        main {
+          padding: 14px;
+        }
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        fieldset {
+          margin: 0;
+        }
+      }
+      @media (max-width: 480px) {
+        aside {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>腕と手の動きの見本</h1>
+      <p>肘の曲がる側と掌の向きを固定した、カメラを使わない技術試作です。関節・手形・親の動きを試せます。</p>
+      <p class="muted">AT-02 / CO補助確認用。実キャラクターの継ぎ目や、カメラ追従の自然さは後続カードで確認します。</p>
+      <div class="layout">
+        <section class="stage" aria-label="動きのプレビュー">
+          <div class="toolbar">
+            <label
+              >姿勢
+              <select id="preset"></select></label
+            ><button id="play" aria-pressed="false">手振りを再生</button
+            ><label><input id="guides" type="checkbox" checked />関節を表示</label>
+          </div>
+          <div class="legend">
+            <span class="right">画面左：モデルの右腕 R</span><span class="left">画面右：モデルの左腕 L</span>
+          </div>
+          <svg id="scene" viewBox="-430 -120 860 680" role="img" aria-label="腕と手の技術見本"></svg>
+          <output id="status"></output>
+        </section>
+        <aside aria-label="姿勢の調整">
+          <fieldset>
+            <legend class="left">モデルの左腕 L</legend>
+            <div id="left-angles"></div>
+            <label
+              >手の形
+              <select id="left-hand"></select
+            ></label>
+          </fieldset>
+          <fieldset>
+            <legend class="right">モデルの右腕 R</legend>
+            <div id="right-angles"></div>
+            <label
+              >手の形
+              <select id="right-hand"></select
+            ></label>
+          </fieldset>
+          <fieldset>
+            <legend>胴体から継承する動き</legend>
+            <label
+              >回転（度）<output id="rotation-value"></output
+              ><input id="rotation" type="range" min="-25" max="25" step="1" value="0"
+            /></label>
+            <label
+              >等倍率<output id="scale-value"></output
+              ><input id="scale" type="range" min="0.65" max="1.25" step="0.01" value="1"
+            /></label>
+            <label
+              >呼吸の移動（px）<output id="breath-value"></output
+              ><input id="breath" type="range" min="-8" max="8" step="0.5" value="0"
+            /></label>
+          </fieldset>
+        </aside>
+      </div>
+      <p class="muted">
+        骨長：上腕118px・前腕108px。数値は制約適用後。ドラッグは試作用の有界探索を使います。製品の追従処理や性能評価ではありません。
+      </p>
+    </main>
+    <!-- AT02_SCRIPT -->
+  </body>
+</html>

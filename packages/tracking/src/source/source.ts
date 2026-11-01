@@ -1,4 +1,4 @@
-import type { CameraCaptureStats, TrackingFrame, TrackingSource } from '@app/contracts';
+import type { BodyTrackingCapability, CameraCaptureStats, TrackingFrame, TrackingSource } from '@app/contracts';
 import type { Environment } from '@app/schema';
 import {
   AUTO_CAPTURE,
@@ -9,6 +9,7 @@ import {
   createDomCameraVideo,
   stopStream,
 } from './camera';
+import { BodyTracker, type BodyTrackerOptions } from './body/tracker';
 import { CaptureSession } from './capture';
 import { NEUTRAL_TRACKING_FRAME, landmarkerResultToFrame } from './convert';
 import {
@@ -26,6 +27,8 @@ export interface MediaPipeTrackingSourceOptions {
   createVideo?: () => CameraVideo;
   createLandmarker?: () => Promise<FaceLandmarkerLike>;
   now?: () => number;
+  // 腕・手の推定（AT-04）の差し替え用。省略すると同梱のモデルと Worker を使う
+  body?: BodyTrackerOptions;
 }
 
 interface Run {
@@ -45,6 +48,9 @@ export function createMediaPipeTrackingSource(options: MediaPipeTrackingSourceOp
 }
 
 class MediaPipeTrackingSource implements TrackingSource {
+  // 腕・手の観測（AT-04）。同じカメラの映像を使い、顔の通知とは独立に通知する
+  readonly body: BodyTrackingCapability;
+  private readonly bodyTracker: BodyTracker;
   private readonly listeners = new Set<(frame: TrackingFrame) => void>();
   private landmarker: Promise<FaceLandmarkerLike> | null = null;
   private run: Run | null = null;
@@ -54,7 +60,10 @@ class MediaPipeTrackingSource implements TrackingSource {
   private captureSettings: Environment['cameraCapture'] = { ...AUTO_CAPTURE };
   private readonly captureListeners = new Set<() => void>();
 
-  constructor(private readonly options: MediaPipeTrackingSourceOptions) {}
+  constructor(private readonly options: MediaPipeTrackingSourceOptions) {
+    this.bodyTracker = new BodyTracker({ now: options.now, ...options.body });
+    this.body = this.bodyTracker;
+  }
 
   private mediaDevices(): MediaDevicesLike {
     const devices = this.options.mediaDevices ?? globalThis.navigator?.mediaDevices;
@@ -154,10 +163,12 @@ class MediaPipeTrackingSource implements TrackingSource {
         if (this.run === run) this.captureChanged();
       },
       this.options.now,
+      () => this.bodyTracker.wantsLargeCapture(),
     );
     run.capture.start();
     if (this.run !== run) return;
     run.capture.configure(this.captureSettings);
+    this.bodyTracker.attach(run.video);
     this.scheduleFrame(run);
   }
 
@@ -180,6 +191,7 @@ class MediaPipeTrackingSource implements TrackingSource {
     const run = this.run;
     if (!run) return;
     this.run = null;
+    this.bodyTracker.detach();
     run.capture?.stop();
     run.cancelFrame?.();
     run.cancelFrame = null;
@@ -217,6 +229,8 @@ class MediaPipeTrackingSource implements TrackingSource {
       // 推定の途中に来たフレームと、推定済みのフレームは捨てる
       if (run.busy || info.presentedFrames <= run.lastPresentedFrames) return;
       run.lastPresentedFrames = info.presentedFrames;
+      // 先に腕・手の Worker へ渡してから顔を推定する（顔の推定中に Worker が並行して動く）
+      this.bodyTracker.onVideoFrame(now, info);
       run.busy = true;
       run.capture?.estimated();
       try {

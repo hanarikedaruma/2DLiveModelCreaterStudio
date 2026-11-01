@@ -23,7 +23,7 @@ describe('I-068: 輪郭線の保存と移行', () => {
     p.schemaVersion = 6;
     const before = JSON.stringify(p);
     const next = migrate(p) as typeof p;
-    expect(next.schemaVersion).toBe(11);
+    expect(next.schemaVersion).toBe(12);
     expect(next.model.contourLines).toBeUndefined();
     expect(next.model).toEqual(p.model);
     expect(JSON.stringify(p)).toBe(before);

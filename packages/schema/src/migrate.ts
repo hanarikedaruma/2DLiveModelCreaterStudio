@@ -3,11 +3,12 @@ import type { Project } from './types';
 import { attachClosedEyeLine } from './closedEyeLine';
 import type { Model, Vec2 } from './types';
 
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 // { [版]: その版の json を次の版に変換する関数 }
 export type Migrations = Record<number, (json: Record<string, unknown>) => Record<string, unknown>>;
 export const MIGRATIONS: Migrations = {
+  11: (json) => json, // 腕は省略OFF。リグ・パラメータ・既存キー・描画順を自動追加しない。
   10: (json) => json, // AI音声は省略OFF。既存の口形・機器・キーを変更しない。
   9: (json) => json, // I-060は省略OFF。既存の遷移・トラック・再生方法を変えない
   1: opacityKeysToAbsolute,

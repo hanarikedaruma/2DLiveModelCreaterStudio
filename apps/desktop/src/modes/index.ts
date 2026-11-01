@@ -29,6 +29,7 @@ import { register as registerPeriodic } from './studio/periodic'; // カード48
 import { register as registerVowels } from './modeling/vowels'; // カード51
 import { register as registerTrackingMap } from './studio/trackingMap'; // I-042
 import { register as registerVoice } from './studio/voice';
+import { register as registerArmSetup } from './modeling/arms'; // AT-10
 
 export function registerModes(): void {
   registerCanvasEdit(); // カード18
@@ -61,4 +62,5 @@ export function registerModes(): void {
   registerVowels(); // カード51
   registerTrackingMap(); // I-042
   registerVoice();
+  registerArmSetup(); // AT-10
 }

@@ -1,0 +1,49 @@
+.arm-setup {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.arm-setup label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.arm-setup select,
+.arm-setup input[type='number'] {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.arm-setup p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.arm-setup fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+.arm-setup-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 5px;
+}
+.arm-setup-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.arm-setup button {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.arm-setup-error {
+  color: var(--danger, #e88686);
+  font-size: 12px;
+}
+.arm-setup .arm-setup-check {
+  display: flex;
+  align-items: start;
+}

@@ -1,0 +1,21 @@
+{
+  "version": "AT-05 CL v2",
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "dependsOn": "AT-03 CO v1、AT-04 CL v1",
+  "notes": "packages/tracking/src/index.ts の sha256 は AT-05 CL v1 の時点のもの。2026-11-01 に AT-07 が export 行を1行足した（AT-05 の行は変更なし）。足した後の値は AT-07 manifest。v2（2026-11-01）：新しい世代の後に遅れて届いた古い世代の通知を更新しない（association.ts）。補助試験1件（association.test.ts）。packages/tracking/src/index.ts はAT-07のexport行を含む",
+  "sha256": {
+    "packages/tracking/src/body/association.test.ts": "ab68c6cd9d6536735819821ae41f40266b4cb6c08226c44c10a9a0ced257e742",
+    "packages/tracking/src/body/association.ts": "26959c155b5952cecc2f35b6b9ab0fda54575886c5c26457b0b073a7a9ca9c81",
+    "packages/tracking/src/body/calibration.test.ts": "d9dbe01ca02ed774ee1c5c354da81af87a473c3e76d20b7fcba52f5f80920aa0",
+    "packages/tracking/src/body/calibration.ts": "15753171930d5241cf8aeaafa0ffd0b992f7b0a539e026bafbacc309a079bfd5",
+    "packages/tracking/src/body/fixtures.ts": "941fd5f254dcc5ad5d6bf48defded34650a0a640b2fa96cbc7ce22c54cb351e2",
+    "packages/tracking/src/body/geometry.ts": "e2f6e2c71bd7120e211ba8a779857dd4c5e62ca8d5814714ff009e1a19bf3e77",
+    "packages/tracking/src/body/index.ts": "f17bc60012ec69d8eef388593634c563db1affc06c8e68f1388bed8df582c72e",
+    "packages/tracking/src/body/regression.test.ts": "0885237de4613f538d8b5c3fa5f402723be947b839d28152719f7e05357aa3d1",
+    "packages/tracking/src/body/fixtures/at01-cross.json": "6dbdccac8780b60b1956b4a21dd70cebf470376c77ded66b2c3d19175da75a01",
+    "packages/tracking/src/body/fixtures/at01-wave.json": "a71e3936b37478b456475bc303716734988243622845bb64bb8d93220922244b",
+    "packages/tracking/src/index.ts": "04d7e36cbab4ee1254942cc9a5da8c33f64abbab0feafba75e1a5826332b5663"
+  }
+}

@@ -69,6 +69,7 @@ export function createDefaultEnvironment(): Environment {
     cameraCapture: { mode: 'auto', width: 640, height: 480, fps: 60 },
     mirror: true,
     calibration: null,
+    armCalibration: null,
     microphoneDeviceId: null,
     silenceThreshold: -50,
     trackingPreset: 'standard',

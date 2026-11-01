@@ -22,7 +22,7 @@ describe('AI音声の保存形式', () => {
       expect(loadProjectJson(JSON.stringify(p)).studio.voice?.speech?.delivery).toBe(delivery);
     }
     expect(() =>
-      voiceSettingsSchema.parse({ ...p.studio.voice, speech: { ...p.studio.voice.speech, delivery: 'other' } }),
+      voiceSettingsSchema.parse({ ...p.studio.voice, speech: { ...p.studio.voice!.speech, delivery: 'other' } }),
     ).toThrow();
   });
   it('読み方と場面を保存し、下書きや発話履歴はプロジェクトへ含めない', () => {
@@ -47,7 +47,7 @@ describe('AI音声の保存形式', () => {
     p.schemaVersion = 10;
     p.model.lipSync.vowels = [{ vowel: 'a', values: { MouthOpen: 0.8 } }];
     const loaded = loadProjectJson(JSON.stringify(p));
-    expect(loaded.schemaVersion).toBe(11);
+    expect(loaded.schemaVersion).toBe(12);
     expect(loaded.studio.voice).toBeUndefined();
     expect(loaded.model.lipSync).toEqual(p.model.lipSync);
   });

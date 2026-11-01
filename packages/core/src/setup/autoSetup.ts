@@ -15,6 +15,7 @@ import { planStep2 } from './step2';
 import { setupWarnings } from './warnings';
 import { setupChest } from './chest';
 import { planBlink } from './blink';
+import { preserveArmSetup } from './arms/protect';
 
 export const AUTO_SETUP_LABEL = '自動セットアップ';
 
@@ -150,5 +151,6 @@ export function runAutoSetup(
     const blink = planBlink(result, side, undefined, nextId);
     if (blink.command && !blink.replacesCustom) result = blink.command.apply(result);
   }
+  result = preserveArmSetup(project, result);
   return deepEqual(result, project) ? project : result;
 }

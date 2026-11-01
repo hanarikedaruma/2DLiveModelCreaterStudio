@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="680" viewBox="-430 -120 860 680">
+  <rect x="-430" y="-120" width="860" height="680" fill="#f7fafb" />
+  <title>顔の前のピース</title>
+  <g font-family="Meiryo" transform="translate(0 260) rotate(0) scale(1) translate(0 -260)">
+    <path d="M -73 217 Q -98 246 -87 430 L 87 430 Q 98 246 73 217 Z" fill="#dce6ec" stroke="#8ca2b3" stroke-width="2" />
+    <line x1="78" y1="240" x2="188.8837" y2="199.6416" stroke="#087f8c" stroke-width="35" stroke-linecap="round" />
+    <line x1="-78" y1="240" x2="-188.8837" y2="199.6416" stroke="#cf6a37" stroke-width="35" stroke-linecap="round" />
+    <path d="M -24 190 L -24 223 Q 0 238 24 223 L 24 190" fill="#f6dcc8" stroke="#ad9789" stroke-width="2" />
+    <ellipse cx="0" cy="120" rx="83" ry="92" fill="#f3e8d9" stroke="#8ca2b3" stroke-width="2" />
+    <path d="M -79 100 Q -78 23 0 26 Q 79 24 80 100 L 39 80 L 20 104 L -3 79 L -27 105 L -49 81 Z" fill="#b3c3ce" />
+    <path
+      d="M -44 127 Q -30 119 -16 127 M 16 127 Q 30 119 44 127 M -15 162 Q 0 174 15 162"
+      fill="none"
+      stroke="#526779"
+      stroke-width="3"
+    />
+    <line
+      x1="188.8837"
+      y1="199.6416"
+      x2="95.353"
+      y2="145.6416"
+      stroke="#183346"
+      stroke-width="27"
+      stroke-linecap="round"
+    />
+    <line
+      x1="188.8837"
+      y1="199.6416"
+      x2="95.353"
+      y2="145.6416"
+      stroke="#f6dcc8"
+      stroke-width="23"
+      stroke-linecap="round"
+    />
+    <line
+      x1="-188.8837"
+      y1="199.6416"
+      x2="-95.353"
+      y2="145.6416"
+      stroke="#183346"
+      stroke-width="27"
+      stroke-linecap="round"
+    />
+    <line
+      x1="-188.8837"
+      y1="199.6416"
+      x2="-95.353"
+      y2="145.6416"
+      stroke="#f6dcc8"
+      stroke-width="23"
+      stroke-linecap="round"
+    />
+    <g data-hand="L" transform="translate(95.353 145.6416) rotate(-30)">
+      <g transform="translate(-12 -35) rotate(-12)">
+        <rect x="-4" y="-39" width="8" height="47" rx="4" fill="#f6dcc8" stroke="#087f8c" stroke-width="1.8" />
+      </g>
+      <g transform="translate(-3 -35) rotate(12)">
+        <rect x="-4" y="-48" width="8" height="56" rx="4" fill="#f6dcc8" stroke="#087f8c" stroke-width="1.8" />
+      </g>
+      <g transform="translate(7 -35) rotate(0)">
+        <rect x="-4" y="-9" width="8" height="17" rx="4" fill="#f6dcc8" stroke="#087f8c" stroke-width="1.8" />
+      </g>
+      <g transform="translate(16 -35) rotate(0)">
+        <rect x="-4" y="-9" width="8" height="17" rx="4" fill="#f6dcc8" stroke="#087f8c" stroke-width="1.8" />
+      </g>
+      <path
+        d="M -13 3 L -20 -28 Q -21 -42 -13 -43 L 13 -43 Q 22 -40 20 -28 L 13 3 Z"
+        fill="#f6dcc8"
+        stroke="#087f8c"
+        stroke-width="2.5"
+      />
+      <path
+        d="M -15 -13 L -34 -30 Q -39 -38 -33 -41 Q -28 -44 -23 -35 L -12 -29 Z"
+        fill="#f6dcc8"
+        stroke="#087f8c"
+        stroke-width="2"
+      />
+      <circle cx="-31" cy="-36" r="2.7" fill="#ac2871" />
+      <path d="M -9 -11 Q 0 -23 11 -19 M -9 -28 Q -3 -34 8 -29" fill="none" stroke="#087f8c" stroke-width="1.5" />
+      <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="bold" fill="#087f8c">L</text>
+    </g>
+    <g data-hand="R" transform="translate(-95.353 145.6416) rotate(30)">
+      <g transform="translate(-16 -35) rotate(0)">
+        <rect x="-4" y="-9" width="8" height="17" rx="4" fill="#f6dcc8" stroke="#cf6a37" stroke-width="1.8" />
+      </g>
+      <g transform="translate(-7 -35) rotate(0)">
+        <rect x="-4" y="-9" width="8" height="17" rx="4" fill="#f6dcc8" stroke="#cf6a37" stroke-width="1.8" />
+      </g>
+      <g transform="translate(3 -35) rotate(-12)">
+        <rect x="-4" y="-47" width="8" height="55" rx="4" fill="#f6dcc8" stroke="#cf6a37" stroke-width="1.8" />
+      </g>
+      <g transform="translate(12 -35) rotate(12)">
+        <rect x="-4" y="-40" width="8" height="48" rx="4" fill="#f6dcc8" stroke="#cf6a37" stroke-width="1.8" />
+      </g>
+      <path
+        d="M -13 3 L -20 -28 Q -21 -42 -13 -43 L 13 -43 Q 22 -40 20 -28 L 13 3 Z"
+        fill="#f6dcc8"
+        stroke="#cf6a37"
+        stroke-width="2.5"
+      />
+      <path
+        d="M 15 -13 L 34 -31 Q 40 -38 33 -42 Q 28 -45 23 -35 L 12 -29 Z"
+        fill="#f6dcc8"
+        stroke="#cf6a37"
+        stroke-width="2"
+      />
+      <circle cx="31" cy="-36" r="2.7" fill="#ac2871" />
+      <path d="M -9 -11 Q 0 -23 11 -19 M -9 -28 Q -3 -34 8 -29" fill="none" stroke="#cf6a37" stroke-width="1.5" />
+      <text x="0" y="-15" text-anchor="middle" font-size="11" font-weight="bold" fill="#cf6a37">R</text>
+    </g>
+    <polyline
+      points="78,240 188.8837,199.6416 95.353,145.6416"
+      fill="none"
+      stroke="#fff"
+      stroke-width="1.6"
+      stroke-dasharray="4 5"
+    />
+    <circle cx="78" cy="240" r="4" fill="white" stroke="#183346" stroke-width="1.5" />
+    <text x="85" y="250" font-size="10" fill="#183346">LS</text>
+    <circle cx="188.8837" cy="199.6416" r="4" fill="white" stroke="#183346" stroke-width="1.5" />
+    <text x="195.8837" y="209.6416" font-size="10" fill="#183346">LE</text>
+    <circle cx="95.353" cy="145.6416" r="4" fill="white" stroke="#183346" stroke-width="1.5" />
+    <text x="102.353" y="155.6416" font-size="10" fill="#183346">LW</text>
+    <polyline
+      points="-78,240 -188.8837,199.6416 -95.353,145.6416"
+      fill="none"
+      stroke="#fff"
+      stroke-width="1.6"
+      stroke-dasharray="4 5"
+    />
+    <circle cx="-78" cy="240" r="4" fill="white" stroke="#183346" stroke-width="1.5" />
+    <text x="-71" y="250" font-size="10" fill="#183346">RS</text>
+    <circle cx="-188.8837" cy="199.6416" r="4" fill="white" stroke="#183346" stroke-width="1.5" />
+    <text x="-181.8837" y="209.6416" font-size="10" fill="#183346">RE</text>
+    <circle cx="-95.353" cy="145.6416" r="4" fill="white" stroke="#183346" stroke-width="1.5" />
+    <text x="-88.353" y="155.6416" font-size="10" fill="#183346">RW</text>
+  </g>
+</svg>

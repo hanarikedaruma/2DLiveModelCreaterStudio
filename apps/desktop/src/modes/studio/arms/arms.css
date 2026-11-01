@@ -1,0 +1,218 @@
+/* ---- スタジオの設定の「腕・手」（AT-11） ---- */
+
+.arms-sides {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 12px;
+}
+.arms-readiness {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.arms-readiness li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 6px;
+  margin-bottom: 4px;
+  color: var(--text-dim);
+}
+.arms-readiness li[data-level='block'] {
+  color: var(--danger);
+}
+.arms-inline {
+  padding: 1px 6px;
+}
+.arms-status {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  margin: 8px 0 0;
+}
+.arms-status > div {
+  display: contents;
+}
+.arms-status dt {
+  color: var(--text-dim);
+}
+.arms-status dd {
+  margin: 0;
+}
+.arms-status dd[data-state='holding'],
+.arms-status dd[data-state='unavailable'] {
+  color: var(--danger);
+}
+/* 左腕・右腕の2列。項目名はその上の行に置き、狭いパネル（800×600 で 150px 程度）でもはみ出さない */
+.arms-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  margin-top: 10px;
+}
+.arms-settings-head {
+  color: var(--text-dim);
+  text-align: center;
+}
+.arms-settings-label {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  color: var(--text-dim);
+}
+.arms-settings select {
+  width: 100%;
+}
+.arms-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.arms-range input {
+  flex: 1;
+  min-width: 0;
+}
+.arms-range output {
+  width: 2.6em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.arms-details {
+  margin-top: 8px;
+}
+.arms-details summary {
+  cursor: pointer;
+  color: var(--text-dim);
+}
+.arms-details-body {
+  margin-top: 6px;
+}
+.arms-details-body .studio-field {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.arms-diag {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  margin: 6px 0 0;
+}
+.arms-diag dt {
+  color: var(--text-dim);
+}
+.arms-diag dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.arms-diag-points[data-stale='true'] .arms-diag dd {
+  opacity: 0.5;
+}
+
+/* 校正のダイアログ（枠のダイアログの見た目を使う） */
+.arms-dialog {
+  max-width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+.arms-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+  counter-reset: arms-step;
+}
+.arms-steps li {
+  flex: 1 1 auto;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: var(--bg-raised);
+  color: var(--text-dim);
+  text-align: center;
+  white-space: nowrap;
+  counter-increment: arms-step;
+}
+.arms-steps li::before {
+  content: counter(arms-step) '. ';
+}
+.arms-steps li[data-state='current'] {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.arms-steps li[data-state='done'] {
+  color: var(--text);
+}
+.arms-skeleton {
+  margin: 0;
+}
+.arms-skeleton svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  background: var(--bg);
+}
+.arms-skeleton[data-stale='true'] svg {
+  opacity: 0.5;
+}
+.arms-frame {
+  fill: none;
+  stroke: var(--border);
+}
+.arms-bone {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.arms-joint {
+  fill: var(--text);
+}
+.arms-joint-hidden {
+  stroke: var(--danger);
+  stroke-width: 2;
+}
+.arms-hand {
+  fill: none;
+  stroke: var(--text-dim);
+}
+.arms-visible {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 6px 0;
+  padding: 0;
+  list-style: none;
+}
+.arms-visible li[data-visible='false'] {
+  color: var(--danger);
+}
+.arms-instruction {
+  margin: 4px 0 8px;
+}
+.arms-count {
+  margin: 8px 0;
+  font-size: 32px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.arms-shapes {
+  width: 100%;
+  margin-bottom: 12px;
+  border-collapse: collapse;
+}
+.arms-shapes th,
+.arms-shapes td {
+  padding: 4px;
+  text-align: center;
+}
+.arms-shapes th[scope='row'] {
+  text-align: left;
+  font-weight: normal;
+}
+.arms-shapes td[data-seen='true'] {
+  color: var(--accent);
+  font-weight: 600;
+}

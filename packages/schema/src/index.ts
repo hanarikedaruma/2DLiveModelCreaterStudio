@@ -1,4 +1,5 @@
 export type * from './types';
+export * from './arms';
 export * from './voice';
 export * from './geometryAffine';
 export * from './geometryWarp';

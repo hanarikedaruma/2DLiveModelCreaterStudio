@@ -1,0 +1,23 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "overflow": [],
+      "onX": 192,
+      "offX": 128,
+      "cancelPreservesCalibration": true
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "overflow": [],
+      "onX": 192,
+      "offX": 128,
+      "cancelPreservesCalibration": true
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "scriptSha256": "efbd15fe12ab5c394ddfd29082fb621b3d4942c8f27d363fd969c83101aafcd0"
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "WebWorker"],
+    "paths": {
+      "@mediapipe/tasks-vision": ["../../../packages/tracking/node_modules/@mediapipe/tasks-vision/vision.d.ts"]
+    }
+  },
+  "include": ["src/worker.ts", "src/protocol.ts", "src/queue.ts"]
+}

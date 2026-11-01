@@ -32,7 +32,7 @@ describe('カード99: 流れ線の保存と移行', () => {
     p.schemaVersion = 3;
     const before = JSON.stringify(p);
     const next = migrate(p) as typeof p;
-    expect(next.schemaVersion).toBe(11);
+    expect(next.schemaVersion).toBe(12);
     expect(next.model.curveGuides).toEqual([]);
     expect({ ...next.model, curveGuides: undefined }).toEqual(p.model);
     expect(JSON.stringify(p)).toBe(before);

@@ -14,7 +14,7 @@ describe('@app/schema の公開', () => {
     ] as const) {
       expect(schema[name], name).toBeTypeOf('function');
     }
-    expect(schema.SCHEMA_VERSION).toBe(11); // AI音声・リップシンクの設定
+    expect(schema.SCHEMA_VERSION).toBe(12); // 腕・手のリグと追従設定
     expect(schema.PARALLAX_RATIO).toBe(0.08);
     expect(schema.STANDARD_PARAMETERS).toHaveLength(28);
   });

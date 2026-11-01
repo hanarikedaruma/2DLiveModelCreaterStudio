@@ -1,0 +1,361 @@
+{
+  "suite": "csp",
+  "label": "fake-cspall",
+  "csp": "all",
+  "browserArgs": ["--remote-debugging-port=9341", "--use-fake-device-for-media-stream=fps=30"],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36 Edg/156.0.0.0",
+    "brands": [
+      {
+        "brand": "Chromium",
+        "version": "156"
+      },
+      {
+        "brand": "Microsoft Edge",
+        "version": "156"
+      },
+      {
+        "brand": "Not:A-Brand",
+        "version": "8"
+      },
+      {
+        "brand": "Microsoft Edge WebView2",
+        "version": "156"
+      }
+    ],
+    "hardwareConcurrency": 16,
+    "devicePixelRatio": 1.25,
+    "viewport": {
+      "width": 1440,
+      "height": 844
+    },
+    "webgl": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4050 Laptop GPU (0x000028A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "videoFrame": true,
+    "offscreenCanvas": true,
+    "worker": true,
+    "origin": "http://at01.localhost"
+  },
+  "manifest": {
+    "commit": "6c3e78c552896f75037dce4226f48da222257994",
+    "host": "28f814dc65776a108aa7ef50f091885f7804e3df80c66142bc112ccda2eab176",
+    "dist": {
+      "gesture_recognizer.task": "97952348cf6a6a4915c2ea1496b4b37ebabc50cbbf80571435643c455f2b0482",
+      "index.html": "557955402ef8e84c30007a2e5e9cd918adefd13946327354bf860724b5d62f8e",
+      "pose_landmarker_full.task": "5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1",
+      "pose_landmarker_lite.task": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+      "assets/face_landmarker-y6w30NYK.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "assets/index-BtNGWT7w.js": "df8989649d03fc0e9e2bf4430c631e02c9c922c37193ffe5e6eb3eb73ace3e1e",
+      "assets/vision_bundle-9zIsgJJP.js": "2ea0be7b51a795825e828eeaf757b3f571dd38fb377f1780d307e2714af3d7a8",
+      "assets/vision_bundle-C_wuZTxH.js": "1e5fb30e62692ac31f25e4d30d62ce2dc5c7e493e8077523524450dc465eb038",
+      "assets/vision_wasm_internal-DfxxaBYC.js": "e170ee67dd4e16c1a6fcd8840a206687e5a59b22c20e4a902bc445b095454d73",
+      "assets/vision_wasm_internal-DuEsUYlF.wasm": "8da277a733926eacd0474b8704b36742d6ec3231c57a860c5b889dff8f1df886",
+      "assets/vision_wasm_module_internal-ByE7dwxA.js": "da8934057f147b622e82cfb4c0dbd85461c598e268588b5a8ba9ca963a8ff82d",
+      "assets/vision_wasm_module_internal-WYnc_Af7.wasm": "2dabd8e23c60984628beb7bb338764c81a08e6837145273f59578684b5d53c1b",
+      "assets/worker-kR9toRC3.js": "8c90188d604e2c7185c2c9026e0abfcb4c5bf4227916c98401ef2c6aee206c08"
+    }
+  },
+  "results": [
+    {
+      "name": "normal",
+      "config": {
+        "deviceId": null,
+        "width": 640,
+        "height": 480,
+        "fps": 30,
+        "load": 120,
+        "face": true,
+        "pose": true,
+        "hands": true,
+        "handHz": 30
+      },
+      "started": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 441.3000000715256,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 435.10000002384186,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [],
+        "shapes": []
+      },
+      "measuredAt": "2026-10-31T06:20:56.750Z",
+      "visibility": "visible",
+      "status": {
+        "running": true,
+        "config": {
+          "deviceId": null,
+          "width": 640,
+          "height": 480,
+          "fps": 30,
+          "face": true,
+          "pose": true,
+          "hands": true,
+          "handHz": 30,
+          "poseHz": 30,
+          "poseModel": "lite",
+          "delegate": "GPU",
+          "fallback": true,
+          "transfer": "videoframe",
+          "load": 120,
+          "overlay": true,
+          "mirrorPreview": true,
+          "simulate": "none"
+        },
+        "camera": {
+          "label": "fake_device_0",
+          "width": 640,
+          "height": 480,
+          "frameRate": 30
+        },
+        "worker": {
+          "state": "ready",
+          "error": null,
+          "ready": {
+            "type": "ready",
+            "tasks": [
+              {
+                "name": "pose",
+                "delegate": "GPU",
+                "loadMs": 441.3000000715256,
+                "errors": []
+              },
+              {
+                "name": "gesture",
+                "delegate": "GPU",
+                "loadMs": 435.10000002384186,
+                "errors": []
+              }
+            ],
+            "offscreenCanvas": true,
+            "webgl2": true
+          }
+        },
+        "net": [],
+        "shapes": []
+      },
+      "summary": {
+        "windowMs": 3004.100000023842,
+        "camera": {
+          "fps": 29.95905595662119,
+          "captureToCallbackMs": {
+            "count": 90,
+            "p50": 3.900000000000091,
+            "p95": 6.354999999999881,
+            "max": 7
+          },
+          "captureSource": "captureTime",
+          "sentFps": 24.96587996385099,
+          "createMs": {
+            "count": 75,
+            "p50": 0,
+            "p95": 0.10000002384185791,
+            "max": 0.10000002384185791
+          }
+        },
+        "face": {
+          "fps": 29.95905595662119,
+          "inferMs": {
+            "count": 90,
+            "p50": 13.199999988079071,
+            "p95": 21.909999978542327,
+            "max": 30.100000023841858
+          },
+          "ageMs": {
+            "count": 90,
+            "p50": 17.850000047683807,
+            "p95": 27.25000002384222,
+            "max": 35.900000047683534
+          },
+          "detectedRatio": 0
+        },
+        "pose": {
+          "fps": 24.96587996385099,
+          "inferMs": {
+            "count": 75,
+            "p50": 11,
+            "p95": 19.490000081062316,
+            "max": 22.100000023841858
+          },
+          "ageAtArrivalMs": {
+            "count": 75,
+            "p50": 26.20000007152521,
+            "p95": 55.45000005483653,
+            "max": 63.500000095367795
+          },
+          "captureToDisplayMs": {
+            "count": 75,
+            "p50": 29.000000095367795,
+            "p95": 57.20000003814712,
+            "max": 71.80000000000018
+          },
+          "detectedRatio": 0
+        },
+        "hands": {
+          "fps": 24.96587996385099,
+          "inferMs": {
+            "count": 75,
+            "p50": 9.5,
+            "p95": 15.680000007152556,
+            "max": 27.200000047683716
+          },
+          "ageAtArrivalMs": {
+            "count": 75,
+            "p50": 26.20000007152521,
+            "p95": 55.45000005483653,
+            "max": 63.500000095367795
+          },
+          "captureToDisplayMs": {
+            "count": 75,
+            "p50": 29.000000095367795,
+            "p95": 57.20000003814712,
+            "max": 71.80000000000018
+          },
+          "anyHandRatio": 0,
+          "twoHandsRatio": 0
+        },
+        "worker": {
+          "transferMs": {
+            "count": 75,
+            "p50": 0.09995114803314209,
+            "p95": 0.199951171875,
+            "max": 0.199951171875
+          },
+          "queueMs": {
+            "count": 75,
+            "p50": 0,
+            "p95": 0,
+            "max": 0.10000002384185791
+          },
+          "resultPostMs": {
+            "count": 75,
+            "p50": 1.1000488996505737,
+            "p95": 8.290048873424526,
+            "max": 17.800048828125
+          },
+          "mainDropped": 0,
+          "transferErrors": 0,
+          "stale": 0
+        },
+        "render": {
+          "fps": 119.42887643448094,
+          "intervalMs": {
+            "count": 358,
+            "p50": 7,
+            "p95": 20.800000000000182,
+            "max": 27.900000000000546
+          },
+          "p99IntervalMs": 20.94300000000031,
+          "slowFrames": 2,
+          "slowRatio": 0.00558659217877095,
+          "longTasks": 0,
+          "longTaskMs": 0
+        }
+      },
+      "probe": {
+        "page": {
+          "type": "probe",
+          "violated": true,
+          "directive": "connect-src",
+          "error": "Failed to fetch"
+        },
+        "worker": {
+          "type": "probe",
+          "violated": true,
+          "directive": "connect-src",
+          "error": "Failed to fetch"
+        }
+      },
+      "memory": {
+        "processes": 8,
+        "workingSetMB": 969.86328125,
+        "privateMB": 927.19140625
+      }
+    },
+    {
+      "name": "net-after-stop",
+      "net": [
+        {
+          "type": "net",
+          "from": "page",
+          "url": "http://127.0.0.1:9/at01-csp-probe-page",
+          "method": "connect-src",
+          "at": 8164.100000023842,
+          "blocked": true
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 10298.399951219559,
+          "blocked": true,
+          "from": "worker"
+        },
+        {
+          "type": "net",
+          "url": "https://odml.pa.googleapis.com/v1/log",
+          "method": "POST",
+          "at": 10310.899951219559,
+          "blocked": true,
+          "from": "worker"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "warning: W1031 06:20:49.732999 2196592 face_landmarker_graph.cc:180] Sets FaceBlendshapesGraph acceleration to xnnpack by default.",
+    "warning: W1031 06:20:49.763000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:20:50.262000 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "warning: W1031 06:20:50.603000 2196592 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.",
+    "warning: W1031 06:20:50.696999 2196592 gl_context.cc:1119] OpenGL error checking is disabled",
+    "error: INFO: Created TensorFlow Lite XNNPACK delegate for CPU.",
+    "warning: W1031 06:20:51.644000 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:20:51.644999 2196592 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.",
+    "warning: W1031 06:20:51.684000 2196592 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.",
+    "error: Connecting to 'http://127.0.0.1:9/at01-csp-probe-page' violates the following Content Security Policy directive: \"connect-src 'self' ipc: http://ipc.localhost\". The action has been blocked.",
+    "error: Fetch API cannot load http://127.0.0.1:9/at01-csp-probe-page. Refused to connect because it violates the document's Content Security Policy."
+  ]
+}

@@ -21,6 +21,14 @@
 
 ## 記録
 
+### CC-032 腕・手の観測・リグ・保存契約（2026-11-01 CO、AT-03）
+
+- 保存形式11→12。Model.armRigs、Project.armTracking、Environment.armCalibrationを任意追加。省略はリグ無し・追従OFF・未校正。旧ArmL/R、既存キー・描画順・顔の通知を維持する。
+- schema/arms.tsがArmRig・制約・手の接続点・左右設定・演者校正・診断を、contracts/arms.tsがBodyTrackingFrame・正規化観測・手形・IK・追従・最終評価・UIサービスを定義。関数・単位・所有・更新順の正本は[AT-03報告](arm-tracking/reports/AT-03-contracts.md)。
+- TrackingSource.bodyとServices.armsは追加能力として任意。未接続の既存実装は顔のみ動作。FakeBodyTracking/FakeArmServiceを独立公開し、未実装サービスを起動しない。
+- IO修復は意味上不正な片腕のリグを削除せず無効化し、その側の追従をOFFにする。保存先を分け、セッション時刻・候補・ロスト状態を保存しない。
+- AT-04〜12が使用する。契約の変更はAT-03を再開して直列処理。独立確認はCL、未コミット版はAT-03 manifestで特定する。
+
 ### CC-031 恥ずかしい演技を出だし・語尾・間・テンポへ適用（2026-10-16 CO）
 
 - ユーザーの「つまり音と始まりの音の両方を吐息」「語尾も息が抜ける」「間を広く、リズムを遅く」の指定により、`shy`へ生成後の共通音声処理を追加。元の合成器・参照声・固定話者・声質設定を維持する。サンプル音声の作り込みではなく実装を優先し、新しい試聴WAVは作らない。
@@ -342,3 +350,7 @@
 - 理由: 詳細モードにだけ出すワープのセクションに対して、ツールのボタン「ワープ編集」がかんたんモードでも出て、押しても何もしなかった（I-008）
 - 影響するカード: CanvasTool を前提に載せるカード（18・21・29・42 など）。省略できる項目を足しただけなので、既存のツールはそのまま動く
 - 移行: shell/canvas/CanvasHost.tsx がツールのボタンを今のかんたん/詳細で出し分け、使っているツールが出ないほうになったら既定のツールに戻す。ワープのツール（modes/modeling/warp/warpTool.ts）を `level: 'detail'` にした。テスト: shell/canvas/toolLevel.test.tsx
+
+### CC-032追記（2026-11-01 CO）
+
+ArmServiceにsettings/cancelCalibration/diagnostics/onDiagnosticsとArmDiagnosticsを追加。HandShapeResultに任意のpointDirection、TargetDeltasに任意のarms（ArmRigEvaluation）を追加。詳細はAT-03報告のCO v3。顔の意味・リグ無しの評価・保存形式12は維持。

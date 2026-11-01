@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "browser": "isolated headless Edge",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "overflow": []
+    },
+    {
+      "width": 800,
+      "height": 600,
+      "overflow": []
+    }
+  ],
+  "operations": [
+    "代表姿勢",
+    "手振りの再生と停止",
+    "IKドラッグ",
+    "保存データ不変",
+    "解除とUndo"
+  ],
+  "pageErrors": [],
+  "scriptSha256": "e81f384323df033e71006a48081352e6168f979a1eabdc739e171cb2eefeab8f"
+}

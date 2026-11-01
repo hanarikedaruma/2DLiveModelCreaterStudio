@@ -1,0 +1,994 @@
+{
+  "createdAt": "2026-10-31T09:35:34.877Z",
+  "width": 640,
+  "height": 480,
+  "followedSteps": 16,
+  "steps": [
+    {
+      "id": "rest",
+      "truth": {
+        "active": [],
+        "shape": null
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6028.100000023842,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 0.04666666666666667,
+      "twoHandRate": 0,
+      "truthHandRate": null,
+      "otherHandRate": null,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0.11333333333333333
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        }
+      },
+      "pose": null,
+      "hands": null,
+      "gestures": {},
+      "sdkGestureMatch": null,
+      "geometricShapes": {},
+      "geometricMatch": null,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "wave-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "open"
+      },
+      "retries": 0,
+      "frames": 148,
+      "durationMs": 6032.699999928474,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 0.9932432432432432,
+      "twoHandRate": 0,
+      "truthHandRate": 0.9932432432432432,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0.02027027027027027
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 147
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "Open_Palm": 113,
+        "None": 34
+      },
+      "sdkGestureMatch": 0.7687074829931972,
+      "geometricShapes": {
+        "open": 120,
+        "unknown": 27
+      },
+      "geometricMatch": 0.8163265306122449,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "wave-left",
+      "truth": {
+        "active": ["left"],
+        "shape": "open"
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6014.300000071526,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 0.9266666666666666,
+      "twoHandRate": 0.12,
+      "truthHandRate": 0.9266666666666666,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 0
+      },
+      "hands": {
+        "sdkSides": {
+          "Left": 155,
+          "Right": 2
+        },
+        "sdkSameNameAsTruth": 0.9872611464968153
+      },
+      "gestures": {
+        "Open_Palm": 105,
+        "None": 49,
+        "ILoveYou": 1,
+        "Victory": 2
+      },
+      "sdkGestureMatch": 0.6687898089171974,
+      "geometricShapes": {
+        "open": 97,
+        "unknown": 59,
+        "peace": 1
+      },
+      "geometricMatch": 0.6178343949044586,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "wave-both",
+      "truth": {
+        "active": ["left", "right"],
+        "shape": "open"
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6009.199999928474,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 0.8543046357615894,
+      "twoHandRate": 0.5298013245033113,
+      "truthHandRate": null,
+      "otherHandRate": null,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": null,
+      "hands": null,
+      "gestures": {
+        "None": 44,
+        "Open_Palm": 164,
+        "Pointing_Up": 1
+      },
+      "sdkGestureMatch": 0.784688995215311,
+      "geometricShapes": {
+        "open": 168,
+        "unknown": 38,
+        "fist": 2,
+        "peace": 1
+      },
+      "geometricMatch": 0.8038277511961722,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "point-up-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "point",
+        "pointing": "up"
+      },
+      "retries": 0,
+      "frames": 147,
+      "durationMs": 6008.400000095367,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 147
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "Pointing_Up": 147
+      },
+      "sdkGestureMatch": 1,
+      "geometricShapes": {
+        "point": 147
+      },
+      "geometricMatch": 1,
+      "indexDirectionDeg": 92.11044728343673
+    },
+    {
+      "id": "point-side-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "point",
+        "pointing": "side"
+      },
+      "retries": 0,
+      "frames": 140,
+      "durationMs": 6059.399999976158,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 140
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "None": 140
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "unknown": 139,
+        "point": 1
+      },
+      "geometricMatch": 0.007142857142857143,
+      "indexDirectionDeg": 178.45940807494762
+    },
+    {
+      "id": "point-diag-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "point",
+        "pointing": "diagonal"
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6019.299999952316,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 150
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "None": 150
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "point": 150
+      },
+      "geometricMatch": 1,
+      "indexDirectionDeg": 146.19092300459153
+    },
+    {
+      "id": "point-side-left",
+      "truth": {
+        "active": ["left"],
+        "shape": "point",
+        "pointing": "side"
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6032.400000095367,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 0
+      },
+      "hands": {
+        "sdkSides": {
+          "Left": 151
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "None": 151
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "point": 146,
+        "unknown": 3,
+        "peace": 2
+      },
+      "geometricMatch": 0.9668874172185431,
+      "indexDirectionDeg": 3.3972587426416503
+    },
+    {
+      "id": "point-diag-left",
+      "truth": {
+        "active": ["left"],
+        "shape": "point",
+        "pointing": "diagonal"
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6018.5,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 0
+      },
+      "hands": {
+        "sdkSides": {
+          "Left": 150
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "Pointing_Up": 150
+      },
+      "sdkGestureMatch": 1,
+      "geometricShapes": {
+        "point": 150
+      },
+      "geometricMatch": 1,
+      "indexDirectionDeg": 39.96283838850745
+    },
+    {
+      "id": "point-camera-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "point",
+        "pointing": "side"
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6024,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0.609271523178808,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 0.7152317880794702,
+          "wrist": 0.24503311258278146
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 164,
+          "Left": 79
+        },
+        "sdkSameNameAsTruth": 0.6748971193415638
+      },
+      "gestures": {
+        "None": 243
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "point": 163,
+        "unknown": 57,
+        "fist": 23
+      },
+      "geometricMatch": 0.6707818930041153,
+      "indexDirectionDeg": 94.12883929705723
+    },
+    {
+      "id": "peace-face-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "peace"
+      },
+      "retries": 0,
+      "frames": 152,
+      "durationMs": 6041.299999952316,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0.039473684210526314,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 0,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0.1513157894736842
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 155,
+          "Left": 3
+        },
+        "sdkSameNameAsTruth": 0.9810126582278481
+      },
+      "gestures": {
+        "Victory": 152,
+        "None": 6
+      },
+      "sdkGestureMatch": 0.9620253164556962,
+      "geometricShapes": {
+        "peace": 55,
+        "unknown": 101,
+        "open": 2
+      },
+      "geometricMatch": 0.34810126582278483,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "peace-face-left",
+      "truth": {
+        "active": ["left"],
+        "shape": "peace"
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6032.100000023842,
+      "followed": false,
+      "poseRate": 1,
+      "handRate": 0.4266666666666667,
+      "twoHandRate": 0,
+      "truthHandRate": 0.4266666666666667,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 0.9066666666666666,
+          "wrist": 0.7133333333333334
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 0.7533333333333333,
+          "wrist": 0
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 0
+      },
+      "hands": {
+        "sdkSides": {
+          "Left": 63,
+          "Right": 1
+        },
+        "sdkSameNameAsTruth": 0.984375
+      },
+      "gestures": {
+        "None": 2,
+        "Victory": 62
+      },
+      "sdkGestureMatch": 0.96875,
+      "geometricShapes": {
+        "fist": 1,
+        "peace": 16,
+        "unknown": 47
+      },
+      "geometricMatch": 0.25,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "fist-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "fist"
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6037.100000023842,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0.4105960264900662
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 151
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "None": 151
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "unknown": 68,
+        "fist": 83
+      },
+      "geometricMatch": 0.5496688741721855,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "fist-left",
+      "truth": {
+        "active": ["left"],
+        "shape": "fist"
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6028.099999904633,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 0.9933774834437086,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 0,
+          "wrist": 0
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 0
+      },
+      "hands": {
+        "sdkSides": {
+          "Left": 151
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "None": 151
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "unknown": 73,
+        "fist": 78
+      },
+      "geometricMatch": 0.5165562913907285,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "flip-right",
+      "truth": {
+        "active": ["right"],
+        "shape": "open",
+        "palmFlip": true
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6030.200000047684,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0.006622516556291391,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0.07947019867549669
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 152
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "Open_Palm": 119,
+        "None": 33
+      },
+      "sdkGestureMatch": 0.7828947368421053,
+      "geometricShapes": {
+        "open": 152
+      },
+      "geometricMatch": 1,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "cross",
+      "truth": {
+        "active": ["left", "right"],
+        "shape": "open",
+        "crossed": true
+      },
+      "retries": 0,
+      "frames": 151,
+      "durationMs": 6023.799999952316,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 1,
+      "truthHandRate": null,
+      "otherHandRate": null,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": null,
+      "hands": null,
+      "gestures": {
+        "None": 302
+      },
+      "sdkGestureMatch": 0,
+      "geometricShapes": {
+        "open": 298,
+        "unknown": 4
+      },
+      "geometricMatch": 0.9867549668874173,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "cover-face",
+      "truth": {
+        "active": ["right"],
+        "shape": "open",
+        "faceCovered": true
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6029.899999976158,
+      "followed": true,
+      "poseRate": 1,
+      "handRate": 1,
+      "twoHandRate": 0,
+      "truthHandRate": 1,
+      "otherHandRate": 0,
+      "faceRate": 0,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 0.92,
+          "wrist": 0.8
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 150
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "Open_Palm": 150
+      },
+      "sdkGestureMatch": 1,
+      "geometricShapes": {
+        "open": 150
+      },
+      "geometricMatch": 1,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "elbow-edge",
+      "truth": {
+        "active": ["right"],
+        "shape": "open",
+        "edge": true
+      },
+      "retries": 0,
+      "frames": 152,
+      "durationMs": 6034.799999952316,
+      "followed": false,
+      "poseRate": 1,
+      "handRate": 0.9868421052631579,
+      "twoHandRate": 0,
+      "truthHandRate": 0,
+      "otherHandRate": 0.9868421052631579,
+      "faceRate": 1,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 1
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 0.24342105263157895,
+          "wrist": 0.06578947368421052
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {},
+        "sdkSameNameAsTruth": null
+      },
+      "gestures": {},
+      "sdkGestureMatch": null,
+      "geometricShapes": {},
+      "geometricMatch": null,
+      "indexDirectionDeg": null
+    },
+    {
+      "id": "out-and-back",
+      "truth": {
+        "active": ["right"],
+        "shape": "open",
+        "outOfFrame": true
+      },
+      "retries": 0,
+      "frames": 150,
+      "durationMs": 6037.700000047684,
+      "followed": false,
+      "poseRate": 1,
+      "handRate": 0.7866666666666666,
+      "twoHandRate": 0.04,
+      "truthHandRate": 0.6,
+      "otherHandRate": 0.22,
+      "faceRate": 0.98,
+      "visibility": {
+        "left": {
+          "shoulder": 1,
+          "elbow": 1,
+          "wrist": 0.6933333333333334
+        },
+        "right": {
+          "shoulder": 1,
+          "elbow": 0.6133333333333333,
+          "wrist": 0.7133333333333334
+        }
+      },
+      "pose": {
+        "higherWristNamedAsTruth": 1,
+        "truthSideOnImageLeft": 1
+      },
+      "hands": {
+        "sdkSides": {
+          "Right": 91
+        },
+        "sdkSameNameAsTruth": 1
+      },
+      "gestures": {
+        "None": 52,
+        "Open_Palm": 39
+      },
+      "sdkGestureMatch": 0.42857142857142855,
+      "geometricShapes": {
+        "unknown": 33,
+        "open": 58
+      },
+      "geometricMatch": 0.6373626373626373,
+      "indexDirectionDeg": null
+    }
+  ],
+  "truthFree": {
+    "sdkSideMatchesNearestPoseWrist": {
+      "rate": 0.9569410954185326,
+      "frames": 2903
+    },
+    "whileCrossed": {
+      "rate": 1,
+      "frames": 302,
+      "crossedFrames": 151
+    },
+    "pointingByDirection": {
+      "up": {
+        "frames": 299,
+        "sdkPointingUp": 147
+      },
+      "side": {
+        "frames": 151,
+        "sdkPointingUp": 0
+      },
+      "diagonal": {
+        "frames": 303,
+        "sdkPointingUp": 150
+      },
+      "down": {
+        "frames": 5,
+        "sdkPointingUp": 0
+      }
+    },
+    "geometricShapeVsSdk": {
+      "point": {
+        "None": 461,
+        "Pointing_Up": 297
+      },
+      "unknown": {
+        "None": 466,
+        "Open_Palm": 41,
+        "ILoveYou": 1,
+        "Victory": 146,
+        "Pointing_Up": 1
+      },
+      "open": {
+        "None": 513,
+        "Open_Palm": 649,
+        "Thumb_Up": 66
+      },
+      "peace": {
+        "None": 5,
+        "Victory": 70
+      },
+      "fist": {
+        "None": 187
+      }
+    },
+    "faceLost": {
+      "frames": 305,
+      "poseRate": 1,
+      "handRate": 1
+    },
+    "elbowVisible": {
+      "left": 0.9905130007027407,
+      "right": 0.8580463808854533,
+      "frames": 2846
+    }
+  }
+}

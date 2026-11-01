@@ -1,0 +1,16 @@
+{
+  "bytes": 123995,
+  "hosts": {
+    "at01.localhost": 13,
+    "at01-netcheck.invalid": 4,
+    "edge.microsoft.com": 4,
+    "odml.pa.googleapis.com": 8
+  },
+  "external": ["at01-netcheck.invalid", "edge.microsoft.com", "odml.pa.googleapis.com"],
+  "netErrors": {
+    "-105": 10,
+    "-102": 12,
+    "-130": 20,
+    "-3": 2
+  }
+}

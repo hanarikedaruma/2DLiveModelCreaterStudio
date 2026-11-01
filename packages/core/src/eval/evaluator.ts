@@ -10,6 +10,7 @@ import {
 import type { BindingEvaluator, ParamValues, TargetDeltas } from '@app/contracts';
 import { prepareBinding, type PreparedBinding } from './prepare';
 import { identityDelta } from './transformDelta';
+import { evaluateArmRigs } from '../joint/evaluate';
 
 function clamp(v: number, min: number, max: number): number {
   return v < min ? min : v > max ? max : v;
@@ -165,6 +166,7 @@ export function createBindingEvaluator(): BindingEvaluator {
   return {
     evaluate(model: Model, params: ParamValues): TargetDeltas {
       const out: TargetDeltas = { transforms: {}, vertices: {}, warpPoints: {} };
+      if (model.armRigs?.length) out.arms = evaluateArmRigs(model, params);
       let parameters = parameterMaps.get(model.parameters);
       if (!parameters) {
         parameters = new Map(model.parameters.map((p) => [p.id, p]));

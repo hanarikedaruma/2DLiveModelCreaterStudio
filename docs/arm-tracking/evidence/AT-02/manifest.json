@@ -1,0 +1,26 @@
+{
+  "version": "AT-02 CO prototype v1",
+  "sources": {
+    "kinematics.ts": "15d9757a85de0bed219f1b7e5f7ca2702c4cdf542a9de9dc48b91486d9dcb8e4",
+    "render.ts": "4abe58e9c34875330e460e5136010d70a4c53e08990edcf134dd94ff06dd106e",
+    "viewer.ts": "eaac71e20df4483290506eba256ac83b144571f6f6cf980d78b63b0393d28639",
+    "viewer.html": "c49dfb171a18d684fd426e0028e3394cc74e1d9bc25c8186e782647870bac23e",
+    "generate.ts": "c09110790ef49b714c0a8ffd3731279375dcbc5ece5cfa2fbdc8bb620c2ee518",
+    "kinematics.co.test.ts": "dda2e4f225bb08836b22c2b998c94c2b91aac6e20189fb1b38511e9f3b9d6c90",
+    "check-preview.mjs": "dc1daa88fd66574418c3adcbc35f60ff9d31c339b62924664825cad925828154",
+    "tsconfig.json": "6d2bbc1434ce8d9c3e2000b487b986721270956ccdb77b14a48da64e0b44b1ed"
+  },
+  "outputs": {
+    "poses.svg": "f480d598b36e848019220eb2e33591576ea84f886c911386e1d3dc400a5affd1",
+    "poses.png": "f51a23466754e095e10363a0fdaebc0871841b297e07e75863e838a5ac95f8e6",
+    "wave.svg": "e3e7ba07725ea53bdcb30a7283404d394deca9ac2ee64a20f770886e46babf14",
+    "wave.png": "c9ee600abc5195a6a5bdaf2c9a0bc03909f666a51308e5bb502b9c0a16fd250b",
+    "transitions.svg": "93164c58b1e7b1f9387dd5e6f1e25616825fabfb89d1cf1a1b8763bf7d118537",
+    "transitions.png": "77c7e8768b4ae2a43d3261f4469a34b93672e0e10d1a92695b8feff4e09a2445",
+    "face-peace.svg": "cd6ede52bd867237b794180b77a868be109b06038a3294ba4d1fb2e2f84e7de5",
+    "face-peace.png": "a91ae55f285170b317b6d0d1be4ecf068968ac57ad1b19188c06a96872a255d2",
+    "poses.json": "a6da85155c785e0f6721f1347d56dfdf6fa187b6d96c84d8be28269f76f6b5c3",
+    "measurements.json": "03cff1fc9cf16d996cdb6eaf81fa56bc9896201d68c50e7e77a39f29007925d0",
+    "preview.html": "34b0c126ecb904ee97c3c76260a6638030d28d62ad095d3e2a43041a78a87a29"
+  }
+}

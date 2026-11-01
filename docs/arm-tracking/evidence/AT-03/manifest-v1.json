@@ -1,0 +1,22 @@
+{
+  "version": "AT-03 CO v1",
+  "date": "2026-11-01",
+  "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
+  "uncommitted": true,
+  "schemaVersion": 12,
+  "sha256": {
+    "packages/schema/src/arms.ts": "be5bb188cd17063d5e7cd91ac221f9aefe82fece74f8d43c4fd4537f25ab1bd0",
+    "packages/schema/src/arms.co.test.ts": "b6c63e646799d786211230aa21b1a627df18d14574e21c4865e903e35e9513f6",
+    "packages/schema/src/types.ts": "a4ad2ab3c5ea6b506b7de42b04d074b0a3b24db3d98b43a92d3f72dc7956a8a1",
+    "packages/schema/src/validate.ts": "7390cd9aaefc9719260858107be3e5f5154c6c0af7abbb508ee147fdcf560d8a",
+    "packages/schema/src/migrate.ts": "8ebf13954efb82a24264357c1fac86cca6d4f691cd07c26bc7e97dcfb7490694",
+    "packages/schema/src/index.ts": "0fa34a4cd07fe1eddbec6497c2a4185bc7218de5a37857aa585d6c7a964b3ff3",
+    "packages/contracts/src/arms.ts": "69402919365ed9ce3688858ba064d27e5a0f00d186d71863c3182b3d7676383d",
+    "packages/contracts/src/index.ts": "6545d81abc28570a1b90aba205c51b5e5d950b68a6faff5e3e444b48f59adc91",
+    "packages/contracts/src/fakes/arms.ts": "41d9388eade53e9df006a63a6a04bbe10dab547cdad12943b9da6ac8d02b5c67",
+    "packages/contracts/src/fakes/arms.co.test.ts": "c79805c0765af80af7bb1349bad6d3fa5b424c84ac50affaad4288eed39752f4",
+    "packages/contracts/src/fakes/index.ts": "bd8bc1ce7ca38445a9ed592b7d698a7bb8720283056c8440154d446b9d217ef9",
+    "packages/io/src/project/repair.ts": "18e9c66192440390321f73badcdbe4e91bf1b542e5df959a581755ba0893f59f",
+    "packages/io/src/project/arms.co.test.ts": "5f2ae65d8438bc4a0eb6c70ca3fe5f2cb539dfc3e85e32078edd47ac32731674"
+  }
+}

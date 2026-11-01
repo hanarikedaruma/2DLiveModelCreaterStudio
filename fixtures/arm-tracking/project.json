@@ -1,0 +1,1879 @@
+{
+  "armTracking": {
+    "mode": "normal",
+    "sides": {
+      "L": {
+        "enabled": false,
+        "gain": 1,
+        "smoothing": 0.5,
+        "handMode": "auto",
+        "restHand": "open"
+      },
+      "R": {
+        "enabled": false,
+        "gain": 1,
+        "smoothing": 0.5,
+        "handMode": "auto",
+        "restHand": "open"
+      }
+    }
+  },
+  "schemaVersion": 12,
+  "id": "arm-tracking-project",
+  "name": "腕・手の技術見本",
+  "assets": [
+    {
+      "id": "arm-tech",
+      "path": "assets/arm-tech.png",
+      "hash": "3bee559c590995c55034cf72a3144c540bc1f4eed2280e8f9b9a57e4f2c2991f",
+      "width": 16,
+      "height": 16,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "canvasSize": {
+        "width": 600,
+        "height": 600
+      },
+      "source": {
+        "kind": "png",
+        "file": "arm-tech.png"
+      },
+      "sourceBlendMode": "normal",
+      "sourceOpacity": 1
+    }
+  ],
+  "model": {
+    "armRigs": [
+      {
+        "id": "arm-L",
+        "side": "L",
+        "enabled": true,
+        "parentPartId": "body-root",
+        "groups": {
+          "shoulder": "shoulder-L",
+          "elbow": "elbow-L",
+          "wrist": "wrist-L"
+        },
+        "joints": {
+          "shoulder": {
+            "x": 378,
+            "y": 240
+          },
+          "elbow": {
+            "x": 378,
+            "y": 358
+          },
+          "wrist": {
+            "x": 378,
+            "y": 466
+          }
+        },
+        "lengths": {
+          "upper": 118,
+          "lower": 108
+        },
+        "bendSign": 1,
+        "referencePose": {
+          "shoulder": 0,
+          "elbow": 0,
+          "wrist": 0
+        },
+        "restPose": {
+          "shoulder": 8,
+          "elbow": 12,
+          "wrist": 0
+        },
+        "limits": {
+          "shoulder": {
+            "min": -25,
+            "max": 160
+          },
+          "elbow": {
+            "min": 0,
+            "max": 145
+          },
+          "wrist": {
+            "min": -40,
+            "max": 40
+          },
+          "forearm": {
+            "min": -25,
+            "max": 300
+          },
+          "hand": {
+            "min": -55,
+            "max": 300
+          }
+        },
+        "hands": {
+          "open": {
+            "partIds": [
+              "open-L"
+            ],
+            "wrist": {
+              "x": 378,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          "fist": {
+            "partIds": [
+              "fist-L"
+            ],
+            "wrist": {
+              "x": 378,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          "point": {
+            "partIds": [
+              "point-L"
+            ],
+            "wrist": {
+              "x": 378,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          "peace": {
+            "partIds": [
+              "peace-L"
+            ],
+            "wrist": {
+              "x": 378,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          }
+        },
+        "restHand": "open",
+        "parameters": {
+          "shoulder": "ArmShoulderL",
+          "elbow": "ArmElbowL",
+          "wrist": "HandAngleL",
+          "shapes": {
+            "open": "HandOpenL",
+            "fist": "HandFistL",
+            "point": "HandPointL",
+            "peace": "HandPeaceL"
+          }
+        }
+      },
+      {
+        "id": "arm-R",
+        "side": "R",
+        "enabled": true,
+        "parentPartId": "body-root",
+        "groups": {
+          "shoulder": "shoulder-R",
+          "elbow": "elbow-R",
+          "wrist": "wrist-R"
+        },
+        "joints": {
+          "shoulder": {
+            "x": 222,
+            "y": 240
+          },
+          "elbow": {
+            "x": 222,
+            "y": 358
+          },
+          "wrist": {
+            "x": 222,
+            "y": 466
+          }
+        },
+        "lengths": {
+          "upper": 118,
+          "lower": 108
+        },
+        "bendSign": 1,
+        "referencePose": {
+          "shoulder": 0,
+          "elbow": 0,
+          "wrist": 0
+        },
+        "restPose": {
+          "shoulder": 8,
+          "elbow": 12,
+          "wrist": 0
+        },
+        "limits": {
+          "shoulder": {
+            "min": -25,
+            "max": 160
+          },
+          "elbow": {
+            "min": 0,
+            "max": 145
+          },
+          "wrist": {
+            "min": -40,
+            "max": 40
+          },
+          "forearm": {
+            "min": -25,
+            "max": 300
+          },
+          "hand": {
+            "min": -55,
+            "max": 300
+          }
+        },
+        "hands": {
+          "open": {
+            "partIds": [
+              "open-R"
+            ],
+            "wrist": {
+              "x": 222,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          "fist": {
+            "partIds": [
+              "fist-R"
+            ],
+            "wrist": {
+              "x": 222,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          "point": {
+            "partIds": [
+              "point-R"
+            ],
+            "wrist": {
+              "x": 222,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          },
+          "peace": {
+            "partIds": [
+              "peace-R"
+            ],
+            "wrist": {
+              "x": 222,
+              "y": 466
+            },
+            "fingerDirection": {
+              "x": 0,
+              "y": -1
+            }
+          }
+        },
+        "restHand": "open",
+        "parameters": {
+          "shoulder": "ArmShoulderR",
+          "elbow": "ArmElbowR",
+          "wrist": "HandAngleR",
+          "shapes": {
+            "open": "HandOpenR",
+            "fist": "HandFistR",
+            "point": "HandPointR",
+            "peace": "HandPeaceR"
+          }
+        }
+      }
+    ],
+    "parts": [
+      {
+        "id": "body-root",
+        "name": "body-root",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": null,
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "shoulder-L",
+        "name": "shoulder-L",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": "body-root",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "elbow-L",
+        "name": "elbow-L",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": "shoulder-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "wrist-L",
+        "name": "wrist-L",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": "elbow-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "upper-L",
+        "name": "upper-L",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "upper-L",
+        "parentId": "shoulder-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "lower-L",
+        "name": "lower-L",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "lower-L",
+        "parentId": "elbow-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "open-L",
+        "name": "open-L",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "open-L",
+        "parentId": "wrist-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "fist-L",
+        "name": "fist-L",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "fist-L",
+        "parentId": "wrist-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "point-L",
+        "name": "point-L",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "point-L",
+        "parentId": "wrist-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "peace-L",
+        "name": "peace-L",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "peace-L",
+        "parentId": "wrist-L",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "shoulder-R",
+        "name": "shoulder-R",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": "body-root",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "elbow-R",
+        "name": "elbow-R",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": "shoulder-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "wrist-R",
+        "name": "wrist-R",
+        "kind": "group",
+        "standardType": null,
+        "assetId": null,
+        "meshId": null,
+        "parentId": "elbow-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "upper-R",
+        "name": "upper-R",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "upper-R",
+        "parentId": "shoulder-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "lower-R",
+        "name": "lower-R",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "lower-R",
+        "parentId": "elbow-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "open-R",
+        "name": "open-R",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "open-R",
+        "parentId": "wrist-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "fist-R",
+        "name": "fist-R",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "fist-R",
+        "parentId": "wrist-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "point-R",
+        "name": "point-R",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "point-R",
+        "parentId": "wrist-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "peace-R",
+        "name": "peace-R",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "peace-R",
+        "parentId": "wrist-R",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      },
+      {
+        "id": "face",
+        "name": "face",
+        "kind": "image",
+        "standardType": null,
+        "assetId": "arm-tech",
+        "meshId": "face",
+        "parentId": "body-root",
+        "position": {
+          "x": 0,
+          "y": 0
+        },
+        "rotation": 0,
+        "scale": {
+          "x": 1,
+          "y": 1
+        },
+        "pivot": {
+          "x": 0,
+          "y": 0
+        },
+        "opacity": 1,
+        "blendMode": "normal",
+        "depth": 0,
+        "mask": null,
+        "physicsId": null,
+        "visible": true,
+        "locked": false
+      }
+    ],
+    "meshes": [
+      {
+        "id": "upper-L",
+        "vertices": [
+          {
+            "x": 369,
+            "y": 240
+          },
+          {
+            "x": 369,
+            "y": 358
+          },
+          {
+            "x": 387,
+            "y": 358
+          },
+          {
+            "x": 387,
+            "y": 240
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "lower-L",
+        "vertices": [
+          {
+            "x": 370,
+            "y": 358
+          },
+          {
+            "x": 370,
+            "y": 466
+          },
+          {
+            "x": 386,
+            "y": 466
+          },
+          {
+            "x": 386,
+            "y": 358
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "open-L",
+        "vertices": [
+          {
+            "x": 368,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 441
+          },
+          {
+            "x": 368,
+            "y": 441
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "fist-L",
+        "vertices": [
+          {
+            "x": 368,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 438
+          },
+          {
+            "x": 368,
+            "y": 438
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "point-L",
+        "vertices": [
+          {
+            "x": 368,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 435
+          },
+          {
+            "x": 368,
+            "y": 435
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "peace-L",
+        "vertices": [
+          {
+            "x": 368,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 466
+          },
+          {
+            "x": 388,
+            "y": 432
+          },
+          {
+            "x": 368,
+            "y": 432
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "upper-R",
+        "vertices": [
+          {
+            "x": 213,
+            "y": 240
+          },
+          {
+            "x": 213,
+            "y": 358
+          },
+          {
+            "x": 231,
+            "y": 358
+          },
+          {
+            "x": 231,
+            "y": 240
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "lower-R",
+        "vertices": [
+          {
+            "x": 214,
+            "y": 358
+          },
+          {
+            "x": 214,
+            "y": 466
+          },
+          {
+            "x": 230,
+            "y": 466
+          },
+          {
+            "x": 230,
+            "y": 358
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "open-R",
+        "vertices": [
+          {
+            "x": 212,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 441
+          },
+          {
+            "x": 212,
+            "y": 441
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "fist-R",
+        "vertices": [
+          {
+            "x": 212,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 438
+          },
+          {
+            "x": 212,
+            "y": 438
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "point-R",
+        "vertices": [
+          {
+            "x": 212,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 435
+          },
+          {
+            "x": 212,
+            "y": 435
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "peace-R",
+        "vertices": [
+          {
+            "x": 212,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 466
+          },
+          {
+            "x": 232,
+            "y": 432
+          },
+          {
+            "x": 212,
+            "y": 432
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      },
+      {
+        "id": "face",
+        "vertices": [
+          {
+            "x": 250,
+            "y": 100
+          },
+          {
+            "x": 350,
+            "y": 100
+          },
+          {
+            "x": 350,
+            "y": 220
+          },
+          {
+            "x": 250,
+            "y": 220
+          }
+        ],
+        "uvs": [
+          {
+            "x": 0,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 0
+          },
+          {
+            "x": 1,
+            "y": 1
+          },
+          {
+            "x": 0,
+            "y": 1
+          }
+        ],
+        "triangles": [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "density": "custom",
+        "edited": false
+      }
+    ],
+    "warps": [],
+    "drawOrder": [
+      "upper-L",
+      "upper-R",
+      "face",
+      "lower-L",
+      "lower-R",
+      "open-L",
+      "fist-L",
+      "point-L",
+      "peace-L",
+      "open-R",
+      "fist-R",
+      "point-R",
+      "peace-R"
+    ],
+    "parameters": [
+      {
+        "id": "FaceAngleX",
+        "name": "顔 左右",
+        "groupId": "face",
+        "min": -30,
+        "max": 30,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "FaceAngleY",
+        "name": "顔 上下",
+        "groupId": "face",
+        "min": -30,
+        "max": 30,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "FaceAngleZ",
+        "name": "顔 傾き",
+        "groupId": "face",
+        "min": -30,
+        "max": 30,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "EyeOpenL",
+        "name": "目 開閉 L",
+        "groupId": "eye",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "standard": true
+      },
+      {
+        "id": "EyeOpenR",
+        "name": "目 開閉 R",
+        "groupId": "eye",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "standard": true
+      },
+      {
+        "id": "EyeBallX",
+        "name": "瞳 左右",
+        "groupId": "eye",
+        "min": -1,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "EyeBallY",
+        "name": "瞳 上下",
+        "groupId": "eye",
+        "min": -1,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "MouthOpen",
+        "name": "口 開閉",
+        "groupId": "mouth",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "ArmShoulderL",
+        "name": "肩 L",
+        "groupId": "armL",
+        "min": -25,
+        "max": 160,
+        "default": 8,
+        "standard": true
+      },
+      {
+        "id": "ArmElbowL",
+        "name": "肘 L",
+        "groupId": "armL",
+        "min": 0,
+        "max": 145,
+        "default": 12,
+        "standard": true
+      },
+      {
+        "id": "HandAngleL",
+        "name": "手首 L",
+        "groupId": "armL",
+        "min": -40,
+        "max": 40,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "HandOpenL",
+        "name": "手 open L",
+        "groupId": "armL",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "standard": true
+      },
+      {
+        "id": "HandFistL",
+        "name": "手 fist L",
+        "groupId": "armL",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "HandPointL",
+        "name": "手 point L",
+        "groupId": "armL",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "HandPeaceL",
+        "name": "手 peace L",
+        "groupId": "armL",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "ArmShoulderR",
+        "name": "肩 R",
+        "groupId": "armR",
+        "min": -25,
+        "max": 160,
+        "default": 8,
+        "standard": true
+      },
+      {
+        "id": "ArmElbowR",
+        "name": "肘 R",
+        "groupId": "armR",
+        "min": 0,
+        "max": 145,
+        "default": 12,
+        "standard": true
+      },
+      {
+        "id": "HandAngleR",
+        "name": "手首 R",
+        "groupId": "armR",
+        "min": -40,
+        "max": 40,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "HandOpenR",
+        "name": "手 open R",
+        "groupId": "armR",
+        "min": 0,
+        "max": 1,
+        "default": 1,
+        "standard": true
+      },
+      {
+        "id": "HandFistR",
+        "name": "手 fist R",
+        "groupId": "armR",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "HandPointR",
+        "name": "手 point R",
+        "groupId": "armR",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      },
+      {
+        "id": "HandPeaceR",
+        "name": "手 peace R",
+        "groupId": "armR",
+        "min": 0,
+        "max": 1,
+        "default": 0,
+        "standard": true
+      }
+    ],
+    "parameterGroups": [
+      {
+        "id": "face",
+        "name": "顔"
+      },
+      {
+        "id": "eye",
+        "name": "目"
+      },
+      {
+        "id": "brow",
+        "name": "眉"
+      },
+      {
+        "id": "mouth",
+        "name": "口"
+      },
+      {
+        "id": "cheek",
+        "name": "頬"
+      },
+      {
+        "id": "body",
+        "name": "体"
+      },
+      {
+        "id": "armL",
+        "name": "左腕"
+      },
+      {
+        "id": "armR",
+        "name": "右腕"
+      },
+      {
+        "id": "sway",
+        "name": "揺れもの"
+      },
+      {
+        "id": "other",
+        "name": "その他"
+      }
+    ],
+    "bindings": [],
+    "curveGuides": [],
+    "lipSync": {
+      "mouthSource": "max",
+      "strength": "standard",
+      "vowels": []
+    },
+    "setupHints": {
+      "closedLineL": null,
+      "closedLineR": null
+    }
+  },
+  "expressions": [],
+  "animations": [],
+  "physics": [],
+  "trackingMappings": [],
+  "trackingSetup": {
+    "mode": "standard",
+    "combine": []
+  },
+  "studio": {
+    "scenes": [
+      {
+        "id": "scene",
+        "name": "シーン 1",
+        "background": {
+          "type": "transparent"
+        },
+        "modelTransform": {
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "scale": 1
+        },
+        "expressionIds": [],
+        "periodicAnimationIds": []
+      }
+    ],
+    "activeSceneId": "scene",
+    "hotkeys": []
+  }
+}

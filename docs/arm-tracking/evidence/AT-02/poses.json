@@ -1,0 +1,709 @@
+{
+  "convention": "モデル自身のLが画面右。y下向き、肩0°=下、正角=外側へ上げる。肘0°=伸展。手の原点=手首、指方向=(0,-1)。",
+  "rig": {
+    "upperLength": 118,
+    "lowerLength": 108,
+    "shoulderX": 78,
+    "shoulderY": 240,
+    "shoulder": [-25, 160],
+    "elbow": [0, 145],
+    "wrist": [-40, 40],
+    "forearm": [-25, 300],
+    "hand": [-55, 300]
+  },
+  "rest": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+  "manualReferences": [
+    {
+      "side": "L",
+      "pose": { "shoulder": 0, "elbow": 0, "wrist": 0 },
+      "elbow": { "x": 78, "y": 358 },
+      "wrist": { "x": 78, "y": 466 }
+    },
+    {
+      "side": "L",
+      "pose": { "shoulder": 90, "elbow": 90, "wrist": 0 },
+      "elbow": { "x": 196, "y": 240 },
+      "wrist": { "x": 196, "y": 132 }
+    },
+    {
+      "side": "L",
+      "pose": { "shoulder": 45, "elbow": 45, "wrist": 0 },
+      "elbow": { "x": 161.4386001800126, "y": 323.4386001800126 },
+      "wrist": { "x": 269.4386001800126, "y": 323.4386001800126 }
+    }
+  ],
+  "poses": [
+    {
+      "name": "休止姿勢",
+      "left": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+      "right": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": 131.36060139245996, "y": 458.3384351563834 },
+            "handRotation": 160
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": 131.36060139245996, "y": 458.3384351563834 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": -131.36060139245996, "y": 458.3384351563834 },
+            "handRotation": -160
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": -131.36060139245996, "y": 458.3384351563834 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "肘 0°",
+      "left": { "shoulder": 55, "elbow": 0, "wrist": 0 },
+      "right": { "shoulder": 55, "elbow": 0, "wrist": 0 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 55, "elbow": 0, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 263.1283620093121, "y": 369.6282746153364 },
+            "handRotation": 125
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 263.1283620093121, "y": 369.6282746153364 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 55, "elbow": 0, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -263.1283620093121, "y": 369.6282746153364 },
+            "handRotation": -125
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -263.1283620093121, "y": 369.6282746153364 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "肘 45°",
+      "left": { "shoulder": 55, "elbow": 45, "wrist": 0 },
+      "right": { "shoulder": 55, "elbow": 45, "wrist": 0 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 55, "elbow": 45, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 281.0191785514195, "y": 288.92801630139496 },
+            "handRotation": 80
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 281.0191785514195, "y": 288.92801630139496 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 55, "elbow": 45, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -281.0191785514195, "y": 288.92801630139496 },
+            "handRotation": -80
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -281.0191785514195, "y": 288.92801630139496 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "肘 90°",
+      "left": { "shoulder": 55, "elbow": 90, "wrist": 0 },
+      "right": { "shoulder": 55, "elbow": 90, "wrist": 0 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 55, "elbow": 90, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 236.60619635201397, "y": 219.21359870621234 },
+            "handRotation": 35
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 236.60619635201397, "y": 219.21359870621234 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 55, "elbow": 90, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -236.60619635201397, "y": 219.21359870621234 },
+            "handRotation": -35
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -236.60619635201397, "y": 219.21359870621234 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "肘 145°",
+      "left": { "shoulder": 55, "elbow": 145, "wrist": 0 },
+      "right": { "shoulder": 55, "elbow": 145, "wrist": 0 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 55, "elbow": 145, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 137.72176574692878, "y": 206.19521644454534 },
+            "handRotation": -20
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": 137.72176574692878, "y": 206.19521644454534 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 55, "elbow": 145, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -137.72176574692878, "y": 206.19521644454534 },
+            "handRotation": 20
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -174.659941226101, "y": 307.68201948942345 },
+            "wrist": { "x": -137.72176574692878, "y": 206.19521644454534 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "手振り・左",
+      "left": { "shoulder": 65, "elbow": 100, "wrist": -25 },
+      "right": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 65, "elbow": 100, "wrist": -25 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": 212.89677574139697, "y": 185.5489656461832 },
+            "handRotation": 40
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": 212.89677574139697, "y": 185.5489656461832 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": -131.36060139245996, "y": 458.3384351563834 },
+            "handRotation": -160
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": -131.36060139245996, "y": 458.3384351563834 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "左右へ指さす",
+      "left": { "shoulder": 90, "elbow": 0, "wrist": 0 },
+      "right": { "shoulder": 90, "elbow": 0, "wrist": 0 },
+      "leftHand": "point",
+      "rightHand": "point",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 90, "elbow": 0, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 196, "y": 240 },
+            "wrist": { "x": 304, "y": 240 },
+            "handRotation": 90
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 196, "y": 240 },
+            "wrist": { "x": 304, "y": 240 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 90, "elbow": 0, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -196, "y": 240 },
+            "wrist": { "x": -304, "y": 240 },
+            "handRotation": -90
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -196, "y": 240 },
+            "wrist": { "x": -304, "y": 240 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "上へ指さす",
+      "left": { "shoulder": 160, "elbow": 20, "wrist": 0 },
+      "right": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+      "leftHand": "point",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 160, "elbow": 20, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 118.35837691242892, "y": 129.11627074726283 },
+            "wrist": { "x": 118.35837691242894, "y": 21.11627074726283 },
+            "handRotation": 0
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 118.35837691242892, "y": 129.11627074726283 },
+            "wrist": { "x": 118.35837691242894, "y": 21.11627074726283 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 8, "elbow": 12, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": -131.36060139245996, "y": 458.3384351563834 },
+            "handRotation": -160
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -94.42242591328773, "y": 356.8516321115053 },
+            "wrist": { "x": -131.36060139245996, "y": 458.3384351563834 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "顔の前のピース",
+      "left": { "shoulder": 110, "elbow": 130, "wrist": -30 },
+      "right": { "shoulder": 110, "elbow": 130, "wrist": -30 },
+      "leftHand": "peace",
+      "rightHand": "peace",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 110, "elbow": 130, "wrist": -30 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 188.8837292527372, "y": 199.64162308757108 },
+            "wrist": { "x": 95.35298564401783, "y": 145.64162308757102 },
+            "handRotation": -30
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 188.8837292527372, "y": 199.64162308757108 },
+            "wrist": { "x": 95.35298564401783, "y": 145.64162308757102 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 110, "elbow": 130, "wrist": -30 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -188.8837292527372, "y": 199.64162308757108 },
+            "wrist": { "x": -95.35298564401783, "y": 145.64162308757102 },
+            "handRotation": 30
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -188.8837292527372, "y": 199.64162308757108 },
+            "wrist": { "x": -95.35298564401783, "y": 145.64162308757102 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "グーとパー",
+      "left": { "shoulder": 60, "elbow": 110, "wrist": 10 },
+      "right": { "shoulder": 60, "elbow": 110, "wrist": 10 },
+      "leftHand": "fist",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 60, "elbow": 110, "wrist": 10 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 180.19099764656374, "y": 299 },
+            "wrist": { "x": 198.9450008345922, "y": 192.64076267468153 },
+            "handRotation": 0
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 180.19099764656374, "y": 299 },
+            "wrist": { "x": 198.9450008345922, "y": 192.64076267468153 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 60, "elbow": 110, "wrist": 10 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -180.19099764656374, "y": 299 },
+            "wrist": { "x": -198.9450008345922, "y": 192.64076267468153 },
+            "handRotation": 0
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -180.19099764656374, "y": 299 },
+            "wrist": { "x": -198.9450008345922, "y": 192.64076267468153 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "手首の両端",
+      "left": { "shoulder": 65, "elbow": 100, "wrist": -40 },
+      "right": { "shoulder": 65, "elbow": 100, "wrist": 40 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 65, "elbow": 100, "wrist": -40 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": 212.89677574139697, "y": 185.5489656461832 },
+            "handRotation": 55
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": 212.89677574139697, "y": 185.5489656461832 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 65, "elbow": 100, "wrist": 40 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": -212.89677574139697, "y": 185.5489656461832 },
+            "handRotation": 25
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": -212.89677574139697, "y": 185.5489656461832 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "複合角度の制限",
+      "left": { "shoulder": 160, "elbow": 145, "wrist": 40 },
+      "right": { "shoulder": 160, "elbow": 145, "wrist": 40 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 160, "elbow": 140, "wrist": 0 },
+          "reasons": ["肘・前腕の範囲", "手首・手の合成角度"],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 118.35837691242892, "y": 129.11627074726283 },
+            "wrist": { "x": 24.82763330370956, "y": 183.11627074726283 },
+            "handRotation": -120
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 118.35837691242892, "y": 129.11627074726283 },
+            "wrist": { "x": 24.82763330370956, "y": 183.11627074726283 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 160, "elbow": 140, "wrist": 0 },
+          "reasons": ["肘・前腕の範囲", "手首・手の合成角度"],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -118.35837691242892, "y": 129.11627074726283 },
+            "wrist": { "x": -24.82763330370956, "y": 183.11627074726283 },
+            "handRotation": 120
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -118.35837691242892, "y": 129.11627074726283 },
+            "wrist": { "x": -24.82763330370956, "y": 183.11627074726283 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "肩の下限",
+      "left": { "shoulder": -25, "elbow": 0, "wrist": -40 },
+      "right": { "shoulder": -25, "elbow": 0, "wrist": -40 },
+      "leftHand": "open",
+      "rightHand": "open",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": -25, "elbow": 0, "wrist": -30 },
+          "reasons": ["手首・手の合成角度"],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 28.131045114597462, "y": 346.9443188703247 },
+            "wrist": { "x": -17.511727153398077, "y": 444.8255598702829 },
+            "handRotation": 235
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 28.131045114597462, "y": 346.9443188703247 },
+            "wrist": { "x": -17.511727153398077, "y": 444.8255598702829 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": -25, "elbow": 0, "wrist": -30 },
+          "reasons": ["手首・手の合成角度"],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -28.131045114597462, "y": 346.9443188703247 },
+            "wrist": { "x": 17.511727153398077, "y": 444.8255598702829 },
+            "handRotation": -235
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -28.131045114597462, "y": 346.9443188703247 },
+            "wrist": { "x": 17.511727153398077, "y": 444.8255598702829 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "親の傾き・呼吸",
+      "left": { "shoulder": 110, "elbow": 130, "wrist": -30 },
+      "right": { "shoulder": 65, "elbow": 100, "wrist": 15 },
+      "leftHand": "peace",
+      "rightHand": "open",
+      "parent": { "rotation": 12, "scale": 0.85, "breath": 6 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 110, "elbow": 130, "wrist": -30 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 188.8837292527372, "y": 199.64162308757108 },
+            "wrist": { "x": 95.35298564401783, "y": 145.64162308757102 },
+            "handRotation": -30
+          },
+          "world": {
+            "shoulder": { "x": 69.4460342957238, "y": 252.1674831250003 },
+            "elbow": { "x": 168.76992159050332, "y": 238.20842109870577 },
+            "wrist": { "x": 100.54922661167853, "y": 176.7822314349625 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 65, "elbow": 100, "wrist": 15 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": -212.89677574139697, "y": 185.5489656461832 },
+            "handRotation": 0
+          },
+          "world": {
+            "shoulder": { "x": -60.25633756157884, "y": 224.59839292256544 },
+            "elbow": { "x": -157.98565505953795, "y": 247.16098367325515 },
+            "wrist": { "x": -162.7900958426402, "y": 155.48679238278527 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "左右の異なる手形",
+      "left": { "shoulder": 65, "elbow": 100, "wrist": 0 },
+      "right": { "shoulder": 65, "elbow": 100, "wrist": 0 },
+      "leftHand": "point",
+      "rightHand": "peace",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 65, "elbow": 100, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": 212.89677574139697, "y": 185.5489656461832 },
+            "handRotation": 15
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": 212.89677574139697, "y": 185.5489656461832 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 65, "elbow": 100, "wrist": 0 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": -212.89677574139697, "y": 185.5489656461832 },
+            "handRotation": -15
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -184.9443188703247, "y": 289.86895488540256 },
+            "wrist": { "x": -212.89677574139697, "y": 185.5489656461832 }
+          }
+        }
+      ]
+    },
+    {
+      "name": "基準角を持つ腕",
+      "left": { "shoulder": 25, "elbow": 65, "wrist": 10 },
+      "right": { "shoulder": 25, "elbow": 65, "wrist": 10 },
+      "leftHand": "fist",
+      "rightHand": "fist",
+      "parent": { "rotation": 0, "scale": 1, "breath": 0 },
+      "applied": [
+        {
+          "side": "L",
+          "pose": { "shoulder": 25, "elbow": 65, "wrist": 10 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 127.86895488540253, "y": 346.9443188703247 },
+            "wrist": { "x": 235.86895488540253, "y": 346.9443188703247 },
+            "handRotation": 80
+          },
+          "world": {
+            "shoulder": { "x": 78, "y": 240 },
+            "elbow": { "x": 127.86895488540253, "y": 346.9443188703247 },
+            "wrist": { "x": 235.86895488540253, "y": 346.9443188703247 }
+          }
+        },
+        {
+          "side": "R",
+          "pose": { "shoulder": 25, "elbow": 65, "wrist": 10 },
+          "reasons": [],
+          "model": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -127.86895488540253, "y": 346.9443188703247 },
+            "wrist": { "x": -235.86895488540253, "y": 346.9443188703247 },
+            "handRotation": -80
+          },
+          "world": {
+            "shoulder": { "x": -78, "y": 240 },
+            "elbow": { "x": -127.86895488540253, "y": 346.9443188703247 },
+            "wrist": { "x": -235.86895488540253, "y": 346.9443188703247 }
+          }
+        }
+      ]
+    }
+  ]
+}

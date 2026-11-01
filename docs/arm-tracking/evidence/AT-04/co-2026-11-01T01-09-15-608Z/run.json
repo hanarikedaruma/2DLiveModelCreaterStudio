@@ -1,0 +1,77 @@
+{
+  "stamp": "2026-11-01T01-09-15-608Z",
+  "sourceVersion": "AT-04 CL v1",
+  "runs": [
+    {
+      "forceCpu": false,
+      "steps": [
+        {
+          "name": "normal",
+          "perSecond": {
+            "faces": 11.333333333333334,
+            "pose": 0,
+            "hands": 0,
+            "poseDetected": 0,
+            "handsDetected": 0
+          },
+          "status": {
+            "generation": 2,
+            "pose": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "hands": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "poseFps": null,
+            "handFps": null,
+            "droppedFrames": 33,
+            "staleResults": 1
+          },
+          "capture": {
+            "mode": "auto",
+            "state": "selecting",
+            "width": 1280,
+            "height": 720,
+            "requestedFps": 60,
+            "nominalFps": 30,
+            "maxFps": 30,
+            "cameraFps": null,
+            "trackingFps": null,
+            "warning": null
+          },
+          "workers": 1
+        }
+      ],
+      "pageErrors": [],
+      "start": {
+        "status": {
+          "generation": 2,
+          "pose": {
+            "state": "ready",
+            "delegate": "GPU",
+            "reason": null
+          },
+          "hands": {
+            "state": "ready",
+            "delegate": "GPU",
+            "reason": null
+          },
+          "poseFps": null,
+          "handFps": null,
+          "droppedFrames": 0,
+          "staleResults": 0
+        },
+        "readyMs": 1250.1000000238419
+      },
+      "networkHosts": [
+        "config.edge.skype.com",
+        "at01.localhost"
+      ],
+      "mediaPipeExternalRequests": []
+    }
+  ]
+}
