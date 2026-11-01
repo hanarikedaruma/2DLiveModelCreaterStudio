@@ -4,7 +4,7 @@
   "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
   "uncommitted": true,
   "dependsOn": "AT-03 CO v1、AT-05 CL v1",
-  "notes": "apps/desktop/src/dev/index.tsx は開発用の確認の入口（メニュー1項目と import 1行）だけを足した。契約への追加3つ（settings・cancelCalibration・diagnostics）はCOへ依頼中で、画面側の service.ts に同じ形を置いている。v2（2026-11-01）：service.ts の診断の型を契約（AT-03 CO v3）の型へ差し替え（動きは同じ）。ArmsSection.test.tsx はCOが契約に合わせて移行した版",
+  "notes": "apps/desktop/src/dev/index.tsx は開発用の確認の入口（メニュー1項目と import 1行）だけを足した。契約への追加3つ（settings・cancelCalibration・diagnostics）はCOへ依頼中で、画面側の service.ts に同じ形を置いている。v2（2026-11-01）：service.ts の診断の型を契約（AT-03 CO v3）の型へ差し替え（動きは同じ）。ArmsSection.test.tsx はCOが契約に合わせて移行した版。apps/desktop/src/dev/index.tsx の sha256 は AT-11 CL v2 の時点（開発用の入口あり）。AT-12 で入口を消した（判断3）。消した後の値は AT-12 manifest",
   "sha256": {
     "apps/desktop/src/dev/index.tsx": "cef64413c090efe79816fe0c60f8279ad3a0c94e21ba8ee03cbb997d3537c055",
     "apps/desktop/src/modes/studio/arms/ArmCalibrationDialog.tsx": "308bb8194c29ce2ff1723ba554dded569af117abeaa8f3dd277dbbdf0c2d1817",

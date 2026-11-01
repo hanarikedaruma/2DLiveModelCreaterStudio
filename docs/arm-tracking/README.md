@@ -21,24 +21,24 @@
 
 依存欄は**すべて必要な直接依存**。推移的な依存も含めて順序を守る。担当変更・状態変更はこの表とカードの両方へ反映する。
 
-| カード                                       | 作業                                     | 実装 | 独立確認 | 直接依存                                        | 状態                   |
-| -------------------------------------------- | ---------------------------------------- | ---- | -------- | ----------------------------------------------- | ---------------------- |
-| [AT-01](cards/01-inference-spike.md)         | 顔・腕・手の同時認識と実機性能の試作     | CL   | CO       | なし                                            | 完了（条件付き採用）   |
-| [AT-02](cards/02-rig-prototype.md)           | 分割腕・固定掌面の見本と関節の試作       | CO   | CL       | なし                                            | 完了                   |
-| [AT-03](cards/03-contracts.md)               | 観測・リグ・設定の契約と保存互換性       | CO   | CL       | AT-01・AT-02                                    | 完了（独立確認合格）   |
-| [AT-04](cards/04-capture-worker.md)          | 共有カメラ・推定Worker・モデル同梱       | CL   | CO       | AT-03                                           | 完了（独立確認合格）   |
-| [AT-05](cards/05-observation-association.md) | 観測の正規化・演者と左右の対応付け       | CL   | CO       | AT-03                                           | 完了（独立確認合格）   |
-| [AT-06](cards/06-constrained-ik.md)          | 制限付きIKと関節の静的制約               | CO   | CL       | AT-03                                           | 完了（独立確認合格）   |
-| [AT-07](cards/07-hand-shapes.md)             | 4種類の手形判定と切替の安定化            | CL   | CO       | AT-05                                           | 完了（独立確認合格）   |
-| [AT-08](cards/08-rig-evaluation.md)          | 共通の関節評価・手形表示・描画順         | CO   | CL       | AT-06                                           | 完了（独立確認合格）   |
-| [AT-09](cards/09-motion-session.md)          | モデルへの追従・平滑化・ロストと復帰     | CL   | CO       | AT-06                                           | 完了（独立確認合格）   |
-| [AT-10](cards/10-modeling-setup.md)          | 腕のセットアップとモデリング画面         | CO   | CL       | AT-08                                           | CL再確認 合格（CO v2） |
-| [AT-11](cards/11-studio-ui-calibration.md)   | スタジオの腕設定・校正・診断画面         | CL   | CO       | AT-05                                           | 完了（独立確認合格）   |
-| [AT-12](cards/12-runtime-integration.md)     | 顔・腕・手と既存スタジオの統合           | CL   | CO       | AT-04・AT-05・AT-07・AT-08・AT-09・AT-10・AT-11 | 設計の判断待ち         |
-| [AT-13](cards/13-regression-e2e.md)          | 保存互換性・異常系・通し操作の回帰試験   | CO   | CL       | AT-12                                           | 未着手                 |
-| [AT-14](cards/14-performance.md)             | OBS同時性能・軽量モード・長時間安定性    | CL   | CO       | AT-12                                           | 未着手                 |
-| [AT-15](cards/15-character-model.md)         | 実キャラクターの腕素材と関節の調整       | CO   | CL       | AT-10                                           | 未着手                 |
-| [AT-16](cards/16-acceptance.md)              | 実カメラでの自然さ・操作・初版の受け入れ | CL   | CO       | AT-13・AT-14・AT-15                             | 未着手                 |
+| カード                                       | 作業                                     | 実装 | 独立確認 | 直接依存                                        | 状態                              |
+| -------------------------------------------- | ---------------------------------------- | ---- | -------- | ----------------------------------------------- | --------------------------------- |
+| [AT-01](cards/01-inference-spike.md)         | 顔・腕・手の同時認識と実機性能の試作     | CL   | CO       | なし                                            | 完了（条件付き採用）              |
+| [AT-02](cards/02-rig-prototype.md)           | 分割腕・固定掌面の見本と関節の試作       | CO   | CL       | なし                                            | 完了                              |
+| [AT-03](cards/03-contracts.md)               | 観測・リグ・設定の契約と保存互換性       | CO   | CL       | AT-01・AT-02                                    | 完了（独立確認合格）              |
+| [AT-04](cards/04-capture-worker.md)          | 共有カメラ・推定Worker・モデル同梱       | CL   | CO       | AT-03                                           | 完了（独立確認合格）              |
+| [AT-05](cards/05-observation-association.md) | 観測の正規化・演者と左右の対応付け       | CL   | CO       | AT-03                                           | 完了（独立確認合格）              |
+| [AT-06](cards/06-constrained-ik.md)          | 制限付きIKと関節の静的制約               | CO   | CL       | AT-03                                           | 完了（独立確認合格）              |
+| [AT-07](cards/07-hand-shapes.md)             | 4種類の手形判定と切替の安定化            | CL   | CO       | AT-05                                           | 完了（独立確認合格）              |
+| [AT-08](cards/08-rig-evaluation.md)          | 共通の関節評価・手形表示・描画順         | CO   | CL       | AT-06                                           | 完了（独立確認合格）              |
+| [AT-09](cards/09-motion-session.md)          | モデルへの追従・平滑化・ロストと復帰     | CL   | CO       | AT-06                                           | v3（AT-12で追加）・COの再確認待ち |
+| [AT-10](cards/10-modeling-setup.md)          | 腕のセットアップとモデリング画面         | CO   | CL       | AT-08                                           | CL再確認 合格（CO v2）            |
+| [AT-11](cards/11-studio-ui-calibration.md)   | スタジオの腕設定・校正・診断画面         | CL   | CO       | AT-05                                           | 完了（独立確認合格）              |
+| [AT-12](cards/12-runtime-integration.md)     | 顔・腕・手と既存スタジオの統合           | CL   | CO       | AT-04・AT-05・AT-07・AT-08・AT-09・AT-10・AT-11 | 実装済・独立確認待ち              |
+| [AT-13](cards/13-regression-e2e.md)          | 保存互換性・異常系・通し操作の回帰試験   | CO   | CL       | AT-12                                           | 未着手                            |
+| [AT-14](cards/14-performance.md)             | OBS同時性能・軽量モード・長時間安定性    | CL   | CO       | AT-12                                           | 未着手                            |
+| [AT-15](cards/15-character-model.md)         | 実キャラクターの腕素材と関節の調整       | CO   | CL       | AT-10                                           | 未着手                            |
+| [AT-16](cards/16-acceptance.md)              | 実カメラでの自然さ・操作・初版の受け入れ | CL   | CO       | AT-13・AT-14・AT-15                             | 未着手                            |
 
 ## 依存関係
 

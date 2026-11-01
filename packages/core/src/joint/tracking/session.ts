@@ -186,6 +186,26 @@ export class ArmMotionSessionImpl implements ArmMotionSession {
     }
   }
 
+  // 表情・アニメーションがこの側の腕を上書きしている間（と、終わった直後）に呼ぶ。履歴は消さず、出力だけを
+  // 表示中の姿勢にして、観測が続いていれば復帰（約200ms）で追従へつなぐ。続いていなければ休止へ戻る。
+  // 両腕を休止へ戻す reset と違い、上書きされていない側には触れない（契約の外の追加。AT-12）
+  resumeFrom(side: ArmSide, displayed: ParamValues): void {
+    const s = this.sides[side];
+    if (!s.rig) return;
+    const ids = s.rig.parameters;
+    const pick = (id: string, fallback: number) =>
+      Number.isFinite(displayed[id]) ? (displayed[id] as number) : fallback;
+    s.output = this.constrain(s, {
+      shoulder: pick(ids.shoulder, s.output.shoulder),
+      elbow: pick(ids.elbow, s.output.elbow),
+      wrist: pick(ids.wrist, s.output.wrist),
+    });
+    s.velocity = zeroPose();
+    s.from = { ...s.output };
+    s.since = null; // 次の描画から数える
+    s.mode = s.lastObsValid && s.ikPose !== null ? 'recover' : 'return';
+  }
+
   status(): Record<ArmSide, ArmMotionStatus> {
     const one = (s: SideState): ArmMotionStatus => {
       if (!s.settings.enabled) return { state: 'off', handState: 'rest', pose: null, hand: null, reasons: [] };

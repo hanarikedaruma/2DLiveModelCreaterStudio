@@ -401,3 +401,49 @@ for (const [label, deps] of DEPS) {
     });
   });
 }
+
+// AT-12 で足した入口：上書きされた側だけ、表示中の姿勢から追従へつなぐ
+describe('resumeFrom（上書きの後のつなぎ）', () => {
+  function tracked() {
+    const s = createArmMotionSession(testDeps);
+    const st = defaultArmTrackingSettings();
+    for (const side of ['L', 'R'] as const) st.sides[side] = { ...st.sides[side], enabled: true };
+    s.configure(testModel(), st);
+    for (let t = 0; t < 600; t += 33) {
+      s.update({ body: frame({ L: observation('L', POSE, t), R: observation('R', POSE, t) }), shapes: {} });
+      s.tick(t + 40);
+    }
+    return s;
+  }
+
+  it('上書きされた側は表示中の姿勢から約200msで追従へ戻り、反対側は追従を続ける', () => {
+    const s = tracked();
+    s.resumeFrom('L', { ArmShoulderL: 140, ArmElbowL: 120, HandAngleL: 0 });
+    let t = 640;
+    s.update({ body: frame({ L: observation('L', POSE, 600), R: observation('R', POSE, 600) }), shapes: {} });
+    s.tick(t);
+    expect(s.status().L.state).toBe('recovering');
+    expect(s.status().L.pose!.shoulder).toBeGreaterThan(130); // 表示中の姿勢から始まる（跳ばない）
+    expect(s.status().R.state).toBe('tracking');
+    for (; t < 1100; t += 16) {
+      if ((t - 640) % 33 < 16)
+        s.update({ body: frame({ L: observation('L', POSE, t - 40), R: observation('R', POSE, t - 40) }), shapes: {} });
+      s.tick(t);
+    }
+    expect(s.status().L.state).toBe('tracking');
+    expect(Math.abs(s.status().L.pose!.shoulder - POSE.shoulder)).toBeLessThan(1);
+  });
+
+  it('観測が無い側は、表示中の姿勢から休止へ戻る', () => {
+    const s = createArmMotionSession(testDeps);
+    s.configure(testModel(), settings());
+    s.tick(0);
+    s.resumeFrom('L', { ArmShoulderL: 100, ArmElbowL: 30, HandAngleL: 0 });
+    s.tick(16);
+    expect(s.status().L.state).toBe('returning');
+    expect(s.status().L.pose!.shoulder).toBeGreaterThan(90);
+    s.tick(16 + MOTION_TIMING.returnMs + 100);
+    s.tick(16 + MOTION_TIMING.returnMs + 200);
+    expect(s.status().L.state).toBe('rest');
+  });
+});

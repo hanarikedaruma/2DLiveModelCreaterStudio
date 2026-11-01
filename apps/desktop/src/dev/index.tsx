@@ -4,7 +4,6 @@ import type { Vec2 } from '@app/schema';
 import type { Services } from '@app/contracts';
 import { emitAppEvent, registerCanvasTool, registerMenuItem, registerPanel, useCanvas, useProject } from '../shell/api';
 import { SHELL_NOTIFY } from '../shell/Shell';
-import { createDemoArmService, register as registerArms } from '../modes/studio/arms';
 import { loadSampleModel } from './sampleModel';
 
 // 最後に押したキャンバス座標（拡大・移動の後も座標が正しいかを確かめる）
@@ -53,16 +52,6 @@ export function registerDevParts(services: Services): void {
   };
 
   registerMenuItem({ id: 'dev.openSample', label: 'サンプルモデルを開く', run: () => void openSample() });
-  // AT-11：本物の腕のサービス（AT-12）が来るまで、仮サービスで「腕・手」のセクションを確かめる入口
-  registerMenuItem({
-    id: 'dev.armsDemo',
-    label: '腕・手の画面を確かめる（仮サービス）',
-    run: () => {
-      services.arms ??= createDemoArmService({ failOnce: 'bend' });
-      registerArms();
-      emitAppEvent(SHELL_NOTIFY, 'スタジオの設定に「腕・手」を出した（仮サービス。肘を曲げる手順は1回目だけ失敗する）');
-    },
-  });
   registerCanvasTool({
     id: 'dev.probe',
     label: '座標の確認',

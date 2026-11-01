@@ -1,17 +1,17 @@
 {
-  "version": "AT-09 CL v2",
+  "version": "AT-09 CL v3",
   "date": "2026-11-01",
   "baseCommit": "6c3e78c552896f75037dce4226f48da222257994",
   "uncommitted": true,
   "dependsOn": "AT-03 CO v1（AT-06は未完了。試験は joint/tracking/testing.ts の仮のIK・制約）",
-  "notes": "2026-11-01 ユーザーの指示でCOから実装を引き継いだ。packages/core/src/index.ts は export 行1行だけ足した。v2（2026-11-01）：新しい世代の後の古い世代の観測を捨てる（session.ts）。補助試験は試験用IKとAT-06 CO v1のIK・制約の両方（session.test.ts）。core/index.ts はCOのAT-06・08・10のexport行を含む",
+  "notes": "2026-11-01 ユーザーの指示でCOから実装を引き継いだ。packages/core/src/index.ts は export 行1行だけ足した。v2（2026-11-01）：新しい世代の後の古い世代の観測を捨てる（session.ts）。補助試験は試験用IKとAT-06 CO v1のIK・制約の両方（session.test.ts）。core/index.ts はCOのAT-06・08・10のexport行を含む。v3（2026-11-01、AT-12）：resumeFrom（上書きされた側だけ表示中の姿勢からつなぐ）と補助試験2件を足した。既存の約束は変えていない",
   "sha256": {
     "packages/core/src/index.ts": "c99de8dd90d27101f608cc9a139c29df011c109b411d9e38c8df2cfc2130aee5",
     "packages/core/src/joint/tracking/filter.ts": "09650b43d8e650d14ce4837a72cc276d242bf219873370910b6bb86c14146a80",
     "packages/core/src/joint/tracking/index.ts": "21baf85e04dd45f65927b0550759400cad1519bdd7d1a6e6f9448d7bdeca02d4",
     "packages/core/src/joint/tracking/rate.ts": "92b88217ef90abe8811f04c178786bbcf9a2d02c493977fc7a566ade2ffdb59c",
-    "packages/core/src/joint/tracking/session.test.ts": "6acc75bce98a07b5fbf253e93f87900b810e572ae9ef646b5afbd412cdec8729",
-    "packages/core/src/joint/tracking/session.ts": "04dc913094fcf067aae9fd4309eaf9fa7a22a2b34a473063ed54649f7a536f9c",
+    "packages/core/src/joint/tracking/session.test.ts": "8c3dd52d23646678770d41d534542a00a8bd337e0896154a2ddfdd5b22b8635e",
+    "packages/core/src/joint/tracking/session.ts": "e98ccc220a3161d34454e95cdffdee481d80892c947ebb1b601b10d459f70bfe",
     "packages/core/src/joint/tracking/testing.ts": "5eb2186ffde6fd3bf9e4927abdd523f7fa71219cf5b2c493216ce600b88f2981"
   }
 }

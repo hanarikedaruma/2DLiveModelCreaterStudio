@@ -58,6 +58,7 @@ import { TauriFileSystem } from './platform/tauriFs';
 import { createKeyEditor } from './services/keyEditor';
 import { createVoiceService, createFakeVoiceService } from './services/voice/service';
 import { createProjectTrackingLayer } from './services/trackingLayer';
+import { createArmService } from './services/arms';
 import {
   createEnvironmentStore,
   fileEnvironmentStorage,
@@ -116,6 +117,8 @@ export function createServices(): Services {
   });
   const audio = playback.audio;
   const vowels = createVowelEstimator();
+  // 顔と腕・手は同じカメラの推定元を使う（AT-04）。腕のサービスは体の推定を購読する（AT-12）
+  const tracking = createMediaPipeTrackingSource();
   return {
     store,
     editor: createEditorStore(),
@@ -136,7 +139,8 @@ export function createServices(): Services {
     importer: createImporter(),
     io,
     autoSaver: createAutoSaver(fs, io, store, projectAssetPngs),
-    tracking: createMediaPipeTrackingSource(),
+    tracking,
+    arms: createArmService({ store, tracking }),
     trackingLayer: createProjectTrackingLayer(store, (parameters, mappings, combine) =>
       createTrackingLayerProducer(parameters, mappings, { combine }),
     ),

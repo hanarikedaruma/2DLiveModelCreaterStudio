@@ -9,6 +9,7 @@ import {
   TrackingSection,
 } from './sections';
 import { StudioCenter } from './StudioCenter';
+import { register as registerArms } from './arms';
 import { studioRuntime } from './runtime';
 import type { ProjectDirResolver } from './backgrounds';
 import './studio.css';
@@ -40,6 +41,7 @@ export function register(): void {
   });
   // 背景は選んだシーンの編集（scenes/、カード39）へ移した
   registerPanelSection({ id: 'studio.output', panelId: STUDIO_SETTINGS_PANEL, order: 30, component: OutputSection });
+  registerArms(); // AT-11・12：腕・手（顔のキャリブレーション・動きの後）
 }
 
 // 保存の結合（カード23・24）で使う。開いているプロジェクトのフォルダを教えると、背景の画像をそこへ写し、そこから読む

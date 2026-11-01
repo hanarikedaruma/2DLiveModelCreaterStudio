@@ -8,7 +8,7 @@
 | 実装担当（推奨）     | CL                                                                                                                                                                                                                                   |
 | 独立テスト・確認担当 | CO                                                                                                                                                                                                                                   |
 | 依存                 | [AT-04](04-capture-worker.md)・[AT-05](05-observation-association.md)・[AT-07](07-hand-shapes.md)・[AT-08](08-rig-evaluation.md)・[AT-09](09-motion-session.md)・[AT-10](10-modeling-setup.md)・[AT-11](11-studio-ui-calibration.md) |
-| 状態                 | 設計の判断待ち                                                                                                                                                                                                                       |
+| 状態                 | 実装済・独立確認待ち                                                                                                                                                                                                                 |
 | 担当者・開始日       | CL・2026-11-01                                                                                                                                                                                                                       |
 
 ## 目的
@@ -64,10 +64,10 @@
 
 ## 作業記録
 
-- 実装者／期間：CL・2026-11-01〜。統合の[設計](../AT-12-integration-design.md)を作り、ユーザーの判断待ち（実装は判断の後）。
-- 使用した依存カードの版：
-- 変更ファイル・コミット：
-- 実行した試験・コマンド・結果：
-- 証跡・報告：
-- 未確認・制約・戻したカード：
+- 実装者／期間：CL・2026-11-01〜。統合の[設計](../AT-12-integration-design.md)を作り、ユーザーが4項目とも推奨（A）で判断した後に実装。
+- 使用した依存カードの版：AT-03 CO v3、AT-04 CL v1、AT-05 CL v2、AT-07 CL v1、AT-08 CO v1、AT-09 CL v3（`resumeFrom` を足した）、AT-10 CO v2、AT-11 CL v2（すべて両者の確認済み。AT-09 v3 の追加分はCOの再確認が要る）。
+- 変更ファイル・コミット：`apps/desktop/src/services/arms/**`（新規）、`services.ts`、`modes/studio/runtime.ts`・`environment.ts`・`index.ts`、`dev/index.tsx`（開発用の入口を消した）、AT-09 の `session.ts`。対象の版は[AT-12 manifest](../evidence/AT-12/manifest.json)。
+- 実行した試験・コマンド・結果：補助試験10件（＋AT-09 の2件）。desktop 1468件・core 830件成功、型・lint・整形成功。main.lock を取って開発サーバーで正式fixtureと仮の体の点を流し、スタジオの「腕・手」・左腕の追従・ミラー・sink・休止への戻りを確認（コンソールの出力0件）。
+- 証跡・報告：[報告](../reports/AT-12-integration.md)。
+- 未確認・制約・戻したカード：実カメラ・Tauri のアプリでは未確認（AT-14・16、本番アプリの反映はユーザーの指示のとき）。
 - 独立確認（担当・日付・対象の版）：

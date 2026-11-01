@@ -13,6 +13,7 @@ import {
   type ViewTransform,
 } from '@app/contracts';
 import { createAutoLayerProducer, HairDynamicsSession, type AutoLayerProducer } from '@app/core';
+import { armRuntimeOf } from '../../services/arms';
 import { hairFrames } from '../../services/hairFrame';
 import {
   createBackgroundFiles,
@@ -148,6 +149,17 @@ export function createStudioRuntime(
     produce: (ctx) => (tracking ? tracking.services.trackingLayer.tick(ctx.now) : null),
   };
   producers.push(trackingProducer);
+  // 腕・手の層（AT-12）。顔の層と同じ順位で別に出し、腕のパラメータだけを左右別に持つ（顔が外れても止めない）
+  producers.push({
+    id: 'tracking',
+    produce: (ctx) => (services ? (armRuntimeOf(services.arms)?.tick(ctx.now) ?? null) : null),
+  });
+  // 腕のサービスは、実行部が回っている間だけ体の推定を購読する
+  let armAttachment: { services: Services; off: () => void } | null = null;
+  function releaseArms() {
+    armAttachment?.off();
+    armAttachment = null;
+  }
   let autoBlinkEnabled = true;
   let auto: { services: Services; producer: AutoLayerProducer } | null = null;
   const autoProducer: LayerProducer = {
@@ -237,6 +249,11 @@ export function createStudioRuntime(
     const background = backgrounds.resolve(sceneBackground(project));
     const frame: StudioFrame = { model, view, background, params, now, layers: [...layers] };
     last = frame;
+    try {
+      armRuntimeOf(s.arms)?.afterFrame(frame); // 表情・アニメーションの上書きが終わったら、表示中の姿勢からつなぐ
+    } catch (e) {
+      report(trackingProducer, '腕の層の後処理', e);
+    }
     previousAnimationPose = { projectId: project.id, values: animationValues, lipSyncOffsets, physicsOffsets };
     if (preview) {
       try {
@@ -295,6 +312,7 @@ export function createStudioRuntime(
     attach(next) {
       if (services !== next) {
         stopTracking();
+        releaseArms();
         services = next;
         hairSession.reset();
         override = null;
@@ -303,6 +321,10 @@ export function createStudioRuntime(
         lastNow = null;
       }
       attachments += 1;
+      if (!armAttachment) {
+        const arms = armRuntimeOf(next.arms);
+        if (arms) armAttachment = { services: next, off: arms.attach() };
+      }
       if (!cancelFrame) cancelFrame = scheduler.request(loop);
       updateState();
       let attached = true;
@@ -311,6 +333,7 @@ export function createStudioRuntime(
         attached = false;
         attachments -= 1;
         if (attachments === 0) {
+          releaseArms();
           previousAnimationPose = null;
           hairSession.reset();
           cancelFrame?.();
