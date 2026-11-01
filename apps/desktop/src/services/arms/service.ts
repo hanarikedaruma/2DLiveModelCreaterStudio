@@ -47,6 +47,7 @@ export interface ArmServiceDeps {
   store: Pick<ProjectStore, 'get' | 'subscribe' | 'dispatch'>;
   tracking: Pick<TrackingSource, 'body' | 'captureStats'>;
   schedule?: (cb: () => void, ms: number) => () => void;
+  now?: () => number; // 撮影時刻と同じページの単調時計（performance.now）
 }
 
 // スタジオの実行部・環境設定の結び付けが使う、契約の外の口
@@ -80,6 +81,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
       const id = setTimeout(cb, ms);
       return () => clearTimeout(id);
     });
+  const now = deps.now ?? (() => performance.now());
   let mirror = true;
   let calibrationValue: ArmCalibration | null = null;
   let deviceId: string | null = null;
@@ -95,11 +97,14 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
   let motionKey = '';
   let motion: Record<ArmSide, ArmMotionStatus> = { L: emptyArmMotionStatus(), R: emptyArmMotionStatus() };
   let lastGeneration = 0;
+  // プロジェクト・ミラー・校正を切り替えた時刻。カメラは止めないので同じ世代のまま届く、それより前に撮影した Pose・手は使わない
+  let acceptFrom = -Infinity;
   let lastDisplayed: ParamValues = {};
   let attachments = 0;
   let offBody: (() => void)[] = [];
   let bodyConfig: BodyTrackingConfig | null = null;
   let project = deps.store.get();
+  let disposed = false;
 
   const notify = () => {
     for (const l of [...listeners]) l();
@@ -127,7 +132,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
   }
   function configureBody() {
     const b = body();
-    if (!b) return;
+    if (!b || disposed) return;
     const next = wantedConfig();
     if (bodyConfig && sameJson(bodyConfig, next)) return; // 同じ設定で世代を上げない
     bodyConfig = next;
@@ -141,6 +146,10 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
   }
   applyProject(project);
   const offStore = deps.store.subscribe((p) => {
+    if (p.id !== project.id) {
+      switchProject(p);
+      return;
+    }
     if (p.model === project.model && p.armTracking === project.armTracking) {
       project = p;
       return;
@@ -148,6 +157,26 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
     applyProject(p);
     notify();
   });
+
+  // 別のプロジェクトを開いた：リグが同じでも、前のプロジェクトの追従・手形・診断・途中の校正を持ち越さない。
+  // 追従は今の姿勢から休止へ戻り始め、同じ世代でもこれから届く観測で取り直す。校正の結果（Environment）は残す
+  function switchProject(next: Project) {
+    project = next;
+    acceptFrom = now();
+    const pending = stopCapture();
+    association.reset(lastGeneration);
+    hands.reset(lastGeneration);
+    session.reset(lastGeneration);
+    lastDisplayed = {};
+    applyProject(next);
+    calibrationState = { state: calibrationValue ? 'ready' : 'empty', step: null, reason: null };
+    notify();
+    if (diagnosticsValue) {
+      diagnosticsValue = null;
+      for (const l of [...diagnosticListeners]) l();
+    }
+    pending?.();
+  }
 
   function resetSession() {
     session.reset(lastGeneration, lastDisplayed);
@@ -204,10 +233,23 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
     return { time, image: { ...frame.image }, pose, hands: handWrists, sides };
   }
 
-  function feed(frame: BodyTrackingFrame) {
+  // 切り替えより前に撮影した部分（Pose・手）を除く。何も残らなければ null
+  function freshPart(frame: BodyTrackingFrame): BodyTrackingFrame | null {
+    const pose = frame.pose && frame.pose.time.capturedAt >= acceptFrom ? frame.pose : null;
+    const hand = frame.hands && frame.hands.time.capturedAt >= acceptFrom ? frame.hands : null;
+    if (pose === frame.pose && hand === frame.hands) return frame;
+    if (pose) return { image: frame.image, pose, hands: hand };
+    return hand ? { image: frame.image, pose: null, hands: hand } : null;
+  }
+
+  function feed(input: BodyTrackingFrame) {
+    if (disposed) return;
+    const frame = freshPart(input);
+    if (!frame) return;
     const sample = frame.pose ?? frame.hands;
-    if (!sample) return;
-    lastGeneration = Math.max(lastGeneration, sample.time.generation);
+    // 新しい世代の後に遅れて届いた古い世代の通知は、追従だけでなく診断・校正の点も更新しない
+    if (sample.time.generation < lastGeneration) return;
+    lastGeneration = sample.time.generation;
     const normalized = association.update(frame);
     const shapes: Partial<Record<ArmSide, HandShapeResult>> = {};
     for (const side of SIDES) {
@@ -241,6 +283,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
 
   function saveCalibration(next: ArmCalibration | null) {
     calibrationValue = next;
+    acceptFrom = now();
     association.configure({ mirror, calibration: next });
     resetSession();
     for (const save of [...savers]) save(next);
@@ -249,6 +292,16 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
   function setCalibrationState(state: ArmServiceStatus['calibration']) {
     calibrationState = state;
     notify();
+  }
+
+  // 途中の校正を何も保存せずに止める。待っている captureCalibration を終える関数を返す（状態を整えてから呼ぶ）
+  function stopCapture(): (() => void) | null {
+    const c = capture;
+    capture = null;
+    c?.cancelTimeout();
+    samples = [];
+    configureBody();
+    return c ? c.resolve : null;
   }
 
   const service: ArmService = {
@@ -279,6 +332,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
       };
     },
     captureCalibration(step) {
+      if (disposed) return Promise.resolve();
       capture?.finish('別の手順を始めた');
       if (step === 'neutral') samples = [];
       setCalibrationState({ state: 'capturing', step, reason: null });
@@ -315,13 +369,9 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
       });
     },
     cancelCalibration() {
-      const c = capture;
-      capture = null;
-      c?.cancelTimeout();
-      samples = [];
-      configureBody();
+      const pending = stopCapture();
       setCalibrationState({ state: calibrationValue ? 'ready' : 'empty', step: null, reason: null });
-      c?.resolve(); // 待っている captureCalibration は、何も保存せずに終える
+      pending?.(); // 待っている captureCalibration は、何も保存せずに終える
     },
     clearCalibration() {
       saveCalibration(null);
@@ -339,6 +389,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
 
   const runtime: ArmRuntime = {
     attach() {
+      if (disposed) return () => {};
       attachments += 1;
       if (attachments === 1) {
         const b = body();
@@ -347,7 +398,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
       }
       let attached = true;
       return () => {
-        if (!attached) return;
+        if (!attached || disposed) return; // dispose の後に外しても二重に解放しない
         attached = false;
         attachments -= 1;
         if (attachments === 0) {
@@ -396,6 +447,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
     setMirror(on) {
       if (on === mirror) return;
       mirror = on;
+      acceptFrom = now();
       association.configure({ mirror, calibration: calibrationValue });
       hands.configure({ mirror });
       resetSession(); // いきなり左右を入れ替えず、休止を経て反対の手で再取得する
@@ -404,6 +456,7 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
     setCalibration(next) {
       if (sameJson(next, calibrationValue)) return;
       calibrationValue = next ? structuredClone(next) : null;
+      acceptFrom = now();
       association.configure({ mirror, calibration: calibrationValue });
       resetSession();
       if (!capture) calibrationState = { state: calibrationValue ? 'ready' : 'empty', step: null, reason: null };
@@ -419,12 +472,17 @@ export function createArmService(deps: ArmServiceDeps): ArmServiceWithRuntime {
       };
     },
     feed,
+    // 最後の解除と同じく購読をやめて体の推定を止め、待っている校正も何も保存せずに終える。2回目以降は何もしない
     dispose() {
+      if (disposed) return;
       offStore();
       for (const off of offBody) off();
       offBody = [];
-      capture?.cancelTimeout();
-      capture = null;
+      attachments = 0;
+      const pending = stopCapture(); // ここで体の推定を止める（configure enabled: false）
+      calibrationState = { state: calibrationValue ? 'ready' : 'empty', step: null, reason: null };
+      disposed = true;
+      pending?.();
       listeners.clear();
       diagnosticListeners.clear();
       savers.clear();

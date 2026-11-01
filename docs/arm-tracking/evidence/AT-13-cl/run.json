@@ -1,0 +1,55 @@
+{
+  "results": {
+    "fixedShape": {
+      "passed": true,
+      "auto": {
+        "HandOpenL": 0,
+        "HandOpenR": 0,
+        "HandFistL": 0,
+        "HandFistR": 1,
+        "HandPointL": 0,
+        "HandPointR": 0,
+        "HandPeaceL": 1,
+        "HandPeaceR": 0
+      },
+      "fixed": {
+        "HandOpenL": 1,
+        "HandOpenR": 0,
+        "HandFistL": 0,
+        "HandFistR": 1,
+        "HandPointL": 0,
+        "HandPointR": 0,
+        "HandPeaceL": 0,
+        "HandPeaceR": 0
+      },
+      "back": {
+        "HandOpenL": 0,
+        "HandOpenR": 0,
+        "HandFistL": 0,
+        "HandFistR": 1,
+        "HandPointL": 0,
+        "HandPointR": 0,
+        "HandPeaceL": 1,
+        "HandPeaceR": 0
+      }
+    },
+    "lateResult": {
+      "passed": true,
+      "switchedAt": 2894.2999999523163,
+      "before": {
+        "L": "tracking",
+        "R": "tracking"
+      },
+      "after": {
+        "L": "tracking",
+        "R": "tracking"
+      }
+    },
+    "workerCycles": {
+      "passed": true,
+      "stopMs": [664, 658, 624, 592, 600],
+      "runningWorkers": [1, 1, 1, 1, 1]
+    }
+  },
+  "errors": []
+}

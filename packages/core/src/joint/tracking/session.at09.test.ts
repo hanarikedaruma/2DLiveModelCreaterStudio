@@ -64,3 +64,22 @@ it('明示reset無しでも、新世代の観測後に旧世代へ戻らない',
   s.tick(250);
   expect(s.status().L.state).toBe('rest');
 });
+it('resumeFromは指定側だけ表示姿勢から復帰し、反対側の追従と観測履歴を維持する', () => {
+  const s = setup();
+  for (let t = 0; t <= 600; t += 20) {
+    s.update({ body: frame({ L: observation('L', pose, t), R: observation('R', pose, t) }), shapes: {} });
+    s.tick(t);
+  }
+  const right = s.status().R.pose!;
+  s.resumeFrom('L', { ArmShoulderL: 120, ArmElbowL: 80, HandAngleL: 10 });
+  s.tick(600);
+  expect(s.status().L.pose).toEqual({ shoulder: 120, elbow: 80, wrist: 10 });
+  expect(s.status().R.pose).toEqual(right);
+  expect(s.status().R.state).toBe('tracking');
+  for (let t = 620; t <= 1000; t += 20) {
+    s.update({ body: frame({ L: observation('L', pose, t), R: observation('R', pose, t) }), shapes: {} });
+    s.tick(t);
+  }
+  expect(s.status().L.state).toBe('tracking');
+  expect(s.status().L.pose!.shoulder).toBeCloseTo(pose.shoulder, 0);
+});

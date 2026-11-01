@@ -1,0 +1,377 @@
+{
+  "results": {
+    "workflow": {
+      "passed": true,
+      "follow": {
+        "status": {
+          "available": true,
+          "reason": null,
+          "tracking": {
+            "generation": 2,
+            "pose": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "hands": {
+              "state": "ready",
+              "delegate": "GPU",
+              "reason": null
+            },
+            "poseFps": 29,
+            "handFps": 29,
+            "droppedFrames": 21,
+            "staleResults": 2
+          },
+          "motion": {
+            "L": {
+              "state": "tracking",
+              "handState": "fixed",
+              "pose": {
+                "shoulder": 0.1923828125,
+                "elbow": 139.71337890625,
+                "wrist": 32.969221932348205
+              },
+              "hand": "peace",
+              "reasons": ["unreachable"]
+            },
+            "R": {
+              "state": "tracking",
+              "handState": "fixed",
+              "pose": {
+                "shoulder": 15.986328125,
+                "elbow": 145,
+                "wrist": 26.138688223901795
+              },
+              "hand": "fist",
+              "reasons": ["elbow", "unreachable"]
+            }
+          },
+          "calibration": {
+            "state": "ready",
+            "step": null,
+            "reason": null
+          },
+          "rigIssues": []
+        },
+        "params": {
+          "FaceAngleX": 0,
+          "FaceAngleY": 0,
+          "FaceAngleZ": 0,
+          "EyeOpenL": 1,
+          "EyeOpenR": 1,
+          "EyeBallX": 0,
+          "EyeBallY": 0,
+          "MouthOpen": 0,
+          "EyeSmileL": 0,
+          "EyeSmileR": 0,
+          "BrowYL": 0,
+          "BrowYR": 0,
+          "BrowFormL": 0,
+          "BrowFormR": 0,
+          "MouthForm": 0,
+          "MouthWidth": 0,
+          "Cheek": 0,
+          "BodyAngleX": 0,
+          "BodyAngleY": 0,
+          "BodyAngleZ": 0,
+          "Breath": 0,
+          "ArmL": 0,
+          "ArmR": 0,
+          "HairFront": 0,
+          "HairSide": 0,
+          "HairBack": 0,
+          "ArmShoulderL": 0.1923828125,
+          "ArmElbowL": 139.71337890625,
+          "HandAngleL": 32.969221932348205,
+          "HandOpenL": 0,
+          "HandFistL": 0,
+          "HandPointL": 0,
+          "HandPeaceL": 1,
+          "ArmShoulderR": 15.986328125,
+          "ArmElbowR": 145,
+          "HandAngleR": 26.138688223901795,
+          "HandOpenR": 0,
+          "HandFistR": 1,
+          "HandPointR": 0,
+          "HandPeaceR": 0
+        },
+        "sinkMatchesPreview": true,
+        "sinkMatchesRuntime": true
+      },
+      "geometry": {
+        "checked": 4,
+        "order": [
+          "upper-L",
+          "upper-R",
+          "face",
+          "lower-L",
+          "open-L",
+          "fist-L",
+          "point-L",
+          "peace-L",
+          "lower-R",
+          "open-R",
+          "fist-R",
+          "point-R",
+          "peace-R"
+        ]
+      }
+    },
+    "transitions": {
+      "passed": true,
+      "state": {
+        "status": {
+          "available": true,
+          "reason": null,
+          "tracking": {
+            "generation": 5,
+            "pose": {
+              "state": "off",
+              "delegate": null,
+              "reason": "カメラが止まっている"
+            },
+            "hands": {
+              "state": "off",
+              "delegate": null,
+              "reason": "カメラが止まっている"
+            },
+            "poseFps": null,
+            "handFps": null,
+            "droppedFrames": 0,
+            "staleResults": 0
+          },
+          "motion": {
+            "L": {
+              "state": "rest",
+              "handState": "rest",
+              "pose": {
+                "shoulder": 8,
+                "elbow": 12,
+                "wrist": 0
+              },
+              "hand": "open",
+              "reasons": []
+            },
+            "R": {
+              "state": "rest",
+              "handState": "rest",
+              "pose": {
+                "shoulder": 8,
+                "elbow": 12,
+                "wrist": 0
+              },
+              "hand": "open",
+              "reasons": []
+            }
+          },
+          "calibration": {
+            "state": "ready",
+            "step": null,
+            "reason": null
+          },
+          "rigIssues": []
+        },
+        "diagnostics": null,
+        "params": {
+          "FaceAngleX": 0,
+          "FaceAngleY": 0,
+          "FaceAngleZ": 0,
+          "EyeOpenL": 1,
+          "EyeOpenR": 1,
+          "EyeBallX": 0,
+          "EyeBallY": 0,
+          "MouthOpen": 0,
+          "ArmShoulderL": 8,
+          "ArmElbowL": 12,
+          "HandAngleL": 0,
+          "HandOpenL": 1,
+          "HandFistL": 0,
+          "HandPointL": 0,
+          "HandPeaceL": 0,
+          "ArmShoulderR": 8,
+          "ArmElbowR": 12,
+          "HandAngleR": 0,
+          "HandOpenR": 1,
+          "HandFistR": 0,
+          "HandPointR": 0,
+          "HandPeaceR": 0,
+          "EyeSmileL": 0,
+          "EyeSmileR": 0,
+          "BrowYL": 0,
+          "BrowYR": 0,
+          "BrowFormL": 0,
+          "BrowFormR": 0,
+          "MouthForm": 0,
+          "MouthWidth": 0,
+          "Cheek": 0,
+          "BodyAngleX": 0,
+          "BodyAngleY": 0,
+          "BodyAngleZ": 0,
+          "Breath": 0,
+          "ArmL": 0,
+          "ArmR": 0,
+          "HairFront": 0,
+          "HairSide": 0,
+          "HairBack": 0
+        }
+      },
+      "broken": ["upper-R", "face", "lower-R", "peace-R"]
+    },
+    "fakeCamera": {
+      "passed": true,
+      "on": {
+        "face": 1988,
+        "pose": 1844,
+        "hands": 1844
+      },
+      "before": {
+        "face": 2019,
+        "pose": 1844,
+        "hands": 1844
+      },
+      "off": {
+        "face": 2049,
+        "pose": 1844,
+        "hands": 1844
+      },
+      "external": []
+    },
+    "composition": {
+      "passed": true,
+      "held": {
+        "FaceAngleX": 0,
+        "FaceAngleY": 0,
+        "FaceAngleZ": 0,
+        "EyeOpenL": 1,
+        "EyeOpenR": 1,
+        "EyeBallX": 0,
+        "EyeBallY": 0,
+        "MouthOpen": 0.6,
+        "ArmShoulderL": 140,
+        "ArmElbowL": 110,
+        "HandAngleL": 0,
+        "HandOpenL": 0,
+        "HandFistL": 0,
+        "HandPointL": 0,
+        "HandPeaceL": 1,
+        "ArmShoulderR": 15.986328125,
+        "ArmElbowR": 145,
+        "HandAngleR": 26.138688223901795,
+        "HandOpenR": 0,
+        "HandFistR": 1,
+        "HandPointR": 0,
+        "HandPeaceR": 0,
+        "EyeSmileL": 0,
+        "EyeSmileR": 0,
+        "BrowYL": 0,
+        "BrowYR": 0,
+        "BrowFormL": 0,
+        "BrowFormR": 0,
+        "MouthForm": 0,
+        "MouthWidth": 0,
+        "Cheek": 0,
+        "BodyAngleX": 0,
+        "BodyAngleY": 0,
+        "BodyAngleZ": 0,
+        "Breath": 0,
+        "ArmL": 0,
+        "ArmR": 0,
+        "HairFront": 0.4,
+        "HairSide": 0,
+        "HairBack": 0
+      },
+      "first": {
+        "FaceAngleX": 0,
+        "FaceAngleY": 0,
+        "FaceAngleZ": 0,
+        "EyeOpenL": 1,
+        "EyeOpenR": 1,
+        "EyeBallX": 0,
+        "EyeBallY": 0,
+        "MouthOpen": 0.6,
+        "ArmShoulderL": 140,
+        "ArmElbowL": 110,
+        "HandAngleL": 0,
+        "HandOpenL": 0,
+        "HandFistL": 0,
+        "HandPointL": 0,
+        "HandPeaceL": 1,
+        "ArmShoulderR": 15.986328125,
+        "ArmElbowR": 145,
+        "HandAngleR": 26.138688223901795,
+        "HandOpenR": 0,
+        "HandFistR": 1,
+        "HandPointR": 0,
+        "HandPeaceR": 0,
+        "EyeSmileL": 0,
+        "EyeSmileR": 0,
+        "BrowYL": 0,
+        "BrowYR": 0,
+        "BrowFormL": 0,
+        "BrowFormR": 0,
+        "MouthForm": 0,
+        "MouthWidth": 0,
+        "Cheek": 0,
+        "BodyAngleX": 0,
+        "BodyAngleY": 0,
+        "BodyAngleZ": 0,
+        "Breath": 0,
+        "ArmL": 0,
+        "ArmR": 0,
+        "HairFront": 0.4,
+        "HairSide": 0,
+        "HairBack": 0
+      },
+      "recovered": {
+        "FaceAngleX": 0,
+        "FaceAngleY": 0,
+        "FaceAngleZ": 0,
+        "EyeOpenL": 1,
+        "EyeOpenR": 1,
+        "EyeBallX": 0,
+        "EyeBallY": 0,
+        "MouthOpen": 0.6,
+        "ArmShoulderL": 0.1923828125,
+        "ArmElbowL": 139.7138671875,
+        "HandAngleL": 32.968733651098205,
+        "HandOpenL": 0,
+        "HandFistL": 0,
+        "HandPointL": 0,
+        "HandPeaceL": 1,
+        "ArmShoulderR": 15.986328125,
+        "ArmElbowR": 145,
+        "HandAngleR": 26.138688223901795,
+        "HandOpenR": 0,
+        "HandFistR": 1,
+        "HandPointR": 0,
+        "HandPeaceR": 0,
+        "EyeSmileL": 0,
+        "EyeSmileR": 0,
+        "BrowYL": 0,
+        "BrowYR": 0,
+        "BrowFormL": 0,
+        "BrowFormR": 0,
+        "MouthForm": 0,
+        "MouthWidth": 0,
+        "Cheek": 0,
+        "BodyAngleX": 0,
+        "BodyAngleY": 0,
+        "BodyAngleZ": 0,
+        "Breath": 0,
+        "ArmL": 0,
+        "ArmR": 0,
+        "HairFront": 0.4,
+        "HairSide": 0,
+        "HairBack": 0
+      }
+    },
+    "oldProject": {
+      "passed": true,
+      "schemaVersion": 12,
+      "armRigs": []
+    }
+  },
+  "errors": [],
+  "external": []
+}

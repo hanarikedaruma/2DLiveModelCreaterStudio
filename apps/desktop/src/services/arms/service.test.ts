@@ -9,7 +9,7 @@ import {
   type Services,
 } from '@app/contracts';
 import { createArmTrackingFixture, createParameterMixer, createProjectStore } from '@app/core';
-import { defaultArmTrackingSettings, type ArmTrackingSettings } from '@app/schema';
+import { defaultArmTrackingSettings, newId, type ArmTrackingSettings } from '@app/schema';
 import { createFakeServices } from '../../services';
 import { createStudioRuntime } from '../../modes/studio/runtime';
 import { armRuntimeOf, createArmService } from './service';
@@ -51,6 +51,7 @@ function setup(sides: Partial<Record<'L' | 'R', boolean>> = { L: true }) {
   const store = createProjectStore(project);
   const body = new FakeBodyTracking();
   const timers: (() => void)[] = [];
+  const clock = { now: 0 }; // 切替の時刻（撮影時刻と同じ時計）
   const arms = createArmService({
     store,
     tracking: { body, captureStats: () => null },
@@ -61,9 +62,10 @@ function setup(sides: Partial<Record<'L' | 'R', boolean>> = { L: true }) {
         if (i >= 0) timers.splice(i, 1);
       };
     },
+    now: () => clock.now,
   });
   const runtime = armRuntimeOf(arms)!;
-  return { store, body, arms, runtime, timers };
+  return { store, body, arms, runtime, timers, clock };
 }
 // 撮影時刻 from から to まで 30fps で流し、描画も進める
 function play(s: ReturnType<typeof setup>, from: number, to: number, raise = 0.25) {
@@ -199,6 +201,59 @@ describe('腕のサービス（AT-12）', () => {
     expect(s.arms.status().calibration.state).toBe('ready');
     s.runtime.tick(950);
     expect(s.arms.status().motion.L.state).toBe('returning');
+  });
+
+  it('別のプロジェクトを開くと、リグが同じでも追従・診断を捨て、切替の後に撮影した同じ世代の観測で取り直す。校正の結果は残す', () => {
+    const s = setup({ L: true });
+    s.runtime.attach();
+    play(s, 0, 900);
+    expect(s.arms.status().motion.L.state).toBe('tracking');
+    s.clock.now = 900;
+    s.runtime.setCalibration({
+      version: 1,
+      camera: { deviceId: null, width: 640, height: 480, fps: 30 },
+      shoulderCenter: { x: 320, y: 216 },
+      shoulderAxis: { x: 1, y: 0 },
+      shoulderWidth: 128,
+      arms: {
+        left: { upper: 70, lower: 60, neutralWrist: { x: 380, y: 400 } },
+        right: { upper: 70, lower: 60, neutralWrist: { x: 260, y: 400 } },
+      },
+    });
+    play(s, 900, 1800);
+    const generation = s.body.status().generation;
+    s.clock.now = 1800;
+    s.store.load({ ...structuredClone(s.store.get()), id: newId() });
+    expect(s.arms.diagnostics()).toBeNull();
+    // 切替の前に撮影し、後から届いた Pose は使わない（手だけの通知も同じ）
+    s.runtime.feed(frameAt(1790, generation));
+    const lateHands = frameAt(1795, generation);
+    s.runtime.feed({ image: lateHands.image, pose: null, hands: { time: lateHands.pose!.time, value: [] } });
+    expect(s.arms.diagnostics()).toBeNull();
+    s.runtime.tick(1830);
+    expect(s.arms.status().motion.L.state).toBe('returning');
+    expect(s.arms.status().calibration.state).toBe('ready');
+    expect(s.arms.calibration()).not.toBeNull();
+    expect(s.body.status().generation).toBe(generation); // カメラ・推定は止めない
+    play(s, 1830, 2700);
+    expect(s.arms.status().motion.L.state).toBe('tracking');
+  });
+
+  it('dispose の後は観測・接続・校正を受け付けず、体の推定を設定し直さない', async () => {
+    const s = setup({ L: true });
+    const off = s.runtime.attach();
+    play(s, 0, 300);
+    s.runtime.dispose();
+    expect(s.body.status().pose.state).toBe('off');
+    const generation = s.body.status().generation;
+    off();
+    s.runtime.dispose();
+    s.runtime.attach();
+    s.runtime.feed(frameAt(400, generation));
+    await s.arms.captureCalibration('neutral');
+    expect(s.body.status().generation).toBe(generation);
+    expect(s.timers).toEqual([]);
+    expect(s.arms.diagnostics()!.time).toBeLessThan(400);
   });
 });
 

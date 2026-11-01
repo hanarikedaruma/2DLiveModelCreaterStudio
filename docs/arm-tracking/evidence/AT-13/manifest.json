@@ -1,0 +1,37 @@
+{
+  "version": "AT-13 CO v2",
+  "date": "2026-11-01",
+  "baseCommit": "3adef3a1f9ef1dc64ebecb5525936b090a73b392",
+  "uncommitted": true,
+  "dependsOn": "AT-12 CL v3、AT-09 CL v3",
+  "nativeTests": 5,
+  "skipped": 0,
+  "serviceIndependentTests": 6,
+  "motionIndependentTests": 5,
+  "relatedDesktopTests": 35,
+  "workspaceTypecheck": "passed",
+  "lint": "passed",
+  "executableSha256": "650f00ffe456605ada69ace07af7599167f1fb901dd5ab9074ec8729ce370602",
+  "sha256": {
+    "apps/desktop/e2e/arm-tracking.at13.e2e.ts": "e98b5439040268fbb7afc4f5605acd55565222d44d2bcbf24c269aa985221b37",
+    "apps/desktop/e2e/app.ts": "36cc5fd9281f56447bad6f87d3200079bae216c20ae2dcced7380d6528395b0b",
+    "apps/desktop/src/services/arms/service.at12.test.ts": "d62b17fd8ec0c3e06c712fa6f21e28fa2ef0ecaed3837e948122e639dc80f697",
+    "packages/core/src/joint/tracking/session.at09.test.ts": "10b893eb684bf910e2c270755cdfbe3c2db2b878639b4742b78796d501d7414a",
+    "prototypes/arm-tracking/at13-check/run.mjs": "85f80a250de22d66dd1f321bb5c4cd8804da6bea02390baa590211d96926574d",
+    "docs/arm-tracking/evidence/AT-12/manifest.json": "64dc6425ed267b2cdf8e9f01c6cb87841a6bf867464f6e9731208a48456ec233",
+    "docs/arm-tracking/evidence/AT-13/build.json": "2207d70099bb06ae695d3c6fee7f7caacf412abed91e29a5c998d3859e73ab9a",
+    "docs/arm-tracking/evidence/AT-13/run.json": "700e73bbc8cf7c7c22985511ae0d684521ca9c28e8b4f1cb70a3e56d02a8990e",
+    "docs/arm-tracking/evidence/AT-13/quality.json": "cf7367a6b822a2fdd1cd3e02e6d6aff1733ae194e05d186acf113cfe73b59eac",
+    "docs/arm-tracking/evidence/AT-13/v2-first-run.json": "0efd3381321270f462cf330d58b6891d9e7567b11f7cda085eeda7879f6d3fa9",
+    "docs/arm-tracking/evidence/AT-13/v2-first-failure.json": "6ddd918684b66d60666fd5955912824bafec9b9f56ba17977880a7fc58f0d9ed",
+    "docs/arm-tracking/evidence/app-update-co-review.json": "92d741e907ec80da626b2cec0c1d2501d4b12845acde134ea7d4abc8ebe77311"
+  },
+  "nativeResult": "passed",
+  "previousNativeResult": {
+    "version": "AT-13 CO v1",
+    "passed": 5,
+    "skipped": 0
+  },
+  "nativeIndependentReview": "CL v2再確認待ち",
+  "workerStopAnomaly": "v2初回の5秒後にPlaywright Worker1が一度残った観測は未分類。履歴と診断をCLへ引継ぎ。"
+}

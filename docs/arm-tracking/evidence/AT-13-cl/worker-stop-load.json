@@ -1,0 +1,146 @@
+{
+  "date": "2026-11-01",
+  "owner": "CL",
+  "purpose": "AT-13 CO v2 の1回目の失敗（OFF の後 5 秒で Worker が1つ残る）の切り分け。負荷の下で、腕 OFF から page.workers() が0になるまでを30秒まで測る",
+  "binary": {
+    "path": ".cache/arm-tracking/at13-app/live2d-studio.exe",
+    "sha256": "650f00ffe456605ada69ace07af7599167f1fb901dd5ab9074ec8729ce370602"
+  },
+  "load": "apps/desktop の全体試験（vitest run）を同時に流した（COの v2 の1回目と重なった CL の全 workspace 試験と同じ負荷）",
+  "testFile": {
+    "note": "一時ファイル（apps/desktop/e2e/zz-cl-worker-load.e2e.ts）。測定後に消した",
+    "sha256": "d36ed4baddf9ca5cf13dc49284b4ac25e25e841ed257573a2d7e7c65b2a55181"
+  },
+  "runs": [
+    {
+      "offDelayMs": 1500,
+      "startedAtJst": "22:14:57",
+      "cycles": [
+        {
+          "i": 0,
+          "before": 1,
+          "stopMs": 574,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 1,
+          "before": 1,
+          "stopMs": 713,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 2,
+          "before": 1,
+          "stopMs": 580,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 3,
+          "before": 1,
+          "stopMs": 586,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 4,
+          "before": 1,
+          "stopMs": 525,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 5,
+          "before": 1,
+          "stopMs": 523,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 6,
+          "before": 1,
+          "stopMs": 661,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 7,
+          "before": 1,
+          "stopMs": 560,
+          "remaining": 0,
+          "at5": null
+        }
+      ]
+    },
+    {
+      "offDelayMs": 0,
+      "note": "ready の直後に OFF（COの繰返しと同じ順）",
+      "cycles": [
+        {
+          "i": 0,
+          "before": 1,
+          "stopMs": 1108,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 1,
+          "before": 1,
+          "stopMs": 1411,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 2,
+          "before": 1,
+          "stopMs": 1247,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 3,
+          "before": 1,
+          "stopMs": 1670,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 4,
+          "before": 1,
+          "stopMs": 1302,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 5,
+          "before": 1,
+          "stopMs": 1301,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 6,
+          "before": 1,
+          "stopMs": 1623,
+          "remaining": 0,
+          "at5": null
+        },
+        {
+          "i": 7,
+          "before": 1,
+          "stopMs": 1298,
+          "remaining": 0,
+          "at5": null
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "offDelay1500": [574, 713, 580, 586, 525, 523, 661, 560],
+    "offDelay0": [1108, 1411, 1247, 1670, 1302, 1301, 1623, 1298],
+    "allStopped": true,
+    "over5s": 0
+  }
+}

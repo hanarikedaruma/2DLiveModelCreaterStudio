@@ -1,0 +1,58 @@
+{
+  "date": "2026-11-01",
+  "owner": "CO",
+  "tests": {
+    "result": "passed",
+    "total": 3112,
+    "counts": {
+      "desktop": 1476,
+      "core": 831,
+      "schema": 136,
+      "contracts": 65,
+      "io": 177,
+      "audio": 79,
+      "render": 59,
+      "tracking": 268,
+      "fixtures": 8,
+      "lintRules": 13
+    },
+    "desktopMaxWorkers": 1
+  },
+  "lint": "passed",
+  "workspaceTypecheck": "passed",
+  "formatCheck": {
+    "result": "failed",
+    "reportedWarnings": 17,
+    "note": "全体checkの警告は生成済みevidence・fixtureと音声JSON。今回追加したdebug JSONは実行後に整形した。過去の固定SHAを持つ証跡・fixtureは変更しない。"
+  },
+  "renderRetry": {
+    "initial": "サンドボックス内でEdge起動時に終了、browser試験未実行",
+    "outsideSandbox": "全59件成功"
+  },
+  "nativeV2": {
+    "latest": {
+      "startedAt": "2026-11-01 22:17:48 JST",
+      "passed": 5,
+      "skipped": 0,
+      "durationSeconds": 99.07,
+      "workerStopMs": [536, 628, 693]
+    },
+    "independentReview": "CL再確認待ち",
+    "previousAnomaly": "22:02の実行で5秒後もPlaywright Worker1が一度残った。原因の分類は未確定。履歴を残してCLへ引継ぎ。"
+  },
+  "sha256": {
+    ".cache/arm-tracking/co-desktop-at13.log": "ad1481ca9b62c904ff3b9f1be96ee020fd3111ae63f21d97842ad9d7aa791d63",
+    ".cache/arm-tracking/co-core-at13.log": "11147e302427ecdd5d4a8b34341ac66a5bda6311364362f9a921fa8f8a4ae795",
+    ".cache/arm-tracking/co-other-packages-at13.log": "9ed768080e6dd7324c980ec0d7a0b4863cf7a7853281c2f797e13bc00224bc7c",
+    ".cache/arm-tracking/co-render-at13.log": "2746e05b646a5c0649a24add851cfd3a9da563bd6a6f9b97123246f4553fae14",
+    ".cache/arm-tracking/co-tracking-at13.log": "1f4fd929dbd19c3f1e786f7821128208e177feff04998cf84edce723c7b87dcc",
+    ".cache/arm-tracking/co-lint-at13.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    ".cache/arm-tracking/co-format-at13.log": "bffcca4b3e3360a18831ff8a4d36c13966f4d28c3935714ba2e41a45732bfc4e",
+    ".cache/arm-tracking/co-typecheck-at13-v2.log": "3afe60a40f886ac7cb996d90e726a4b8b8f09f8f589445d088a8ad969b342ce7",
+    ".cache/arm-tracking/co-native-at13-v2.log": "e3db9439541770537299dc5febb2e4c9af05cbb2f57b536e63e9489ddc8c33e7",
+    ".cache/arm-tracking/co-native-at13-v2-diagnosis.log": "588bea886d87c6a6884d344a1418b45a1d74c7a9edf736cfca4dfa9833c9a035",
+    ".cache/arm-tracking/co-native-at13-v2-final.log": "e9fc544bb5c0a1cf410ccdb2eb760a31aada3e70b7692a11c7d210b3ae198849",
+    ".cache/arm-tracking/co-native-at13-v2-final-conditional.log": "6edaa3c42c4f1f890af878d124dfc83b80abf78b6423b0ed7030b763fb06d9eb"
+  },
+  "changedFormatCheck": "passed"
+}

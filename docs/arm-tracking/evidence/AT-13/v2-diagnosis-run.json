@@ -1,0 +1,163 @@
+{
+  "results": {
+    "fakeCamera": {
+      "passed": true,
+      "on": {
+        "face": 2028,
+        "pose": 1922,
+        "hands": 1921
+      },
+      "before": {
+        "face": 2044,
+        "pose": 1922,
+        "hands": 1922
+      },
+      "off": {
+        "face": 2075,
+        "pose": 1922,
+        "hands": 1922
+      },
+      "external": [],
+      "workerStopMs": [530, 679, 617],
+      "workerStops": [
+        {
+          "elapsedMs": 530,
+          "remaining": 0,
+          "afterStatusQuery": 0,
+          "state": {
+            "settings": {
+              "mode": "normal",
+              "sides": {
+                "L": {
+                  "enabled": false,
+                  "gain": 1,
+                  "smoothing": 0.5,
+                  "handMode": "auto",
+                  "restHand": "open"
+                },
+                "R": {
+                  "enabled": false,
+                  "gain": 1,
+                  "smoothing": 0.5,
+                  "handMode": "auto",
+                  "restHand": "open"
+                }
+              }
+            },
+            "body": {
+              "generation": 3,
+              "pose": {
+                "state": "off",
+                "delegate": null,
+                "reason": null
+              },
+              "hands": {
+                "state": "off",
+                "delegate": null,
+                "reason": null
+              },
+              "poseFps": null,
+              "handFps": null,
+              "droppedFrames": 0,
+              "staleResults": 0
+            },
+            "hidden": false
+          },
+          "probes": []
+        },
+        {
+          "elapsedMs": 679,
+          "remaining": 0,
+          "afterStatusQuery": 0,
+          "state": {
+            "settings": {
+              "mode": "normal",
+              "sides": {
+                "L": {
+                  "enabled": false,
+                  "gain": 1,
+                  "smoothing": 0.5,
+                  "handMode": "auto",
+                  "restHand": "open"
+                },
+                "R": {
+                  "enabled": false,
+                  "gain": 1,
+                  "smoothing": 0.5,
+                  "handMode": "auto",
+                  "restHand": "open"
+                }
+              }
+            },
+            "body": {
+              "generation": 5,
+              "pose": {
+                "state": "off",
+                "delegate": null,
+                "reason": null
+              },
+              "hands": {
+                "state": "off",
+                "delegate": null,
+                "reason": null
+              },
+              "poseFps": null,
+              "handFps": null,
+              "droppedFrames": 0,
+              "staleResults": 0
+            },
+            "hidden": false
+          },
+          "probes": []
+        },
+        {
+          "elapsedMs": 617,
+          "remaining": 0,
+          "afterStatusQuery": 0,
+          "state": {
+            "settings": {
+              "mode": "normal",
+              "sides": {
+                "L": {
+                  "enabled": false,
+                  "gain": 1,
+                  "smoothing": 0.5,
+                  "handMode": "auto",
+                  "restHand": "open"
+                },
+                "R": {
+                  "enabled": false,
+                  "gain": 1,
+                  "smoothing": 0.5,
+                  "handMode": "auto",
+                  "restHand": "open"
+                }
+              }
+            },
+            "body": {
+              "generation": 7,
+              "pose": {
+                "state": "off",
+                "delegate": null,
+                "reason": null
+              },
+              "hands": {
+                "state": "off",
+                "delegate": null,
+                "reason": null
+              },
+              "poseFps": null,
+              "handFps": null,
+              "droppedFrames": 0,
+              "staleResults": 0
+            },
+            "hidden": false
+          },
+          "probes": []
+        }
+      ]
+    }
+  },
+  "errors": [],
+  "external": []
+}

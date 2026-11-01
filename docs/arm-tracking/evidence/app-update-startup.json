@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-01T13:09:24.877Z",
+  "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+  "profile": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\arm-release-1793538564876",
+  "started": true,
+  "productionDebugApiAbsent": true,
+  "modelingArmTool": false,
+  "studioArmSection": true,
+  "armSidesOffByDefault": true,
+  "dialogsAtStartup": 0,
+  "errors": [],
+  "closedOwnProcessOnly": true
+}

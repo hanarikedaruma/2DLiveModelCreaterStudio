@@ -1,0 +1,13 @@
+[
+  {
+    "step": "normal",
+    "startedAt": "2026-11-01T13:24:39.696Z",
+    "exit": 0
+  },
+  {
+    "step": "load",
+    "startedAt": "2026-11-01T13:26:42.826Z",
+    "exit": 0,
+    "loadStillRunningAtEnd": false
+  }
+]

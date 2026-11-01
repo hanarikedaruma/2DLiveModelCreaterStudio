@@ -36,7 +36,9 @@ declare global {
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = join(HERE, '..', '..', '..');
-export const EXE = join(HERE, '..', 'src-tauri', 'target', 'debug', 'live2d-studio.exe');
+export const EXE = process.env.STUDIO_E2E_EXE
+  ? resolve(process.env.STUDIO_E2E_EXE)
+  : join(HERE, '..', 'src-tauri', 'target', 'debug', 'live2d-studio.exe');
 export const RESULTS = join(HERE, 'results');
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

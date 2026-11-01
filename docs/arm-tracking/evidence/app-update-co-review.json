@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-01",
+  "by": "CO",
+  "method": "ファイルの読み取りとSHA-256照合。アプリの操作・終了は行わない。",
+  "built": {
+    "path": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\release\\live2d-studio.exe",
+    "sha256": "ad0b0d7825c611c5fcf6e36bd7dca824a20a16f10dad80e4034d7ddb80c34dd9"
+  },
+  "installed": {
+    "path": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+    "sha256": "ad0b0d7825c611c5fcf6e36bd7dca824a20a16f10dad80e4034d7ddb80c34dd9"
+  },
+  "match": true,
+  "sources": {
+    "apps/desktop/src/services/arms/service.ts": {
+      "expected": "ed3bac65bdd27e75e676e9673864c679451c574b3911864e6120ff584a66926e",
+      "actual": "ed3bac65bdd27e75e676e9673864c679451c574b3911864e6120ff584a66926e",
+      "match": true
+    },
+    "apps/desktop/src/services.ts": {
+      "expected": "28db770a603b2c7e9fa4c5b3c40daa70cca25106c3344b1edd0cff73b000e3bc",
+      "actual": "28db770a603b2c7e9fa4c5b3c40daa70cca25106c3344b1edd0cff73b000e3bc",
+      "match": true
+    },
+    "apps/desktop/src/modes/studio/runtime.ts": {
+      "expected": "03e55dbb3e892d41f67f8bb9f8f0b86cc71034d2013b13a5660c9f4d8db820a2",
+      "actual": "03e55dbb3e892d41f67f8bb9f8f0b86cc71034d2013b13a5660c9f4d8db820a2",
+      "match": true
+    },
+    "apps/desktop/src/modes/studio/environment.ts": {
+      "expected": "95129eeeac39b527f2538c124b96ba8f748036f6e495edd08c60cde41117512d",
+      "actual": "95129eeeac39b527f2538c124b96ba8f748036f6e495edd08c60cde41117512d",
+      "match": true
+    },
+    "apps/desktop/src/modes/studio/index.ts": {
+      "expected": "ab8ea5b3631c236dca06a4fa5bb68c5d2e1fe9c0ba109f176bffe0f845e6fdd4",
+      "actual": "ab8ea5b3631c236dca06a4fa5bb68c5d2e1fe9c0ba109f176bffe0f845e6fdd4",
+      "match": true
+    },
+    "packages/core/src/joint/tracking/session.ts": {
+      "expected": "e98ccc220a3161d34454e95cdffdee481d80892c947ebb1b601b10d459f70bfe",
+      "actual": "e98ccc220a3161d34454e95cdffdee481d80892c947ebb1b601b10d459f70bfe",
+      "match": true
+    }
+  },
+  "startupCheck": "CLのapp-update-startup.jsonを確認。COの独自起動は行っていない。"
+}

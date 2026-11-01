@@ -1,0 +1,49 @@
+{
+  "updatedAt": "2026-11-01T13:09:24.464Z",
+  "by": "CL",
+  "method": "pnpm app:install（tools/app/install.ps1：pnpm tauri build --no-bundle、VITE_E2E なし、通常の識別子）",
+  "baseCommit": "3adef3a1f9ef1dc64ebecb5525936b090a73b392",
+  "uncommittedProductFiles": [" M apps/desktop/src/services/arms/service.ts"],
+  "ordinaryIdentifier": "jp.co.globalsystems.live2dstudio",
+  "productionBuild": true,
+  "built": {
+    "path": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\apps\\desktop\\src-tauri\\target\\release\\live2d-studio.exe",
+    "bytes": 34839040,
+    "sha256": "ad0b0d7825c611c5fcf6e36bd7dca824a20a16f10dad80e4034d7ddb80c34dd9"
+  },
+  "installed": {
+    "path": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+    "bytes": 34839040,
+    "sha256": "ad0b0d7825c611c5fcf6e36bd7dca824a20a16f10dad80e4034d7ddb80c34dd9"
+  },
+  "match": true,
+  "previousInstalledSha256": "2237e9eac680c1046b772b5f6aeb739503a9f8af53096e038c98bdb7273d0fd7",
+  "sourceSha256": {
+    "apps/desktop/src/services/arms/service.ts": "ed3bac65bdd27e75e676e9673864c679451c574b3911864e6120ff584a66926e",
+    "apps/desktop/src/services.ts": "28db770a603b2c7e9fa4c5b3c40daa70cca25106c3344b1edd0cff73b000e3bc",
+    "apps/desktop/src/modes/studio/runtime.ts": "03e55dbb3e892d41f67f8bb9f8f0b86cc71034d2013b13a5660c9f4d8db820a2",
+    "apps/desktop/src/modes/studio/environment.ts": "95129eeeac39b527f2538c124b96ba8f748036f6e495edd08c60cde41117512d",
+    "apps/desktop/src/modes/studio/index.ts": "ab8ea5b3631c236dca06a4fa5bb68c5d2e1fe9c0ba109f176bffe0f845e6fdd4",
+    "packages/core/src/joint/tracking/session.ts": "e98ccc220a3161d34454e95cdffdee481d80892c947ebb1b601b10d459f70bfe"
+  },
+  "startup": {
+    "checkedAt": "2026-11-01T13:09:24.877Z",
+    "installed": "C:\\Users\\hanar\\AppData\\Local\\Programs\\2D Live Model Creator Studio\\live2d-studio.exe",
+    "profile": "C:\\Users\\hanar\\.claude\\workspace\\2DLiveModelCreaterStudio\\.cache\\verification\\arm-release-1793538564876",
+    "started": true,
+    "productionDebugApiAbsent": true,
+    "modelingArmTool": false,
+    "studioArmSection": true,
+    "armSidesOffByDefault": true,
+    "dialogsAtStartup": 0,
+    "errors": [],
+    "closedOwnProcessOnly": true
+  },
+  "excluded": ["tools/model-authoring/raster.py（腕と無関係の未コミットの変更。アプリには含まれない）"],
+  "notes": [
+    "インストール版の起動確認は新しい WebView2 プロファイルで行い、カメラは開始せず、プロジェクトを開かず、起動したプロセスだけを閉じた。起動時のダイアログは0件。",
+    "modelingArmTool が false なのは、新しい（素材の無い）プロジェクトでは中央が「素材を読み込む」画面になり、キャンバスのツールバーが出ないため（Layout.tsx の Center）。腕の設定ツールの画面操作は AT-13 の検証用アプリ（COの通し試験①）で確かめた。利用者の環境で制作プロジェクトを開いて確かめることはしていない。",
+    "スタジオの「腕・手」の欄は出て、左右とも既定でオフ（app-update-studio.png は右の列の上部。欄は「スタジオの設定」の中）。",
+    "検証の前提：AT-12 CL v3（CO独立確認合格）、AT-13 CO v1（CL確認：製品の不具合なし、COの試験1件の待ち時間の修正待ち）。全 workspace の型・lint が成功、テストは I-093 の1件を除き成功。"
+  ]
+}
